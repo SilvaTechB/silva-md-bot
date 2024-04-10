@@ -1,0 +1,18 @@
+
+#    * @project_name : Gifted-Md
+#    * @author : @GiftedTech
+#    * @youtube : https://www.youtube.com/c/@giftedtechnexus
+#    * @description : Gifted-Md ,A Multi-functional whatsapp bot md.
+#    * @version 2.0.0
+# 
+# Don't change this [ /SuhailTechInfo/ ] name!
+# Change from below link, else bot not works!
+
+ 
+
+FROM quay.io/giftedmaurice/gifted-mdv2
+RUN git clone https://github.com/Giftedmaurice/gifted-mdV2 /root/Gifted
+WORKDIR /root/Gifted
+RUN npm install
+EXPOSE 8000
+CMD ["npm","start" ] 
