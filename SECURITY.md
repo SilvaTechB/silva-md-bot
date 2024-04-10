@@ -1,3 +1,5 @@
+ 
+
 # Security Policy
 
 ## Supported Versions
@@ -11,6 +13,26 @@ currently being supported with security updates.
 | 5.0.x   | :x:                |
 | 4.0.x   | :white_check_mark: |
 | < 4.0   | :x:                |
+
+
+                                                               
+  * @project_name : Gifted-Md
+   * @author : Gifted Tech Info
+   * @youtube : https://www.youtube.com/@giftedtechnexus
+   * @description : Gifted-Md ,A Multi-functional whatsapp user bot.
+   * @version 2.5.0
+*
+* 
+   * Created By Gifted Tech Info.
+   * © 2024 Gifted-Md.
+
+
+*/
+
+
+
+
+
 
 ## Reporting a Vulnerability
 
