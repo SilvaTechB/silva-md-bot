@@ -1,4 +1,4 @@
-/**
+/*
 //════════════════════════════════════════════════════════════════════════════════════════════//
 //                                                                                            //
 //                                ＷＨＡＴＳＡＰＰ ＢＯＴ－ＭＤ ＢＥＴＡ                          //
@@ -36,22 +36,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 const bot = require(__dirname + '/lib/smd')
 const { VERSION } = require(__dirname + '/config')
 
@@ -66,5 +50,5 @@ const start = async () => {
     Debug.error(error);
     start();
   }
-
+}
 start();
