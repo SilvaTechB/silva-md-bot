@@ -60,6 +60,6 @@ const start = async () => {
   } catch (error) {
     Debug.error(error);
     start();
-  }
-}
+  } }
+
 start();
