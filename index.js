@@ -63,5 +63,3 @@ const start = async () => {
   }
 }
 start();
-
-// GIFTED TECH //
