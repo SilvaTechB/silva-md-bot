@@ -1,0 +1,41 @@
+/**
+//════════════════════════════════════════════════════════════════════════════════════════════//
+//                                                                                            //
+//                                ＷＨＡＴＳＡＰＰ ＢＯＴ－ＭＤ ＢＥＴＡ                          //
+//                                                                                            // 
+//                                         Ｖ：2．5．0                                         // 
+//                                                                                            // 
+//                                                                                            // 
+//          ██████╗ ██╗███████╗████████╗███████╗██████╗     ███╗   ███╗██████╗                // 
+//         ██╔════╝ ██║██╔════╝╚══██╔══╝██╔════╝██╔══██╗    ████╗ ████║██╔══██╗               // 
+//         ██║  ███╗██║█████╗     ██║   █████╗  ██║  ██║    ██╔████╔██║██║  ██║               // 
+//         ██║   ██║██║██╔══╝     ██║   ██╔══╝  ██║  ██║    ██║╚██╔╝██║██║  ██║               // 
+//         ╚██████╔╝██║██║        ██║   ███████╗██████╔╝    ██║ ╚═╝ ██║██████╔╝               // 
+//          ╚═════╝ ╚═╝╚═╝        ╚═╝   ╚══════╝╚═════╝     ╚═╝     ╚═╝╚═════╝                //
+//                                                                                            //
+//                                                                                            //
+//                                                                                            //
+//                                                                                            //
+//════════════════════════════════════════════════════════════════════════════════════════════//
+*                                                                 
+  * @project_name : Gifted-Md
+   * @author : Gifted Tech Info
+   * @youtube : https://www.youtube.com/@giftedtechnexus
+   * @description : Gifted-Md ,A Multi-functional whatsapp user bot.
+   * @version 2.5.0
+*
+* 
+   * Created By Gifted Tech Info.
+   * © 2024 Gifted-Md.
+
+
+*/
+let Gifted_Md = "Gifted MD Whatsapp bot md"
+
+
+
+
+const _0x1eb71a=_0x2fd1;function _0x2fd1(_0x54a451,_0x29ab75){const _0x23e338=_0x23e3();return _0x2fd1=function(_0x2fd173,_0x28d9e5){_0x2fd173=_0x2fd173-0xda;let _0x244706=_0x23e338[_0x2fd173];return _0x244706;},_0x2fd1(_0x54a451,_0x29ab75);}(function(_0x2eeb08,_0x24ef64){const _0x4d1137=_0x2fd1,_0x14bc6a=_0x2eeb08();while(!![]){try{const _0x360f95=-parseInt(_0x4d1137(0xe5))/0x1*(-parseInt(_0x4d1137(0xe8))/0x2)+-parseInt(_0x4d1137(0xfb))/0x3*(-parseInt(_0x4d1137(0xf9))/0x4)+-parseInt(_0x4d1137(0xee))/0x5*(parseInt(_0x4d1137(0xfe))/0x6)+parseInt(_0x4d1137(0xdd))/0x7+-parseInt(_0x4d1137(0xe3))/0x8+parseInt(_0x4d1137(0xe7))/0x9+parseInt(_0x4d1137(0xdb))/0xa;if(_0x360f95===_0x24ef64)break;else _0x14bc6a['push'](_0x14bc6a['shift']());}catch(_0x171529){_0x14bc6a['push'](_0x14bc6a['shift']());}}}(_0x23e3,0x5d5e7));const axios=require(_0x1eb71a(0xfd));smd({'cmdname':_0x1eb71a(0xda),'info':_0x1eb71a(0xfa),'type':_0x1eb71a(0xe1),'filename':__filename},async(_0x1dcf26,_0x27a963,{smd:_0x33cfc2})=>{const _0x5d46ae=_0x1eb71a;try{await _0x1dcf26[_0x5d46ae(0xf2)](await randomeFunfacts(_0x33cfc2));}catch(_0x86d191){await _0x1dcf26['error'](_0x86d191+_0x5d46ae(0xed)+_0x33cfc2,_0x86d191);}}),smd({'cmdname':_0x1eb71a(0xdc),'info':_0x1eb71a(0xea),'type':'fun','filename':__filename},async(_0x1140dd,_0x35ad6d,{smd:_0x270fa2})=>{const _0x65b566=_0x1eb71a;try{await _0x1140dd[_0x65b566(0xf2)](await randomeFunfacts(_0x270fa2));}catch(_0x1cf050){await _0x1140dd[_0x65b566(0xe2)](_0x1cf050+'\x0a\x0acommand:\x20'+_0x270fa2,_0x1cf050);}}),smd({'cmdname':_0x1eb71a(0xf3),'info':_0x1eb71a(0xf8),'type':_0x1eb71a(0xe1),'filename':__filename},async(_0x5845cc,_0x19b76b,{smd:_0x393f17})=>{const _0x220985=_0x1eb71a;try{await _0x5845cc['reply'](await randomeFunfacts(_0x393f17));}catch(_0x236957){await _0x5845cc[_0x220985(0xe2)](_0x236957+_0x220985(0xed)+_0x393f17,_0x236957);}}),smd({'cmdname':_0x1eb71a(0xfc),'info':_0x1eb71a(0xec),'type':'fun','filename':__filename},async(_0x4bab0d,_0x62e8be,{smd:_0x2d5077})=>{const _0x24f623=_0x1eb71a;try{await _0x4bab0d[_0x24f623(0xf2)](await randomeFunfacts(_0x2d5077));}catch(_0x403e3f){await _0x4bab0d[_0x24f623(0xe2)](_0x403e3f+_0x24f623(0xed)+_0x2d5077,_0x403e3f);}}),smd({'cmdname':_0x1eb71a(0xe9),'info':'Sends\x20Joke\x20in\x20chat.','type':_0x1eb71a(0xe1),'filename':__filename},async(_0x5b210f,_0x940b76,{smd:_0x192c6a})=>{const _0x48f0cb=_0x1eb71a;try{await _0x5b210f[_0x48f0cb(0xf2)](await randomeFunfacts(_0x192c6a));}catch(_0x108a89){await _0x5b210f[_0x48f0cb(0xe2)](_0x108a89+_0x48f0cb(0xed)+_0x192c6a,_0x108a89);}}),smd({'cmdname':'fact','info':_0x1eb71a(0xf1),'type':_0x1eb71a(0xe1),'filename':__filename},async(_0x41717a,_0x507e83,{smd:_0x281703})=>{const _0x50970f=_0x1eb71a;try{await _0x41717a['reply'](await randomeFunfacts(_0x281703));}catch(_0xdfe44d){await _0x41717a[_0x50970f(0xe2)](_0xdfe44d+'\x0a\x0acommand:\x20'+_0x281703,_0xdfe44d);}}),smd({'cmdname':_0x1eb71a(0xde),'info':_0x1eb71a(0xe4),'type':_0x1eb71a(0xe1),'filename':__filename},async(_0x31b2e4,_0x67f05c,{smd:_0x49db53})=>{const _0x7df674=_0x1eb71a;try{await _0x31b2e4['reply'](await randomeFunfacts(_0x49db53));}catch(_0x63acf7){await _0x31b2e4['error'](_0x63acf7+_0x7df674(0xed)+_0x49db53,_0x63acf7);}}),smd({'cmdname':_0x1eb71a(0x101),'info':'urban\x20dictionary.','type':_0x1eb71a(0xe1),'filename':__filename},async(_0x3b527f,_0x449ad8)=>{const _0x58b4c5=_0x1eb71a;try{let _0xe9c793=_0x449ad8?_0x449ad8:_0x3b527f['reply_text'];if(!_0xe9c793)return await _0x3b527f[_0x58b4c5(0xf5)]('*_Hey\x20'+_0x3b527f[_0x58b4c5(0xf0)]+',\x20please\x20provide\x20a\x20text!_*');let {data:_0x5760c5}=await axios['get']('http://api.urbandictionary.com/v0/define?term='+_0xe9c793);var _0x214cd6=_0x5760c5?_0x58b4c5(0xe0)+_0xe9c793+_0x58b4c5(0x100)+_0x5760c5[_0x58b4c5(0xf4)][0x0][_0x58b4c5(0xdf)][_0x58b4c5(0xf7)](/\[/g,'')['replace'](/\]/g,'')+_0x58b4c5(0xe6)+_0x5760c5[_0x58b4c5(0xf4)][0x0][_0x58b4c5(0xf6)][_0x58b4c5(0xf7)](/\[/g,'')[_0x58b4c5(0xf7)](/\]/g,'')+_0x58b4c5(0xef):_0x58b4c5(0xff);return _0x3b527f[_0x58b4c5(0xf2)](_0x214cd6);}catch(_0x4f5e65){await _0x3b527f[_0x58b4c5(0xe2)](_0x4f5e65+'\x0a\x0acommand:\x20define',_0x4f5e65,_0x58b4c5(0xeb)+text+'```');}});function _0x23e3(){const _0xf8ec28=['Sends\x20Joke\x20in\x20chat.','\x0a\x0acommand:\x20','540395wYMUgh','```','senderName','Sends\x20fact\x20in\x20chat.','reply','dare','list','send','example','replace','truth\x20and\x20dare(dare\x20game.).','10124tSkPJu','Random\x20Question.','42gObOHf','joke','axios','18EeOPmI','*_No\x20results\x20found\x20for\x20given\x20word_*','```\x20\x0a*Definition:*\x20```','define','question','436390aFnxVX','truth','4957603RHxQaW','quotes','definition','*Word:*\x20```','fun','error','5059408RBlhrK','Sends\x20quotes\x20in\x20chat.','218YkwQRA','```\x20\x0a*Example:*\x20```','3139578FsxTfE','1862Gkrrcm','joke2','truth\x20and\x20dare(truth\x20game.).','*No\x20result\x20for:*\x20```'];_0x23e3=function(){return _0xf8ec28;};return _0x23e3();}
+
+
+
