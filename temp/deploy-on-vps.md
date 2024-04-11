@@ -25,8 +25,8 @@
   
    5. Clone Repo and install required packages
       ```
-      git clone https://github.com/Giftedmaurice/gifted-mdV2
-      cd gifted-mdV2
+      git clone https://github.com/mouricedevs/Gifted-Md
+      cd Gifted-Md
       yarn install --network-concurrency 1
       ```
 
@@ -43,9 +43,9 @@
       THUMB_IMAGE = "https://telegra.ph/file/54efddccf41281ad7ec51.jpg"
       OWNER_NAME = "GiftedTech"
       PREFIX = .
-      WARN_COUNT = 3
+      WARN_COUNT = 5
       DISABLE_PM = "false"
-      THEME= "GIFTED"
+      THEME= "Gifted"
       MODE = "private"
       ANTILINK_VALUES = "https://,chat.whatsapp.com"
       
