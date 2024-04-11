@@ -107,6 +107,8 @@
 ---
 ### Credits to:
  - [Suhail Ser](https://github.com/SuhailTechInfo) for the Initial Base Code
+   
+ - [Astropeda Team](https://github.com/Astropeda1) for new menu format.
 
  - [France King](https://github.com/franceking1) for our Brotherhood.
 
