@@ -16,7 +16,7 @@
    * Created By Gifted Tech Info.
    * © 2024 Gifted-Md.
 
-# Don't change this [ /SuhailTechInfo/ ] name!
+# Don't change this [ /GiftedTech/ ] name!
 # Change from below link, else bot not works!
 
  
