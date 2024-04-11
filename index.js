@@ -66,7 +66,7 @@ const start = async () => {
     Debug.error(error);
     start();
   }
-}
+
 start();
 
 
