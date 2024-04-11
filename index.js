@@ -54,7 +54,7 @@ const start = async () => {
     Debug.info(`Gifted ${VERSION}`)
   try {
     await bot.init()
-    bot.logger.info('⏳ Database is Syncing!')
+    bot.logger.info('⏳ Gifted Database is Syncing!')
     await bot.DATABASE.sync()
     await bot.connect()
   } catch (error) {
@@ -63,3 +63,5 @@ const start = async () => {
   }
 }
 start();
+
+// GIFTED TECH //
