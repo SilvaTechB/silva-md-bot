@@ -10,7 +10,7 @@
 
  
 
-FROM quay.io/giftedmaurice/gifted-mdv2
+FROM quay.io/mouricedevs/gifted-md
 RUN git clone https://github.com/mouricedevs/gifted-md /root/Gifted
 WORKDIR /root/Gifted
 RUN npm install
