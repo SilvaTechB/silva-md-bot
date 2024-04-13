@@ -2,13 +2,12 @@
    "name": "gifted-md",
    "version": "2.5.0",
    "description": "Multi device whatsapp bot by GiftedTech.",
-   "main": "lib/smd.js",
+   "main": "index.js",
    "type": "commonjs",  
    "scripts": {
-            "run": "pm2 start lib/smd.js --deep-monitoring --attach --name Gifted || node lib/smd.js",
-            "start": "pm2 start lib/smd.js --attach --name gifted || node lib/smd.js",
-            "stop": "pm2 stop Gifted",
-            "heroku-postbuild": "git clone https://github.com/mouricedevs/gifted-md.git temp1 && mv temp1/.git .git && rm -rf temp1"
+            "run": "pm2 start . --deep-monitoring --attach --name Gifted || node .",
+            "start": "pm2 start . --attach --name Gifted",
+            "stop": "pm2 stop Gifted"
    },
    "author": "GiftedTech",
    "license" :"Apache-2.0",
@@ -77,5 +76,3 @@
    "bugs": { "url": "https://github.com/mouricedevs/Gifted-Md/issues" },
    "homepage": "https://github.com/mouricedevs/Gifted-Md#readme"
 }
-
-
