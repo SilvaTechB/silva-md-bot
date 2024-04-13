@@ -64,7 +64,7 @@ smd(
     filename: __filename,
   },
   async (message) => {
-    const channelMessage = `*GIFTED MD SUPPORT CHANNEL*\n\n _ʜᴇʏ ʜᴇʀᴇ's ᴏᴜʀ ᴄʜᴀɴɴᴇʟ ʟɪɴᴋ, ᴘʟᴇᴀsᴇ ғᴏʟʟᴏᴡ ᴀɴᴅ sᴜᴘᴘᴏʀᴛ ᴜs ᴛᴏ ᴋᴇᴇᴘ ᴛʜɪs ᴘʀᴏᴊᴇᴄᴛ ᴀʟɪᴠᴇ_\n *ʟɪɴᴋ:* https://whatsapp.com/channel/0029VaJmfmTDJ6H7CmuBss0o\n\n ${Config.botname} *WORKS*`;
+    const channelMessage = `*GIFTED MD SUPPORT CHANNEL* \n\n _ʜᴇʏ ʜᴇʀᴇ's ᴏᴜʀ ᴄʜᴀɴɴᴇʟ ʟɪɴᴋ, ᴘʟᴇᴀsᴇ ғᴏʟʟᴏᴡ ᴀɴᴅ sᴜᴘᴘᴏʀᴛ ᴜs ᴛᴏ ᴋᴇᴇᴘ ᴛʜɪs ᴘʀᴏᴊᴇᴄᴛ ᴀʟɪᴠᴇ_\n *ʟɪɴᴋ:* https://whatsapp.com/channel/0029VaJmfmTDJ6H7CmuBss0o\n\n ${Config.botname}`;
 
     const contextInfo = {
       forwardingScore: 999,
@@ -83,7 +83,7 @@ smd(
     filename: __filename,
   },
   async (message) => {
-    const SupportMsg = `*GIFTED MD SUPPORT GROUP*n\n *ʟɪɴᴋ:* https://chat.whatsapp.com/Cv3dRoX0q1dAfKs7OOkJTW\n\n ${Config.botname} *WORKS*`;
+    const SupportMsg = `*GIFTED MD SUPPORT GROUP* n\n *ʟɪɴᴋ:* https://chat.whatsapp.com/Cv3dRoX0q1dAfKs7OOkJTW\n\n ${Config.botname}`;
 
     const contextInfo = {
       forwardingScore: 999,
@@ -102,7 +102,7 @@ smd(
     filename: __filename,
   },
   async (message) => {
-    const SupportMsg = `*GIFTED MD DISCUSSION GROUP*n\n *ʟɪɴᴋ:* https://chat.whatsapp.com/KuKmv83j2Zw4zBuq7bbxBP\n\n ${Config.botname} *WORKS*`;
+    const SupportMsg = `*GIFTED MD DISCUSSION GROUP* n\n *ʟɪɴᴋ:* https://chat.whatsapp.com/KuKmv83j2Zw4zBuq7bbxBP\n\n ${Config.botname}`;
 
     const contextInfo = {
       forwardingScore: 999,
