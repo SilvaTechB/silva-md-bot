@@ -1,14 +1,1 @@
-web: npm start 
-
-
-
-
-
-
-
-
-
-
-
-
-# Developer: GIFTED TECH
+web: npm start

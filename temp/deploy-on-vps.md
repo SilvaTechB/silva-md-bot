@@ -1,4 +1,4 @@
-## Deploy on VPS, Termux or PC.
+## Deploy on VPS or PC or Termux.
 - You need to Install git,ffmpeg,curl,nodejs,yarn with pm2 
    1. Install git ffmpeg curl 
       ``` 
@@ -41,10 +41,10 @@
       OWNER_NUMBER="254728782591"
       SESSION_ID = "SESSION_85_23_59_01_kjgfgfclhj"
       THUMB_IMAGE = "https://telegra.ph/file/54efddccf41281ad7ec51.jpg"
-      OWNER_NAME = "GiftedTech"
+      OWNER_NAME = "Gifted"
       PREFIX = .
       WARN_COUNT = 5
-      DISABLE_PM = "false"
+      DISABLE_PM = "true"
       THEME= "Gifted"
       MODE = "private"
       ANTILINK_VALUES = "https://,chat.whatsapp.com"
@@ -59,8 +59,8 @@
 
  
 <h2 align="center">  NOTICE </h2>
-
-- Gifted-Md is not made by `WhatsApp Inc.` Sometimes or misusing the bot might `ban` your `WhatsApp account!`
-- In that case, I'm not responsible for banning your account.
-- Use Gifted-Md at your own risk by keeping this warning in mind.
+---
+- *Suhail-Md is not made by `WhatsApp Inc.` Sometimes or misusing the bot might `ban` your `WhatsApp account!`*
+- *In that case, I'm not responsible for banning your account.*
+- *Use Suhail-Md at your own risk by keeping this warning in mind.*
  

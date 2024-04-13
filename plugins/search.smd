@@ -540,4 +540,3 @@ if(!nobios){ nobio = ''; } else {nobio += nobios+'\n\n' ;}
 return await message.reply(`${nobio}${nowhatsapp}${Config.caption}`);
 
 })
-

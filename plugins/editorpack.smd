@@ -136,4 +136,3 @@ return await m.sendUi(m.chat, { caption: str})
 }
 }catch(e){ m.error(`${e}\n\nCommand: ${smd}`,e,false)}
  })
-
