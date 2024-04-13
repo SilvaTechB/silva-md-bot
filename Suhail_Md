@@ -11,7 +11,7 @@
  
 
 FROM quay.io/giftedmaurice/gifted-mdv2
-RUN git clone https://github.com/Giftedmaurice/gifted-mdV2 /root/Gifted
+RUN git clone https://github.com/mouricedevs/gifted-md /root/Gifted
 WORKDIR /root/Gifted
 RUN npm install
 EXPOSE 8000
