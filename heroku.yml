@@ -1,0 +1,6 @@
+build:
+  docker:
+      web: Gifted_Md
+run:
+  web: npm start
+ 
