@@ -3,7 +3,7 @@
  <h1 align="center"> ɢɪғᴛᴇᴅ ᴍᴅ Version 2.5.0 </h1> 
  <br>
 
-<h3 align="center"> <a href="https://github.com/mouricedevs/Gifted-Md-Plugins">🍫 EXTERNAL PLUGINS 🍫</a></h3> 
+
 
 <p align="center"> Introducing ɢɪғᴛᴇᴅ ʙᴏᴛ v2.5.0, It is designed to bring a whole new level of excitement to your boring WhatsApp use. </p>
 
