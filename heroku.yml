@@ -1,7 +1,0 @@
-build:
-  docker:
-      web: Suhail_Md
-run:
-  web: npm start
- 
-
