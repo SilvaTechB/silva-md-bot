@@ -85,9 +85,9 @@
    
 ## Gifted-Md V.2.5.0 Deployment Methods
 ---
-1.  ***Click [`FORK (A MUST)`](https://github.com/mouricedevs/Gifted-Md/fork) and `Star ⭐ Repository` for Courage.***
+1.  ***Click [`FORK`](https://github.com/mouricedevs/Gifted-Md/fork) and `Star ⭐ Repository` for Courage.***
 2.  ***Get `SESSION ID`  [`BY CLICKING HERE`](https://session.giftedtechnexus.co.ke) Supports Both QR SCAN And Pair Code And then `Go-to Whatapp>Three dots>Linked Devices`***
-3. ***Deploy on [`HEROKU`](https://deploy-gifted.vercel.app)***
+3. ***Deploy on [`HEROKU`](https://dashboard.heroku.com/new?template=https://github.com/mouricedevs/gifted-md)***
 4.  ***Deploy FREE on `Codespace,` First see [`Codespace tutorial`](https://youtu.be/3NdJb6_1cJM)***
 5.  ***Deploy on [`Replit`](https://replit.com/github.com/mouricedevs/Gifted-Md)***
 6.  ***Deploy on [`Railway`](https://railway.app/template/GZOvIe?referralCode=wVDLrh)***
