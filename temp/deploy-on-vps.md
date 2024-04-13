@@ -25,8 +25,8 @@
   
    5. Clone Repo and install required packages
       ```
-      git clone https://github.com/kingjux/Venocyber-md
-      cd Venocyber-md
+      git clone https://github.com/mouricedevs/Gifted-Md
+      cd Gifted-Md
       yarn install --network-concurrency 1
       ```
 
@@ -38,14 +38,14 @@
       copy paste lines below.
 
       ```
-      OWNER_NUMBER="255698101622"
+      OWNER_NUMBER="254728782591"
       SESSION_ID = "SESSION_85_23_59_01_kjgfgfclhj"
-      THUMB_IMAGE = "https://telegra.ph/file/12b0fb245e6b8ba4bf718.jpg"
-      OWNER_NAME = "VenocyberTech"
+      THUMB_IMAGE = "https://telegra.ph/file/54efddccf41281ad7ec51.jpg"
+      OWNER_NAME = "GiftedTech"
       PREFIX = .
-      WARN_COUNT = 3
-      DISABLE_PM = "false"
-      THEME= "VENOCYBER"
+      WARN_COUNT = 5
+      DISABLE_PM = "true"
+      THEME= "Gifted"
       MODE = "private"
       ANTILINK_VALUES = "https://,chat.whatsapp.com"
       
@@ -62,5 +62,5 @@
 
 - Gifted-Md is not made by `WhatsApp Inc.` Sometimes or misusing the bot might `ban` your `WhatsApp account!`
 - In that case, I'm not responsible for banning your account.
-- Use Venocyber-Md at your own risk by keeping this warning in mind.
+- Use Gifted-Md at your own risk by keeping this warning in mind.
  
