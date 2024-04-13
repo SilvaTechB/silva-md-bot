@@ -12,14 +12,14 @@
 #    * @description : Suhail-Md ,A Multi-functional whatsapp bot md.
 #    * @version 1.2.8
 # 
-# Don't change this [ /SuhailTechInfo/ ] name!
+# Don't change this [ /GiftedTech/ ] name!
 # Change from below link, else bot not works!
 
  
 
-FROM quay.io/suhailtechinfo/suhail-v2
-RUN git clone https://github.com/SuhailTechInfo/Suhail-Md /root/Suhail
-WORKDIR /root/Suhail/
+FROM quay.io/mouricedevs/gifted-v2
+RUN git clone https://github.com/mouricedevs/Gifted-Md /root/Gifted
+WORKDIR /root/Gifted/
 RUN npm install
 EXPOSE 8000
 CMD ["npm","start" ] 
