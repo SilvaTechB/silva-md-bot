@@ -1,4 +1,4 @@
-h1 align="center"> ɢɪғᴛᴇᴅ ᴍᴅ Version 2.5.0 </h1> 
+<h1 align="center"> ɢɪғᴛᴇᴅ ᴍᴅ Version 2.5.0 </h1> 
  <br>
 
 
