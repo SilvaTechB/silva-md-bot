@@ -31,7 +31,7 @@
 
 let Gifted_Md = "Gifted MD Whatsapp bot md"
 let baseApi = process.env.API_SMD || global.api_smd || "https://api-smd-1.vercel.app"
-// let maher_api = 'https://api.maher-zubair.tech';
+// let baseApi= "https://api-smd.vercel.app";
 
 
 
