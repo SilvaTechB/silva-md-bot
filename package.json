@@ -16,7 +16,7 @@
    "author": "GiftedTech",
    "license" :"Apache-2.0",
    "dependencies": { 
-             "@adiwajshing/keyed-db": "^0.2.4",
+            "@adiwajshing/keyed-db": "^0.2.4",
              "@hapi/boom": "^9.1.4",
              "@whiskeysockets/baileys": "6.6.0",             
              "acrcloud": "^1.4.0",
@@ -62,11 +62,11 @@
              "wa-sticker-formatter": "^4.3.2",
              "youtubei.js": "^7.0.0",
              "ytdl-secktor": "^0.0.1-development",
-             "link-preview-js": "^3.0.0"
+             "link-preview-js": "^3.0.0",
+             "puppeteer": "latest"
    },
    "directories": {
       "lib": "lib",
-      "assets": "lib/assets",
       "plugins" :"plugins"
 
    },
