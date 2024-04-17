@@ -8,7 +8,10 @@
             "run": "pm2 start lib/smd.js --deep-monitoring --attach --name Gifted || node lib/smd.js",
             "start": "pm2 start lib/smd.js --attach --name gifted || node lib/smd.js",
             "stop": "pm2 stop Gifted",
-            "heroku-postbuild": "git clone https://github.com/mouricedevs/gifted-md.git temp1 && mv temp1/.git .git && rm -rf temp1"
+           
+       "heroku-postbuild": "git clone https://github.com/mouricedevs/Gifted-Md.git temp && mv temp/.git .git && rm -rf temp && npx puppeteer@latest install  --y",
+       "fis-heroku-postbuild": "git clone https://github.com/mouricedevs/Gifted-Md.git temp1 && rsync -av temp1/* ./ && rsync -av temp1/.* ./ && rm -rf temp1 && npm i && npx puppeteer@latest install",
+       "postinstall": "npx puppeteer@latest install --y"
    },
    "author": "GiftedTech",
    "license" :"Apache-2.0",
