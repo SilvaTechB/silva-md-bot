@@ -1,7 +1,7 @@
 {
    "name": "gifted-md",
    "version": "2.5.0",
-   "description": "Multi device whatsapp bot by GiftedTech.",
+   "description": "Multi device whatsapp bot by Gifted Tech.",
    "main": "index.js",
    "type": "commonjs",  
    "scripts": {
@@ -9,14 +9,14 @@
             "gifted": "pm2 start . --deep-monitoring --attach --name Gifted || node .",
             "start": "pm2 start . --attach --name Gifted",
             "stop": "pm2 stop Gifted",
-       "heroku-postbuild": "git clone https://github.com/mouricedevs/Gifted-Md.git temp && mv temp/.git .git && rm -rf temp && npx puppeteer@latest install  --y",
-       "fis-heroku-postbuild": "git clone https://github.com/mouricedevs/Gifted-Md.git temp1 && rsync -av temp1/* ./ && rsync -av temp1/.* ./ && rm -rf temp1 && npm i && npx puppeteer@latest install",
-       "postinstall": "npx puppeteer@latest install --y"
+            "heroku-postbuild": "git clone https://github.com/mouricedevs/Gifted-Md.git temp && mv temp/.git .git && rm -rf temp && npx puppeteer@latest install  --y",
+            "fis-heroku-postbuild": "git clone https://github.com/mouricedevs/Gifted-Md.git temp1 && rsync -av temp1/* ./ && rsync -av temp1/.* ./ && rm -rf temp1 && npm i && npx puppeteer@latest install",
+            "postinstall": "npx puppeteer@latest install --y"
    },
    "author": "GiftedTech",
    "license" :"Apache-2.0",
-   "dependencies": { 
-            "@adiwajshing/keyed-db": "^0.2.4",
+   "dependencies": {
+             "@adiwajshing/keyed-db": "^0.2.4",
              "@hapi/boom": "^9.1.4",
              "@whiskeysockets/baileys": "6.6.0",             
              "acrcloud": "^1.4.0",
@@ -63,12 +63,11 @@
              "youtubei.js": "^7.0.0",
              "ytdl-secktor": "^0.0.1-development",
              "link-preview-js": "^3.0.0",
-             "puppeteer": "latest"
+            "puppeteer": "latest"
    },
    "directories": {
       "lib": "lib",
       "plugins" :"plugins"
-
    },
    "devDependencies": {
       "pino": "^7.0.5"
