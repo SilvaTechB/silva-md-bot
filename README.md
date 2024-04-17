@@ -104,9 +104,8 @@
 
 ---
 ### Credits to:
- - [Suhail Ser](https://github.com/SuhailTechInfo) for the Initial Base Code
+ - [Suhail Ser](https://github.com/SuhailTechInfo) for the Base Bot
 
- - [France King](https://github.com/franceking1) for our Brotherhood.
 
 ---
 
