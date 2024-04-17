@@ -66,7 +66,7 @@ global.timezone= process.env.TZ || process.env.TIME_ZONE || "Africa/Nairobi";
 global.github=process.env.GITHUB|| "https://github.com/mouricedevs/Gifted-Md";
 global.gurl  =process.env.GURL  || "https://whatsapp.com/channel/0029VaJmfmTDJ6H7CmuBss0o";
 global.website=process.env.GURL || "https://whatsapp.com/channel/0029VaJmfmTDJ6H7CmuBss0o" ; 
-global.THUMB_IMAGE = process.env.THUMB_IMAGE || process.env.IMAGE || "https://github.com/mouricedevs/Gifted-Md/blob/main/lib/assets/gifted.jpeg?raw=true" ; // SET LOGO FOR IMAGE
+global.THUMB_IMAGE = process.env.THUMB_IMAGE || process.env.IMAGE || 
 
 
 
