@@ -104,7 +104,9 @@
 
 ---
 ### Credits to:
- - [Suhail Ser](https://github.com/SuhailTechInfo) for the Base Bot
+- [Suhail Ser](https://github.com/SuhailTechInfo) for the Base Bot
+- [Astropeda Team](https://github.com/Astropeda) for new menu design and some cmds
+- [France King](https://github.com/franceking1) for our long-lasting brotherhood
 
 
 ---
