@@ -42,4 +42,4 @@ smd({
                 console.log(e)
             }
         }
-    )
+    );
