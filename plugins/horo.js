@@ -7,7 +7,7 @@ const fetch = require('node-fetch')
 
 
 //---------------------------------------------------------------------------
-cmd({
+smd({
             pattern: "horo",
             category: "search",
             desc: "Gives horoscope info of user.",
