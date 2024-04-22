@@ -25,7 +25,7 @@
    * @version 2.5.0
 *
 * 
-   * Created By Gifted Tech Info.
+   * Created By Gifted Tech.
    * © 2024 Gifted-Md.
 
 */
