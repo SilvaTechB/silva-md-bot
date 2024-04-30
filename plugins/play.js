@@ -1,3 +1,19 @@
+let Gifted_Md = "Gifted MD Whatsapp bot md"
+
+let baseApi = process.env.API_SMD || global.api_smd || "https://api-smd.onrender.com"
+
+
+
+/*
+cmd({
+   cmdname :"downloader",
+   type: "downloader",
+   use:"< downloader >",
+   filename: __filename,
+}
+ */
+
+
 const {
   search,
   download
@@ -65,3 +81,12 @@ smd({
      return _0x54463e.error(_0x593953 + "\n\ncommand: play", _0x593953, "*_Video not Found_*");
    }
  });
+
+
+
+/*
+cmd({
+   cmdname :"downloader",
+   type: "downloader",
+}
+ */
