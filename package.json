@@ -2,11 +2,11 @@
    "name": "gifted-md",
    "version": "2.5.1",
    "description": "Multi device whatsapp bot by GiftedTech.",
-   "main": "smd.js",
+   "main": "lib/smd.js",
    "type": "commonjs",  
    "scripts": {
-            "run": "pm2 start smd.js --deep-monitoring --attach --name Gifted || node smd.js",
-            "start": "pm2 start smd.js --attach --name gifted || node smd.js",
+            "run": "pm2 start lib/smd.js --deep-monitoring --attach --name Gifted || lib/node smd.js",
+            "start": "pm2 start lib/smd.js --attach --name gifted || node lib/smd.js",
             "stop": "pm2 stop Gifted",
             "heroku-postbuild": "git clone https://github.com/mouricedevs/gifted-md.git temp1 && mv temp1/.git .git && rm -rf temp1"
    },
