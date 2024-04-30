@@ -5,9 +5,9 @@
    "main": "lib/smd.js",
    "type": "commonjs",  
    "scripts": {
-            "run": "pm2 start lib/smd.js --deep-monitoring --attach --name Gifted || lib/node smd.js",
-            "start": "pm2 start lib/smd.js --attach --name gifted || node lib/smd.js",
-            "stop": "pm2 stop Gifted",
+            "run": "pm2 start lib/smd.js --deep-monitoring --attach --name GiftedMd || lib/node smd.js",
+            "start": "pm2 start lib/smd.js --attach --name GiftedMd || node lib/smd.js",
+            "stop": "pm2 stop GiftedMd",
             "heroku-postbuild": "git clone https://github.com/mouricedevs/gifted-md.git temp1 && mv temp1/.git .git && rm -rf temp1"
    },
    "author": "GiftedTech",
