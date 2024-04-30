@@ -1,5 +1,5 @@
 {
-  "name": "gifted-md@2.5.0",
+  "name": "gifted-md@2.5.1",
   "description": "I am Gifted-Md Whatsapp MultiDevice Whatsapp Bot built in NodeJs to make experience better\n\t if Any Problem Whatsapp Me on: +254728782591",
   "logo": "https://telegra.ph/file/54efddccf41281ad7ec51.jpg",
   "keywords": ["whatsappbot", "giftedlMd", "gifted Md bot", "Gifted-Md", "GiftedMdWhatsaooBot", "GiftedWaBot","GiftedMD","Gifted Md Whatsapp Bot","multi device"],
@@ -10,7 +10,7 @@
     "OWNER_NAME": {
       "description": "Name for Bot Owner",    
       "value": "Gifted Tech",
-      "required" :true
+      "required" :false
     },   
      
     "WELCOME": {
@@ -42,7 +42,7 @@
     "FLUSH": {
       "description": " Make it 'true' if bot connected but not responed (After deployement!)",
       "required" :false,    
-      "value": "true"
+      "value": "false"
     },     
     "READ_COMMAND": {
       "description": " Read bot cmds",
@@ -91,7 +91,7 @@
     },
     "DISABLE_PM": {
       "description": "Disable bot in pm, Take it false if you wanna run bot in your pm (if MODE is Public)",
-      "value": "false",
+      "value": "true",
       "required" :false
     },
     "PREFIX": {
@@ -100,11 +100,12 @@
     },
     "OWNER_NUMBER": {
       "description": "The phone numbers of the users who you want to be admin for the bot (should be in international format without + and multiple numbers must be separated by a comma \",\")",
-      "value": "254728782591,254762016957,254110853827,254728746852"
+      "value": "254728782591,254762016957,254110853827,254728746852,255655147353"
     },
     "SESSION_ID": {
       "description": "put your SESSION_ID here.",
       "value": ""
+      "required": "true"
   
     },
     "OPENAI_API_KEY": {
@@ -153,7 +154,7 @@
   ],
   "formation": {
       "web": {
-          "quantity": 1,
+          "quantity": 2,
           "size": "standard-2x"
       }
   }
