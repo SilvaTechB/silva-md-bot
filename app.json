@@ -153,7 +153,7 @@
   ],
   "formation": {
       "web": {
-          "quantity": 2,
+          "quantity": 1,
           "size": "standard-2x"
       }
   }
