@@ -1,0 +1,99 @@
+const {
+    aitts,
+    smd,
+    prefix,
+    Config,
+    parsedJid,
+    sleep,
+  } = require("../lib");
+  const axios = require("axios");
+  const { send } = require("../lib");
+  const fetch = require("node-fetch");
+   smd({
+    pattern: "gpt4",
+    category: "ai",
+    desc: "Chat with GPT-4 AI model",
+    use: "<text>",
+    filename: __filename,
+  }, async (message, text, { cmdName }) => {
+    if (!text) return message.reply(`*_Hello, This is Gifted-Md GPT4! Please ask Your Query_*\n*_Eg ${prefix + cmdName} What is the meaning of Gifted?_*`);
+  
+    try {
+      const apiUrl = `https://ultimetron.guruapi.tech/gpt4?prompt=${encodeURIComponent(text)}`;
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+  
+      if (!data.result.success) return message.send("*There's a problem, try again later!*");
+  
+      const { reply } = data.result;
+      const gifted = "*Gifted-Md GPT4:*\n";
+      const tbl = "";
+      await send(message, `${gifted}${tbl}${reply}${tbl}`);
+    } catch (error) {
+      return await message.error(`${error}\n\n command: ${cmdName}`, error, `*_An error occurred while processing your request_*`);
+    }
+  });
+  
+  smd({
+    pattern: "gemini",
+    category: "ai",
+    desc: "Chat with Bard AI model",
+    use: "<text>",
+    filename: __filename,
+  }, async (message, text, { cmdName }) => {
+    if (!text) return message.reply(`*_Please provide a query_*\n*_Example ${prefix + cmdName} What is the meaning of Gifted?_*`);
+  
+    try {
+      const res = await (await fetch(`https://api.maher-zubair.tech/ai/gemini?q=${text}`)).json();
+  
+      if (!res.status === 200) return message.send("*There's a problem, try again later!*");
+  
+      const { result } = res;
+      const gifted = "*Gifted-Md Gemini:*\n"
+      const tbl = "";
+      await send(message, `${gifted}${tbl}${result}${tbl}`);
+    } catch (e) {
+      return await message.error(`${e}\n\n command: ${cmdName}`, e, `*_An error occurred while processing your request_*`);
+    }
+  });
+  smd(
+    {
+      cmdname: "alexa2",
+      category: "ai",
+      use: "[text]",
+      filename: __filename,
+      info: "chat with simsimi alexa ai!",
+    },
+    async (_0xe6d6e, _0x23f786) => {
+      try {
+        if (!_0x23f786) {
+          return await _0xe6d6e.reply(
+            "Hi *" + _0xe6d6e.senderName + "*, do you want to talk?"
+          );
+        }
+        const _0x55bb61 = {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: "text=" + encodeURIComponent(_0x23f786) + "&lc=en&key=",
+        };
+        const _0x5099c8 = await fetch(
+          "https://api.simsimi.vn/v2/simtalk",
+          _0x55bb61
+        );
+        const _0x2c3e12 = await _0x5099c8.json();
+        if (_0x2c3e12.status === "200" && _0x2c3e12.message) {
+          _0xe6d6e.reply(_0x2c3e12.message);
+        } else {
+          _0xe6d6e.reply("*No Responce!*");
+        }
+      } catch (_0xfee6e3) {
+        await _0xe6d6e.error(
+          _0xfee6e3 + "\n\ncommand : alexa2",
+          _0xfee6e3,
+          false
+        );
+      }
+    }
+  );
