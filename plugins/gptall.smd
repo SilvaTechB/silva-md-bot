@@ -27,7 +27,7 @@ const {
   
       const { reply } = data.result;
       const gifted = "*Gifted-Md GPT4:*\n";
-      const tbl = "";
+      const tbl = "'";
       await send(message, `${gifted}${tbl}${reply}${tbl}`);
     } catch (error) {
       return await message.error(`${error}\n\n command: ${cmdName}`, error, `*_An error occurred while processing your request_*`);
@@ -50,7 +50,7 @@ const {
   
       const { result } = res;
       const gifted = "*Gifted-Md Gemini:*\n"
-      const tbl = "";
+      const tbl = "'";
       await send(message, `${gifted}${tbl}${result}${tbl}`);
     } catch (e) {
       return await message.error(`${e}\n\n command: ${cmdName}`, e, `*_An error occurred while processing your request_*`);
