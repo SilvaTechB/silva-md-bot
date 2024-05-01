@@ -23,7 +23,7 @@ const {
       const response = await fetch(apiUrl);
       const data = await response.json();
   
-      if (!data.result.success) return message.send("*There's a problem, try again later!*");
+      if (!data.result.success) return message.reply("*There's a problem, try again later!*");
   
       const { reply } = data.result;
       const gifted = "*Gifted-Md GPT4:*\n";
@@ -46,7 +46,7 @@ const {
     try {
       const res = await (await fetch(`https://api.maher-zubair.tech/ai/gemini?q=${text}`)).json();
   
-      if (!res.status === 200) return message.send("*There's a problem, try again later!*");
+      if (!res.status === 200) return message.reply("*There's a problem, try again later!*");
   
       const { result } = res;
       const gifted = "*Gifted-Md Gemini:*\n"
