@@ -5,10 +5,10 @@
    "main": "lib/smd.js",
    "type": "commonjs",  
    "scripts": {
-            "run": "pm2 start lib/smd.js --deep-monitoring --attach --name GiftedMd || lib/node smd.js",
-            "start": "pm2 start lib/smd.js --attach --name GiftedMd || node lib/smd.js",
+            "run": "pm2 start lib/smd.js --deep-monitoring --attach --name Silva || lib/node smd.js",
+            "start": "pm2 start lib/smd.js --attach --name Silva || node lib/smd.js",
             "stop": "pm2 stop GiftedMd",
-            "heroku-postbuild": "git clone https://github.com/mouricedevs/gifted-md.git temp1 && mv temp1/.git .git && rm -rf temp1"
+            "heroku-postbuild": "git clone https://github.com/SilvaTechB/SilvaGifted.git temp1 && mv temp1/.git .git && rm -rf temp1"
    },
    "author": "GiftedTech",
    "license" :"Apache-2.0",
@@ -72,8 +72,8 @@
    },
    "repository": {
       "type": "git",
-      "url": "git+https://github.com/mouricedevs/Gifted-Md.git"
+      "url": "git+https://github.com/SilvaTechB/SilvaGifted.git"
    },
-   "bugs": { "url": "https://github.com/mouricedevs/Gifted-Md/issues" },
-   "homepage": "https://github.com/mouricedevs/Gifted-Md#readme"
+   "bugs": { "url": "https://github.com/SilvaTechB/SilvaGifted/issues" },
+   "homepage": "https://github.com/SilvaTechB/SilvaGifted#readme"
 }
