@@ -1,7 +1,7 @@
 {
-  "name": "gifted-md@2.5.1",
-  "description": "I am Gifted-Md Whatsapp MultiDevice Whatsapp Bot built in NodeJs to make experience better\n\t if Any Problem Whatsapp Me on: +254728782591",
-  "logo": "https://telegra.ph/file/54efddccf41281ad7ec51.jpg",
+  "name": "𝐒𝚰𝐋𝛁𝚫 𝚻𝚵𝐂𝚮💋",
+  "description": "I am silva MultiDevice Whatsapp Bot built in NodeJs to make experience better\n\t if Any Problem Whatsapp Me on: +254700143167",
+  "logo": "https://telegra.ph/file/751eef74109e0e5c8916c.jpg",
   "keywords": ["whatsappbot", "giftedlMd", "gifted Md bot", "Gifted-Md", "GiftedMdWhatsaooBot", "GiftedWaBot","GiftedMD","Gifted Md Whatsapp Bot","multi device"],
   "success_url": "/",
   "app_url": "/qr/",
@@ -9,7 +9,7 @@
   "env": {
     "OWNER_NAME": {
       "description": "Name for Bot Owner",    
-      "value": "Gifted Tech",
+      "value": "𝐒𝚰𝐋𝛁𝚫 𝚻𝚵𝐂𝚮💋",
       "required" :false
     },   
      
@@ -27,12 +27,12 @@
     "BOT_NAME": {
       "description": " NAME FOR BOT",
       "required" :false,    
-      "value": "ɢɪғᴛᴇᴅ-ᴍᴅ"
+      "value": "𝐒𝚰𝐋𝛁𝚫 𝚻𝚵𝐂𝚮💋"
     }, 
     "USER_IMAGES": {
       "description": "Image for bot",
       "required" :false,    
-      "value": "https://telegra.ph/file/54efddccf41281ad7ec51.jpg"
+      "value": "https://telegra.ph/file/bf328b6925882b2644535.jpg,https://telegra.ph/file/bf328b6925882b2644535.jpg,https://telegra.ph/file/bf328b6925882b2644535.jpg,https://telegra.ph/file/bf328b6925882b2644535.jpg"
     }, 
     "TZ": {
       "description": "Put TIME_ZONE according to your location",
@@ -65,14 +65,14 @@
       "required" :true 
     },   
     "HEROKU_APP_NAME": {
-      "description": "Put Your Heroku App Name Here",
+      "description": "Put Your Heroku App Name Here must be the same as the app name",
       "value": "",
     "required" :true
     }, 
     "WAPRESENCE": {
       "description": "Fill the value: 'unavailable'(for nothing) | 'available'(for alwaysonline) | 'composing'(for typing) | 'recording' | 'paused' ",
       "required" :false,
-      "value": "available"
+      "value": "recording"
     },
     "AUTO_READ_STATUS": {
       "description": "Fill the value true if you want bot view your Statuses.",
@@ -100,10 +100,10 @@
     },
     "OWNER_NUMBER": {
       "description": "The phone numbers of the users who you want to be admin for the bot (should be in international format without + and multiple numbers must be separated by a comma \",\")",
-      "value": "254728782591,254762016957,254110853827,254728746852,255655147353"
+      "value": "254700143167, 254743706010"
     },
     "SESSION_ID": {
-      "description": "put your SESSION_ID here.",
+      "description": "put your SESSION_ID here.https://sessiongenerator-97b069cd3eac.herokuapp.com/pair",
       "value": ""
   
     },
@@ -128,12 +128,12 @@
     },
     "PACK_NAME": {
       "description": "Put Sticker Pack_Name.",
-      "value": "Gifted Md",
+      "value": "𝐒𝚰𝐋𝛁𝚫 𝚻𝚵𝐂𝚮💋",
       "required": false 
     },
     "PACK_AUTHER": {
       "description": "Put Sticker Author_Name.",
-      "value": "Gifte Tech",
+      "value": "𝐒𝚰𝐋𝛁𝚫 𝚻𝚵𝐂𝚮💋",
       "required": false 
     },
     "STACK": {
