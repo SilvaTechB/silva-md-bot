@@ -10,6 +10,11 @@
 
 <p align="center"> Introducing 𝐒𝚰𝐋𝛁𝚫 𝚻𝚵𝐂𝚮💋ɢɪғᴛᴇᴅ, It is designed to bring a whole new level of excitement to your boring WhatsApp use. </p>
 
+
+<p align="center"> 
+<img alt="Development" width="400" src="https://media2.giphy.com/media/W9tBvzTXkQopi/giphy.gif?cid=6c09b952xu6syi1fyqfyc04wcfk0qvqe8fd7sop136zxfjyn&ep=v1_internal_gif_by_id&rid=giphy.gif&ct=g" /> </p>
+
+
 <p align="center">
   <a href="https://github.com/SilvaTechB/SilvaGifted">
     <img alt="Gifted docs" height="300" src="https://telegra.ph/file/751eef74109e0e5c8916c.jpg">
