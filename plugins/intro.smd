@@ -50,19 +50,19 @@
 const { smd, Config,smdBuffer,  prefix } = require('../lib')
 
 
-var surl = 'https:/github.com/mouricedevs/Gifted-Md' // Source URL
+var surl = 'https:/github.com/SilvaTechB/SilvaGifted' // Source URL
 const number = '254728782591'
-var name = ' Gifted Tech'
+var name = ' Silva Tech'
 var body = '𝑇𝛩𝑈𝐶𝛨 𝛨𝛯𝑅𝛯'
 var image = 'https://telegra.ph/file/54efddccf41281ad7ec51.jpg'
 let text = `╭═══ ━ ━ ━ ━ • ━ ━ ━ ━ ═══♡᭄
 │       「 𝗠𝗬 𝗜𝗡𝗧𝗥𝗢 」
-│ Name      : ɢɪғᴛᴇᴅ ᴛᴇᴄʜ
-│ Place       : Eldoret, Kenya
+│ Name      : ²⁰²⁴ ∅ 𝐒𝚰𝐋𝛁𝚫 𝚻𝚵𝐂𝚮💋
+│ Place       : Kenya
 │ Gender    :  ᴍᴀʟᴇ
-│ Age          : 20
-│ Phone     : wa.me/254728782591
-│ Youtube   : youtube.com/@giftedtechnexus
+│ Age          : 21
+│ Phone     : wa.me/254700143167
+│ Tiktok  : tiktok.com/@silva.edits6
 │ Status     : Web Dev, App Dev, Software Dev.
 ╰═══ ━ ━ ━ ━ • ━ ━ ━ ━ ═══♡᭄`
 
