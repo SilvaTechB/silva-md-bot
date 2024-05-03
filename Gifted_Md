@@ -27,7 +27,7 @@
 
  
 
-FROM quay.io/mouricedevs/giftedmd
+FROM quay.io/SilvaTechB/SilvaGifted
 RUN git clone https://github.com/SilvaTechB/SilvaGifted /root/SilvaGifted
 WORKDIR /root/SilvaGifted
 RUN npm install
