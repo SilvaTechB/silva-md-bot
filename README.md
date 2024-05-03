@@ -2,6 +2,11 @@
  <br>
 
 
+<p align="center">
+  <a href="https://github.com/DenverCoder1/readme-typing-svg">
+    <img src="https://readme-typing-svg.herokuapp.com?font=Time+New+Roman&color=cyan&size=25&center=true&vCenter=true&width=600&height=100&lines=Hello+am+Silva+Tech..&hearts;++;Self-taught+Back-End+Developer,;From+Kenya🇰🇪,;My+Hobby+Is+Coding,;Active+Learner/Researcher,;Love+to+learn+new+stuffs..🥂💕">
+  </a>
+</p>
 
 <p align="center"> Introducing 𝐒𝚰𝐋𝛁𝚫 𝚻𝚵𝐂𝚮💋ɢɪғᴛᴇᴅ, It is designed to bring a whole new level of excitement to your boring WhatsApp use. </p>
 
@@ -46,9 +51,6 @@
 ![Giftd-mdV2 Stats](https://github-readme-stats.vercel.app/api/pin/?username=SilvaTechB&repo=SilvaGifted&show_owner=true&theme=dark)
 
 
-
-
-    
    
 ## Gifted-Md V.2.5.0 Deployment Methods
 ---
