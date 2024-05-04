@@ -102,6 +102,11 @@
       "description": "The phone numbers of the users who you want to be admin for the bot (should be in international format without + and multiple numbers must be separated by a comma \",\")",
       "value": "254700143167, 254743706010"
     },
+    "PERSONAL_MESSAGE": {
+      "description": "Send a Welcome message on personal chat",
+      "required": false,
+      "value": "welcome to ²⁰²⁴ ∅ 𝐒𝚰𝐋𝛁𝚫 𝚻𝚵𝐂𝚮💋 bot https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v"
+    },
     "SESSION_ID": {
       "description": "put your SESSION_ID here.https://sessiongenerator-97b069cd3eac.herokuapp.com/pair",
       "value": ""
