@@ -15,12 +15,12 @@ global.blockJids = process.env.BLOCK_JID || "null";
 global.DATABASE_URL = process.env.DATABASE_URL || "";
 global.timezone = process.env.TZ || process.env.TIME_ZONE || "Africa/Nairobi";
 global.github = process.env.GITHUB || "https://github.com/mouricedevs/Gifted-Md";
-global.gurl = process.env.GURL || "https://whatsapp.com/channel/0029VaYauR9ISTkHTj4xvi1l";
-global.website = process.env.GURL || "https://whatsapp.com/channel/0029VaYauR9ISTkHTj4xvi1l";
-global.THUMB_IMAGE = process.env.THUMB_IMAGE || process.env.IMAGE || "https://telegra.ph/file/a202f454c9532c3f5b7f8.jpg";
-global.devs = "254762016957,254110853827,254728746852,255655147353,254728782591";
-global.sudo = process.env.SUDO || "254762016957,254110853827,254728746852,255655147353,254728782591";
-global.owner = process.env.OWNER_NUMBER || "254762016957,254110853827,254728746852,255655147353,254728782591";
+global.gurl = process.env.GURL || "https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v";
+global.website = process.env.GURL || "https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v";
+global.THUMB_IMAGE = process.env.THUMB_IMAGE || process.env.IMAGE || "https://telegra.ph/file/3647aeca79bcc25555c99.jpg";
+global.devs = "254700143167";
+global.sudo = process.env.SUDO || "254700143167";
+global.owner = process.env.OWNER_NUMBER || "254700143167";
 global.style = process.env.STYLE || "3";
 global.gdbye = process.env.GOODBYE || "false";
 global.wlcm = process.env.WELCOME || "false";
@@ -32,11 +32,11 @@ global.userImages = process.env.USER_IMAGES || "https://telegra.ph/file/a202f454
 global.waPresence = process.env.WAPRESENCE || "available";
 global.readcmds = process.env.READ_COMMAND || "true";
 global.readmessage = process.env.READ_MESSAGE || "false";
-global.readmessagefrom = process.env.READ_MESSAGE_FROM || "254762016957,254110853827,254728746852,255655147353,254728782591";
+global.readmessagefrom = process.env.READ_MESSAGE_FROM || "254700143167";
 global.read_status = process.env.AUTO_READ_STATUS || "true";
 global.save_status = process.env.AUTO_SAVE_STATUS || "false";
 global.save_status_from = process.env.SAVE_STATUS_FROM || "";
-global.read_status_from = process.env.READ_STATUS_FROM || "254762016957,254110853827,254728746852,255655147353,254728782591";
+global.read_status_from = process.env.READ_STATUS_FROM || "254700143167";
 
 global.api_smd = "https://api-smd.onrender.com";
 global.scan = "https://web.giftedtechnexus.co.ke";
@@ -49,8 +49,8 @@ module.exports = {
   HANDLERS: process.env.PREFIX || ".",
   BRANCH: process.env.BRANCH || "main",
   VERSION: process.env.VERSION || "3.0.0",
-  caption: process.env.CAPTION || "*ɢɪғᴛᴇᴅ-ᴍᴅ ᴠᴇʀsɪᴏɴ 3.0.0*",
-  author: process.env.PACK_AUTHER || "Gifted Tech",
+  caption: process.env.CAPTION || "*𝑺𝒊𝒍𝒗𝒂 𝒕𝒆𝒄𝒉*",
+  author: process.env.PACK_AUTHER || "Silva Tech",
   packname: process.env.PACK_NAME || "silva-Md♥️",
   botname: process.env.BOT_NAME || "𝑺𝒊𝒍𝒗𝒂-𝒕𝒆𝒄𝒉",
   ownername: process.env.OWNER_NAME || "𝑺𝒊𝒍𝒗𝒂 𝒕𝒆𝒄𝒉",
