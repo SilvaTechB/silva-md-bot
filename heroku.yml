@@ -1,7 +1,6 @@
-build:
-  docker:
-      web: Gifted_Md
-run:
-  web: npm start
- 
-
+ #heroku.yml file data to run Container
+ build:
+   docker:
+       web: lib/Dockerfile
+ run:
+   web: npm start
