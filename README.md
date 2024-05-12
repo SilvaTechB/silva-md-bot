@@ -62,7 +62,7 @@
 ---
 1.  ***Fork Repo [`CLICK HERE`](https://github.com/SilvaTechB/SilvaGifted/fork) (A MUST) and `Star ⭐ Repository` for Courage.***
 2.  ***Get `SESSION ID`  [`BY CLICKING HERE`](https://sessiongenerator-97b069cd3eac.herokuapp.com/pair) Supports only Pair Code And then `Go-to Whatapp>Three dots>Linked Devices`***
-3. ***Deploy on [`HEROKU`](https://dashboard.heroku.com/new?template=https://github.com/SilvaTechB/SilvaGifted)***
+3. ***Deploy on [`HEROKU`](https://dashboard.heroku.com/new?template=https://github.com/Sylivanu/SilvaGifted)***
 4.  ***Deploy FREE on `Codespace,` First see [`Codespace tutorial`](https://youtu.be/3NdJb6_1cJM)***
 5.  ***Deploy on [`Replit`](https://replit.com/github.com/SilvaTechB/SilvaGifted)***
 
