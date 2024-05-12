@@ -1,35 +1,19 @@
-#============================================================================================#   
-#                                      GIFTED－MD                                             # 
-#                                                                                             # 
-#                                   VERSION ：2．5．0                                          # 
-#                                                                                             # 
-#                                                                                             # 
-#           ██████╗ ██╗███████╗████████╗███████╗██████╗     ███╗   ███╗██████╗                # 
-#          ██╔════╝ ██║██╔════╝╚══██╔══╝██╔════╝██╔══██╗    ████╗ ████║██╔══██╗               # 
-#          ██║  ███╗██║█████╗     ██║   █████╗  ██║  ██║    ██╔████╔██║██║  ██║               # 
-#          ██║   ██║██║██╔══╝     ██║   ██╔══╝  ██║  ██║    ██║╚██╔╝██║██║  ██║               # 
-#          ╚██████╔╝██║██║        ██║   ███████╗██████╔╝    ██║ ╚═╝ ██║██████╔╝               # 
-#           ╚═════╝ ╚═╝╚═╝        ╚═╝   ╚══════╝╚═════╝     ╚═╝     ╚═╝╚═════╝                # 
-#                                                                                             # 
-#                                                                                             # 
-#                                                                                             # 
-#                                                                                             # 
-#=============================================================================================# 
-#                                                                 
-#    * @project_name : Gifted-Md
-#    * @author : @GiftedTech
-#    * @youtube : https://www.youtube.com/@giftedtechnexus
-#    * @description : Gifted-Md ,A Multi-functional whatsapp bot md.
-#    * @version 2.5.0
-# 
-# Don't change this [ /GiftedTech/ ] name!
-# Change from below link, else bot not works!
+# Don't change this [ /SilvaTech/ ] name!
+# Change from below link, else bot wil not work!
 
- 
 
-FROM quay.io/SilvaTechB/SilvaGifted
-RUN git clone https://github.com/SilvaTechB/SilvaGifted /root/SilvaGifted
-WORKDIR /root/SilvaGifted/
+FROM quay.io/sampandey001/secktor
+
+RUN git clone https://github.com/SilvaTechB/SilvaGifted /root/SilvaTech
+
+# Clear npm cache and remove node_modules directories
+RUN npm cache clean --force
+RUN rm -rf /root/SilvaTech/node_modules
+
+# Install dependencies
+WORKDIR /root/SilvaTech
 RUN npm install
-EXPOSE 8000
-CMD ["npm","start" ] 
+
+# Add additional Steps To Run...
+EXPOSE 3000
+CMD ["npm","start" ]
