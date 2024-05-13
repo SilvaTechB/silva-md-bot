@@ -1,4 +1,4 @@
-<h1 align="center"> 𝐒𝚰𝐋𝛁𝚫 𝚻𝚵𝐂𝚮💋 
+<h1 align="center"> 𝑺𝒊𝒍𝒗𝒂 𝒕𝒆𝒄𝒉
 <img src="https://github.com/0xAbdulKhalid/0xAbdulKhalid/raw/main/assets/mdImages/handshake.gif" width ="80"></h1> 
  <br>
 
@@ -9,7 +9,7 @@
   </a>
 </p>
 
-<p align="center"> Introducing 𝐒𝚰𝐋𝛁𝚫 𝚻𝚵𝐂𝚮💋ɢɪғᴛᴇᴅ, It is designed to bring a whole new level of excitement to your boring WhatsApp use. </p>
+<p align="center"> Introducing 𝑺𝒊𝒍𝒗𝒂 𝒕𝒆𝒄𝒉, It is designed to bring a whole new level of excitement to your boring WhatsApp use. </p>
 
 
 <p align="center"> 
@@ -25,7 +25,7 @@
    
    
 <p align="center">
-  <a href="https://wa.me/+254700143167?text=Hi+Bro--+I+Need+Help.+I've+messaged+you+from+𝐒𝚰𝐋𝛁𝚫 𝚻𝚵𝐂𝚮💋ɢɪғᴛᴇᴅ ʙᴏᴛ+Repo" target="_blank">
+  <a href="https://wa.me/+254700143167?text=Hi+Bro--+I+Need+Help.+I've+messaged+you+from+𝑺𝒊𝒍𝒗𝒂+𝒕𝒆𝒄𝒉 ʙᴏᴛ+Repo" target="_blank">
     <img alt="whatsapp" src="https://img.shields.io/badge/ Whatsapp -25D366?style=for-the-badge&logo=whatsapp&logoColor=white" />
 
 </p>
@@ -36,7 +36,7 @@
 
 
 
-<p align="center"> 𝐒𝚰𝐋𝛁𝚫 𝚻𝚵𝐂𝚮💋ɢɪғᴛᴇᴅ uses
+<p align="center"> 𝑺𝒊𝒍𝒗𝒂 𝒕𝒆𝒄𝒉 uses
   <a href="https://github.com/adiwajshing/Baileys">Multi-Device Baileys.</a>
 </p>
 <p align="center">
@@ -79,7 +79,6 @@
 
 ---
 ### Credits to:
-- [Suhail Ser](https://github.com/SuhailTechInfo) for the Base Bot
 - [Gifted Team](https://github.com/mouricedevs) for new menu design and some cmds
 
 ---
