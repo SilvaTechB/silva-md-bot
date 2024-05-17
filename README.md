@@ -64,11 +64,11 @@
 
  <h3>silva tech Stats</h3>
 
-![Giftd-mdV2 Stats](https://github-readme-stats.vercel.app/api/pin/?username=SilvaTechB&repo=SilvaGifted&show_owner=true&theme=dark)
+![ Stats](https://github-readme-stats.vercel.app/api/pin/?username=SilvaTechB&repo=SilvaGifted&show_owner=true&theme=dark)
 
 
    
-## Gifted-Md V.2.5.0 Deployment Methods
+## Setup
 ---
 1.  ***Fork Repo [`CLICK HERE`](https://github.com/SilvaTechB/SilvaGifted/fork) (A MUST) and `Star ⭐ Repository` for Courage.***
 2.  ***Get `SESSION ID`  [`BY CLICKING HERE`](https://sessiongenerator-97b069cd3eac.herokuapp.com/pair) Supports only Pair Code And then `Go-to Whatapp>Three dots>Linked Devices`***
