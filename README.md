@@ -28,7 +28,7 @@
 
 <p align="center">
   <a href="https://github.com/SilvaTechB/SilvaGifted">
-    <img alt="Gifted docs" height="300" src="https://telegra.ph/file/751eef74109e0e5c8916c.jpg">
+    <img alt="Silva docs" height="300" src="https://telegra.ph/file/751eef74109e0e5c8916c.jpg">
   </a>
 </p>
     
