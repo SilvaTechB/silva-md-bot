@@ -91,7 +91,7 @@
 
 ---
 ### Credits to:
-- [Gifted Team](https://github.com/mouricedevs) for new menu design and some cmds
+- [Tech king](https://github.com/Sylivanu) for support
 
 ---
 
@@ -103,4 +103,4 @@
 - *silva tech is not made by `WhatsApp Inc.` Sometimes or misusing the bot might `ban` your `WhatsApp account!`*
 - *In that case, I'm not responsible for banning your account.*
 - *Use silva tech at your own risk by keeping this warning in mind.*
-- [`Deploy on Heroku`](htttps://dashboard.heroku.com/new?template=https://github.com/SilvaTechB/SilvaGifted/)
+- [`Deploy on Heroku`](htttps://dashboard.heroku.com/new?template=https://github.com/SilvaTechB/s-ilva/)
