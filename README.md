@@ -63,11 +63,21 @@
 ## Setup
 ---
 1.  ***Fork Repo [`CLICK HERE`](https://github.com/SilvaTechB/SilvaGifted/fork) (A MUST) and `Star ⭐ Repository` for Courage.***
-2.  ***Get `SESSION ID`  [`BY CLICKING HERE`](https://sessiongenerator-97b069cd3eac.herokuapp.com/pair) Supports only Pair Code And then `Go-to Whatapp>Three dots>Linked Devices`***
-3. ***Deploy on [`HEROKU`](https://dashboard.heroku.com/new?template=https://github.com/SilvaTechB/SilvaGifted)***
-4.  ***Deploy FREE on `Codespace,` First see [`Codespace tutorial`](https://youtu.be/3NdJb6_1cJM)***
-5.  ***Deploy on [`Replit`](https://replit.com/github.com/SilvaTechB/SilvaGifted)***
+### SETUP
 
+1. Scan the QR and copy it
+    <br>
+<a href='suhail' target="_blank"><img alt='PAIR CODE' src='https://img.shields.io/badge/Pair_code-100000?style=for-the-badge&logo=scan&logoColor=white&labelColor=black&color=blue'/></a>
+
+#### DEPLOY TO HEROKU 
+
+1. If You don't have a account in Heroku. Create a account.
+    <br>
+<a href='https://signup.heroku.com/' target="_blank"><img alt='Heroku' src='https://img.shields.io/badge/-Create-blue?style=for-the-badge&logo=heroku&logoColor=white'/></a>
+
+3. Now Deploy
+    <br>
+<a href='https://dashboard.heroku.com/new?template=https://github.com/SilvaTechB/s-ilva' target="_blank"><img alt='DEPLOY' src='https://img.shields.io/badge/-DEPLOY-purple?style=for-the-badge&logo=heroku&logoColor=white'/></a>
 ##
 ---
 
