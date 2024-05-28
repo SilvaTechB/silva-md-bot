@@ -13,13 +13,8 @@
 
 <p align="center"> Introducing 𝑺𝒊𝒍𝒗𝒂 𝒕𝒆𝒄𝒉, It is designed to bring a whole new level of excitement to your boring WhatsApp use. </p>
 
-
-<p align="center"> 
-<img alt="Development" width="250" src="https://media2.giphy.com/media/W9tBvzTXkQopi/giphy.gif?cid=6c09b952xu6syi1fyqfyc04wcfk0qvqe8fd7sop136zxfjyn&ep=v1_internal_gif_by_id&rid=giphy.gif&ct=g" /> </p>
-
-
 <p align="center">
-  <a href="https://github.com/SilvaTechB/SilvaGifted">
+  <a href="https://github.com/SilvaTechB/silva-md-bot">
     <img alt="Silva docs" height="300" src="https://telegra.ph/file/751eef74109e0e5c8916c.jpg">
   </a>
 </p>
@@ -31,7 +26,7 @@
     <img alt="whatsapp" src="https://img.shields.io/badge/ Whatsapp -25D366?style=for-the-badge&logo=whatsapp&logoColor=white" />
 
 </p>
-<p align="center"><img src="https://profile-counter.glitch.me/{SilvaTechB}/count.svg" alt="ɢɪғᴛᴇᴅ ᴍᴅ :: Visitor's Count" /></p>
+<p align="center"><img src="https://profile-counter.glitch.me/{SilvaTechB}/count.svg" alt="𝑺𝒊𝒍𝒗𝒂 𝒕𝒆𝒄𝒉 ᴍᴅ :: Visitor's Count" /></p>
 
 ---
 
@@ -47,22 +42,19 @@
 
 ---
 
-<p align="center">
-  <a href="https://github.com/SilvaTechB/SilvaGifted"><b>Gifted-Md V.2.5.0</b></a> Support Deploy On...
-</p>
 
-<p align="center">Need help? please create an <a href="https://github.com/SilvaTechB/SilvaGifted/issues">issue</a></p>
+<p align="center">Need help? please create an <a href="https://github.com/SilvaTechB/silva-md-bot/issues">issue</a></p>
 
 
  <h3>silva tech Stats</h3>
 
-![ Stats](https://github-readme-stats.vercel.app/api/pin/?username=SilvaTechB&repo=SilvaGifted&show_owner=true&theme=dark)
+![ Stats](https://github-readme-stats.vercel.app/api/pin/?username=SilvaTechB&repo=silva-md-bot&show_owner=true&theme=dark)
 
 
    
 ## Setup
 ---
-1.  ***Fork Repo [`CLICK HERE`](https://github.com/SilvaTechB/SilvaGifted/fork) (A MUST) and `Star ⭐ Repository` for Courage.***
+1.  ***Fork Repo [`CLICK HERE`](https://github.com/SilvaTechB/silva-md-bot/fork) (A MUST) and `Star ⭐ Repository` for Courage.***
 ### SETUP
 
 1. Scan the QR and copy it
@@ -87,7 +79,13 @@
 
 
 ### I Am
-- [Silva Tech](https://github.com/SilvaTechB) 
+- [Silva Tech](https://github.com/SilvaTechB)
+-
+
+<p align="center"> 
+<img alt="Development" width="250" src="https://media2.giphy.com/media/W9tBvzTXkQopi/giphy.gif?cid=6c09b952xu6syi1fyqfyc04wcfk0qvqe8fd7sop136zxfjyn&ep=v1_internal_gif_by_id&rid=giphy.gif&ct=g" /> </p>
+
+
 
 ---
 ### Credits to:
@@ -103,4 +101,4 @@
 - *silva tech is not made by `WhatsApp Inc.` Sometimes or misusing the bot might `ban` your `WhatsApp account!`*
 - *In that case, I'm not responsible for banning your account.*
 - *Use silva tech at your own risk by keeping this warning in mind.*
-- [`Deploy on Heroku`](htttps://dashboard.heroku.com/new?template=https://github.com/SilvaTechB/s-ilva/)
+- [`Deploy on Heroku`](htttps://dashboard.heroku.com/new?template=https://github.com/SilvaTechB/s-ilva)
