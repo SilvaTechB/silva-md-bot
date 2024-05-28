@@ -59,7 +59,7 @@
 
 1. Scan the QR and copy it
     <br>
-<a href='suhail' target="_blank"><img alt='PAIR CODE' src='https://img.shields.io/badge/Pair_code-100000?style=for-the-badge&logo=scan&logoColor=white&labelColor=black&color=blue'/></a>
+<a href='https://suhail-md-vtsf.onrender.com/code' target="_blank"><img alt='PAIR CODE' src='https://img.shields.io/badge/Pair_code-100000?style=for-the-badge&logo=scan&logoColor=white&labelColor=black&color=blue'/></a>
 
 #### DEPLOY TO HEROKU 
 
