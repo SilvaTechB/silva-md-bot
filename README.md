@@ -1,5 +1,10 @@
+# HEROKU ERROR FIXED
 
-
+<p align="center">
+  <a href="https://github.com/DenverCoder1/readme-typing-svg">
+    <img src="https://readme-typing-svg.herokuapp.com?font=Time+New+Roman&color=purple&size=25&center=true&vCenter=true&width=600&height=100&lines=HEROKU+ERROR+FIXED+SILVA..&hearts;++;HEROKU+ERROR+FIXED,;From+Kenya🇰🇪,;My+Hobby+Is+Coding,;Active+Learner/Researcher,;Love+to+learn+new+stuffs..🥂💕">
+  </a>
+</p>
 <h1 align="center"> 𝑺𝒊𝒍𝒗𝒂 𝒕𝒆𝒄𝒉
 <img src="https://github.com/0xAbdulKhalid/0xAbdulKhalid/raw/main/assets/mdImages/handshake.gif" width ="80"></h1> 
  <br>
