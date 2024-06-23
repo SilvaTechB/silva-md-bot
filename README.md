@@ -2,14 +2,14 @@
 
 <p align="center">
   <a href="https://github.com/DenverCoder1/readme-typing-svg">
-    <img src="https://readme-typing-svg.herokuapp.com?font=Time+New+Roman&color=purple&size=25&center=true&vCenter=true&width=600&height=100&lines=HEROKU+ERROR+FIXED+SILVA..&hearts;++;HEROKU+ERROR+FIXED,;HEROKU+ANTIBAN+ACTIVE,;NOW+DEPLOY+WITH+HEROKU,;UPDATE+YOUR+FORK,;AFTER+to+EVERY+DAYS..🥂💕">
+    <img src="https://readme-typing-svg.herokuapp.com?font=Time+New+Roman&color=purple&size=25&center=true&vCenter=true&width=600&height=100&lines=HEROKU+ERROR+FIXED+SILVA..&hearts;++;HEROKU+ERROR+FIXED,;HEROKU+ANTIBAN+ACTIVE,;NOW+DEPLOY+WITH+HEROKU,;UPDATE+YOUR+FORK,;AFTER+EVERY+2+DAYS..🥂💕">
   </a>
 </p>
 <h1 align="center"> 𝑺𝒊𝒍𝒗𝒂 𝒕𝒆𝒄𝒉
 <img src="https://github.com/0xAbdulKhalid/0xAbdulKhalid/raw/main/assets/mdImages/handshake.gif" width ="80"></h1> 
  <br>
 
-
+### we love silva md
 <p align="center">
   <a href="https://github.com/DenverCoder1/readme-typing-svg">
     <img src="https://readme-typing-svg.herokuapp.com?font=Time+New+Roman&color=cyan&size=25&center=true&vCenter=true&width=600&height=100&lines=Hello+am+Silva+Tech..&hearts;++;Self-taught+Back-End+Developer,;From+Kenya🇰🇪,;My+Hobby+Is+Coding,;Active+Learner/Researcher,;Love+to+learn+new+stuffs..🥂💕">
