@@ -1,9 +1,9 @@
 {
-  "name":"SILVA-1.0",
+  "name":"SILVA-MD-BOT",
   "description":"bot whatsapp developed by Silva Sylivanus",
   "keywords":["bot","node","baileys","whatsapp"],
   "logo":"https://telegra.ph/file/3647aeca79bcc25555c99.jpg",
-  "repository":"https://github.com/Sylivanu/silva-tech",
+  "repository":"https://github.com/SilvaTechB/silva-md-bot",
   "succes_url":"/",
   "stack":"container",
   "env":{
@@ -35,7 +35,7 @@
     "BOT_NAME" : {
        
       "description":"put A name for your bot",
-      "value":"SILVA-TECH",
+      "value":"SILVA-MD",
       "required":false
 
     } ,
@@ -64,7 +64,7 @@
 	  ,
     "SESSION_ID":
     {
-      "description":"put your session ID , the code you receive after scanning Qr code",   
+      "description":"put your session ID , the code you receive after scanning Qr code or after pairing",   
       "value":"",
       "required":true
       
@@ -81,7 +81,7 @@
     
     "desc": "Your number , dont put '+' and put you area code(exemple of togo '228')",
     "required":false,
-    "value": "254700143167"
+    "value": "254743706010"
   },
     "WARN_COUNT":
   {
