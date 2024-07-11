@@ -9,7 +9,7 @@ RUN apt-get update && \
   npm i pm2 -g && \
   rm -rf /var/lib/apt/lists/*
   
-RUN git clone https://github.com/Sylivanu/silva-tech  /root/silva
+RUN git clone https://github.com/SilvaTechB/silva-md-bot  /root/silva
 WORKDIR /root/silva/
 
 
