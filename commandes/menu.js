@@ -32,7 +32,7 @@ const temps = moment().format('HH:mm:ss');
 const date = moment().format('DD/MM/YYYY');
 
   let infoMsg =  `
-╭────✧{𝐒𝚰𝐋𝛁𝚫 𝚻𝚵𝐂𝚮}✧────◆
+╭────✧{THE SILVA}✧────◆
 │🚂  *Prefix* : ${s.PREFIXE}
 │🚂  *Owner* : ${s.OWNER_NAME}
 │🚂  *Mode* : ${mode}
