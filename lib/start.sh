@@ -1,6 +1,6 @@
 while true
 do
-echo "Starting Gifted-Md!"
+echo "Starting silva-md-bot!"
 node smd.js
 done
 
