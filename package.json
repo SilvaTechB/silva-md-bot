@@ -1,16 +1,16 @@
 {
-   "name": "gifted-md",
+   "name": "silva-md",
    "version": "2.5.1",
-   "description": "Multi device whatsapp bot by GiftedTech.",
+   "description": "Multi device whatsapp bot by silvaTech.",
    "main": "lib/smd.js",
    "type": "commonjs",  
    "scripts": {
-            "run": "pm2 start lib/smd.js --deep-monitoring --attach --name GiftedMd || lib/node smd.js",
-            "start": "pm2 start lib/smd.js --attach --name GiftedMd || node lib/smd.js",
+            "run": "pm2 start lib/smd.js --deep-monitoring --attach --name silva|| lib/node smd.js",
+            "start": "pm2 start lib/smd.js --attach --name silva || node lib/smd.js",
             "stop": "pm2 stop GiftedMd",
-            "heroku-postbuild": "git clone https://github.com/mouricedevs/gifted-md.git temp1 && mv temp1/.git .git && rm -rf temp1"
+            "heroku-postbuild": "git clone https://github.com/SilvaTechB/silva-md-bot.git temp1 && mv temp1/.git .git && rm -rf temp1"
    },
-   "author": "GiftedTech",
+   "author": "silvaTech",
    "license" :"Apache-2.0",
    "dependencies": { 
              "@adiwajshing/keyed-db": "^0.2.4",
@@ -72,8 +72,8 @@
    },
    "repository": {
       "type": "git",
-      "url": "git+https://github.com/mouricedevs/Gifted-Md.git"
+      "url": "git+https://github.com/SilvaTechB/silva-md-bot.git"
    },
-   "bugs": { "url": "https://github.com/mouricedevs/Gifted-Md/issues" },
-   "homepage": "https://github.com/mouricedevs/Gifted-Md#readme"
+   "bugs": { "url": "https://github.com/SilvaTechB/silva-md-bot/issues" },
+   "homepage": "https://github.com/SilvaTechB/silva-md-bot#readme"
 }
