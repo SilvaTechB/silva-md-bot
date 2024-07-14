@@ -1,0 +1,6 @@
+build:
+  docker:
+      web: Silva_Md
+run:
+  web: npm start
+ 
