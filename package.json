@@ -7,7 +7,7 @@
    "scripts": {
             "run": "pm2 start lib/smd.js --deep-monitoring --attach --name silva|| lib/node smd.js",
             "start": "pm2 start lib/smd.js --attach --name silva || node lib/smd.js",
-            "stop": "pm2 stop GiftedMd",
+            "stop": "pm2 stop silva",
             "heroku-postbuild": "git clone https://github.com/SilvaTechB/silva-md-bot.git temp1 && mv temp1/.git .git && rm -rf temp1"
    },
    "author": "silvaTech",
