@@ -1,18 +1,21 @@
 {
-   "name": "silva-md",
-   "version": "2.5.1",
-   "description": "Multi device whatsapp bot by SilvaTech.",
-   "main": "lib/smd.js",
+   "name": "s-ilva",
+   "version": "1.3.7",
+   "description": "Multi device whatsapp bot.",
+   "main": "index.js",
    "type": "commonjs",  
    "scripts": {
-            "run": "pm2 start lib/smd.js --deep-monitoring --attach --name silva || lib/node smd.js",
-            "start": "pm2 start lib/smd.js --attach --name silva || node lib/smd.js",
-            "stop": "pm2 stop silva",
-            "heroku-postbuild": "git clone https://github.com/SilvaTechB/silva-md-bot.git temp1 && mv temp1/.git .git && rm -rf temp1"
+            "run": "pm2 start . --deep-monitoring --attach --name Suhail",
+            "suhail": "pm2 start . --deep-monitoring --attach --name Suhail",
+            "start": "pm2 start . --attach --name Suhail",
+            "stop": "pm2 stop Suhail",
+            "old-heroku-postbuild": "git clone https://github.com/Sylivanu/s-ilva.git temp && mv temp/.git .git && rm -rf temp && npx puppeteer@latest install  --y",
+            "fis-heroku-postbuild": "git clone https://github.com/Sylivanu/s-ilva.git temp1 && rsync -av temp1/* ./ && rsync -av temp1/.* ./ && rm -rf temp1 && npm i && npx puppeteer@latest install",
+            "old-postinstall": "npx puppeteer@latest install --y"
    },
-   "author": "SilvaTech",
+   "author": "Sylivanu",
    "license" :"Apache-2.0",
-   "dependencies": { 
+   "dependencies": {
              "@adiwajshing/keyed-db": "^0.2.4",
              "@hapi/boom": "^9.1.4",
              "@whiskeysockets/baileys": "6.6.0",             
@@ -59,21 +62,12 @@
              "wa-sticker-formatter": "^4.3.2",
              "youtubei.js": "^7.0.0",
              "ytdl-secktor": "^0.0.1-development",
-             "link-preview-js": "^3.0.0"
+             "link-preview-js": "^3.0.0",
+            "puppeteer": "latest"
    },
    "directories": {
       "lib": "lib",
-      "assets": "lib/assets",
-      "plugins" :"plugins"
-
+      "plugins" :"lib/plugins"
    },
-   "devDependencies": {
-      "pino": "^7.0.5"
-   },
-   "repository": {
-      "type": "git",
-      "url": "git+https://github.com/SilvaTechB/silva-md-bot.git"
-   },
-   "bugs": { "url": "https://github.com/SilvaTechB/silva-md-bot/issues" },
-   "homepage": "https://github.com/SilvaTechB/silva-md-bot#readme"
+   "devDependencies": { "pino": "^7.0.5" }
 }

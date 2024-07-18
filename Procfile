@@ -1,1 +1,14 @@
-web: npm start
+web: npm start || node .
+
+
+
+
+
+
+
+
+
+
+
+
+# Creator: SILVA TECH

@@ -1,6 +1,7 @@
 build:
   docker:
-      web: Silva_Md
+      worker: Dockerfile
 run:
-  web: npm start
- 
+   worker: npm start
+
+   
