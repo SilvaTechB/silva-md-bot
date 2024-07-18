@@ -1,4 +1,4 @@
-## Deploy on VPS or PC or Termux.
+## Deploy on VPS or PC.
 - You need to Install git,ffmpeg,curl,nodejs,yarn with pm2 
    1. Install git ffmpeg curl 
       ``` 
@@ -25,8 +25,8 @@
   
    5. Clone Repo and install required packages
       ```
-      git clone https://github.com/SilvaTechB/silva-md-bot
-      cd Gifted-Md
+      git clone https://github.com/SuhailTechInfo/Suhail-Md
+      cd Suhail-Md
       yarn install --network-concurrency 1
       ```
 
@@ -38,15 +38,15 @@
       copy paste lines below.
 
       ```
-      OWNER_NUMBER="254743706010"
+      OWNER_NUMBER="923184474176"
       SESSION_ID = "SESSION_85_23_59_01_kjgfgfclhj"
-      THUMB_IMAGE = "https://telegra.ph/file/751eef74109e0e5c8916c.jpg"
-      OWNER_NAME = "silva"
+      THUMB_IMAGE = "https://telegra.ph/file/d5b1c3544fedc23e11a06.jpg"
+      OWNER_NAME = "Suhail"
       PREFIX = .
-      WARN_COUNT = 5
-      DISABLE_PM = "true"
-      THEME= "Silva"
-      MODE = "private"
+      WARN_COUNT = 3
+      DISABLE_PM = "false"
+      THEME= "SUHAIL"
+      MODE = "public"
       ANTILINK_VALUES = "https://,chat.whatsapp.com"
       
       ```
@@ -60,7 +60,7 @@
  
 <h2 align="center">  NOTICE </h2>
 ---
-- *Silva-Md is not made by `WhatsApp Inc.` Sometimes or misusing the bot might `ban` your `WhatsApp account!`*
+- *Suhail-Md is not made by `WhatsApp Inc.` Sometimes or misusing the bot might `ban` your `WhatsApp account!`*
 - *In that case, I'm not responsible for banning your account.*
-- *Use Silva-Md at your own risk by keeping this warning in mind.*
+- *Use Suhail-Md at your own risk by keeping this warning in mind.*
  

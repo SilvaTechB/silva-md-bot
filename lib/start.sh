@@ -1,9 +1,5 @@
 while true
 do
-echo "Starting silva-md-bot!"
-node smd.js
+echo "Starting s-ilva!"
+node .
 done
-
-     
-   
-     
