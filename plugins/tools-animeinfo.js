@@ -10,7 +10,7 @@ let handler = async (m, { conn, text, usedPrefix }) => {
     let result = anime.data[0]
     let resultes = await translate(`${result.background}`, { to: 'en', autoCorrect: true })
     let resultes2 = await translate(`${result.synopsis}`, { to: 'hi', autoCorrect: true })
-    let AnimeInfo = `
+    let AnimeInfo = ` 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓
 🎀 • *Title:* ${result.title}
 🎋 • *Format:* ${result.type}
 📈 • *Status:* ${result.status.toUpperCase().replace(/\_/g, ' ')}
