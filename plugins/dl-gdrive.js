@@ -5,7 +5,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   try {
     let res = await fg.GDriveDl(args[0])
     await m.reply(`
-≡ *Google Drive DL*
+≡ *𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 Google Drive DL*
 
 ▢ *Number:* ${res.fileName}
 ▢ *Size:* ${res.fileSize}
