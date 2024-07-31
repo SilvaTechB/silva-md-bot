@@ -65,7 +65,7 @@ function _0x2d7d() {
     '138900SoPaMU',
     'command',
     '18WIBnHw',
-    '*GURU\x20BOT\x20EXTERNAL\x20PLUGINS*\x20\x0a\x0ahttps://github.com/Guru322/EXTERNAL-PLUGINS',
+    '*𝐒𝐈𝐋𝐕𝐀\x20BOT\x20EXTERNAL\x20PLUGINS*\x20\x0a\x0ahttps://github.com/SilvaTechB/EXTERNAL-PLUGINS',
     '286610EXPZvD',
     '252588xRdLJE',
     'help',
