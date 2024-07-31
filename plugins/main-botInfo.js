@@ -56,7 +56,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
 
   let infobt = `
 ≡ *INFO BOT*
-  
+  𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓
 *STATE*
 ▢ *${groupsIn.length}* GROUP CHATS
 ▢ *${groupsIn.length}* united groups
@@ -66,19 +66,19 @@ let handler = async (m, { conn, usedPrefix, command }) => {
 
 *≡ OWNER*
 ▢ Instagram :
-  • https://instagram.com/Lazack_28
+  • https://instagram.com/_its.silva
 ▢ GitHub :
-  • https://github.com/Lazack28 
+  • https://github.com/SilvaTechB
 ▢ YouTube : 
-  • https://youtube.com/@Lazack28
+  • https://youtube.com/@silva.edits6
 ▢ credit: 
-  • mr oreo
+  • mr xei & mr shizo
 
  *≡ S E R V E R*
 *🛑 RAM:* ${format(totalmem() - freemem())} / ${format(totalmem())}
 *🔵 FreeRAM:* ${format(freemem())}
 
-*≡  NodeJS memory*
+*≡𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 NodeJS memory*
 ${
   '```' +
   Object.keys(used)
