@@ -9,7 +9,7 @@ let handler = async (m, { conn, usedPrefix, command, args: [event], text }) => {
   ▢ promote
   ▢ demote
   └───────────
-  
+  𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓
   📌 Example :
   
   *${usedPrefix + command}* welcome @user`
