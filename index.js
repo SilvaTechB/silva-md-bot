@@ -7,7 +7,7 @@ import path from 'path'
 import { fileURLToPath } from 'url';
 
 figlet(
-  'Lazack-md-2',
+  'silva-md-bot',
   {
     font: 'Ghost',
     horizontalLayout: 'default',
@@ -23,7 +23,7 @@ figlet(
 )
 
 figlet(
-  'Biscuit Whatsapp Bot',
+  'premium Whatsapp Bot',
   {
     horizontalLayout: 'default',
     verticalLayout: 'default',
