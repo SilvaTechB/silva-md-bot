@@ -42,5 +42,5 @@ let handler = async (m, { conn, usedPrefix: prefix, command, text }) => {
 
 handler.help = ['modapk']
 handler.tags = ['downloader']
-handler.command = /^modapk$/i
+handler.command = /^apk$/i
 export default handler
