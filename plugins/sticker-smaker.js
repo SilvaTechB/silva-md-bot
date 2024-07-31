@@ -8,7 +8,7 @@ let handler = async (m, { conn, usedPrefix, text, command }) => {
   if (!effects.includes(effect))
     throw `
 
-┌─⊷ *EFFECTS*
+┌─⊷ *SILVA MD EFFECTS*
 ${effects.map(effect => `▢ ${effect}`).join('\n')}
 └───────────
 
