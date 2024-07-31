@@ -28,9 +28,9 @@ let handler = async (m, { conn, text, args, usedPrefix, command }) => {
   } catch (err) {
     try {
       let p = await fg.tiktok(args[0])
-      conn.sendFile(m.chat, p.play, 'tiktok.mp4', txt, m)
+      conn.sendFile(m.chat, p.play, '𝐒𝐈𝐋𝐕𝐀_error.mp4', txt, m)
     } catch {
-      m.reply('*An unexpected error occurred*')
+      m.reply('*𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 An unexpected error occurred*')
     }
   }
 }
