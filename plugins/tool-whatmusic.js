@@ -18,7 +18,7 @@ let handler = async m => {
     if (code !== 0) throw msg
     let { title, artists, album, genres, release_date } = res.metadata.music[0]
     let txt = `
-𝚁𝙴𝚂𝚄𝙻𝚃
+𝚁𝙴𝚂𝚄𝙻𝚃 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓
 • 📌 *TITLE*: ${title}
 • 👨‍🎤 𝙰𝚁𝚃𝙸𝚂𝚃: ${artists !== undefined ? artists.map(v => v.name).join(', ') : 'NOT FOUND'}
 • 💾 𝙰𝙻𝙱𝚄𝙼: ${album.name || 'NOT FOUND'}
