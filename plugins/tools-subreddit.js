@@ -14,7 +14,7 @@ let subredditHandler = async (m, { conn, text }) => {
 
     console.log('JSON response:', json)
 
-    let subredditInfo = `*Subreddit Information:*\n
+    let subredditInfo = `*𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 Subreddit Information:*\n
      • *Name:* ${json.name}\n
      • *Title:* ${json.title}\n
      • *Active Users:* ${json.active_users}\n
