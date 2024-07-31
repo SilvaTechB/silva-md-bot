@@ -20,7 +20,7 @@ if (!text && !m.quoted) return m.reply("Where is Infos")
                 conn.copyNForward(get[i], m.getQuotedObj(), false);
             } else if (text && m.quoted) {
                 conn.sendMessage(get[i], {
-                    text: text + "\n" + m.quoted.text + "\n\nAdvertise by Lazack"
+                    text: text + "\n" + m.quoted.text + "\n\nAdvertise by 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓"
                 });
             }
             count--;
