@@ -1,0 +1,35 @@
+{
+  "name": "LAZACK MD V2",
+  "description": "WhatsApp Bot Base using Baileys. Written in javascript",
+  "keywords": [
+    "whatsapp bot",
+    "ShizoBot",
+    "WaBot",
+    "oreo-bot",
+    "Termux-WaBot",
+    "WaBot-Base"
+  ],
+"env": {
+      "PREFIX": {
+      "description": "put any one symbol here except @ and + , leave it Blank if you want to use multiple prefix",
+      "required": false,
+      "value": ""
+    },
+"OWNER_NAME": {
+      "description": "owner name of the bot or Your Name",
+      "required": false,
+      "value": ""
+}
+    },
+ "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    },
+    {
+      "url": "https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest"
+    },
+    {
+      "url": "https://github.com/clhuang/heroku-buildpack-webp-binaries.git"
+    }
+  ]
+}
