@@ -220,7 +220,7 @@ let handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, isR
       if (!/[01]/.test(command))
         return m.reply(`
 ≡ List of options
-
+𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓
 ◈──『 *ADMIN*』───⳹
 ⛊ welcome
 ⛊ antilink
@@ -231,6 +231,7 @@ let handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, isR
 ⛊ antispam
 ⛊ antitoxic
 ╰──────────⳹ 
+𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 
 ◈──『 *USERS*』───⳹
 ⛊ autolevelup
 ⛊ chatbot 
@@ -241,6 +242,7 @@ let handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, isR
 ⛊ autotype
 ⛊ autobio
 ╰──────────⳹
+𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓
 *📌 Example :*
 *${usedPrefix}on* welcome
 *${usedPrefix}off* welcome
