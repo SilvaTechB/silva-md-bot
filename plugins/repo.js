@@ -3,15 +3,15 @@ import { join } from 'path';
 import axios from 'axios'; 
 
 let handler = async function (m, { conn, __dirname }) {
-const githubRepoURL = 'https://github.com/Lazack28/Lazack-md';
+const githubRepoURL = 'https://github.com/SilvaTechB/silva-md-bot';
   try {
 const [, username, repoName] = githubRepoURL.match(/github\.com\/([^/]+)\/([^/]+)/);
 const response = await axios.get(`https://api.github.com/repos/${username}/${repoName}`);
 if (response.status === 200) {
 const repoData = response.data;
 const formattedInfo = `
-🍪 𝐋𝐀𝐙𝐀𝐂𝐊-𝐌𝐃 🍪
-*A Fully Featured WhatsApp Bot Loaded with Features 🎊*
+🍑🍆𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓💦☣
+*This is a Horny WhatsApp Bot Loaded with Features 🎊*
 𝖲𝖳𝖠𝖱✨ :: ${repoData.stargazers_count}
 𝖥𝖮𝖱𝖪 🍽️ :: ${repoData.forks_count}
 𝖴𝖱𝖫 👻 :: ${repoData.html_url}
@@ -23,9 +23,9 @@ effectively.
 *Interactive Features::* 𝙶𝚊𝚖𝚎𝚜, 𝚝𝚛𝚒𝚟𝚒𝚊, 𝚊𝚗𝚍 𝚖𝚘𝚛𝚎 𝚏𝚞𝚗. 
 *Custom Commands::* 𝙲𝚛𝚎𝚊𝚝𝚎 𝚊𝚗𝚍 𝚍𝚎𝚙𝚕𝚘𝚢 𝚢𝚘𝚞𝚛 𝚘𝚠𝚗 𝚌𝚘𝚖𝚖𝚊𝚗𝚍𝚜.
 
-*_DEPLOY NOW_*
+*_DEPLOY 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 NOW_*
 
-\`\`\`Enhance your WhatsApp experience with 𝐋𝐀𝐙𝐀𝐂𝐊-𝐌𝐃 ! 🍪\`\`\`
+\`\`\`Enhance your WhatsApp experience with 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓💥\`\`\`
         `.trim();
         
       await conn.relayMessage(m.chat,  {
@@ -51,6 +51,6 @@ effectively.
 };
 handler.help = ['script'];
 handler.tags = ['main'];
-handler.command = ['sc', 'repo', 'script', 'code'];
+handler.command = ['sc', 'repo', 'script', 'code', 'silva'];
 
 export default handler;
