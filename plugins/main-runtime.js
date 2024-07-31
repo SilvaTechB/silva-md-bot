@@ -51,7 +51,7 @@ let handler = async (m, { conn, isRowner}) => {
 
   await conn.sendMessage(m.chat, {
           react: {
-            text: `⏱️`,
+            text: `💦`,
             key: m.key,
           }})
   let neww = performance.now()
@@ -73,5 +73,5 @@ function clockString(ms) {
   let h = isNaN(ms) ? '--' : Math.floor(ms / 3600000) % 24
   let m = isNaN(ms) ? '--' : Math.floor(ms / 60000) % 60
   let s = isNaN(ms) ? '--' : Math.floor(ms / 1000) % 60
-  return [d, '𝐋𝐀𝐙𝐀𝐂𝐊-𝐌𝐃 running time\n *Days ☀️*\n ', h, ' *Hours 🕐*\n ', m, ' *Minute ⏰*\n ', s, ' *Second ⏱️* '].map(v => v.toString().padStart(2, 0)).join('')
+  return [d, '𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 running time\n *Days ☀️*\n ', h, ' *Hours 🕐*\n ', m, ' *Minute ⏰*\n ', s, ' *Second ⏱️* '].map(v => v.toString().padStart(2, 0)).join('')
 }
