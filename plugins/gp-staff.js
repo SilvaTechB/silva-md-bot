@@ -10,7 +10,7 @@ let handler = async (m, { conn, participants, groupMetadata, args }) => {
 
   let text = `
 ≡ *GROUP ADMINS* _${groupMetadata.subject}_
-
+𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓
 ┌─⊷ *ADMINS*
 ▢ ${listAdmin}
 └───────────
