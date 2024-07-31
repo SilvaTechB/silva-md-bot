@@ -138,7 +138,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
 	}
 };
 handler.help = ['hd', 'hdr', 'unblur', 'remblur', 'colorize', 'colorizer', 'enhance', 'enhancer','dehaze','recolor' ,'enhance']
-handler.tags = ["image", "maker"];
+handler.tags = ["image", "maker", "img"];
 handler.command = ['hd', 'hdr', 'unblur', 'remblur', 'colorize', 'colorizer', 'enhance', 'enhancer','dehaze','recolor' ,'enhance']
 export default handler;
       
