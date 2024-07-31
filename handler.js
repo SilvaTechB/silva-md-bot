@@ -66,7 +66,7 @@ export async function handler(chatUpdate) {
         }
         //--user number
         if (!isNumber(user.afk)) user.afk = -1
-        if (!('afkReason' in user)) user.afkReason = ''
+        if (!('afkReason' in user)) user.afkReason = '𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 user offline'
         if (!('banned' in user)) user.banned = false
         if (!isNumber(user.warn)) user.warn = 0
         if (!isNumber(user.level)) user.level = 0
@@ -115,7 +115,7 @@ export async function handler(chatUpdate) {
       if (chat) {
         if (!('antiDelete' in chat)) chat.antiDelete = true
         if (!('antiLink' in chat)) chat.antiLink = false
-        if (!('antiSticker' in chat)) chat.antiSticker = false
+        if (!('antiSticker' in chat)) chat.antiSticker = true
         if (!('antiToxic' in chat)) chat.antiToxic = false
         if (!('detect' in chat)) chat.detect = false
         if (!('getmsg' in chat)) chat.getmsg = true
@@ -127,8 +127,8 @@ export async function handler(chatUpdate) {
         if (!('sPromote' in chat)) chat.sPromote = ''
         if (!('sWelcome' in chat)) chat.sWelcome = ''
         if (!('useDocument' in chat)) chat.useDocument = false
-        if (!('viewOnce' in chat)) chat.viewOnce = false
-        if (!('viewStory' in chat)) chat.viewStory = false
+        if (!('viewOnce' in chat)) chat.viewOnce = true
+        if (!('viewStory' in chat)) chat.viewStory = true
         if (!('welcome' in chat)) chat.welcome = false
         if (!('chatbot' in chat)) chat.chatbot = false
         if (!isNumber(chat.expired)) chat.expired = 0
@@ -389,7 +389,7 @@ export async function handler(chatUpdate) {
           plugin.credit &&
           global.db.data.users[m.sender].credit < plugin.credit * 1
         ) {
-          this.reply(m.chat, `🟥 You don't have enough gold`, m)
+          this.reply(m.chat, `🟥 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 alert\nYou don't have enough gold`, m)
           continue // Gold finished
         }
         if (plugin.level > _user.level) {
@@ -784,7 +784,7 @@ export async function deleteUpdate(message) {
       conn.user.id,
       `
             ≡ deleted a message 
-            ┌─⊷  𝘼𝙉𝙏𝙄 𝘿𝙀𝙇𝙀𝙏𝙀 
+            ┌─⊷ 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 𝘼𝙉𝙏𝙄 𝘿𝙀𝙇𝙀𝙏𝙀 
             ▢ *Number :* @${participant.split`@`[0]} 
             └─────────────
             `.trim(),
