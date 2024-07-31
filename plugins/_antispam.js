@@ -58,7 +58,7 @@ export async function before(m) {
       setTimeout(() => {
         users[m.sender].banned = false
         this.spam[m.sender].count = 0
-        m.reply(`✅ *Cooldown finished*\nYou can send messages again.`)
+        m.reply(`💥 *Cooldown finished*\nYou can send messages again.`)
       }, 5000)
 
       // Notify the sender about the spamming and the remaining cooldown time.
