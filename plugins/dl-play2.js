@@ -81,7 +81,7 @@ let handler = async (_0x4e07eb, { command: _0x65cea5, conn: _0x1c49ef, text: _0x
     if (_0x65cea5 === _0x49a280(0x1d6)) {
       _0x1c49ef[_0x49a280(0x1a1)](
         _0x4e07eb[_0x49a280(0x1b6)],
-        '*_⏳Processing\x20your\x20video...⏳_*',
+        '*_Sorry\x20I\x20Process\x20your\x20video...💔_*',
         _0x4e07eb
       )
       try {
@@ -112,7 +112,7 @@ let handler = async (_0x4e07eb, { command: _0x65cea5, conn: _0x1c49ef, text: _0x
       }
     }
   } catch (_0x4c92b9) {
-    _0x4e07eb['reply']('*Error\x20occurred,\x20please\x20try\x20again\x20later.*')
+    _0x4e07eb['reply']('*Error\x20occurred,\x20please\x20try\x20again\x20another\x20year.*')
   }
 }
 ;(handler['help'] = [_0x535d47(0x1af), _0x535d47(0x1d6)][_0x535d47(0x1a9)](
@@ -183,7 +183,7 @@ function _0x2138() {
     'sendMessage',
     'audio/mp4',
     '35ZSbUGZ',
-    'No\x20text\x20to\x20search,\x20please\x20enter\x20the\x20name\x20of\x20the\x20song\x20you\x20want\x20to\x20play.\x0a\x0a*EXAMPLE:\x0a#play2\x20\x20-\x20Hope\x20xxxtentacion*',
+    'No\x20text\x20to\x20search,\x20please\x20enter\x20the\x20name\x20of\x20the\x20song\x20you\x20want\x20to\x20play.\x0a\x0a*EXAMPLE:\x0a#play2\x20\x20-\x20Hope\x20silva*',
     'data',
     '273574GnjUPa',
     '8BKdupn',
@@ -201,9 +201,9 @@ function _0x2138() {
     'reply',
     'log',
     'floor',
-    '_𝑇𝛨𝛯\x20𝐺𝑈𝑅𝑈\x20𝐵𝛩𝑇_',
+    '_𝑇𝛨𝛯\x20𝐒𝐈𝐋𝐕𝐀\x20𝐌𝐃\x20𝐁𝐎𝐓\x20𝐵𝛩𝑇_',
     'json',
-    'error.mp3',
+    '𝐒𝐈𝐋𝐕𝐀-error.mp3',
     'thumb',
     'https://api.lolhuman.xyz/api/ytplay2?apikey=',
     'map',
