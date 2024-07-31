@@ -368,7 +368,7 @@ async function connectionUpdate(update) {
   if (connection === 'open') {
     const { jid, name } = conn.user
 
-    let msgf = `Hai🤩${name} Congrats you have successfully deployed 𝐋𝐀𝐙𝐀𝐂𝐊-𝐌𝐃\nJoin my support Group for any Query\nhttps://whatsapp.com/channel/0029VaFytPbAojYm7RIs6l1x`
+    let msgf = `Hello🤩${name} Congrats you have successfully deployed 𝕤𝕚𝕝𝕧𝕒-𝕧𝟝\nJoin the 𝕤𝕚𝕝𝕧𝕒-𝕧𝟝 channel for updates\nhttps://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v\nMUCH LOVE FROM SILVA TECH INC\nfor any query contact\n254743706010\n254700143167`
 
     let gmes = conn.sendMessage(
       jid,
