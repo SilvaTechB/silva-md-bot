@@ -6,7 +6,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender
   let name = await conn.getName(who)
   let totalf = Object.values(global.plugins).filter(v => v.help && v.tags).length
-  let txt = `*乂  B O T  -  F E A T U R E*\n\n`
+  let txt = `*乂𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓   -  F E A T U R E*\n\n`
   txt += `	◦  *Total* : ${totalf}\n`
   txt += author
   await conn.relayMessage(
