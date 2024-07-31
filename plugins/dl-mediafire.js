@@ -15,7 +15,7 @@ let handler = async (m, { conn, args, usedPrefix, command, isOwner, isPrems }) =
   let { url, url2, filename, ext, aploud, filesize, filesizeH } = res
   let isLimit = (isPrems || isOwner ? limit : limit) * 1012 < filesize
   let caption = `
-   ≡ *MEDIAFIRE*
+   ≡ *𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 MEDIAFIRE*
 
 ▢ *Number:* ${filename}
 ▢ *Size:* ${filesizeH}
