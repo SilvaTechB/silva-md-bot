@@ -30,7 +30,7 @@ let handler = async (m, { text, usedPrefix, command }) => {
 
       // Write the Gist file content to the plugin file
       await fs.promises.writeFile(pluginPath, file.content)
-      m.reply(`successfully installed the plugin to Guru Bot`)
+      m.reply(`successfully installed the plugin to 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓`)
     }
   } catch (error) {
     throw `Error fetching or saving the plugin: ${error.message}`
