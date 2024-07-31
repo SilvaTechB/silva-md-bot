@@ -9,17 +9,19 @@ import moment from 'moment-timezone'
 let totalf = Object.values(global.plugins).filter(v => v.help && v.tags).length
 let tags = { 'main': 'Main' }
 const defaultMenu = {
-  before: `┏━━━ ❮❮ 𝙼𝙴𝙽𝚄 ❯❯
-┃🇹🇿 *𝙽𝚊𝚖𝚎:* ${global.author}
-┃🇹🇿 *𝚃𝚘𝚝𝚊𝚕:* ${totalf} + Features
-┃🇹🇿 *𝚅𝚎𝚛𝚜𝚒𝚘𝚗:* V-02
-┃🇹🇿 *𝙿𝚛𝚎𝚏𝚒𝚡:* Any Prefix
-┃🇹🇿 *𝙾𝚠𝚗𝚎𝚛:* Lazack28 
-┃🇹🇿 *𝙿𝚕𝚊𝚝𝚏𝚘𝚛𝚖:* Heroku
+  before: `┏━━━━━━⊱ 𝑺𝑰𝑳𝑽𝑨 𝑩𝑶𝑻 ⊰━━━━━━
+┏━━━ ❮❮ 𝙼𝙴𝙽𝚄 ❯❯
+┃💘 *𝙽𝚊𝚖𝚎:* ${global.author}
+┃💦 *𝚃𝚘𝚝𝚊𝚕:* ${totalf} + Features
+┃💥 *𝚅𝚎𝚛𝚜𝚒𝚘𝚗:* LTE
+┃🍆 *𝙿𝚛𝚎𝚏𝚒𝚡:* Any Prefix
+┃💋 *Developer:* S͛I͛L͛V͛A͛ B͛O͛T͛
+┃🍑 *𝙿𝚕𝚊𝚝𝚏𝚘𝚛𝚖:* HEROKU
 ┖─────────┈┈┈〠⸙࿉༐
+─═✧✧═─ 𝕊𝕀𝕃𝕍𝔸 𝔹𝕆𝕋 ─═✧✧═─
     %readmore`.trimStart(),
   header: '┏━━━━ ❨ *%category* ❩ ━━┄┈ •⟅ ',
-  body: ' ┃🕸️ %cmd',
+  body: ' ┃☣ %cmd',
   footer: '┗━═┅┅┅┅═━–––––––๑\n',
   after: `*Made by ♡ ${global.oname}*`,
 }
@@ -117,7 +119,7 @@ let handler = async (m, { conn, usedPrefix: _p, __dirname }) => {
     const pp = await conn.profilePictureUrl(conn.user.jid).catch(_ => './media/contact.png')
 
     // Sending the menu
-    conn.sendButton(m.chat, text.replace(), author, pp, [['BOT MENU 🤖', '.botmenu'], ['OWNER MENU 🦉', '.ownermenu'], ['FUN MENU 😂', '.funmenu'], ['LAZACK SPEED 🛫', '.ping']], null, [['SOCIAL 📶', smlink]], m)
+    conn.sendButton(m.chat, text.replace(), author, pp, [['BOT MENU 🤖', '.botmenu'], ['OWNER MENU 🦉', '.ownermenu'], ['FUN MENU 😂', '.funmenu'], ['SILVA SPEED 🛫', '.ping']], null, [['SOCIAL 📶', smlink]], m)
     
   } catch (e) {
     conn.reply(m.chat, 'ERROR IN MENU', m)
