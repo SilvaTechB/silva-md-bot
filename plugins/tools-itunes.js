@@ -14,7 +14,7 @@ let itunesHandler = async (m, { conn, text }) => {
 
     console.log('JSON response:', json)
 
-    let songInfo = `*Song Information:*\n
+    let songInfo = `*𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 Song Information:*\n
      • *Name:* ${json.name}\n
      • *Artist:* ${json.artist}\n
      • *Album:* ${json.album}\n
