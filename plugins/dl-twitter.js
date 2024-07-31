@@ -6,7 +6,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   try {
     let { SD, HD, desc, thumb, audio } = await fg.twitter(args[0])
     let te = ` 
-┌─⊷ *TWITTER DL*
+┌─⊷ *𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 TWITTER DL*
 ▢ Description: ${desc}
 └───────────`
     conn.sendFile(m.chat, HD, 'twitter.mp4', te, m)
