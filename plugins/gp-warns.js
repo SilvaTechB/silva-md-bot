@@ -11,7 +11,7 @@ let handler = async (m, { conn, args, groupMetadata }) => {
   let name = conn.getName(who)
   m.reply(`
  *WARNINGS*
-
+𝐒𝐈𝐋𝐕𝐀 𝐌𝐃
 ▢ *Name :* ${name} 
 ▢ *Warns :* ${warn}`)
 }
