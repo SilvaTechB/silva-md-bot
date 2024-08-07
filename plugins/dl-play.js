@@ -22,7 +22,7 @@ let handler = async (m, { conn, command, text, usedPrefix }) => {
     const { title, url, thumbnail } = result;
 
     const captvid = '*FOLLOW 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 support CHANNEL, and just few second i will send THE SONG YOU REQUESTED*';
-    const sourceUrl = "https://chat.whatsapp.com/IIpL6gf6dcq4ial8gaJLE9";
+    const sourceUrl = "https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v";
 
     conn.reply(m.chat, captvid, m, {
       contextInfo: {
