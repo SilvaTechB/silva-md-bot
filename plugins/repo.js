@@ -42,11 +42,11 @@ effectively.
           }}}}}}, {})
           
     } else {
-      await conn.reply(m.chat, 'Unable to fetch repository information.', m);
+      await conn.reply(m.chat, '🍑🍆𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓💦☣Unable to fetch repository information.Get silva md via original Repo https://github.com/SilvaTechB/silva-md-bot', m);
     }
   } catch (error) {
     console.error(error);
-    await conn.reply(m.chat, 'An error occurred while fetching repository information.', m);
+    await conn.reply(m.chat, '🍑🍆𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓💦☣An error occurred while fetching repository information.Get silva md via original Repo https://github.com/SilvaTechB/silva-md-bot', m);
   }
 };
 handler.help = ['script'];
