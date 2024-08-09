@@ -64,7 +64,7 @@ try {
 }
 
 }
-handler.help = ['play']
+handler.help = ['music']
 handler.tags = ['downloader']
 handler.command = ['audio', 'video']
 
