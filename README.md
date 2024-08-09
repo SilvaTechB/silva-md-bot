@@ -74,6 +74,8 @@
 
 <details>
 <summary>UPLOAD YOUR CREDS.JSON FILE</summary>
+<a href='https://github.com/SilvaTechB/silva-md-bot/tree/main/Authenticators' target="_blank"><img alt='UPLOAD CREDS.JSON' src='https://img.shields.io/badge/UPLOAD_CREDS.JSON-100000?style=for-the-badge&logo=scan&logoColor=white&labelColor=black&color=red'/></a>
+
 Then **[Upload](https://github.com/SilvaTechB/silva-md-bot/tree/main/Authenticators)** your creds.json file in the **[session folder](https://github.com/SilvaTechB/silva-md-bot/tree/main/Authenticators)**
 
 ### DELETE THE EXISTING CREDS.JSON FILE
