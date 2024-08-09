@@ -1,4 +1,4 @@
-# THE NEW LOOK OF SILVA MD BOT FROM THE SILVA V SERIES
+### THE NEW LOOK OF SILVA MD BOT FROM THE SILVA V SERIES
 
 <p align="center">
   <a href="https://github.com/DenverCoder1/readme-typing-svg">
@@ -64,7 +64,22 @@
 
 1. PAIRING
     <br>
+<details>
+<summary>GET YOUR SESSION_FILE</summary>
 <a href='https://cred-session.onrender.com/pair' target="_blank"><img alt='PAIR CODE' src='https://img.shields.io/badge/Pair_code-100000?style=for-the-badge&logo=scan&logoColor=white&labelColor=black&color=blue'/></a>
+
+</details>
+
+**OR**
+
+<details>
+<summary>UPLOAD YOUR CREDS.JSON FILE</summary>
+
+</details>
+
+- Then **[Upload](https://github.com/SilvaTechB/silva-md-bot/tree/main/Auth)** your creds.json file in the **[session folder](https://github.com/sion)**
+
+<a><img src='https://i.imgur.com/LyHic3i.gif'/></a>
 
 #### DEPLOY TO HEROKU 
 
