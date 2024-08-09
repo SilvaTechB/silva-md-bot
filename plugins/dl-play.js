@@ -83,8 +83,10 @@ let handler = async (m, { conn, command, text, usedPrefix }) => {
 
 handler.help = ['play'].map((v) => v + ' <query>');
 handler.tags = ['downloader'];
-handler.command = /^play$/i;
+handler.command = ['play', 'song']
 
 handler.exp = 0;
 
 export default handler;
+
+
