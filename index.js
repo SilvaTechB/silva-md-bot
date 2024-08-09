@@ -108,7 +108,7 @@ async function start(file) {
     console.log(chalk.yellow(`Installed ${files.length} plugins`))
 
     try {
-      const { default: baileys } = await import('@whiskeysockets/baileys')
+      const { default: baileys } = await import('@shizodevs/shizoweb')
       const version = (await baileys.fetchLatestBaileysVersion()).version
       console.log(chalk.yellow(`Using Baileys version ${version}`))
     } catch (e) {
