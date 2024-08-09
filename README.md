@@ -74,9 +74,9 @@
 
 <details>
 <summary>UPLOAD YOUR CREDS.JSON FILE</summary>
-<a>Then **[Upload](https://github.com/SilvaTechB/silva-md-bot/tree/main/Authenticators)** your creds.json file in the **[session folder](https://github.com/SilvaTechB/silva-md-bot/tree/main/Authenticators)**
+Then **[Upload](https://github.com/SilvaTechB/silva-md-bot/tree/main/Authenticators)** your creds.json file in the **[session folder](https://github.com/SilvaTechB/silva-md-bot/tree/main/Authenticators)**
 
-### DELETE THE EXISTING CREDS.JSON FILE</a>
+### DELETE THE EXISTING CREDS.JSON FILE
 </details>
 
 <a><img src='https://i.imgur.com/LyHic3i.gif'/></a>
