@@ -70,14 +70,16 @@
 
 </details>
 
-**OR**
+
 
 <details>
-<summary>UPLOAD YOUR CREDS.JSON FILE</summary>
+UPLOAD YOUR CREDS.JSON FILE
 
 </details>
 
-- Then **[Upload](https://github.com/SilvaTechB/silva-md-bot/tree/main/Auth)** your creds.json file in the **[session folder](https://github.com/sion)**
+- Then **[Upload](https://github.com/SilvaTechB/silva-md-bot/tree/main/Authenticators)** your creds.json file in the **[session folder](https://github.com/SilvaTechB/silva-md-bot/tree/main/Authenticators)**
+
+### DELETE THE EXISTING CREDS.JSON FILE
 
 <a><img src='https://i.imgur.com/LyHic3i.gif'/></a>
 
