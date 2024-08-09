@@ -368,7 +368,7 @@ async function connectionUpdate(update) {
   if (connection === 'open') {
     const { jid, name } = conn.user
 
-    let msgf = `Hello🤩${name} Congrats you have successfully deployed 𝕤𝕚𝕝𝕧𝕒-𝕧𝟝\nJoin the 𝕤𝕚𝕝𝕧𝕒-𝕧𝟝 channel for updates\nhttps://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v\nMUCH LOVE FROM SILVA TECH INC\nfor any query contact\n254743706010\n254700143167`
+    let msgf = `Hello🤩${name} Congrats you have successfully deployed 𝕤𝕚𝕝𝕧𝕒-𝕧𝟝\nJoin the 𝕤𝕚𝕝𝕧𝕒-𝕧𝟝 channel for updates\nhttps://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v\nMUCH LOVE FROM SILVA TECH INC\nfor any query contact\n254743706010\n254700143167\n\n🍑🍆𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓💦☣\n*This is a Horny WhatsApp Bot Loaded with Features 🎊*\n𝖲𝖳𝖠𝖱✨ :: ${repoData.stargazers_count}\n𝖥𝖮𝖱𝖪 🍽️ :: ${repoData.forks_count}\n𝖴𝖱𝖫 👻 :: ${repoData.html_url}\n*Automated Messaging:* 𝙲𝚞𝚜𝚝𝚘𝚖 𝚛𝚎𝚜𝚙𝚘𝚗𝚜𝚎𝚜 𝚏𝚘𝚛 𝚟𝚊𝚛𝚒𝚘𝚞𝚜 𝚝𝚛𝚒𝚐𝚐𝚎𝚛𝚜.\n*Media Sharing ::* 𝙴𝚊𝚜𝚒𝚕𝚢 𝚜𝚑𝚊𝚛𝚎 𝚒𝚖𝚊𝚐𝚎𝚜, 𝚟𝚒𝚍𝚎𝚘𝚜, 𝚊𝚗𝚍 𝚏𝚒𝚕𝚎𝚜.\n*Chat Management ::* 𝚃𝚘𝚘𝚕𝚜 𝚝𝚘 𝚖𝚊𝚗𝚊𝚐𝚎 𝚌𝚑𝚊𝚝𝚜 effectively.\n*Interactive Features::* 𝙶𝚊𝚖𝚎𝚜, 𝚝𝚛𝚒𝚟𝚒𝚊, 𝚊𝚗𝚍 𝚖𝚘𝚛𝚎 𝚏𝚞𝚗.\n*Custom Commands::* 𝙲𝚛𝚎𝚊𝚝𝚎 𝚊𝚗𝚍 𝚍𝚎𝚙𝚕𝚘𝚢 𝚢𝚘𝚞𝚛 𝚘𝚠𝚗 𝚌𝚘𝚖𝚖𝚊𝚗𝚍𝚜.\n\n*_THANK YOU FOR DEPLOYING 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 NOW_*\n\nEnhance your WhatsApp experience with 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓💥`
 
     let gmes = conn.sendMessage(
       jid,
