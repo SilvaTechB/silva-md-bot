@@ -1,4 +1,4 @@
-### THE NEW LOOK OF SILVA MD BOT FROM THE SILVA V SERIES
+THE NEW LOOK OF SILVA MD BOT FROM THE SILVA V SERIES
 
 <p align="center">
   <a href="https://github.com/DenverCoder1/readme-typing-svg">
@@ -73,13 +73,13 @@
 
 
 <details>
-UPLOAD YOUR CREDS.JSON FILE
+<summary>UPLOAD YOUR CREDS.JSON FILE</summary>
 
-</details>
 
 - Then **[Upload](https://github.com/SilvaTechB/silva-md-bot/tree/main/Authenticators)** your creds.json file in the **[session folder](https://github.com/SilvaTechB/silva-md-bot/tree/main/Authenticators)**
 
 ### DELETE THE EXISTING CREDS.JSON FILE
+</details>
 
 <a><img src='https://i.imgur.com/LyHic3i.gif'/></a>
 
