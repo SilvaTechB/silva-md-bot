@@ -1,4 +1,4 @@
-import fs from 'fs'
+//import fs from 'fs'
 import acrcloud from 'acrcloud'
 let acr = new acrcloud({
 host: 'identify-eu-west-1.acrcloud.com',
@@ -33,4 +33,4 @@ m.reply(txt)
 handler.help = ['shazam']
 handler.tags = ['tools']
 handler.command = /^quemusica|shazam|whatmusic|find$/i
-export default handler
+export default handler)//
