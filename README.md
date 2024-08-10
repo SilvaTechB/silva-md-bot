@@ -91,7 +91,7 @@ Then **[Upload](https://github.com/SilvaTechB/silva-md-bot/tree/main/Authenticat
 
 3. Now Deploy
     <br>
-<a href='https://dashboard.heroku.com/new?template=https://github.com/SilvaTechB/s-ilva' target="_blank"><img alt='DEPLOY' src='https://img.shields.io/badge/-DEPLOY-purple?style=for-the-badge&logo=heroku&logoColor=white'/></a>
+<a href='https://dashboard.heroku.com/new?template=https://github.com/SilvaTechB/silva-md-bot' target="_blank"><img alt='DEPLOY' src='https://img.shields.io/badge/-DEPLOY-purple?style=for-the-badge&logo=heroku&logoColor=white'/></a>
 ##
 #### DEPLOY TO KOYEB 
 
