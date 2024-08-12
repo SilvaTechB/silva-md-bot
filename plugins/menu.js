@@ -11,7 +11,7 @@ let tags = { 'main': 'Main' }
 const defaultMenu = {
   before: `┏━━━━━━⊱ 𝑺𝑰𝑳𝑽𝑨 𝑩𝑶𝑻 ⊰━━━━━━
 ┏━━━ ❮❮ 𝙼𝙴𝙽𝚄 ❯❯
-┃💘 *𝙽𝚊𝚖𝚎:* ${global.author}
+┃💘 *User:* ${global.author}
 ┃💦 *𝚃𝚘𝚝𝚊𝚕:* ${totalf} + Features
 ┃💥 *𝚅𝚎𝚛𝚜𝚒𝚘𝚗:* LTE
 ┃🍆 *𝙿𝚛𝚎𝚏𝚒𝚡:* Any Prefix
@@ -119,8 +119,8 @@ let handler = async (m, { conn, usedPrefix: _p, __dirname }) => {
     const pp = await conn.profilePictureUrl(conn.user.jid).catch(_ => './media/contact.png')
 
     // Sending the menu
-    conn.sendButton(m.chat, text.replace(), author, pp, [['BOT MENU 🤖', '.botmenu'], ['OWNER MENU 🦉', '.ownermenu'], ['FUN MENU 😂', '.funmenu'], ['SILVA SPEED 🛫', '.ping']], null, [['SOCIAL 📶', smlink]], m)
-    
+    conn.sendButton(m.chat, text.replace(), author, pp, [['Bot menu 🤖', '.botmenu'],['Owner or silva⚡', '.owner'], ['Owner menu 🦉', '.ownermenu'], ['Fun menu😂', '.funmenu'], ['Bot speed 🛫', '.ping']]]], null, [['SOCIAL 📶', smlink], ['Join Group 🥰', gclink], ['WA CHANNEL😘', chlink]]], m)
+
   } catch (e) {
     conn.reply(m.chat, 'ERROR IN MENU', m)
     throw e
