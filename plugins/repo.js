@@ -16,12 +16,12 @@ const formattedInfo = `
 𝖥𝖮𝖱𝖪 🍽️ :: ${repoData.forks_count}
 𝖴𝖱𝖫 👻 :: ${repoData.html_url}
 \`🚀 Key Features\`
-*Automated Messaging:* 𝙲𝚞𝚜𝚝𝚘𝚖 𝚛𝚎𝚜𝚙𝚘𝚗𝚜𝚎𝚜 𝚏𝚘𝚛 𝚟𝚊𝚛𝚒𝚘𝚞𝚜 𝚝𝚛𝚒𝚐𝚐𝚎𝚛𝚜.
-*Media Sharing ::* 𝙴𝚊𝚜𝚒𝚕𝚢 𝚜𝚑𝚊𝚛𝚎 𝚒𝚖𝚊𝚐𝚎𝚜, 𝚟𝚒𝚍𝚎𝚘𝚜, 𝚊𝚗𝚍 𝚏𝚒𝚕𝚎𝚜.
-*Chat Management ::* 𝚃𝚘𝚘𝚕𝚜 𝚝𝚘 𝚖𝚊𝚗𝚊𝚐𝚎 𝚌𝚑𝚊𝚝𝚜
-effectively.
-*Interactive Features::* 𝙶𝚊𝚖𝚎𝚜, 𝚝𝚛𝚒𝚟𝚒𝚊, 𝚊𝚗𝚍 𝚖𝚘𝚛𝚎 𝚏𝚞𝚗. 
-*Custom Commands::* 𝙲𝚛𝚎𝚊𝚝𝚎 𝚊𝚗𝚍 𝚍𝚎𝚙𝚕𝚘𝚢 𝚢𝚘𝚞𝚛 𝚘𝚠𝚗 𝚌𝚘𝚖𝚖𝚊𝚗𝚍𝚜.
+*Automated Messaging:*
+*Media Sharing ::*
+*Chat Management :*
+*Interactive Features::*
+*Custom Commands::*.
+> Trying to make it a usee friendly bot
 
 *_DEPLOY 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 NOW_*
 
