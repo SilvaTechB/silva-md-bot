@@ -20,6 +20,7 @@ global.bname = botname
 //Extra Shortcuts
 global.smlink = process.env.SOCIAL_MEDIA_LINK || 'https://github.com/SilvaTechB'
 global.gclink = process.env.GROUP_LINK || 'https://chat.whatsapp.com/Jjj2lYrtGHc5WY2rUmC6JD'
+global.chlink = process.env.CHANNEL_LINK || 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v'
  
 //Apikeys
 global.shizokeys = 'shizo'
