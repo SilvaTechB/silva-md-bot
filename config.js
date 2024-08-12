@@ -24,16 +24,6 @@ global.chlink = process.env.CHANNEL_LINK || 'https://whatsapp.com/channel/0029Va
  
 //Apikeys
 global.shizokeys = 'shizo'
-global.APIKeys = {
-  // APIKey Here
-  // 'https://website': 'apikey'
-  'https://api.xteam.xyz': 'd90a9e986e18778b',
-  'https://api.lolhuman.xyz': '85faf717d0545d14074659ad',
-  'https://api.neoxr.my.id': `${keysneoxr}`,
-  'https://violetics.pw': 'beta',
-  'https://zenzapis.xyz': `${keysxxx}`,
-  'https://api-fgmods.ddns.net': 'fg-dylux',
-}
 
 //Sticker Watermarks
 global.packname = process.env.BOT_NAME || '𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓'
@@ -96,21 +86,6 @@ global.keysxteammm = [
   'kurrxd09',
   'ebb6251cc00f9c63',
 ]
-global.APIs = {
-  // API Prefix
-  // name: 'https://website'
-  xteam: 'https://api.xteam.xyz',
-  dzx: 'https://api.dhamzxploit.my.id',
-  lol: 'https://api.lolhuman.xyz',
-  violetics: 'https://violetics.pw',
-  neoxr: 'https://api.neoxr.my.id',
-  zenzapis: 'https://zenzapis.xyz',
-  akuari: 'https://api.akuari.my.id',
-  akuari2: 'https://apimu.my.id',
-  nrtm: 'https://fg-nrtm.ddns.net',
-  bg: 'http://bochil.ddns.net',
-  fgmods: 'https://api-fgmods.ddns.net',
-} 
 
 let file = fileURLToPath(import.meta.url)
 watchFile(file, () => {
