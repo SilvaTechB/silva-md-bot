@@ -9,23 +9,27 @@ import moment from 'moment-timezone'
 let totalf = Object.values(global.plugins).filter(v => v.help && v.tags).length
 let tags = { 'main': 'Main' }
 const defaultMenu = {
-  before: `┏━━━━━━⊱ 𝑺𝑰𝑳𝑽𝑨 𝑩𝑶𝑻 ⊰━━━━━━
-┏━━━ ❮❮ 𝙼𝙴𝙽𝚄 ❯❯
-┃💘 *𝙽𝚊𝚖𝚎:* ${global.author}
-┃💦 *𝚃𝚘𝚝𝚊𝚕:* ${totalf} + Features
-┃💥 *𝚅𝚎𝚛𝚜𝚒𝚘𝚗:* LTE
-┃🍆 *𝙿𝚛𝚎𝚏𝚒𝚡:* Any Prefix
-┃💋 *Developer:* S͛I͛L͛V͛A͛ B͛O͛T͛
-┃🍑 *𝙿𝚕𝚊𝚝𝚏𝚘𝚛𝚖:* HEROKU
+  before: `┏━━━━━━⊱ 𝑺𝑰𝑳𝑽𝑨 𝑩𝑶𝑻 ⊰━━━━━━⸙
+┏━━━━❮❮ CMD LINE ❯❯━━━━━━
+┃💫 *𝙽𝚊𝚖𝚎:* ${global.author}
+┃🫠 *𝚃𝚘𝚝𝚊𝚕:* ${totalf} + Features
+┃💥 *Network:* LTE
+┃📍 ᴠᴇʀꜱɪᴏɴ: 2.5.3
+┃👨‍💻 ᴏᴡɴᴇʀ : *𝕊𝕀𝕃𝕍𝔸*      
+┃👤 ɴᴜᴍʙᴇʀ: 254743706010
+┃💻 HOSTER: *Silva Platform*
+┃🛡 ᴍᴏᴅᴇ: *Unkown*
+┃💫 ᴘʀᴇғɪx: *Multi-Prefix*
 ┖─────────┈┈┈〠⸙࿉༐
+Thank you for choosing silva md
+powered by Sylivanus❤️
 ─═✧✧═─ 𝕊𝕀𝕃𝕍𝔸 𝔹𝕆𝕋 ─═✧✧═─
     %readmore`.trimStart(),
-  header: '┏━━━━ ❨ *%category* ❩ ━━┄┈ •⟅ ',
-  body: ' ┃☣ %cmd',
+  header: '┏━━━━ ❨ *💫 %category* ❩ ━━┄┈ •⟅ ',
+  body: ' ┃✓ %cmd',
   footer: '┗━═┅┅┅┅═━–––––––๑\n',
   after: `*Made by ♡ ${global.oname}*`,
 }
-
 let handler = async (m, { conn, usedPrefix: _p, __dirname }) => {
   try {
     // Reading package.json
@@ -119,8 +123,8 @@ let handler = async (m, { conn, usedPrefix: _p, __dirname }) => {
     const pp = await conn.profilePictureUrl(conn.user.jid).catch(_ => './media/contact.png')
 
     // Sending the menu
-    conn.sendButton(m.chat, text.replace(), author, pp, [['BOT MENU 🤖', '.botmenu'], ['OWNER MENU 🦉', '.ownermenu'], ['FUN MENU 😂', '.funmenu'], ['SILVA SPEED 🛫', '.ping']], null, [['SOCIAL 📶', smlink]], m)
-    
+    conn.sendButton(m.chat, text.replace(), author, pp, [['SILVA MENU', '.botmenu']],null, [['WA CHANNEL', ' chlink'], ['SOCIAL ', smlink]], m)
+
   } catch (e) {
     conn.reply(m.chat, 'ERROR IN MENU', m)
     throw e
