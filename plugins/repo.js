@@ -12,26 +12,32 @@ const repoData = response.data;
 const formattedInfo = `
 🍑🍆𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓💦☣
 *This is a Horny WhatsApp Bot Loaded with Features 🎊*
-𝖲𝖳𝖠𝖱✨ :: ${repoData.stargazers_count}
-𝖥𝖮𝖱𝖪 🍽️ :: ${repoData.forks_count}
-𝖴𝖱𝖫 👻 :: ${repoData.html_url}
-\`🚀 Key Features\`
-*Automated Messaging:*
-*Media Sharing ::*
-*Chat Management :*
-*Interactive Features::*
-*Custom Commands::*.
-> Trying to make it a usee friendly bot
+┃✰𝖲𝖳𝖠𝖱✨ :: ${repoData.stargazers_count}
+┃✰𝖥𝖮𝖱𝖪 🍽️ :: ${repoData.forks_count}
+┃✰𝖴𝖱𝖫 👻 :: ${repoData.html_url}
+\`🚀 OUR REPOSITORY\`
+*Welcome to Silva MD! 🤖✨*
+
+_Get Started: Welcome to the Silva MD WhatsApp bot repository! 🎉 Feel free to fork this project and customize it for your own WhatsApp experience._
+
+*How to Use:*
+
+1. *Fork the Repository:* Click on the “Fork” button to create your own copy.
+2. *Set Up Your Bot:* Follow the setup instructions in the README file.
+3. *Enjoy Your Bot:* Start chatting with Silva MD and explore its features! 💬
+
+Thank you for joining our community! If you have any questions, don’t hesitate to reach out. Happy coding! 🚀
+> Trying to make it a user friendly bot
 
 *_DEPLOY 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 NOW_*
 
-\`\`\`Enhance your WhatsApp experience with 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓💥\`\`\`
+\`\`\`USER FRIENDLY 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓💥\`\`\`
         `.trim();
-        
+
       await conn.relayMessage(m.chat,  {
         requestPaymentMessage: {
           currencyCodeIso4217: 'INR',
-          amount1000: 69000,
+          amount1000: 6900000000,
           requestFrom: m.sender,
           noteMessage: {
           extendedTextMessage: {
@@ -40,7 +46,7 @@ const formattedInfo = `
           externalAdReply: {
           showAdAttribution: true
           }}}}}}, {})
-          
+
     } else {
       await conn.reply(m.chat, 'Unable to fetch repository information.', m);
     }
