@@ -1,6 +1,6 @@
 { 
-    "name": "OREO-BOT",
-    "version": "2.0.4",
+    "name": "silva-md-bot",
+    "version": "3.2.2",
     "description": "WhatsApp Bot created with the help of ShizoBot-base using Baileys. Written in javascript",
     "main": "index.js",
     "type": "module",
@@ -21,16 +21,16 @@
     "Termux-WaBot",
     "WaBot-Base"
   ],
-    "homepage": "https://github.com/shizothetechie/oreo-bot",
+    "homepage": "https://github.com/SilvaTechB/silva-md-bot",
     "author": {
         "name": "shizo"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/shizothetechie/oreo-bot.git"
+        "url": "git+https://github.com/SilvaTechB/silva-md-bot.git"
     },
     "bugs": {
-        "url": "https://github.com/shizothetechie/oreo-bot/issues"
+        "url": "https://github.com/SilvaTechB/silva-md-bot/issues"
     },
     "license": "GPL-3.0-or-later",
     "dependencies": {
@@ -98,7 +98,7 @@
         "api-dylux": "^1.6.9",
         "@vitalets/google-translate-api": "^9.2.0",
         "yargs": "^17.6.0",
-        "youtubedl-core": "^4.11.5",
+        "youtubedl-core": "^4.11.7",
         "@xct007/frieren-scraper": "*",
         "@xct007/tiktok-scraper": "*"    
 }
