@@ -150,7 +150,7 @@ Base | Github Team|
 ---|---
 [TEAM SILVA](https://github.com/SilvaTechB)  | [MANAGER](https://github.com/Sylivanu)
 Maintainer | Silva Team|
-<a href="https://github.com/Lazack28"><img src="https://github.com/Lazack_8.png?size=100" width="130" height="100"></a> |
+<a href="https://github.com/Lazack28"><img src="https://github.com/Lazack28.png?size=100" width="130" height="100"></a> |
 ---|---
 [Lazack](https://github.com/Lazack28)
 HELP |
