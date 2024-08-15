@@ -152,8 +152,8 @@ Base | Github Team|
 Maintainer | Silva Team|
 <a href="https://github.com/Lazack28"><img src="https://github.com/Lazack28.png?size=100" width="130" height="100"></a> |[<img src="https://github.com/FG98F.png?size=100" width="100" height="100">](https://github.com/FG98F)
 ---|---
-[Lazack](https://github.com/Lazack28)
-[MANAGER](https://github.com/FG98F)
+[Lazack](https://github.com/Lazack28)  |
+[FG98F](https://github.com/FG98F)
 HELP | FG98F|
 
 
