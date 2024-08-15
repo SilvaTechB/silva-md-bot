@@ -140,17 +140,21 @@ For help visit [Github wiki](https://github.com/SilvaTechB/silva-md-bot/wiki)
 
 
 ---
-## HELPERS
+## CREDITS TO:
 
 <a href="https://github.com/shizothetechie"><img src="https://github.com/shizothetechie.png?size=100" width="130" height="100"></a> | [<img src="https://github.com/github.png?size=100" width="100" height="100">](https://github.com/github) 
 ---|---
 [SHIZO](https://github.com/shizothetechie)  | [GITHUB](https://github.com/github)
 Base | Github Team|
-
 <a href="https://github.com/SilvaTechB"><img src="https://github.com/SilvaTechB.png?size=100" width="130" height="100"></a> | [<img src="https://github.com/Sylivanu.png?size=100" width="100" height="100">](https://github.com/Sylivanu) 
 ---|---
-[TEAM SILVA](https://github.com/SilvaTechB)  | [GITHUB](https://github.com/Sylivanu)
+[TEAM SILVA](https://github.com/SilvaTechB)  | [MANAGER](https://github.com/Sylivanu)
 Maintainer | Silva Team|
+<a href="https://github.com/Lazack_28"><img src="https://github.com/Lazack_28.png?size=100" width="130" height="100"></a> |
+---|---
+[Lazack](https://github.com/Lazack_28)
+HELP |
+
 
 
 
