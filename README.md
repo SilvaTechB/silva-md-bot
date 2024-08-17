@@ -68,7 +68,7 @@
     <br>
 <details>
 <summary>CLICK HERE TO GET YOUR CREDS.JSON FILE</summary>
-<a href='https://cred-session.onrender.com/pair' target="_blank"><img alt='PAIR CODE' src='https://img.shields.io/badge/Pair_code-100000?style=for-the-badge&logo=scan&logoColor=white&labelColor=black&color=blue'/></a>
+<a href='https://creds-1.onrender.com/pair' target="_blank"><img alt='PAIR CODE' src='https://img.shields.io/badge/Pair_code-100000?style=for-the-badge&logo=scan&logoColor=white&labelColor=black&color=blue'/></a>
 
 </details>
 
