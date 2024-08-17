@@ -15,6 +15,21 @@
       "required": false,
       "value": ""
     },
+    "statusview": {
+      "description": "make it true if you want bot to view status",
+      "required": false,
+      "value": ""
+    },
+    "autoRead": {
+      "description": "make it true if you want bot to read messages",
+      "required": false,
+      "value": ""
+    },
+    "antidelete": {
+      "description": "bot will forward deleted messages if you make it true",
+      "required": false,
+      "value": "false"
+    },
 "OWNER_NAME": {
       "description": "owner name of the bot or Your Name",
       "required": false,
