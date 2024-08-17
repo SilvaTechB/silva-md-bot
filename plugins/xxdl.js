@@ -1,60 +1,44 @@
-import { xnxxSearch, xnxxdl } from '../lib/scraper.js'
 
+import fetch from 'node-fetch'
+import fg from 'api-dylux'
 let handler = async (m, { conn, args, text, usedPrefix, command }) => {
-  let chat = global.db.data.chats[m.chat]
-  if (!chat.nsfw)
-    throw `🚫 This group does not support NSFW content.\n\nTo turn it on, use: *${usedPrefix}enable* nsfw`
+
+ let chat = global.db.data.chats[m.chat]
+  if (!chat.nsfw) throw `🚫 El grupo no admite contenido nsfw \n\nPara habilitar escriba \n*${usedPrefix}enable* nsfw`
   let user = global.db.data.users[m.sender].age
-  if (user < 18) throw `❎ You must be 18 years or older to use this feature.`
-  if (!text)
-    throw `✳️ What do you want to search?\n📌 Usage: *${usedPrefix + command} <search>*\n\nExample: Hot desi bhabi or you can use a link as well\nExample: .xnxx link *`
+  if (user < 17) throw `❎ Eres menor de edad! vuelve cuando tengas más de 18 años`
+  if (!text) throw `✳️ Para buscar\n📌 Use : *${usedPrefix + command} <search>*\n\nPara descargar desde URL:\n📌Use : *${usedPrefix + command} <url>*`
 
-  m.react('⌛')
-
-  let url
-  try {
-    url = new URL(text)
-  } catch (error) {
-    url = null
-  }
-
-  if (url) {
-    try {
-      const files = await xnxxdl(url.href)
-      if (files && files.high) {
-        conn.sendFile(m.chat, files.high, 'video.mp4', 'Here is your video', m)
-        m.react('✅')
-      } else {
-        m.reply('🔴 Error: Failed to retrieve the download URL.')
-      }
-    } catch (e) {
-      console.error(e)
-      m.reply('🔴 Error: We encountered a problem while processing the request.')
+    m.react(rwait)
+    if (text.includes('http://') || text.includes('https://')) {
+        if (!text.includes('xnxx.com')) return m.reply(`❎ Ingrese un link de *xnxx.com*`)
+        try {
+            let xn = await fg.xnxxdl(text)
+            conn.sendFile(m.chat, xn.url_dl, xn.title + '.mp4', `
+≡  *XNXX DL*
+            
+▢ *📌Título*: ${xn.title}
+▢ *⌚Duración:* ${xn.duration}
+▢ *🎞️Calidad:* ${xn.quality}
+`.trim(), m, false, { asDocument: chat.useDocument })
+ m.react(done)
+ } catch (e) {
+    m.reply(`🔴 Error : intenta mas tarde`)
+ }
+    } else {
+        try {
+            let res = await fg.xnxxSearch(text)
+            let ff = res.result.map((v, i) => `${i + 1}┃ *Titulo* : ${v.title}\n*Link:* ${v.link}\n`).join('\n') 
+              if (res.status) m.reply(ff)
+            } catch (e) {
+              m.reply(`🔴 Error: intenta mas tarde`)
+               }
     }
-  } else {
-    try {
-      const results = await xnxxSearch(text)
-      if (results.length > 0) {
-        const message = results.map((r, i) => `${i + 1}. [${r.title}](${r.link})`).join('\n')
-        m.reply(message, null, {
-          contextInfo: {
-            mentionJid: conn.parseMention(message),
-          },
-        })
-      } else {
-        m.reply('🔴 Error: No search results found.')
-      }
-    } catch (e) {
-      console.error(e)
-      m.reply('🔴 Error: We encountered a problem while processing the request.')
-    }
-  }
 }
-
-handler.help = ['xnxx']
-handler.tags = ['nsfw', 'premium']
-handler.command = ['xnxxsearch', 'xnxxdl', 'xnxx']
-handler.group = true
+handler.help = ['xnxx'] 
+handler.tags = ['nsfw', 'prem']
+handler.command = ['xnxxsearch', 'xnxxdl', 'xnxx'] 
+handler.diamond = 2
 handler.premium = false
 handler.register = true
 
