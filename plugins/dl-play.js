@@ -21,7 +21,7 @@ let handler = async (m, { conn, command, text, usedPrefix }) => {
 
     const { title, url, thumbnail } = result;
 
-    const captvid = '*FOLLOW 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 support CHANNEL, and just few second i will send THE SONG YOU REQUESTED*';
+    const captvid = '*FOLLOW 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 support CHANNEL, and Our team is working to fix this issue 😭 thank you*';
     const sourceUrl = "https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v";
 
     conn.reply(m.chat, captvid, m, {
@@ -88,5 +88,3 @@ handler.command = ['play', 'song']
 handler.exp = 0;
 
 export default handler;
-
-
