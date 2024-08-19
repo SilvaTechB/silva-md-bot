@@ -1,14 +1,16 @@
-import axios from 'axios';
+import ytdl from '@distube/ytdl-core';
+import yts from 'youtube-yts';
 import fs from 'fs';
 import { pipeline } from 'stream';
 import { promisify } from 'util';
 import os from 'os';
+import axios from 'axios';
 
 const streamPipeline = promisify(pipeline);
 
 let handler = async (m, { conn, command, text, usedPrefix }) => {
   if (!text) throw `${usedPrefix}${command} Fairy tale`;
-  await m.react('💫');
+  await m.react('⏳');
 
   try {
     const query = encodeURIComponent(text);
@@ -19,7 +21,7 @@ let handler = async (m, { conn, command, text, usedPrefix }) => {
 
     const { title, url, thumbnail } = result;
 
-    const captvid = '*FOLLOW 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 support CHANNEL, and Our team is working to fix this issue 😭 thank you*';
+    const captvid = '*FOLLOW 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 support CHANNEL, and just few second i will send THE SONG YOU REQUESTED*';
     const sourceUrl = "https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v";
 
     conn.reply(m.chat, captvid, m, {
@@ -34,18 +36,23 @@ let handler = async (m, { conn, command, text, usedPrefix }) => {
       }
     });
 
-    const y2mateApi = `https://y2mate.is/api/v1/convert?url=${url}&format=mp3`;
-    const y2mateResponse = await axios.get(y2mateApi);
-    const y2mateData = y2mateResponse.data;
-    const audioUrl = y2mateData.link;
+    const res = await axios.get(`https://ibraah.adams.me/api/v1/yta?query=${query}`);
+    let response = await res.data;
+    let coverBuffer = await (await fetch(`${response.data.thumbnail}`)).buffer();
+
+    const audioStream = ytdl(url, {
+      filter: 'audioonly',
+      quality: 'highestaudio',
+    });
 
     const tmpDir = os.tmpdir();
     const writableStream = fs.createWriteStream(`${tmpDir}/${title}.mp3`);
-    const audioStream = axios.get(audioUrl, { responseType: 'stream' });
-    await streamPipeline(audioStream.data, writableStream);
+    await streamPipeline(audioStream, writableStream);
 
-    const audio = fs.readFileSync(`${tmpDir}/${title}.mp3`);
-    await conn.sendMessage(m.chat, { audio: audio, mimetype: 'audio/mpeg' }, { quoted: m });
+    const songBuffer = await (await fetch(`${response.data.downloadUrl}`)).buffer();
+    const song = await AddMp3Meta(songBuffer, coverBuffer, { title: response.data.title, artist: response.data.channel.name });
+
+    await conn.sendMessage(m.chat, { audio: song, mimetype: 'audio/mpeg' }, { quoted: m });
 
     fs.unlink(`${tmpDir}/${title}.mp3`, (err) => {
       if (err) {
