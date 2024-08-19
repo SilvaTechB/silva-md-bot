@@ -5,6 +5,7 @@ import fetch from 'node-fetch'
 import { join } from 'path'
 import { xpRange } from '../lib/levelling.js'
 import moment from 'moment-timezone'
+import proto from '@adiwajshing/baileys'
 
 let totalf = Object.values(global.plugins).filter(v => v.help && v.tags).length
 let tags = { 'main': 'Main' }
