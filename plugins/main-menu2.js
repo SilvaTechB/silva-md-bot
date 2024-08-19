@@ -161,7 +161,7 @@ const interactiveMessage = proto.Message.InteractiveMessage.create({
 conn.sendMessage(m.chat, interactiveMessage, { quoted: m })
 
 // Send audio file
-const audio = await conn.getBuffer('./media/silva.mp4')
+const audio = await conn.getBuffer('./media/Alive.mp3')
 conn.sendMessage(m.chat, { audio: audio, mimetype: 'audio/mpeg' }, { quoted: m })
 
   } catch (e) {
