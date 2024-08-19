@@ -5,7 +5,6 @@ import fetch from 'node-fetch'
 import { join } from 'path'
 import { xpRange } from '../lib/levelling.js'
 import moment from 'moment-timezone'
-import proto from '@adiwajshing/baileys'
 
 let totalf = Object.values(global.plugins).filter(v => v.help && v.tags).length
 let tags = { 'main': 'Main' }
@@ -123,44 +122,8 @@ let handler = async (m, { conn, usedPrefix: _p, __dirname }) => {
     text = text.replace(new RegExp(`%(${Object.keys(replace).sort((a, b) => b.length - a.length).join`|`})`, 'g'), (_, name) => '' + replace[name])
     const pp = await conn.profilePictureUrl(conn.user.jid).catch(_ => './media/contact.png')
 
-// Sending the menu
-const buttons = [
-  {
-    buttonId: 'SILVA MENU',
-    buttonText: {
-      displayText: 'SILVA MENU'
-    },
-    type: 1
-  }
-]
-
-const buttonMessage = {
-  text: text.replace(),
-  footer: author,
-  buttons: buttons,
-  headerType: 4,
-  header: await conn.getBuffer(pp)
-}
-
-const interactiveMessage = proto.Message.InteractiveMessage.create({
-  interactiveMessage: proto.Message.InteractiveMessage.Body.create({
-    header: proto.Message.InteractiveMessage.Header.create({
-      title: 'SILVA MENU'
-    }),
-    footer: proto.Message.InteractiveMessage.Footer.create({
-      text: 'SELECT AN OPTION'
-    }),
-    nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
-      buttons: buttons
-    })
-  })
-})
-
-conn.sendMessage(m.chat, interactiveMessage, { quoted: m })
-
-// Send audio file
-const audio = await conn.getBuffer('./media/Alive.mp3')
-conn.sendMessage(m.chat, { audio: audio, mimetype: 'audio/mpeg' }, { quoted: m })
+    // Sending the menu
+    conn.sendButton(m.chat, text.replace(), author, pp, [['SILVA MENU', '.botmenu']],null, [['WA CHANNEL', ' chlink'], ['SOCIAL ', smlink]], m)
 
   } catch (e) {
     conn.reply(m.chat, 'ERROR IN MENU', m)
