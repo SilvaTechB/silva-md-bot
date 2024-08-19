@@ -8,7 +8,7 @@ const streamPipeline = promisify(pipeline);
 
 let handler = async (m, { conn, command, text, usedPrefix }) => {
   if (!text) throw `${usedPrefix}${command} Fairy tale`;
-  await m.react(rwait);
+  await m.react('⏳');
 
   try {
     const query = encodeURIComponent(text);
@@ -44,28 +44,7 @@ let handler = async (m, { conn, command, text, usedPrefix }) => {
     const audioStream = axios.get(audioUrl, { responseType: 'stream' });
     await streamPipeline(audioStream.data, writableStream);
 
-    const doc = {
-      audio: {
-        url: `${tmpDir}/${title}.mp3`
-      },
-      mimetype: 'audio/mpeg',
-      ptt: false,
-      waveform: [100, 0, 0, 0, 0, 0, 100],
-      fileName: `${title}`,
-      contextInfo: {
-        externalAdReply: {
-          showAdAttribution: true,
-          mediaType: 2,
-          mediaUrl: url,
-          title: title,
-          body: 'HERE IS YOUR SONG WITH 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓',
-          sourceUrl: url,
-          thumbnail: await (await conn.getFile(thumbnail)).data
-        }
-      }
-    };
-
-    await conn.sendMessage(m.chat, doc, { quoted: m });
+    await conn.sendMessage(m.chat, { audio: fs.readFileSync(`${tmpDir}/${title}.mp3`) }, { quoted: m });
 
     fs.unlink(`${tmpDir}/${title}.mp3`, (err) => {
       if (err) {
