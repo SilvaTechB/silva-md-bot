@@ -1,10 +1,8 @@
-import ytdl from '@distube/ytdl-core';
-import yts from 'youtube-yts';
+import axios from 'axios';
 import fs from 'fs';
 import { pipeline } from 'stream';
 import { promisify } from 'util';
 import os from 'os';
-import axios from 'axios';
 
 const streamPipeline = promisify(pipeline);
 
@@ -36,14 +34,15 @@ let handler = async (m, { conn, command, text, usedPrefix }) => {
       }
     });
 
-    const audioStream = ytdl(url, {
-      filter: 'audioonly',
-      quality: 'highestaudio',
-    });
+    const y2mateApi = `https://y2mate.is/api/v1/convert?url=${url}&format=mp3`;
+    const y2mateResponse = await axios.get(y2mateApi);
+    const y2mateData = y2mateResponse.data;
+    const audioUrl = y2mateData.link;
 
     const tmpDir = os.tmpdir();
     const writableStream = fs.createWriteStream(`${tmpDir}/${title}.mp3`);
-    await streamPipeline(audioStream, writableStream);
+    const audioStream = axios.get(audioUrl, { responseType: 'stream' });
+    await streamPipeline(audioStream.data, writableStream);
 
     const doc = {
       audio: {
