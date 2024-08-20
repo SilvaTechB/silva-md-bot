@@ -6,7 +6,7 @@ let handler = async (m, { conn, usedPrefix, args, command, text }) => {
 
   let res;
   try {
-    res = await fetch(`https://www.guruapi.tech/api/igdlv1?url=${text}`);
+    res = await fetch(`https://api.maher-zubair.tech/download/instagram2?url=${text}`);
   } catch (error) {
     throw `An error occurred: ${error.message}`;
   }
@@ -23,7 +23,7 @@ let handler = async (m, { conn, usedPrefix, args, command, text }) => {
     const mediaType = mediaData.type;
     const mediaURL = mediaData.url_download;
 
-    let cap = `HERE YOU GO ${mediaType.toUpperCase()} >,<`;
+    let cap = `HERE IS YOUR REQUEST SENT BY 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 DEPLOY TODAY ASAP>,<`;
 
     if (mediaType === 'video') {
       
