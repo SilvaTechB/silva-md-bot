@@ -21,6 +21,13 @@ const defaultMenu = {
 ┃🛡 ᴍᴏᴅᴇ: *Unkown*
 ┃💫 ᴘʀᴇғɪx: *Multi-Prefix*
 ┖─────────┈┈┈〠⸙࿉༐
+├──────────●●►
+│
+│      ▎▍▌▌▉▏▎▌▉▐▏▌▎
+│      ▎▍▌▌▉▏▎▌▉▐▏▌▎
+│       ©𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓
+│
+╰──────────────────
 Thank you for choosing silva md
 powered by Sylivanus❤️
 ─═✧✧═─ 𝕊𝕀𝕃𝕍𝔸 𝔹𝕆𝕋 ─═✧✧═─
@@ -123,7 +130,7 @@ let handler = async (m, { conn, usedPrefix: _p, __dirname }) => {
     const pp = await conn.profilePictureUrl(conn.user.jid).catch(_ => './media/contact.png')
 
     // Sending the menu
-    conn.sendButton(m.chat, text.replace(), author, pp, [['SILVA MENU', '.botmenu']],null, [['WA CHANNEL', ' chlink'], ['SOCIAL ', smlink]], m)
+    conn.sendButton(m.chat, text.replace(), author, pp, [['🥰🫂❤️💫', '/botmenu']],null, [['WA CHANNEL', ' chlink'], ['SOCIAL ', smlink]], m)
 
   } catch (e) {
     conn.reply(m.chat, 'ERROR IN MENU', m)
