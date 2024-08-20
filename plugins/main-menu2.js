@@ -137,7 +137,7 @@ let handler = async (m, { conn, usedPrefix: _p, __dirname }) => {
     throw e
   }
 }
-handler.command = /^(menu|help)$/i
+handler.command = /^(menu2|help2)$/i
 handler.exp = 3
 
 export default handler
