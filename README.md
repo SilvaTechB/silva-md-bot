@@ -142,12 +142,12 @@ For help visit [Github wiki](https://github.com/SilvaTechB/silva-md-bot/wiki)
 
 
 ---
-## CREDITS TO:
+## THANKS TO OUR TEAM :
 
-<a href="https://github.com/shizothetechie"><img src="https://github.com/shizothetechie.png?size=100" width="130" height="100"></a> | [<img src="https://github.com/github.png?size=100" width="100" height="100">](https://github.com/github) 
+<a href="https://github.com/shizothetechie"><img src="https://github.com/shizothetechie.png?size=100" width="130" height="100"></a> | [<img src="https://github.com/xei-sensei.png?size=100" width="100" height="100">](https://github.com/xei-sensei) 
 ---|---
-[SHIZO](https://github.com/shizothetechie)  | [GITHUB](https://github.com/github)
-Base | Github Team|
+[SHIZO](https://github.com/shizothetechie)  | [GITHUB](https://github.com/xei-sensei)
+Base | Maintainer|
 <a href="https://github.com/SilvaTechB"><img src="https://github.com/SilvaTechB.png?size=100" width="130" height="100"></a> | [<img src="https://github.com/Sylivanu.png?size=100" width="100" height="100">](https://github.com/Sylivanu) 
 ---|---
 [TEAM SILVA](https://github.com/SilvaTechB)  | [MANAGER](https://github.com/Sylivanu)
