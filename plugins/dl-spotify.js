@@ -8,7 +8,7 @@ let handler = async (m, { conn, text }) => {
   await displayLoadingScreen(conn, m.chat)
   let pp = 'https://wallpapercave.com/wp/wp7932387.jpg'
   const query = encodeURIComponent(text)
-  let res = `https://api.maher-zubair.tech/download/alldownload2?url=${query}`
+  let res = `https://api.lolhuman.xyz/api/ytplay?apikey=3916f9eaea0887fc23149851&query=${query}`
   // let spotify = await (await fetch(res)).buffer()
   let doc = {
     audio: {
