@@ -106,13 +106,16 @@ let msg = generateWAMessageFromContent(m.chat, {
                   {
                   "name": "cta_url",
                  "buttonParamsJson": "{\"display_text\":\"Silva Script 🎉\",\"url\":\"https://github.com/SilvaTechB/silva-md-bot\",\"merchant_url\":\"https://github.com/SilvaTechB/silva-md-bot\"}"
+                  {
+                  "name": "cta_url",
+                 "buttonParamsJson": "{\"display_text\":\"Wa Channel 🧭\",\"url\":\"https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v\",\"merchant_url\":\"https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v\"}"
               }
            ],
           })
         })
     }
   }
-}, {})
+}, {})🚲
 
 await conn.relayMessage(msg.key.remoteJid, msg.message, {
 
