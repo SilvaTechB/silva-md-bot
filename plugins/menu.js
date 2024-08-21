@@ -43,9 +43,10 @@ let more = String.fromCharCode(8206)
 let readMore = more.repeat(850) 
 let greeting = ucapan()
 let taguser = '@' + m.sender.split("@s.whatsapp.net")[0]
-
-let str = ` ╭═══〘 𝑺𝑰𝑳𝑽𝑨 𝑩𝑶𝑻 〙═══⊷❍
-┏━━━━❮❮ CMD LINE ❯❯━━━━━━
+ 
+let str = ` ❤️ *_Hello ${name}, ${greeting}! Welcome to my menu!_* 🥳
+╭═══〘 𝑺𝑰𝑳𝑽𝑨 𝑩𝑶𝑻 〙═══⊷❍
+┃✰│━━━❮❮ CMD LINE ❯❯━━━━━━
 ┃✰│𝙽𝚊𝚖𝚎: ${global.author}
 ┃✰│𝚃𝚘𝚝𝚊𝚕: 700+ Features
 ┃✰│Network:LTE
