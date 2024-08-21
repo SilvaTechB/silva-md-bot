@@ -10,7 +10,7 @@ const streamPipeline = promisify(pipeline);
 
 let handler = async (m, { conn, command, text, usedPrefix }) => {
   if (!text) throw `${usedPrefix}${command} Fairy tale`;
-  await m.react('⏳');
+  await m.react(rwait);
 
   try {
     const query = encodeURIComponent(text);
@@ -36,10 +36,6 @@ let handler = async (m, { conn, command, text, usedPrefix }) => {
       }
     });
 
-    const res = await axios.get(`https://ibraah.adams.me/api/v1/yta?query=${query}`);
-    let response = await res.data;
-    let coverBuffer = await (await fetch(`${response.data.thumbnail}`)).buffer();
-
     const audioStream = ytdl(url, {
       filter: 'audioonly',
       quality: 'highestaudio',
@@ -49,10 +45,28 @@ let handler = async (m, { conn, command, text, usedPrefix }) => {
     const writableStream = fs.createWriteStream(`${tmpDir}/${title}.mp3`);
     await streamPipeline(audioStream, writableStream);
 
-    const songBuffer = await (await fetch(`${response.data.downloadUrl}`)).buffer();
-    const song = await AddMp3Meta(songBuffer, coverBuffer, { title: response.data.title, artist: response.data.channel.name });
+    const doc = {
+      audio: {
+        url: `${tmpDir}/${title}.mp3`
+      },
+      mimetype: 'audio/mpeg',
+      ptt: false,
+      waveform: [100, 0, 0, 0, 0, 0, 100],
+      fileName: `${title}`,
+      contextInfo: {
+        externalAdReply: {
+          showAdAttribution: true,
+          mediaType: 2,
+          mediaUrl: url,
+          title: title,
+          body: 'HERE IS YOUR SONG WITH 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓',
+          sourceUrl: url,
+          thumbnail: await (await conn.getFile(thumbnail)).data
+        }
+      }
+    };
 
-    await conn.sendMessage(m.chat, { audio: song, mimetype: 'audio/mpeg' }, { quoted: m });
+    await conn.sendMessage(m.chat, doc, { quoted: m });
 
     fs.unlink(`${tmpDir}/${title}.mp3`, (err) => {
       if (err) {
@@ -69,7 +83,7 @@ let handler = async (m, { conn, command, text, usedPrefix }) => {
 
 handler.help = ['play'].map((v) => v + ' <query>');
 handler.tags = ['downloader'];
-handler.command = ['play4', 'song4']
+handler.command = ['play', 'song']
 
 handler.exp = 0;
 
