@@ -31,7 +31,7 @@ let handler = async (m, { conn, command, text, usedPrefix }) => {
           thumbnailUrl: thumbnail,
           sourceUrl,
           mediaType: 1,
-          renderLargerThumbnail: false
+          renderLargerThumbnail: true
         }
       }
     });
