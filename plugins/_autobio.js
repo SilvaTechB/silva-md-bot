@@ -14,7 +14,7 @@ handler.all = async function (m) {
         })) * 1000
     }
     let muptime = clockString(_muptime)
-    let bio = `❤️🌿SILVA MD[${date.toLocaleTimeString('en-US', { timeZone: 'Africa/Nairobi'})}]🔥11 FEB my birthday💕❤️🥳\n💫 Time Active ${muptime}\n\n ┃ 💥💦  By 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓`
+    let bio = `❤️🌿🥳\n💫 Time Active ${muptime}\n\n ┃ 💥💦  By 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓`
     await this.updateProfileStatus(bio).catch(_ => _)
     setting.status = new Date() * 1
   }
