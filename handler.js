@@ -71,7 +71,7 @@ export async function handler(chatUpdate) {
         if (!isNumber(user.warn)) user.warn = 0
         if (!isNumber(user.level)) user.level = 0
         if (!('role' in user)) user.role = 'Tadpole'
-        if (!('autolevelup' in user)) user.autolevelup = false
+        if (!('autolevelup' in user)) user.autolevelup = true
            /*
    Do Not Modify this Section ❌  👇👇
    Else Relationship Features Will Not Work 😔
@@ -116,21 +116,21 @@ export async function handler(chatUpdate) {
         if (!('antiDelete' in chat)) chat.antiDelete = true
         if (!('antiLink' in chat)) chat.antiLink = false
         if (!('antiSticker' in chat)) chat.antiSticker = true
-        if (!('antiToxic' in chat)) chat.antiToxic = false
+        if (!('antiToxic' in chat)) chat.antiToxic = true
         if (!('detect' in chat)) chat.detect = false
         if (!('getmsg' in chat)) chat.getmsg = true
         if (!('isBanned' in chat)) chat.isBanned = false
-        if (!('nsfw' in chat)) chat.nsfw = false
+        if (!('nsfw' in chat)) chat.nsfw = true
         if (!('sBye' in chat)) chat.sBye = ''
         if (!('sDemote' in chat)) chat.sDemote = ''
         if (!('simi' in chat)) chat.simi = false
-        if (!('sPromote' in chat)) chat.sPromote = ''
-        if (!('sWelcome' in chat)) chat.sWelcome = ''
+        if (!('sPromote' in chat)) chat.sPromote = 'true'
+        if (!('sWelcome' in chat)) chat.sWelcome = 'true'
         if (!('useDocument' in chat)) chat.useDocument = false
         if (!('viewOnce' in chat)) chat.viewOnce = true
         if (!('viewStory' in chat)) chat.viewStory = true
-        if (!('welcome' in chat)) chat.welcome = false
-        if (!('chatbot' in chat)) chat.chatbot = false
+        if (!('welcome' in chat)) chat.welcome = true
+        if (!('chatbot' in chat)) chat.chatbot = true
         if (!isNumber(chat.expired)) chat.expired = 0
       } else
         global.db.data.chats[m.chat] = {

@@ -38,6 +38,7 @@
         "@shizodevs/wabotmodule": "*",
         "@adiwajshing/keyed-db": "^0.2.4",
         "@bochilteam/scraper": "^4.0.22-alpha.0",
+        "@neeraj-x0/ytsearch": "^1.0.0",
         "@shineiichijo/marika": "^2.0.6",
         "awesome-phonenumber": "^3.4.0",
         "acrcloud": "^1.4.0",
