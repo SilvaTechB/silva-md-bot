@@ -21,7 +21,7 @@ let handler = async (m, { conn, command, text, usedPrefix }) => {
 
     const { title, url, thumbnail } = result;
 
-    const captvid = '*FOLLOW 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 support CHANNEL, and just few second i will send THE SONG YOU REQUESTED*';
+    const captvid = '*FOLLOW 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 support CHANNEL,Sorry I can't send your request. follow our channel for updates. once we fix this error. love silva ❤️*';
     const sourceUrl = "https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v";
 
     conn.reply(m.chat, captvid, m, {
