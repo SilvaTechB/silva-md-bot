@@ -1,4 +1,4 @@
-const { ytsdl } = require('../lib/ytdl')
+const { ytsdl } = require('../tmp/ytdl')
 bot(
  {
   pattern: 'yta',
