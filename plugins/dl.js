@@ -1,3 +1,4 @@
+const { bot, mode, isUrl, getBuffer, getJson, validateQuality } = require('../lib')
 const { ytsdl } = require('../tmp/ytdl')
 bot(
  {
