@@ -148,6 +148,8 @@ For help visit [Github wiki](https://github.com/SilvaTechB/silva-md-bot/wiki)
 
 ---
 ## THANKS TO OUR TEAM :
+<details>
+<summary>CLICK HERE </summary>
 
 <a href="https://github.com/shizothetechie"><img src="https://github.com/shizothetechie.png?size=100" width="130" height="100"></a> | [<img src="https://github.com/xei-sensei.png?size=100" width="100" height="100">](https://github.com/xei-sensei) 
 ---|---
@@ -161,7 +163,7 @@ Maintainer | Silva Team|
 ---|---
 [LAZACK](https://github.com/Lazack28)  | [FG98F](https://github.com/FG98F)
 Maintainer | FG98F|
-
+</details>
 
 
 
