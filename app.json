@@ -35,12 +35,6 @@
       "required": false,
       "value": ""
 }
-  "SESSION_ID": {
-      "description": "put your session ID here in the box below",
-      "required": true,
-      "value": ""
-    }
-
     },
  "buildpacks": [
     {
