@@ -20,6 +20,11 @@
       "required": false,
       "value": ""
     },
+     "SESSION_ID": {
+      "description": "your session id",
+      "required": true,
+      "value": ""
+    },
     "autoRead": {
       "description": "make it true if you want bot to read messages",
       "required": false,
