@@ -1,0 +1,46 @@
+import { download } from 'aptoide-scraper'
+
+let handler = async (m, { oreo, usedPrefix: prefix, command, text }) => {
+  try {
+    if (command === 'modapk') {
+      if (!text) throw `*[❗] Please provide the APK Name you want to download.*`
+
+      await oreo.reply(m.chat, global.wait, m)
+      let data = await download(text)
+
+      if (data.size.replace(' MB', '') > 200) {
+        return await oreo.sendMessage(
+          m.chat,
+          { text: '*[⛔] The file is too large.*' },
+          { quoted: m }
+        )
+      }
+
+      if (data.size.includes('GB')) {
+        return await oreo.sendMessage(
+          m.chat,
+          { text: '*[⛔] The file is too large.*' },
+          { quoted: m }
+        )
+      }
+
+      await oreo.sendMessage(
+        m.chat,
+        {
+          document: { url: data.dllink },
+          mimetype: 'application/vnd.android.package-archive',
+          fileName: data.name + '.apk',
+          caption: null,
+        },
+        { quoted: m }
+      )
+    }
+  } catch {
+    throw `*[❗] An error occurred. Make sure to provide a valid link.*`
+  }
+}
+
+handler.help = ['modapk']
+handler.tags = ['downloader']
+handler.command = /^modapk$/i
+export default handler
