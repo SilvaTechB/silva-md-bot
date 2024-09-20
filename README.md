@@ -1,13 +1,10 @@
-## THE NEW LOOK OF SILVA MD BOT FROM THE SILVA V SERIES
+### LATEST UPDATE SEPTEMBER 2024
 
-<p align="center">
-  <a href="https://github.com/DenverCoder1/readme-typing-svg">
-    <img src="https://readme-typing-svg.herokuapp.com?font=Time+New+Roman&color=purple&size=25&center=true&vCenter=true&width=600&height=100&lines=HEROKU+ERROR+FIXED+SILVA..&hearts;++;HEROKU+ERROR+FIXED,;HEROKU+ANTIBAN+ACTIVE,;NOW+DEPLOY+WITH+HEROKU,;UPDATE+YOUR+FORK,;AFTER+EVERY+2+DAYS..🥂💕">
-  </a>
-</p>
-<h1 align="center"> 𝑺𝒊𝒍𝒗𝒂 𝒕𝒆𝒄𝒉
-<img src="https://github.com/0xAbdulKhalid/0xAbdulKhalid/raw/main/assets/mdImages/handshake.gif" width ="80"></h1> 
- <br>
+<img src="https://i.imgur.com/dBaSKWF.gif" height="90" width="100%">
+
+<a href="https://git.io/typing-svg"><img src="https://readme-typing-svg.demolab.com?font=Black+Ops+One&size=50&pause=1000&color=F70707&center=true&width=910&height=100&lines=SILVA+MD+BOT+YOUR+NUMBER+ONE+WHATSAPP+USER+BOT" alt="Typing SVG" /></a>
+  </p>
+<img src="https://i.imgur.com/dBaSKWF.gif" height="150" width="100%">
 
 ### we love silva md
 <p align="center">
@@ -15,7 +12,7 @@
     <img src="https://readme-typing-svg.herokuapp.com?font=Time+New+Roman&color=cyan&size=25&center=true&vCenter=true&width=600&height=100&lines=Hello+am+Silva+Tech..&hearts;++;Self-taught+Back-End+Developer,;From+Kenya🇰🇪,;My+Hobby+Is+Coding,;Active+Learner/Researcher,;Love+to+learn+new+stuffs..🥂💕">
   </a>
 </p>
-
+<img src="https://i.imgur.com/dBaSKWF.gif" height="90" width="100%">
 
 <p align="center"> Introducing 𝑺𝒊𝒍𝒗𝒂 𝒕𝒆𝒄𝒉, It is designed to bring a whole new level of excitement to your boring WhatsApp use. </p>
 
@@ -34,7 +31,7 @@
 </p>
 <p align="center"><img src="https://profile-counter.glitch.me/{SilvaTechB}/count.svg" alt="𝑺𝒊𝒍𝒗𝒂 𝒕𝒆𝒄𝒉 ᴍᴅ :: Visitor's Count" /></p>
 
----
+<img src="https://i.imgur.com/dBaSKWF.gif" height="90" width="100%">
 
 <img align= "right" width= "240" src= "https://media.tenor.com/YM91d6z3icQAAAAi/anime.gif"/>
 
@@ -47,7 +44,7 @@
   <img title="Whatsapp-Bot-Javascript" src="https://img.shields.io/badge/Javascript-363303?style=for-the-badge&logo=linux&logoColor=c6c631"></img>
 </p>
 
----
+<img src="https://i.imgur.com/dBaSKWF.gif" height="90" width="100%">
 
 
 <p align="center">Need help? please create an <a href="https://github.com/SilvaTechB/silva-md-bot/issues">issue</a></p>
@@ -58,7 +55,7 @@
 ![ Stats](https://github-readme-stats.vercel.app/api/pin/?username=SilvaTechB&repo=silva-md-bot&show_owner=true&theme=dark)
 
 
-   
+  <img src="https://i.imgur.com/dBaSKWF.gif" height="90" width="100%"> 
 ## Setup
 ---
 1.  ***Fork Repo [`CLICK HERE`](https://github.com/SilvaTechB/silva-md-bot/fork) (A MUST) and `Star ⭐ Repository` for Courage.***
@@ -84,6 +81,7 @@ Then **[Upload](https://github.com/SilvaTechB/silva-md-bot/tree/main/Authenticat
 </details>
 
 <a><img src='https://i.imgur.com/LyHic3i.gif'/></a>
+<img src="https://i.imgur.com/dBaSKWF.gif" height="90" width="100%">
 
 #### DEPLOYMENT
 
