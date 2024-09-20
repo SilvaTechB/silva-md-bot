@@ -1,3 +1,4 @@
+
 import chalk from 'chalk'
 import { spawn } from 'child_process'
 import express from 'express'
@@ -7,7 +8,7 @@ import path from 'path'
 import { fileURLToPath } from 'url';
 
 figlet(
-  'silva-md-bot',
+  'LAZACK MD',
   {
     font: 'Ghost',
     horizontalLayout: 'default',
@@ -23,7 +24,7 @@ figlet(
 )
 
 figlet(
-  'premium Whatsapp Bot',
+  'Advanced Whatsapp Bot',
   {
     horizontalLayout: 'default',
     verticalLayout: 'default',
@@ -43,7 +44,7 @@ const port = process.env.PORT || 5000
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-app.use(express.static(path.join(__dirname, 'media')));
+app.use(express.static(path.join(__dirname, 'jusorts')));
 
 app.get('/', (req, res) => {
   res.redirect('/lazack.html');
@@ -98,17 +99,17 @@ async function start(file) {
     start('lazack.js')
   })
 
-  const pluginsFolder = path.join(path.dirname(currentFilePath), 'plugins')
+  const pluginsFolder = path.join(path.dirname(currentFilePath), 'lazackcmds')
 
   fs.readdir(pluginsFolder, async (err, files) => {
     if (err) {
-      console.error(chalk.red(`Error reading plugins folder: ${err}`))
+      console.error(chalk.red(`Error reading lazackcmds folder: ${err}`))
       return
     }
     console.log(chalk.yellow(`Installed ${files.length} plugins`))
 
     try {
-      const { default: baileys } = await import('@shizodevs/shizoweb')
+      const { default: baileys } = await import('@whiskeysockets/baileys')
       const version = (await baileys.fetchLatestBaileysVersion()).version
       console.log(chalk.yellow(`Using Baileys version ${version}`))
     } catch (e) {
