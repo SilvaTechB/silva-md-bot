@@ -15,8 +15,7 @@
     "BOTNAME": {
       "description": "Give your BOT a name",
       "required": true,
-      "value": "𝕊𝕀𝕃𝕍𝔸 𝕄𝔻 𝔹𝕆𝕋
-"
+      "value": "𝕊𝕀𝕃𝕍𝔸 𝕄𝔻 𝔹𝕆𝕋"
     },
     "DATABASE_URL": {
       "description": "your mongodb database url",
