@@ -8,11 +8,11 @@ let handler = async (m, { conn }) => {
     message: {
       contactMessage: {
         displayName: `Lazack md`,
-        vcard: `BEGIN:VCARD\nVERSION:3.0\nN:;a,;;;\nFN:'LAZACK MD'\nitem1.TEL;waid=${m.sender.split('@')[0]}:${m.sender.split('@')[0]}\nitem1.X-ABLabel:Ponsel\nEND:VCARD`,
+        vcard: `BEGIN:VCARD\nVERSION:3.0\nN:;a,;;;\nFN:'silva MD'\nitem1.TEL;waid=${m.sender.split('@')[0]}:${m.sender.split('@')[0]}\nitem1.X-ABLabel:Ponsel\nEND:VCARD`,
       },
     },
   }
-  let pingMsg = await conn.sendMessage(m.chat, { text: 'Pinging...' }, { quoted: fgg })
+  let pingMsg = await conn.sendMessage(m.chat, { text: 'light...' }, { quoted: fgg })
 
   let timestamp = speed()
 
@@ -26,7 +26,7 @@ let handler = async (m, { conn }) => {
           key: pingMsg.key,
           type: 14,
           editedMessage: {
-            conversation: `*Lazack 28  💘 running ping:* *${latency} ms*`,
+            conversation: `*silva md speed bot:* *${latency} ms*`,
           },
         },
       },
