@@ -196,7 +196,7 @@ function _0x3759() {
         '8562IJlLOJ',
         'fakeObj',
         '4huDdKw',
-        '@shizodevs/shizoweb',
+        '@whiskeysockets/baileys',
         'KZjzU',
         'ndOWW',
         'exec',
