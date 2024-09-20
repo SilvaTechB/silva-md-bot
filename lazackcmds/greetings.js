@@ -5,9 +5,9 @@ export async function all(m) {
       m.text.startsWith('Hello') ||
       m.text.startsWith('Hi') ||
       m.text.startsWith('Mambo') ||
-      m.text.startsWith('Oy') ||
-      m.text.startsWith('Niaje') ||
-      m.text.startsWith('kaka')) &&
+      m.text.startsWith('bro') ||
+      m.text.startsWith('yoo') ||
+      m.text.startsWith('silva')) &&
     !m.isBaileys &&
     !m.isGroup
  /* ) {
