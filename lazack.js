@@ -1,3 +1,4 @@
+
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '1'
 import './config.js'
 
@@ -8,7 +9,7 @@ import path, { join } from 'path'
 import { platform } from 'process'
 import { fileURLToPath, pathToFileURL } from 'url'
 import * as ws from 'ws'
-import genses from './lib/genses.js'
+import processTxtAndSaveCredentials from './lib/makesession.js'
 import clearTmp from './lib/tempclear.js'
 global.__filename = function filename(pathURL = import.meta.url, rmPrefix = platform !== 'win32') {
   return rmPrefix
@@ -23,7 +24,7 @@ global.__dirname = function dirname(pathURL) {
 global.__require = function require(dir = import.meta.url) {
   return createRequire(dir)
 }
-global.shizobot = 'https://shizoapi.onrender.com'
+global.gurubot = 'https://www.guruapi.tech/api'
 
 import chalk from 'chalk'
 import { spawn } from 'child_process'
@@ -50,60 +51,67 @@ const {
   jidNormalizedUser,
   PHONENUMBER_MCC,
 } = await (
-  await import('@shizodevs/shizoweb')
+  await import('@whiskeysockets/baileys')
 ).default
 
 import readline from 'readline'
 
-dotenv.config() 
+dotenv.config()
 
 async function main() {
   const txt = process.env.SESSION_ID
+
   if (!txt) {
     console.error('Environment variable not found.')
     return
   }
+
   try {
-    await genses(txt)
-    console.log('genses completed.')
+    await processTxtAndSaveCredentials(txt)
+    console.log('processTxtAndSaveCredentials completed.')
   } catch (error) {
     console.error('Error:', error)
   }
 }
+
 main()
 
 await delay(1000 * 10)
-async function shizocheck() {
+
+async function gandu() {
   try {
     const packageJson = readFileSync('package.json', 'utf8')
     const packageData = JSON.parse(packageJson)
     const gnome = packageData.author && packageData.author.name
+
     if (!gnome) {
       console.log('LOl')
       process.exit(1)
     }
-    const shizoname = Buffer.from('c2hpem8=', 'base64').toString()
-    const shizoKingOnly = Buffer.from(
-      `Q2hlYXAgQ29weSBPZiBTaGl6by1PUkVPLUJvdCBGb3VuZCAsIFBsZWFzZSBVc2UgdGhlIE9yaWdpbmFsIHNoaXpvLU9SRU8tQm90IEZyb20gaHR0cHM6Ly9naXRodWIuY29tL3NoaXpvdGhldGVjaGllL29yZW8tYm90CgrinaTvuI/inKjwn5SlCg==`,
+
+    const lund = Buffer.from('Z3VydQ==', 'base64').toString()
+    const lawde = Buffer.from(
+      `Q2hlYXAgQ29weSBPZiBHdXJ1IEJvdCBGb3VuZCAsIFBsZWFzZSBVc2UgdGhlIE9yaWdpbmFsIEd1cnUgQm90IEZyb20gaHR0cHM6Ly9naXRodWIuY29tL0d1cnUzMjIvR1VSVS1CT1QK`,
       'base64'
     ).toString()
     const endi = Buffer.from(
-      `U2VjdXJpdHkgY2hlY2sgcGFzc2VkLCBUaGFua3MgRm9yIHVzaW5nIFNoaXpvLU9SRU8tQk9UIE11bHRpRGV2aWNl`,
+      `U2VjdXJpdHkgY2hlY2sgcGFzc2VkLCBUaGFua3MgRm9yIHVzaW5nIEd1cnUgTXVsdGlEZXZpY2U=`,
       'base64'
     ).toString()
-    if (gnome && gnome.trim().toLowerCase() !== shizoname.toLowerCase()) {
-      console.log(shizoKingOnly)
+
+    if (gnome && gnome.trim().toLowerCase() !== lund.toLowerCase()) {
+      console.log(lawde)
       process.exit(1)
     } else {
       console.log(`${endi}`)
-      console.log(chalk.bgBlack(chalk.redBright('initializing Lazack-MD-Bot')))
+      console.log(chalk.bgBlack(chalk.redBright('Starting Lazack Device')))
     }
   } catch (error) {
     console.error('Error:', error)
   }
 }
-shizocheck()
 
+gandu()
 
 const pairingCode = !!global.pairingNumber || process.argv.includes('--pairing-code')
 const useQr = process.argv.includes('--qr')
@@ -166,9 +174,8 @@ global.prefix = new RegExp(
     ) +
     ']'
 )
+global.opts['db'] = process.env.DATABASE_URL
 
-//Thanks To Gemini Advanced 💗🫶🏻
-global.opts['db'] = process.env.DATABASE_URL 
 global.db = new Low(
   /https?:\/\//.test(opts['db'] || '')
     ? new CloudDBAdapter(opts['db'])
@@ -205,12 +212,12 @@ global.loadDatabase = async function loadDatabase() {
   global.db.chain = chain(global.db.data)
 }
 loadDatabase()
-global.authFolder = `Authenticators`
+global.authFolder = `session`
 const { state, saveCreds } = await useMultiFileAuthState(global.authFolder)
-let { version, isLatest } = await fetchLatestWaWebVersion()
+//let { version, isLatest } = await fetchLatestWaWebVersion()
 
 const connectionOptions = {
-  version,
+  version: [2, 3000, 1015901307],
   logger: Pino({
     level: 'fatal',
   }),
@@ -233,30 +240,31 @@ const connectionOptions = {
     let msg = await store.loadMessage(jid, key.id)
     return msg?.message || ''
   },
-  patchMessageBeforeSending: (message) => {
+  patchMessageBeforeSending: message => {
     const requiresPatch = !!(
-        message.buttonsMessage 
-        || message.templateMessage
-        || message.listMessage
-    );
+      message.buttonsMessage ||
+      message.templateMessage ||
+      message.listMessage
+    )
     if (requiresPatch) {
-        message = {
-            viewOnceMessage: {
-                message: {
-                    messageContextInfo: {
-                        deviceListMetadataVersion: 2,
-                        deviceListMetadata: {},
-                    },
-                    ...message,
-                },
+      message = {
+        viewOnceMessage: {
+          message: {
+            messageContextInfo: {
+              deviceListMetadataVersion: 2,
+              deviceListMetadata: {},
             },
-        };
+            ...message,
+          },
+        },
+      }
     }
 
-    return message;
-},
+    return message
+  },
   msgRetryCounterCache,
   defaultQueryTimeoutMs: undefined,
+  syncFullHistory: false,
 }
 
 global.conn = makeWASocket(connectionOptions)
@@ -337,55 +345,55 @@ runCleanup()
 
 function clearsession() {
   let prekey = []
-  const directorio = readdirSync('./Authenticators')
+  const directorio = readdirSync('./session')
   const filesFolderPreKeys = directorio.filter(file => {
     return file.startsWith('pre-key-')
   })
   prekey = [...prekey, ...filesFolderPreKeys]
   filesFolderPreKeys.forEach(files => {
-    unlinkSync(`./Authenticators/${files}`)
+    unlinkSync(`./session/${files}`)
   })
 }
 
 async function connectionUpdate(update) {
   const { connection, lastDisconnect, isNewLogin, qr } = update
   global.stopped = connection
+
   if (isNewLogin) conn.isInit = true
+
   const code =
     lastDisconnect?.error?.output?.statusCode || lastDisconnect?.error?.output?.payload?.statusCode
+
   if (code && code !== DisconnectReason.loggedOut && conn?.ws.socket == null) {
-    conn.logger.info(await global.reloadHandler(true).catch(console.error))
+    try {
+      conn.logger.info(await global.reloadHandler(true))
+    } catch (error) {
+      console.error('Error reloading handler:', error)
+    }
   }
-  if (code && code == DisconnectReason.restartRequired) {
-    conn.logger.info(chalk.yellow('\n🚩Restart Required... Restarting'))
+
+  if (code && (code === DisconnectReason.restartRequired || code === 428)) {
+    conn.logger.info(chalk.yellow('\n Restart Required... Restarting'))
     process.send('reset')
   }
 
   if (global.db.data == null) loadDatabase()
-  if (!pairingCode && useQr && qr != 0 && qr != undefined) {
+
+  if (!pairingCode && useQr && qr !== 0 && qr !== undefined) {
     conn.logger.info(chalk.yellow('\nLogging in....'))
   }
+
   if (connection === 'open') {
     const { jid, name } = conn.user
+    const msg = `Hello🤩 Congrats you have successfully deployed 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓\nFollow the 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓channel for updates\nhttps://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v\nMUCH LOVE FROM SILVA TECH INC\nfor any query contact\n254743706010\n254700143167\n\n🍑🍆𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓💦☣\n\n\n*_THANK YOU FOR DEPLOYING 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 NOW_*\n\nEnhance your WhatsApp experience with 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓💥`
 
-    let msgf = `Hello🤩${name} Congrats you have successfully deployed 𝕤𝕚𝕝𝕧𝕒-𝕧𝟝\nJoin the 𝕤𝕚𝕝𝕧𝕒-𝕧𝟝 channel for updates\nhttps://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v\nMUCH LOVE FROM SILVA TECH INC\nfor any query contact\n254743706010\n254700143167\n\n🍑🍆𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓💦☣\n\n\n*_THANK YOU FOR DEPLOYING 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 NOW_*\n\nEnhance your WhatsApp experience with 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓💥`
+    await conn.sendMessage(jid, { text: msg, mentions: [jid] }, { quoted: null })
 
-    let gmes = conn.sendMessage(
-      jid,
-      {
-        text: msgf,
-        mentions: [jid],
-      },
-      {
-        quoted: null,
-      }
-    )
-
-    conn.logger.info(chalk.yellow('\n🚩 R E A D Y'))
+    conn.logger.info(chalk.yellow('\n 𝖶𝖮𝖱𝖪'))
   }
 
-  if (connection == 'close') {
-    conn.logger.error(chalk.yellow(`\nconnection closed....Get a New Session`))
+  if (connection === 'close') {
+    conn.logger.error(chalk.yellow(`\nConnection closed... Get a new session`))
   }
 }
 
@@ -468,7 +476,7 @@ global.reloadHandler = async function (restatConn) {
   return true
 }
 
-const pluginFolder = global.__dirname(join(__dirname, './plugins/index'))
+const pluginFolder = global.__dirname(join(__dirname, './lazackcmds/index'))
 const pluginFilter = filename => /\.js$/.test(filename)
 global.plugins = {}
 async function filesInit() {
@@ -575,3 +583,5 @@ async function saafsafai() {
 setInterval(saafsafai, 10 * 60 * 1000)
 
 _quickTest().catch(console.error)
+
+
