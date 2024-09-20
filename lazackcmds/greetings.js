@@ -2,7 +2,7 @@ export async function all(m) {
   // when someone sends you hello message
   if (
     (m.mtype === 'hellomessage' ||
-      m.text.startsWith('Hello, hi, mambo, yoo, bro, Sasa, mambo, babe') ||
+      m.text.startsWith('Hello') ||
       m.text.startsWith('hi') ||
       m.text.startsWith('mambo')) &&
     !m.isBaileys &&
