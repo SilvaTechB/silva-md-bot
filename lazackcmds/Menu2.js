@@ -7,8 +7,8 @@ const { levelling } = '../lib/levelling.js'
 import moment from 'moment-timezone'
 import { promises } from 'fs'
 import { join } from 'path'
-const time = moment.tz('Asia/Kolkata').format('HH')
-let wib = moment.tz('Asia/Kolkata').format('HH:mm:ss')
+const time = moment.tz('Africa/Nairobi').format('HH')
+let wib = moment.tz('Africa/Nairobi').format('HH:mm:ss')
 //import db from '../lib/database.js'
 
 let handler = async (m, { conn, usedPrefix, command}) => {
@@ -37,38 +37,38 @@ let quote = quotes[Math.floor(Math.random() * quotes.length)];
 
 let taguser = '@' + m.sender.split("@s.whatsapp.net")[0]
 let str = `
-🚀 *_Buckle up ${name}, ${greeting}! We're going on an adventure!_* 🚀
+🤖 *_Hold on ${name}, ${greeting}! this will be a head on ride!_* 🤖
 
-📜 *_Quote of the day: ${quote}_* 📜
+📚 *_Quote of the day: ${quote}_* 📜
 
-╔═══════════════════════╗
-║ 🌟 *User Info:* 🌟                    
-║═══════════════════════╣
-║ 👾  *User Tag:* ${taguser}            
-║ 🎩  *Name:* ${name}                   
-║ 🦸  *Master Mind:* LAZACK28           
-║ 💎  *Diamonds:* ${diamond}             
-║ 🏆  *Rank:* ${role}                   
-║ 🎮  *XP:* ${exp}                      
-╚═══════════════════════╝
+*:–☆–:*:–☆–:*:–☆–:*:–☆–:*:–☆–:*:–☆–:*
+ 🌟 *Holder statistics:* 🌟                    
+*:–☆–:*:–☆–:*:–☆–:*:–☆–:*:–☆–:*:–☆–:*
+ 👾  *User Tag:* ${taguser}            
+ 🎩  *Name:* ${name}                   
+ 🦸  *Master Mind:* silva tech inc           
+ 💎  *Diamonds:* ${diamond}             
+ 🏆  *Rank:* ${role}                   
+ 🎮  *XP:* ${exp}                      
+*:–☆–:*:–☆–:*:–☆–:*:–☆–:*:–☆–:*:–☆–:*
 
-╔═══════════════════════╗
-║ 📅 *Today's Sauce!* 📅                
-╠═══════════════════════╣
-║ 📆  *Today's Date:* ${date}           
-║ ⏲️  *Current Time:* ${wib}            
-╚═══════════════════════╝
+*:–☆–:*:–☆–:*:–☆–:*:–☆–:*:–☆–:*:–☆–:*
+ 📅 *Today's Sauce!* 📅                
+*:–☆–:*:–☆–:*:–☆–:*:–☆–:*:–☆–:*:–☆–:*
+ 📆  *Today's Date:* ${date}           
+ ⏲️  *Current Time:* ${wib}            
+*:–☆–:*:–☆–:*:–☆–:*:–☆–:*:–☆–:*:–☆–:*
 
-╔═══════════════════════╗
+*:–☆–:*:–☆–:*:–☆–:*:–☆–:*:–☆–:*:–☆–:*
 ║ 🤖 *BOT STATUS:* 🤖                   
-╠═══════════════════════╣
-║ 🤡  *Bot Name:* ${botname}            
-║ 💻  *Platform:* Linux                  
-║ 📣  *Prefix:* ${usedPrefix}            
-║ 🕓  *Uptime:* ${uptime}               
-║ 💌  *Database:* ${rtotalreg} of ${totaluser} 
-║ 📚  *Total Users:* ${totaluser}       
-╚═══════════════════════╝
+*:–☆–:*:–☆–:*:–☆–:*:–☆–:*:–☆–:*:–☆–:*
+🤡  *Bot Name:* ${botname}            
+💻  *Platform:* Linux                  
+📣  *Prefix:* ${usedPrefix}            
+🕓  *Uptime:* ${uptime}               
+💌  *Database:* ${rtotalreg} of ${totaluser} 
+📚  *Total Users:* ${totaluser}       
+*:–☆–:*:–☆–:*:–☆–:*:–☆–:*:–☆–:*:–☆–:*
 
 💡 *_Remember, when in doubt, use ${usedPrefix}list or ${usedPrefix}help2. It's like my magic spell book!_* 💡
 `
