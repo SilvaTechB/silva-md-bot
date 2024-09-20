@@ -1,8 +1,8 @@
 FROM quay.io/gurusensei/gurubhay:latest
 
-RUN git clone https://github.com/SilvaTechB/silva-md-bot /root/silva
+RUN git clone https://github.com/SilvaTechB/silva-md-bot /root/sylivanus
 
-WORKDIR /root/silva/
+WORKDIR /root/sylivanus/
 
 RUN npm install --platform=linuxmusl
 

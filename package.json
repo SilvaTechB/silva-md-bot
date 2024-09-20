@@ -1,8 +1,8 @@
 {
-    "name": "silva-md-bot",
-    "version": "2.2.0",
-    "description": "horney botWhatsApp",
-    "main": "mtaju.js",
+    "name": "SILVA MD",
+    "version": "2.1.0",
+    "description": "Advanced WhatsApp",
+    "main": "silva.js",
     "type": "module",
     "directories": {
         "lib": "lib",
@@ -13,8 +13,8 @@
         "node": ">=20.0.0"
     },
     "scripts": {
-        "start": "node mtaju.js",
-        "test": "node mtajubots.js"
+        "start": "node silva.js",
+        "test": "node silvamd.js"
     },
     "keywords": [
         "termux-whatsapp-bot",
@@ -28,16 +28,16 @@
         "MD",
         "baileys-md"
     ],
-    "homepage": "https://github.com/SilvaTechB/silva-md-bot",
+    "homepage": "https://github.com/Guru322/GURU-BOT",
     "author": {
-        "name": "SILVA"
+        "name": "GURU"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/SilvaTechB/silva-md-bot.git"
+        "url": "git+https://github.com/Guru322/GURU-BOT.git"
     },
     "bugs": {
-        "url": "https://github.com/SilvaTechB/silva-md-bot/issues"
+        "url": "https://github.com/Guru322/GURU-BOT/issues"
     },
     "license": "Apache License 2.0",
     "dependencies": {

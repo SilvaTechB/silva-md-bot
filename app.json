@@ -1,6 +1,6 @@
 {
-  "name": "𝓢𝓘𝓛𝓥𝓐 𝓜𝓓 𝓑𝓞𝓣",
-  "description": " WITH GREAT POWER COMES WITH GREAT RESPONSIBILITIES. TEAM SILVA AND LAZACK WHATSAPP BOT.",
+  "name": "SILVA AI",
+  "description": " with great power comes with great responsibilities. follow the deployment process below.",
   "keywords": [
     "whatsapp bot"
   ],
@@ -15,7 +15,7 @@
     "BOTNAME": {
       "description": "Give your BOT a name",
       "required": true,
-      "value": "𝕊𝕀𝕃𝕍𝔸 𝕄𝔻 𝔹𝕆𝕋"
+      "value": "SILVA-MD-BOT©®"
     },
     "DATABASE_URL": {
       "description": "your mongodb database url",
@@ -37,14 +37,14 @@
       "required": false,
       "value": ""
     },
-     "HKEY": {
+     "HEROKU API KEY": {
       "description": "Put your Heroku api key Here , Get one from here https://dashboard.heroku.com/account",
-      "required": false,
+      "required": true,
       "value": ""
     },
-     "HAPP": {
-      "description": "Put the Heroku app name, same as above entered",
-      "required": false,
+     "HEROKU APP NAME": {
+      "description": "Put the Heroku app name, same as above entered on app name",
+      "required": true,
       "value": ""
     },
     "statusview": {
@@ -55,7 +55,7 @@
     "autoRead": {
       "description": "make it true if you want bot to read messages",
       "required": false,
-      "value": ""
+      "value": "false"
     },
     "antidelete": {
       "description": "bot will forward deleted messages if you make it true",

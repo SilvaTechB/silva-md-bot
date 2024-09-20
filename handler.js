@@ -8,7 +8,7 @@ import fetch from 'node-fetch'
 import Pino from 'pino'
 
 /**
- * @type {import("@shizodevs/shizoweb")}
+ * @type {import("@whiskeysockets/baileys")}
  */
 const isNumber = x => typeof x === 'number' && !isNaN(x)
 const delay = ms =>
@@ -22,10 +22,10 @@ const delay = ms =>
 
 /** 
  * Handle messages upsert
- * @param {import("@shizodevs/shizoweb").BaileysEventMap<unknown>["messages.upsert"]} groupsUpdate
+ * @param {import("@whiskeysockets/baileys").BaileysEventMap<unknown>["messages.upsert"]} groupsUpdate
  */
 const { getAggregateVotesInPollMessage, makeInMemoryStore } = await (
-  await import('@shizodevs/shizoweb')
+  await import('@whiskeysockets/baileys')
 ).default
 const store = makeInMemoryStore({
   logger: Pino().child({
@@ -66,12 +66,12 @@ export async function handler(chatUpdate) {
         }
         //--user number
         if (!isNumber(user.afk)) user.afk = -1
-        if (!('afkReason' in user)) user.afkReason = '𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 user offline'
+        if (!('afkReason' in user)) user.afkReason = 'away from keyboard'
         if (!('banned' in user)) user.banned = false
         if (!isNumber(user.warn)) user.warn = 0
         if (!isNumber(user.level)) user.level = 0
         if (!('role' in user)) user.role = 'Tadpole'
-        if (!('autolevelup' in user)) user.autolevelup = true
+        if (!('autolevelup' in user)) user.autolevelup = false
            /*
    Do Not Modify this Section ❌  👇👇
    Else Relationship Features Will Not Work 😔
@@ -115,22 +115,22 @@ export async function handler(chatUpdate) {
       if (chat) {
         if (!('antiDelete' in chat)) chat.antiDelete = true
         if (!('antiLink' in chat)) chat.antiLink = false
-        if (!('antiSticker' in chat)) chat.antiSticker = true
-        if (!('antiToxic' in chat)) chat.antiToxic = true
+        if (!('antiSticker' in chat)) chat.antiSticker = false
+        if (!('antiToxic' in chat)) chat.antiToxic = false
         if (!('detect' in chat)) chat.detect = false
         if (!('getmsg' in chat)) chat.getmsg = true
         if (!('isBanned' in chat)) chat.isBanned = false
-        if (!('nsfw' in chat)) chat.nsfw = true
+        if (!('nsfw' in chat)) chat.nsfw = false
         if (!('sBye' in chat)) chat.sBye = ''
         if (!('sDemote' in chat)) chat.sDemote = ''
         if (!('simi' in chat)) chat.simi = false
-        if (!('sPromote' in chat)) chat.sPromote = 'true'
-        if (!('sWelcome' in chat)) chat.sWelcome = 'true'
+        if (!('sPromote' in chat)) chat.sPromote = ''
+        if (!('sWelcome' in chat)) chat.sWelcome = ''
         if (!('useDocument' in chat)) chat.useDocument = false
-        if (!('viewOnce' in chat)) chat.viewOnce = true
-        if (!('viewStory' in chat)) chat.viewStory = true
-        if (!('welcome' in chat)) chat.welcome = true
-        if (!('chatbot' in chat)) chat.chatbot = true
+        if (!('viewOnce' in chat)) chat.viewOnce = false
+        if (!('viewStory' in chat)) chat.viewStory = false
+        if (!('welcome' in chat)) chat.welcome = false
+        if (!('chatbot' in chat)) chat.chatbot = false
         if (!isNumber(chat.expired)) chat.expired = 0
       } else
         global.db.data.chats[m.chat] = {
@@ -389,7 +389,7 @@ export async function handler(chatUpdate) {
           plugin.credit &&
           global.db.data.users[m.sender].credit < plugin.credit * 1
         ) {
-          this.reply(m.chat, `🟥 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 alert\nYou don't have enough gold`, m)
+          this.reply(m.chat, `🟥 You don't have enough gold`, m)
           continue // Gold finished
         }
         if (plugin.level > _user.level) {
@@ -517,7 +517,7 @@ export async function handler(chatUpdate) {
 
 /**
  * Handle groups participants update
- * @param {import("@shizodevs/shizoweb").BaileysEventMap<unknown>["group-participants.update"]} groupsUpdate
+ * @param {import("@whiskeysockets/baileys").BaileysEventMap<unknown>["group-participants.update"]} groupsUpdate
  */
 export async function participantsUpdate({ id, participants, action }) {
   if (opts['self'] || this.isInit) return
@@ -574,7 +574,7 @@ export async function participantsUpdate({ id, participants, action }) {
                 contextInfo: {
                   mentionedJid: [user],
                   externalAdReply: {
-                    title: '𝐒𝐈𝐋𝐕𝐀 𝐌𝐃',
+                    title: 'silva ᴛʜᴇ sylivanus ʙᴏᴛ',
                     body: 'welcome to Group',
                     thumbnailUrl: welcomeApiUrl,
                     sourceUrl: 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v',
@@ -631,7 +631,7 @@ export async function participantsUpdate({ id, participants, action }) {
                 contextInfo: {
                   mentionedJid: [user],
                   externalAdReply: {
-                    title: '𝐒𝐈𝐋𝐕𝐀 𝐌𝐃',
+                    title: 'silva ᴛʜᴇ sylivanus ʙᴏᴛ',
                     body: 'Goodbye from  Group',
                     thumbnailUrl: leaveApiUrl,
                     sourceUrl: 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v',
@@ -682,7 +682,7 @@ export async function participantsUpdate({ id, participants, action }) {
 
 /**
  * Handle groups update
- * @param {import("@shizodevs/shizoweb").BaileysEventMap<unknown>["groups.update"]} groupsUpdate
+ * @param {import("@whiskeysockets/baileys").BaileysEventMap<unknown>["groups.update"]} groupsUpdate
  */
 export async function groupsUpdate(groupsUpdate) {
   if (opts['self']) return
@@ -784,7 +784,7 @@ export async function deleteUpdate(message) {
       conn.user.id,
       `
             ≡ deleted a message 
-            ┌─⊷ 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 𝘼𝙉𝙏𝙄 𝘿𝙀𝙇𝙀𝙏𝙀 
+            ┌─⊷  𝘼𝙉𝙏𝙄 𝘿𝙀𝙇𝙀𝙏𝙀 
             ▢ *Number :* @${participant.split`@`[0]} 
             └─────────────
             `.trim(),
@@ -863,7 +863,7 @@ global.dfail = (type, m, conn) => {
   const emoji = {
     general: '⚙️',
     owner: '👑',
-    moderator: '🛡️',
+    moderator: '🤖',
     premium: '💎',
     group: '👥',
     private: '📱',
