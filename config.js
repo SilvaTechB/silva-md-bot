@@ -1,65 +1,32 @@
-import { watchFile, unwatchFile } from 'fs' 
+
+import { watchFile, unwatchFile } from 'fs'
 import chalk from 'chalk'
 import { fileURLToPath } from 'url'
-import moment from 'moment-timezone' 
-import fs from 'fs' 
+import fs from 'fs'
 
-//OwnerShip
-global.owner = [
-  [process.env.OWNER_NUMBER || '254743706010', process.env.OWNER_NAME || '𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓', true],
-  ['254700143167', '𝐒𝐈𝐋𝐕𝐀 𝐌𝐃', true]
-]
-global.mods = []
-global.prems = []
+import dotenv from 'dotenv'
+dotenv.config()
 
-global.author = process.env.OWNER_NAME || '𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓'
-global.botname = process.env.BOT_NAME || '𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓'
-global.oname = author
-global.bname = botname
+const ownervb = process.env.OWNERS || "254700143167"
 
-//Extra Shortcuts
-global.smlink = process.env.SOCIAL_MEDIA_LINK || 'https://github.com/SilvaTechB'
-global.gclink = process.env.GROUP_LINK || 'https://chat.whatsapp.com/Jjj2lYrtGHc5WY2rUmC6JD'
-global.chlink = process.env.CHANNEL_LINK || 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v'
- 
-//Apikeys
-global.shizokeys = 'shizo'
 
-//Sticker Watermarks
-global.packname = process.env.BOT_NAME || '𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓'
-global.stkpack = process.env.BOT_NAME || '𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓'
-global.stkowner = process.env.OWNER_NAME || '© 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓'
+const ownerlist = ownervb.split(';');
 
-//Watermark
-global.maker = process.env.MAKER || 'Made with 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓'
+global.owner = [];
+for (let i = 0; i < ownerlist.length; i += 2) {
+    const owner = [
+        ownerlist[i],            
+        ownerlist[i + 1],         
+        true                        
+    ];
+    global.owner.push(owner);
+}
 
-//global emojis
-global.wait = '*⌛ _𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓..._*\n*▰▰▰▱▱▱▱▱*'
-global.rwait = '⌛'
-global.dmoji = '🤭'
-global.done = '✅'
-global.error = '❌' 
-global.xmoji = '🔥' 
+//global.pairingNumber = "" //put your bot number here
 
-//management
-global.bug = '*!! Sorry 💢 !!*\nSomething went wrong 🌋'
-global.stop = '*!! 🎭 Unfortunately 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓💔 !!*\nBot system is not Responding 🙃'
-
-//TimeLines
-global.botdate = `*⫹⫺ Date:*  ${moment.tz('Africa/Nairobi').format('DD/MM/YY')}`
-global.bottime = `*⫹⫺ Time:* ${moment.tz('Africa/Nairobi').format('HH:mm:ss')}`
-
-//Hosting Management
-global.serverHost = 1
-global.getQrWeb = 0
-global.renderHost = 0
-global.replitHost = 0
-
-global.pairingNumber = "254743706010" //put your bot number here
-
-global.mods = ['254743706010','254700143167']
-global.prems = ['254700143167','254743706010']
-global.allowed = ['254743706010','254700143167']
+global.mods = ['254743706010', '254700143167']
+global.prems = ['254743706010', '254700143167', '254755257907']
+global.allowed = ['254743706010', '254700143167']
 global.keysZens = ['c2459db922', '37CC845916', '6fb0eff124']
 global.keysxxx = keysZens[Math.floor(keysZens.length * Math.random())]
 global.keysxteammm = [
@@ -75,17 +42,56 @@ global.keysxteam = keysxteammm[Math.floor(keysxteammm.length * Math.random())]
 global.keysneoxrrr = ['5VC9rvNx', 'cfALv5']
 global.keysneoxr = keysneoxrrr[Math.floor(keysneoxrrr.length * Math.random())]
 global.lolkeysapi = ['GataDios']
-global.keysZens = ['c2459db922', '37CC845916', '6fb0eff124']
-global.keysxxx = keysZens[Math.floor(keysZens.length * Math.random())]
-global.keysxteammm = [
-  '29d4b59a4aa687ca',
-  '5LTV57azwaid7dXfz5fzJu',
-  'cb15ed422c71a2fb',
-  '5bd33b276d41d6b4',
-  'HIRO',
-  'kurrxd09',
-  'ebb6251cc00f9c63',
-]
+
+global.APIs = {
+  // API Prefix
+  // name: 'https://website'
+  xteam: 'https://api.xteam.xyz',
+  dzx: 'https://api.dhamzxploit.my.id',
+  lol: 'https://api.lolhuman.xyz',
+  violetics: 'https://violetics.pw',
+  neoxr: 'https://api.neoxr.my.id',
+  zenzapis: 'https://zenzapis.xyz',
+  akuari: 'https://api.akuari.my.id',
+  akuari2: 'https://apimu.my.id',
+  nrtm: 'https://fg-nrtm.ddns.net',
+  bg: 'http://bochil.ddns.net',
+  fgmods: 'https://api-fgmods.ddns.net',
+}
+global.APIKeys = {
+  // APIKey Here
+  // 'https://website': 'apikey'
+  'https://api.xteam.xyz': 'd90a9e986e18778b',
+  'https://api.lolhuman.xyz': '85faf717d0545d14074659ad',
+  'https://api.neoxr.my.id': `${keysneoxr}`,
+  'https://violetics.pw': 'beta',
+  'https://zenzapis.xyz': `${keysxxx}`,
+  'https://api-fgmods.ddns.net': 'fg-dylux',
+}
+
+// Sticker WM
+global.botname = process.env.BOTNAME
+global.premium = 'true'
+global.packname = '𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓'
+global.author = '𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓'
+global.menuvid = ''
+global.igfg = ''
+global.dygp = ''
+global.fgsc = 'https://github.com/SilvaTechB/silva-md-bot'
+global.fgyt = 'https://youtube.com/@silvaedits254'
+global.fgpyp = 'https://youtube.com/@silvaedits254'
+global.fglog = ''
+global.thumb = fs.readFileSync('./jusorts/silva.jpg')
+
+global.wait = '*⌛ _𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 analysing..._*\n*▰▰▰▱▱▱▱▱*'
+global.rwait = '⌛'
+global.dmoji = '🤭'
+global.done = '✅'
+global.error = '❌'
+global.xmoji = '🔥'
+
+global.multiplier = 69
+global.maxwarn = '3'
 
 let file = fileURLToPath(import.meta.url)
 watchFile(file, () => {
