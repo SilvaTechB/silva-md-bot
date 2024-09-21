@@ -17,13 +17,13 @@ let handler = async (m, { conn, text }) => {
 
   try {
     const installationId = 'a1i0Z--jzbJC6kx-2_s3OMNW2X7O2Qe3ca-XwmHexijCBA6MNKAO2ciUw756zhWj'
-    const apiurl = `https://truecaller-api.vercel.app/search?phone=${encodeURIComponent(phoneNumber)}&id=${installationId}`
+    const apiurl = `https://truecaller-api.vercel.app/search?phone=${encodeURIComponent(phoneNumber)}&id=${installationId)`
 
     let response = await fetch(apiurl)
     console.log(response)
     let json = await response.json()
 
-    json.creator = 'GURU'
+    json.creator = 'Silva'
 
     let milf = ''
     for (let prop in json) {
