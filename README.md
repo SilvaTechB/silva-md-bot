@@ -1,4 +1,4 @@
-[![Typing SVG](https://readme-typing-svg.demolab.com?font=Protest+Guerrilla&pause=1000&color=F70000&random=true&width=910&height=1000&lines=THANK+YO%C3%9A;FOR+CHOOSING+SILVA+MD+BOT;2024+SEPTEMBER+UPDATES;CREATED+BY+SILVA)](https://git.io/typing-svg)
+[![Typing SVG](https://readme-typing-svg.demolab.com?font=Protest+Guerrilla&pause=1000&color=F70000&random=true&width=910&height=100&lines=THANK+YO%C3%9A;FOR+CHOOSING+SILVA+MD+BOT;2024+SEPTEMBER+UPDATES;CREATED+BY+SILVA)](https://git.io/typing-svg)
 
 <img src="https://i.imgur.com/dBaSKWF.gif" height="90" width="100%">
 
