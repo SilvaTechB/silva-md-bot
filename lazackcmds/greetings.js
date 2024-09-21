@@ -18,10 +18,10 @@ export async function all(m) {
       },
       { quoted: m }*/
     ) {
-    this.sendButton(m.chat, `*WELCOME ITS ME JUST REPLYING*      
+    this.sendButton(m.chat, `*WELCOME THIS IS SILVA MD*      
     Hello 💕🥰 @${m.sender.split('@')[0]} 
-    i may be offline or i may be slow to respond you but wait i will be back soon 😇
-  `.trim(), igfg, null, [['OWNER HELP', '.grp'],['GET TEXT', '.repo']] , m, { mentions: [m.sender] })
+    THANK YOU FOR MESSAGING ME I WILL RESPOND IF I DONT KNOW AM OFFLINE😇
+  `.trim(), igfg, null, [['OWNER HELP', '.grp'],['BOT SCRIPT', '.repo']] , m, { mentions: [m.sender] })
     m.react('💕')
   }
 
