@@ -1,4 +1,4 @@
-import { bitly } from '@shizodevs/wabotmodule';
+import { bitly } from '@whiskeysockets/baileys';
 
 let handler = async (m, { conn, args }) => {
   try {
@@ -10,7 +10,7 @@ let handler = async (m, { conn, args }) => {
     await conn.sendFile(m.chat, qrCode, 'qrcode.png', `Successfuly Shorted Your Link ✅
 🏴‍☠️ *Original Link:* ${longURL}
 🧟‍♂️ *Shorted Link:* ` + shortURL + `
-📢 *Powered by:* Bit.ly
+📢 *Powered by:* Silva md bot
 👨‍🎓 *Developer:* ${author}`, m);
   } catch (error) {
     console.error(error);
