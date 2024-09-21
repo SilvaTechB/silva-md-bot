@@ -1,104 +1,83 @@
-import ytdl from 'youtubedl-core';
-import yts from 'youtube-yts';
-import fs from 'fs';
-import { pipeline } from 'stream';
-import { promisify } from 'util';
-import os from 'os';
-import axios from 'axios';
+import ytSearch from 'yt-search';
+import { youtubedl, youtubedlv2 } from '@bochilteam/scraper-sosmed';
 
-const streamPipeline = promisify(pipeline);
-
-let handler = async (m, { conn, command, text, usedPrefix }) => {
-  if (!text) throw `Use example ${usedPrefix}${command} naruto blue bird`;
-  await m.react(rwait);
-
-  try {
-    // Encode the query for the API request
-    const query = encodeURIComponent(text);
-
-    // Make a GET request to the API
-    const response = await axios.get(`https://www.guruapi.tech/api/ytsearch?text=${query}`);
-    const result = response.data.results[0]; // Get the first result
-
-    if (!result) throw 'Video Not Found, Try Another Title';
-
-    // Extract video information from the API response
-    const { title, thumbnail, duration, views, uploaded, url } = result;
-
-    // Create a message caption with video information
-    const captvid = `✼ SILVA Y O U T U B E PLAYER ✼
-  ❏ Title: ${title}
-  ❐ Duration: ${duration}
-  ❑ Views: ${views}
-  ❒ Upload: ${uploaded}
-  ❒ Link: ${url}
-
-> I CAN'T DOWNLOAD FOR YOU NOW WE ARE FIXING THE PROBLEM.
-> FIXING THIS ERROR
-⊱─━━━━⊱༻●༺⊰━━━━─⊰`;
-
-    // Send the video information along with the thumbnail to the Discord channel
-    conn.sendMessage(m.chat, { image: { url: thumbnail }, caption: captvid, footer: author }, { quoted: m });
-
-    // Download and send the audio of the video
-    const audioStream = ytdl(url, {
-      filter: 'audioonly',
-      quality: 'highestaudio',
-    });
-
-    // Get the path to the system's temporary directory
-    const tmpDir = os.tmpdir();
-
-    // Create a writable stream in the temporary directory
-    const writableStream = fs.createWriteStream(`${tmpDir}/${title}.mp3`);
-
-    // Start the download
-    await streamPipeline(audioStream, writableStream);
-
-    // Prepare the message document with audio file and metadata
-    const doc = {
-      audio: {
-        url: `${tmpDir}/${title}.mp3`
-      },
-      mimetype: 'audio/mpeg',
-      ptt: false,
-      waveform: [100, 0, 0, 0, 0, 0, 100],
-      fileName: `${title}`,
-      contextInfo: {
-        externalAdReply: {
-          showAdAttribution: true,
-          mediaType: 2,
-          mediaUrl: url,
-          title: title,
-          body: 'HERE IS YOUR SONG',
-          sourceUrl: "https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v",
-          thumbnail: await (await conn.getFile(thumbnail)).data
-        }
-      }
-    };
-
-    // Send the audio message to the Discord channel
-    await conn.sendMessage(m.chat, doc, { quoted: m });
-
-    // Delete the downloaded audio file
-    fs.unlink(`${tmpDir}/${title}.mp3`, (err) => {
-      if (err) {
-        console.error(`Failed to delete audio file: ${err}`);
-      } else {
-        console.log(`Deleted audio file: ${tmpDir}/${title}.mp3`);
-      }
-    });
-  } catch (error) {
-    console.error(error);
-    throw 'An error occurred while searching for YouTube videos.';
+let handler = async (message, { conn, command, text, usedPrefix }) => {
+  if (!text) {
+    throw `Example: \n${usedPrefix}${command} <video name>`;
   }
+
+  let searchResult = await ytSearch(text);
+  let video = searchResult.videos[0];
+
+  await conn.sendMessage(message.chat, {
+    react: { text: '😁', key: message.key }
+  });
+
+  if (!video) {
+    throw "Couldn't find any video, try another name.";
+  }
+
+  const {
+    title,
+    description,
+    thumbnail,
+    videoId,
+    durationH,
+    views,
+    publishedTime,
+  } = video;
+
+  const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+  let responseMessage = `╭━━━━⊱𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓⊱━━━━❣️
+*🎉 Title:* ${title}
+*🖇️ Link:* ${videoUrl}
+*📆 Uploaded:* ${publishedTime}
+*⌚ Duration:* ${durationH}
+*👀 Views:* ${views.toLocaleString()}
+*📃 Description:* ${description}
+╰━━━━━━━⚡𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓⚡━━━━━━━❣️`;
+
+  await conn.sendMessage(message.chat, {
+    text: responseMessage,
+    contextInfo: {
+      externalAdReply: {
+        title: responseMessage,
+        thumbnailUrl: thumbnail,
+        mediaType: 1,
+        renderLargerThumbnail: true
+      }
+    }
+  }, { quoted: message });
+
+  const audioInfo = await youtubedl(videoUrl).catch(() => youtubedlv2(videoUrl));
+  const audioUrl = await audioInfo.audio['128kbps'].download();
+
+  let audioMessage = {
+    audio: { url: audioUrl },
+    mimetype: "audio/mp4",
+    fileName: `${title}`,
+    contextInfo: {
+      externalAdReply: {
+        showAdAttribution: true,
+        mediaType: 2,
+        mediaUrl: videoUrl,
+        title: title,
+        body: "⚡𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓⚡",
+        sourceUrl: videoUrl,
+        thumbnail: await (await conn.getFile(thumbnail)).data
+      }
+    }
+  };
+
+  return conn.sendMessage(message.chat, audioMessage, { quoted: message });
 };
 
-handler.help = ['play'].map((v) => v + ' <query>');
+handler.help = ["song", "play"];
 handler.tags = ['downloader'];
-handler.command = /^play$/i;
-
-handler.exp = 0;
+handler.command = /^song$/i;
 
 export default handler;
-      
+
+function pickRandom(items) {
+  return items[Math.floor(Math.random() * items.length)];
+}
