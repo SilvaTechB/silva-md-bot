@@ -14,7 +14,7 @@ conn.sendButton(m.chat, `*HELLO DID YOU CALL OUT FOR ME*
 conn.sendFile(m.chat, av, 'audio.mp3', null, m, true, { type: 'audioMessage', ptt: true })
 } 
 
-handler.customPrefix = /^(bot|lazack)$/i
+handler.customPrefix = /^(bot|Silva|silva|Hello|AI)$/i
 handler.command = new RegExp()
 
 export default handler
