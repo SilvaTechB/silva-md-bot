@@ -18,7 +18,7 @@
 
 <p align="center">
   <a href="https://github.com/SilvaTechB/silva-md-bot">
-    <img alt="Silva docs" height="300" src="https://telegra.ph/file/751eef74109e0e5c8916c.jpg">
+    <img alt="Silva docs" height="300" src="https://i.imgur.com/Yj5nnVr.jpeg">
   </a>
 </p>
     
@@ -176,3 +176,4 @@ Maintainer | FG98F|
 - *Use silva tech at your own risk by keeping this warning in mind.*
 - [`Deploy on Heroku`](htttps://dashboard.heroku.com/new?template=https://github.com/SilvaTechB/s-ilva)
  <img src="https://i.imgur.com/dBaSKWF.gif" height="90" width="100%">
+  <img src="https://telegra.ph/file/751eef74109e0e5c8916c.jpg" height="90" width="100%">
