@@ -25,7 +25,7 @@
    
    
 <p align="center">
-  <a href="https://wa.me/+254700143167?text=Hi+Bro--+I+Need+Help.+I've+messaged+you+from+𝑺𝒊𝒍𝒗𝒂+𝒕𝒆𝒄𝒉 ʙᴏᴛ+Repo" target="_blank">
+  <a href="https://wa.me/+254700143167?text=hello+Bro--+I+Need+Help.+I've+messaged+you+from+𝑺𝒊𝒍𝒗𝒂+𝒕𝒆𝒄𝒉 ʙᴏᴛ+Repo" target="_blank">
     <img alt="whatsapp" src="https://img.shields.io/badge/ Whatsapp -25D366?style=for-the-badge&logo=whatsapp&logoColor=white" />
 
 </p>
@@ -61,24 +61,23 @@
 ### SETUP
 
 1. PAIRING
+   
 <a href='https://creds-1.onrender.com/pair' target="_blank"><img alt='PAIR CODE' src='https://img.shields.io/badge/Pair_code-100000?style=for-the-badge&logo=scan&logoColor=white&labelColor=black&color=blue'/></a>
 
 ### DELETE THE EXISTING CREDS.JSON FILE
-<a><img src='https://i.imgur.com/LyHic3i.gif'/></a>
 <img src="https://i.imgur.com/dBaSKWF.gif" height="90" width="100%">
 
 #### DEPLOYMENT
-<img src="https://i.imgur.com/dBaSKWF.gif" height="90" width="100%">
 1. If You don't have a account in Heroku. Create a account.
     <br>
 <a href='https://signup.heroku.com/' target="_blank"><img alt='Heroku' src='https://img.shields.io/badge/-Create-blue?style=for-the-badge&logo=heroku&logoColor=white'/></a>
 
 3. Now Deploy
     <br>
+    
 <a href='https://dashboard.heroku.com/new?template=https://github.com/SilvaTechB/silva-md-bot' target="_blank"><img alt='DEPLOY' src='https://img.shields.io/badge/-DEPLOY-purple?style=for-the-badge&logo=heroku&logoColor=white'/></a>
-##
+
 #### DEPLOY TO KOYEB 
-<img src="https://i.imgur.com/dBaSKWF.gif" height="90" width="100%">
 1. If You don't have a account in koyeb. Create a account.
     <br>
 <a href='https://app.koyeb.com/auth/signup' target="_blank"><img alt='koyeb' src='https://img.shields.io/badge/-Create-red?style=for-the-badge&logo=koyeb&logoColor=white'/></a>
@@ -92,7 +91,6 @@
 <a href='https://github.com/SilvaTechB/s-ilva' target="_blank"><img alt='DEPLOY' src='https://img.shields.io/badge/-DEPLOY-red?style=for-the-badge&logo=koyeb&logoColor=white'/></a>
 
 #### DEPLOY TO RAILWAY
-<img src="https://i.imgur.com/dBaSKWF.gif" height="90" width="100%">
 1. If You don't have a account in railway. Create a account.
     <br>
 <a href='https://railway.app/login' target="_blank"><img alt='railway' src='https://img.shields.io/badge/-Create-black?style=for-the-badge&logo=railway&logoColor=white'/></a>
