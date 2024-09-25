@@ -61,33 +61,14 @@
 ### SETUP
 
 1. PAIRING
-    <br>
-<details>
-<summary>CLICK HERE TO GET YOUR CREDS.JSON FILE</summary>
 <a href='https://creds-1.onrender.com/pair' target="_blank"><img alt='PAIR CODE' src='https://img.shields.io/badge/Pair_code-100000?style=for-the-badge&logo=scan&logoColor=white&labelColor=black&color=blue'/></a>
 
-</details>
-
-
-
-<details>
-<summary>CLICK HERE TO UPLOAD YOUR CREDS.JSON FILE</summary>
-<a href='https://github.com/SilvaTechB/silva-md-bot/tree/main/Authenticators' target="_blank"><img alt='UPLOAD CREDS.JSON' src='https://img.shields.io/badge/UPLOAD_CREDS.JSON-100000?style=for-the-badge&logo=scan&logoColor=white&labelColor=black&color=red'/></a>
-
-Then **[Upload](https://github.com/SilvaTechB/silva-md-bot/tree/main/Authenticators)** your creds.json file in the **[session folder](https://github.com/SilvaTechB/silva-md-bot/tree/main/Authenticators)**
-
 ### DELETE THE EXISTING CREDS.JSON FILE
-</details>
-
 <a><img src='https://i.imgur.com/LyHic3i.gif'/></a>
 <img src="https://i.imgur.com/dBaSKWF.gif" height="90" width="100%">
 
 #### DEPLOYMENT
-
-
-<details>
-<summary>CLICK HERE FOR DEPLOYMENT PROCESSS</summary>
-
+<img src="https://i.imgur.com/dBaSKWF.gif" height="90" width="100%">
 1. If You don't have a account in Heroku. Create a account.
     <br>
 <a href='https://signup.heroku.com/' target="_blank"><img alt='Heroku' src='https://img.shields.io/badge/-Create-blue?style=for-the-badge&logo=heroku&logoColor=white'/></a>
@@ -97,7 +78,7 @@ Then **[Upload](https://github.com/SilvaTechB/silva-md-bot/tree/main/Authenticat
 <a href='https://dashboard.heroku.com/new?template=https://github.com/SilvaTechB/silva-md-bot' target="_blank"><img alt='DEPLOY' src='https://img.shields.io/badge/-DEPLOY-purple?style=for-the-badge&logo=heroku&logoColor=white'/></a>
 ##
 #### DEPLOY TO KOYEB 
-
+<img src="https://i.imgur.com/dBaSKWF.gif" height="90" width="100%">
 1. If You don't have a account in koyeb. Create a account.
     <br>
 <a href='https://app.koyeb.com/auth/signup' target="_blank"><img alt='koyeb' src='https://img.shields.io/badge/-Create-red?style=for-the-badge&logo=koyeb&logoColor=white'/></a>
@@ -111,7 +92,7 @@ Then **[Upload](https://github.com/SilvaTechB/silva-md-bot/tree/main/Authenticat
 <a href='https://github.com/SilvaTechB/s-ilva' target="_blank"><img alt='DEPLOY' src='https://img.shields.io/badge/-DEPLOY-red?style=for-the-badge&logo=koyeb&logoColor=white'/></a>
 
 #### DEPLOY TO RAILWAY
-
+<img src="https://i.imgur.com/dBaSKWF.gif" height="90" width="100%">
 1. If You don't have a account in railway. Create a account.
     <br>
 <a href='https://railway.app/login' target="_blank"><img alt='railway' src='https://img.shields.io/badge/-Create-black?style=for-the-badge&logo=railway&logoColor=white'/></a>
