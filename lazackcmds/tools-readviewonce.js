@@ -1,4 +1,4 @@
-let { downloadContentFromMessage } = await import('@shizodevs/shizoweb')
+let { downloadContentFromMessage } = await import('@whiskeysockets/baileys')
 
 var handler = async (m, { conn }) => {
   if (!/viewOnce/.test(m.quoted?.mtype)) throw '✳️❇️ Its Not a ViewOnce Message'
