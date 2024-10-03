@@ -1,4 +1,4 @@
-//import db from '../lib/database.js'
+b//import db from '../lib/database.js'
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
   let poin = 300
@@ -16,30 +16,30 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
   if (text == astro) {
     global.db.data.users[m.sender].exp += 100
-    m.reply(`▢ *A tie*\n\n‣ You : ${text}\n‣ Guru : ${astro}\n\n🎁 Points (±)100 XP`)
+    m.reply(`▢ *A tie*\n\n‣ You : ${text}\n‣ 𝐒𝐈𝐋𝐕𝐀 : ${astro}\n\n🎁 Points (±)100 XP`)
   } else if (text == 'rock') {
     if (astro == 'scissors') {
       global.db.data.users[m.sender].exp += 300
-      m.reply(`▢ *Won* 🎊\n\n‣ You : ${text}\n‣ GURU : ${astro}\n\n🎁 Points *+${poin} XP*`)
+      m.reply(`▢ *Won* 🎊\n\n‣ You : ${text}\n‣ 𝐒𝐈𝐋𝐕𝐀 : ${astro}\n\n🎁 Points *+${poin} XP*`)
     } else {
       global.db.data.users[m.sender].exp -= 300
-      m.reply(`▢ *lost*\n\n‣ You : ${text}\n‣ GURU : ${astro}\n\n Points *-${poin} XP*`)
+      m.reply(`▢ *lost*\n\n‣ You : ${text}\n‣ 𝐒𝐈𝐋𝐕𝐀 : ${astro}\n\n Points *-${poin} XP*`)
     }
   } else if (text == 'scissors') {
     if (astro == 'paper') {
       global.db.data.users[m.sender].exp += 300
-      m.reply(`▢ *won* 🎊\n\n‣ You : ${text}\n‣ GURU : ${astro}\n\n🎁 Points *+${poin} XP*`)
+      m.reply(`▢ *won* 🎊\n\n‣ You : ${text}\n‣ 𝐒𝐈𝐋𝐕𝐀 : ${astro}\n\n🎁 Points *+${poin} XP*`)
     } else {
       global.db.data.users[m.sender].exp -= 300
-      m.reply(`▢ *lost*\n\n‣ You : ${text}\n‣ GURU : ${astro}\n\nPoints *-${poin} XP*`)
+      m.reply(`▢ *lost*\n\n‣ You : ${text}\n‣ 𝐒𝐈𝐋𝐕𝐀 : ${astro}\n\nPoints *-${poin} XP*`)
     }
   } else if (text == 'paper') {
     if (astro == 'rock') {
       global.db.data.users[m.sender].exp += 300
-      m.reply(`▢ *won* 🎊\n\n‣ You : ${text}\n‣ GURU : ${astro}\n\n🎁 Points *+${poin} XP*`)
+      m.reply(`▢ *won* 🎊\n\n‣ You : ${text}\n‣ 𝐒𝐈𝐋𝐕𝐀 : ${astro}\n\n🎁 Points *+${poin} XP*`)
     } else {
       global.db.data.users[m.sender].exp -= 300
-      m.reply(`▢ *You lost*\n\n‣ You : ${text}\n‣ GURU : ${astro}\n\nPoints *-${poin} XP*`)
+      m.reply(`▢ *You lost*\n\n‣ You : ${text}\n‣ 𝐒𝐈𝐋𝐕𝐀 : ${astro}\n\nPoints *-${poin} XP*`)
     }
   } else {
     throw reseqv
