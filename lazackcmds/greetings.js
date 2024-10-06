@@ -2,11 +2,6 @@ export async function all(m) {
   // when someone sends you hello message
   if (
     (m.mtype === 'hellomessage' ||
-      m.text.startsWith('Hello') ||
-      m.text.startsWith('Hi') ||
-      m.text.startsWith('Mambo') ||
-      m.text.startsWith('bro') ||
-      m.text.startsWith('yoo') ||
       m.text.startsWith('silva')) &&
     !m.isBaileys &&
     !m.isGroup
