@@ -54,7 +54,7 @@ YOUR PREMIUM USER BOT`;
 
 handler.help = ["play"];
 handler.tags = ["dl"];
-handler.command = ["play"];
+handler.command = ["music"];
 handler.disabled = false;
 
 export default handler;
