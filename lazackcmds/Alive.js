@@ -9,7 +9,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     key: {
       fromMe: false,
       participant: `${m.sender.split`@`[0]}@s.whatsapp.net`,
-      ...(m.chat ? { remoteJid: '16504228206@s.whatsapp.net' } : {}),
+      ...(m.chat ? { remoteJid: '254700143167@s.whatsapp.net' } : {}),
     },
     message: {
       contactMessage: {
@@ -30,8 +30,8 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     contextInfo: {
       mentionedJid: [m.sender],
       externalAdReply: {
-        title: 'halleluja silva Md Bot Alive',
-        body: 'SILVA MD BOT SEPTEMBER 2024',
+        title: '𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 Alive',
+        body: 'SILVA MD BOT OCTOBER 2024',
         thumbnailUrl: img,
         sourceUrl: 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v',
         mediaType: 1,
