@@ -1,48 +1,35 @@
-const delay = time => new Promise(res => setTimeout(res, time))
+conn.ev.on("call", async callEvents => {
+  // Check if anti-call feature is enabled
+  const isAntiCallEnabled = process.env.ANTI_CALL === "true";
 
-export async function before(m) {
-  let bot = global.db.data.settings[this.user.jid] || {}
- 
-  if (m.isBaileys) return
-  if (!bot.antiCall) return
+  if (isAntiCallEnabled) {
+    for (let callEvent of callEvents) {
+      // Check if the call event is an incoming call (status "offer")
+      if (callEvent.status === "offer") {
+        try {
+          // Message to be sent to the caller
+          const warningMessage = {
+            text: "*ANTICALL IS ACTIVATED*\n*Please do not disturb me by calling repeatedly.*\n*Here is my bot owner's contact information.*\n\nᴘʀɪɴᴄᴇ ᴍᴅ"
+          };
 
-  const messageType = {
-    40: '📞 You missed a voice call, and the call has been missed.',
-    41: '📹 You missed a video call, and the call has been missed.',
-    45: '📞 You missed a group voice call, and the call has been missed.',
-    46: '📹 You missed a group video call, and the call has been missed.',
-  }[m.messageStubType]
+          // Send the warning message to the caller
+          let sentMessage = await conn.sendMessage(callEvent.from, warningMessage);
+          console.log("Warning message sent:", sentMessage);
 
-  
-  if (messageType) {
-   
+          // Send the bot owner's contact to the caller
+          await conn.sendContact(callEvent.from, global.owner, sentMessage);
+          console.log("Owner's contact sent to:", callEvent.from);
 
-    await this.sendMessage(m.chat, {
-      text: `You are banned + blocked for calling the bot`,
-      mentions: [m.sender],
-    })
+          // Reject the incoming call
+          await conn.rejectCall(callEvent.id, callEvent.from);
+          console.log("Call rejected from:", callEvent.from);
 
-   
-    await delay(1000)
-
-    global.db.data.users[m.sender].banned = true
-    global.db.data.users[m.sender].warning = 1
-
-   
-
-    await this.updateBlockStatus(m.sender, 'block')
-
-  
-    if (m.isGroup) {
-      await this.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
+        } catch (error) {
+          console.error("Error handling call event:", error);
+        }
+      }
     }
   } else {
-    console.log({
-      messageStubType: m.messageStubType,
-      messageStubParameters: m.messageStubParameters,
-      type: m.messageStubType,
-    })
+    console.log("Anti-call feature is disabled.");
   }
-}
-
-export const disabled = false
+});

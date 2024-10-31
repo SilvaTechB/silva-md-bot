@@ -1,81 +1,100 @@
-import fetch from 'node-fetch'
-import axios from 'axios'
+import fetch from "node-fetch";  // node-fetch for making API requests
 
-export async function before(m, { conn }) {
+export async function before(message, { conn }) {
+  console.log("Chatbot feature is active.");
+  
   try {
-    if (m.isBaileys && m.fromMe) {
-      return true
+    console.log("Received message object:", JSON.stringify(message, null, 2));
+    
+    // Skip messages sent by the bot or system messages
+    if (message.isBaileys || message.fromMe) {
+      console.log("Message from bot itself or Baileys, skipping.");
+      return true;
     }
 
-    if (!m.isGroup) {
-      return false
+    const irrelevantTypes = ["protocolMessage", "pollUpdateMessage", "reactionMessage", "stickerMessage"];
+    
+    // Skip irrelevant message types
+    if (irrelevantTypes.includes(message.mtype)) {
+      console.log("Irrelevant message type, skipping.");
+      return true;
     }
 
-    const users = global.db.data.users
-    const chats = global.db.data.chats
-
-    const user = global.db.data.users[m.sender]
-    const chat = global.db.data.chats[m.chat]
-    let name = conn.getName(m.sender)
-    if (
-      m.mtype === 'protocolMessage' ||
-      m.mtype === 'pollUpdateMessage' ||
-      m.mtype === 'reactionMessage' ||
-      m.mtype === 'stickerMessage'
-    ) {
-      return
+    // Skip if there's no text content
+    if (!message.text) {
+      console.log("No text in the message.");
+      return true;
     }
 
-    if (
-      !m.msg ||
-      !m.message ||
-      m.key.remoteJid !== m.chat ||
-      users[m.sender].banned ||
-      chats[m.chat].isBanned
-    ) {
-      return
-    }
+    // Fetch the chatbot settings for this chat
+    const chatSettings = global.db.data.chats[message.chat] || {};
+    const chatbotEnabled = chatSettings.chatbot || false;
+    
+    // Define the owner's number
+    const ownerNumber = global.owner[0];
 
-    if (!m.quoted || !m.quoted.isBaileys) return
+    // Only process if chatbot is enabled or the message is from the owner
+    if (chatbotEnabled || message.sender === ownerNumber) {
+      console.log("Processing message from user or owner.");
+      const encodedMessage = encodeURIComponent(message.text);
+      console.log("Message to process:", encodedMessage);
 
-    if (!chat.chatbot) {
-      return true
-    }
+      // Function to send the message to GPT-3
+      const getGPT3Response = async (userMessage) => {
+        try {
+          // The initial system prompt for GPT-3
+          const systemPrompt = {
+            role: "system",
+            content: `This is SILVA CHATBOT with a lot of features. Respond with heart emojis in every reply...`  // shortened for brevity
+          };
 
-    const msg = encodeURIComponent(m.text)
-    console.log(msg)
+          const userPrompt = {
+            role: "user",
+            content: userMessage
+          };
 
-    const response = await axios.post(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyDJC5a882ruaC4XL6ejY1yhgRkN-JNQKg8',
-      {
-        contents: [
-          {
-            parts: [
-              {
-                text: msg,
-              },
-            ],
-          },
-        ],
-      }
-    )
+          const conversation = [systemPrompt, userPrompt];
+          
+          const response = await fetch("https://api.yanzbotz.live/api/ai/gpt3", {
+            method: "POST",
+            headers: {
+              "Accept": "application/json",
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ messages: conversation })
+          });
 
-    const data = response.data
-    if (data.candidates && data.candidates.length > 0) {
-      const candidate = data.candidates[0]
-      const content = candidate.content
+          if (!response.ok) {
+            throw new Error("API call failed.");
+          }
 
-      let reply = content.parts[0].text
-      if (reply) {
-        reply = reply.replace(/Google/gi, 'shizo')
-        reply = reply.replace(/a large language model/gi, botname)
+          const gpt3Response = await response.json();
+          console.log("GPT-3 response:", gpt3Response);
+          return gpt3Response.result;
 
-        m.reply(reply)
+        } catch (error) {
+          console.error("Error during GPT-3 API request:", error.message);
+          return "I'm sorry, I couldn't process your request.";
+        }
+      };
+
+      // Get the GPT-3 response and reply
+      const gpt3Response = await getGPT3Response(message.text);
+      if (gpt3Response) {
+        await message.reply(gpt3Response);
+        console.log("Replied with:", gpt3Response);
+      } else {
+        await message.reply("No suitable response from the API.");
+        console.log("No suitable response from the API.");
       }
     } else {
-      m.reply('No suitable response from the API.')
+      console.log("Chatbot is not enabled for this chat, skipping.");
     }
+
   } catch (error) {
-    console.log(error)
+    console.error("Error processing message:", error.message);
+    await message.reply("An error occurred while processing your message.");
   }
+
+  return true;
 }
