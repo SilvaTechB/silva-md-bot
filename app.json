@@ -1,79 +1,44 @@
 {
-  "name": "SILVA AI",
-  "description": " with great power comes with great responsibilities. follow the deployment process below.",
+  "name": "𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓",
+  "description": "WhatsApp Bot Base using Baileys. Written in javascript developed by silva tech",
   "keywords": [
-    "whatsapp bot"
+    "whatsapp bot",
+    "ShizoBot",
+    "WaBot",
+    "oreo-bot",
+    "Termux-WaBot",
+    "WaBot-Base"
   ],
-  "repository": "https://github.com/SilvaTechB/silva-md-bot",
-  "stack": "container",
-  "env": {
-    "OWNERS": {
-      "description": "owner numbers",
-      "required": true,
-      "value": "254700143167"
-    },
-    "BOTNAME": {
-      "description": "Give your BOT a name",
-      "required": true,
-      "value": "SILVA-MD-BOT©®"
-    },
-    "DATABASE_URL": {
-      "description": "your mongodb database url",
-      "required": false,
-      "value": ""
-    },
-    "SESSION_ID": {
-      "description": "your session id",
-      "required": false,
-      "value": ""
-    },
-    "MODE": {
-      "description": "mode public or private",
-      "required": true,
-      "value": "public"
-    },
-    "PREFIX": {
+"env": {
+      "PREFIX": {
       "description": "put any one symbol here except @ and + , leave it Blank if you want to use multiple prefix",
       "required": false,
-      "value": ""
-    },
-     "HEROKU API KEY": {
-      "description": "Put your Heroku api key Here , Get one from here https://dashboard.heroku.com/account",
-      "required": true,
-      "value": ""
-    },
-     "HEROKU APP NAME": {
-      "description": "Put the Heroku app name, same as above entered on app name",
-      "required": true,
       "value": ""
     },
     "statusview": {
       "description": "make it true if you want bot to view status",
       "required": false,
-      "value": "true"
+      "value": ""
     },
     "autoRead": {
       "description": "make it true if you want bot to read messages",
       "required": false,
-      "value": "false"
+      "value": ""
     },
     "antidelete": {
       "description": "bot will forward deleted messages if you make it true",
       "required": false,
-      "value": "true"
+      "value": "false"
     },
-     "REMOVEBG_KEY": {
-      "description": "your RemoveBg api key",
+"OWNER_NAME": {
+      "description": "owner name of the bot or Your Name",
       "required": false,
       "value": ""
-    }
+}
     },
-    "buildpacks": [
+ "buildpacks": [
     {
       "url": "heroku/nodejs"
-    },
-    {
-      "url": "https://github.com/DuckyTeam/heroku-buildpack-imagemagick.git"
     },
     {
       "url": "https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest"
@@ -81,11 +46,5 @@
     {
       "url": "https://github.com/clhuang/heroku-buildpack-webp-binaries.git"
     }
-  ],
-  "formation": {
-    "web": {
-      "quantity": 1,
-      "size": "basic"
-    }
-  }
+  ]
 }
