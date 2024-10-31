@@ -2,11 +2,11 @@ let handler = async (m, { conn }) => {
   await conn
     .fetchBlocklist()
     .then(async data => {
-      let txt = `*≡𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 List *\n\n*Total :* ${data.length}\n\n┌─⊷\n`
+      let txt = `*≡ List *\n\n*Total :* ${data.length}\n\n┌─⊷\n`
       for (let i of data) {
         txt += `▢ @${i.split('@')[0]}\n`
       }
-      txt += '└──────𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓─────'
+      txt += '└───────────'
       return conn.reply(m.chat, txt, m, { mentions: await conn.parseMention(txt) })
     })
     .catch(err => {

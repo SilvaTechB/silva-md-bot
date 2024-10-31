@@ -105,7 +105,7 @@ let msg = generateWAMessageFromContent(m.chat, {
                 },
                  {
                 "name": "quick_reply",
-                "buttonParamsJson": "{\"display_text\":\"Owner✨❤️\",\"id\":\".owner\"}"
+                "buttonParamsJson": "{\"display_text\":\"Owner✨❤️\",\"id\":\".grp\"}"
                  },
                   {
                   "name": "quick_reply",

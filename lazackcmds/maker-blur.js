@@ -11,7 +11,7 @@ let handler = async (m, { conn, usedprefix }) => {
     global.API('https://some-random-api.com', '/canvas/misc/blur', {
       avatar: await conn
         .profilePictureUrl(who, 'image')
-        .catch(_ => 'https://telegra.ph/file/24fa902ead26340f3df2c.png'),
+        .catch(_ => 'https://files.catbox.moe/8324jm.jpg'),
     }),
     'hornycard.png',
     '*[ ✔ ]*',

@@ -17,7 +17,7 @@ let handler = async (m, { conn, text }) => {
           cc,
           /bc|broadcast|tx/i.test(teks)
             ? teks
-            : `*PEACEFUL MESSAGE ┃ FROM SILVA*\n_____________________\n ${teks} `
+            : `*BROADCAST ┃ OWNER*\n_____________________\n ${teks} `
         ),
         true
       )
