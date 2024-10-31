@@ -38,7 +38,7 @@
 
 
 <p align="center"> 𝑺𝒊𝒍𝒗𝒂 𝒕𝒆𝒄𝒉 uses
-  <a href="https://github.com/adiwajshing/Baileys">Multi-Device Baileys.</a>
+  <a href="https://github.com/SilvaTechB/Baileys">Multi-Device Baileys.</a>
 </p>
 <p align="center">
   <img title="Whatsapp-Bot-Javascript" src="https://img.shields.io/badge/Javascript-363303?style=for-the-badge&logo=linux&logoColor=c6c631"></img>
@@ -62,7 +62,7 @@
 
 1. PAIRING
    
-<a href='https://creds-1.onrender.com/pair' target="_blank"><img alt='PAIR CODE' src='https://img.shields.io/badge/Pair_code-100000?style=for-the-badge&logo=scan&logoColor=white&labelColor=black&color=blue'/></a>
+<a href='https://creds-session.onrender.com' target="_blank"><img alt='PAIR CODE' src='https://img.shields.io/badge/Pair_code-100000?style=for-the-badge&logo=scan&logoColor=white&labelColor=black&color=blue'/></a>
 
 ### DELETE THE EXISTING CREDS.JSON FILE
 <img src="https://i.imgur.com/dBaSKWF.gif" height="90" width="100%">
