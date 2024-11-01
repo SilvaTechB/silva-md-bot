@@ -75,6 +75,7 @@ export async function handler(chatUpdate) {
            /*
    Do Not Modify this Section ❌  👇👇
    Else Relationship Features Will Not Work 😔
+   Your Devs Friend Shizo The Techie
    */
    if (!('lover' in user)) user.lover = ''
    if (!('exlover' in user)) user.exlover = ''
@@ -89,6 +90,7 @@ export async function handler(chatUpdate) {
    /*
    Do Not Modify this Section ❌  ☝️☝️
    Else Relationship Features Will Not Work 😔
+   Your Devs Friend Shizo The Techie
    */
           exp: 0,
           credit: 0,
@@ -246,7 +248,7 @@ export async function handler(chatUpdate) {
             let data = (await conn.onWhatsApp(jid))[0] || {}
             if (data.exists)
               m.reply(
-                `*silva md bot*\nhello developer there s an error in this plugin please chech\n*🗂️ Plugin:* ${name}\n*👤 Sender:* ${m.sender}\n*💬 Chat:* ${m.chat}\n*💻 Command:* ${m.text}\n\n\${format(e)}`.trim(),
+                `*🗂️ Plugin:* ${name}\n*👤 Sender:* ${m.sender}\n*💬 Chat:* ${m.chat}\n*💻 Command:* ${m.text}\n\n\${format(e)}`.trim(),
                 data.jid
               )
           }
@@ -387,13 +389,13 @@ export async function handler(chatUpdate) {
           plugin.credit &&
           global.db.data.users[m.sender].credit < plugin.credit * 1
         ) {
-          this.reply(m.chat, `💀 You don't have enough gold`, m)
+          this.reply(m.chat, `🟥 You don't have enough gold`, m)
           continue // Gold finished
         }
         if (plugin.level > _user.level) {
           this.reply(
             m.chat,
-            `💀 Level required ${plugin.level} to use this command. \nYour level ${_user.level}`,
+            `🟥 Level required ${plugin.level} to use this command. \nYour level ${_user.level}`,
             m
           )
           continue // If the level has not been reached
@@ -439,7 +441,7 @@ export async function handler(chatUpdate) {
                 let data = (await this.onWhatsApp(jid))[0] || {}
                 if (data.exists)
                   return m.reply(
-                    `*silva md bot*\nhello developer there s an error in this plugin please chech\n*🗂️ Plugin:* ${m.plugin}\n*👤 Sender:* ${m.sender}\n*💬 Chat:* ${m.chat}\n*💻 Command:* ${usedPrefix}${command} ${args.join(' ')}\n📄 *Error Logs:*\n\n${text}`.trim(),
+                    `*🗂️ Plugin:* ${m.plugin}\n*👤 Sender:* ${m.sender}\n*💬 Chat:* ${m.chat}\n*💻 Command:* ${usedPrefix}${command} ${args.join(' ')}\n📄 *Error Logs:*\n\n${text}`.trim(),
                     data.jid
                   )
               }
@@ -784,7 +786,7 @@ export async function deleteUpdate(message) {
             ≡ deleted a message 
             ┌─⊷  𝘼𝙉𝙏𝙄 𝘿𝙀𝙇𝙀𝙏𝙀 
             ▢ *Number :* @${participant.split`@`[0]} 
-            └───SILVA MD BOT──────────
+            └─────────────
             `.trim(),
       msg,
       {
@@ -904,5 +906,3 @@ watchFile(file, async () => {
   console.log(chalk.redBright('Update handler.js'))
   if (global.reloadHandler) console.log(await global.reloadHandler())
 })
-
-
