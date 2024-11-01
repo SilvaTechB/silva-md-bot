@@ -383,8 +383,6 @@ async function connectionUpdate(update) {
   }
 
   if (connection === 'open') {
-await conn.groupAcceptInvite("Lr80ac3MKKIKGew8mFES2a");
-
     const { jid, name } = conn.user
     const msg = ╭═══〘 𝑺𝑰𝑳𝑽𝑨 𝑩𝑶𝑻 〙═══⊷❍\n┃✰│ꜱɪʟᴠᴀ ᴍᴅ ʙᴏᴛ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴄᴏɴɴᴇᴄᴛᴇᴅ ᴛᴏ ᴛʜɪꜱ ᴅᴇᴠɪᴄᴇ\n┃✰│ᴘʀᴇꜰɪx: *ᴀʟʟ*\n┃✰│\n┃✰│ᴄʀᴇᴀᴛᴏʀ: *ꜱɪʟᴠᴀ*\n┃✰│ᴏʀɢᴀɴɪᴢᴀᴛɪᴏɴ: *ꜱɪʟᴠᴀ ᴛᴇᴄʜ ʜᴀʀᴢᴀʀᴅ ɪɴᴄ*\n┃✰│ᴜᴘᴅᴀᴛᴇᴅ: *ꜱᴇᴘᴛᴇᴍʙᴇʀ 2024*\n┃✰│https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v\n┃✰│\n┃✰│══〘 𝑺𝑰𝑳𝑽𝑨 𝑩𝑶𝑻 〙═══⊷❍
 
