@@ -384,7 +384,7 @@ async function connectionUpdate(update) {
 
   if (connection === 'open') {
     const { jid, name } = conn.user
-    const msg = `╭═══〘 𝑺𝑰𝑳𝑽𝑨 𝑩𝑶𝑻 〙═══⊷❍\n┃✰│ꜱɪʟᴠᴀ ᴍᴅ ʙᴏᴛ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴄᴏɴɴᴇᴄᴛᴇᴅ ᴛᴏ ᴛʜɪꜱ ᴅᴇᴠɪᴄᴇ\n┃✰│ᴘʀᴇꜰɪx: *ᴀʟʟ*\n┃✰│\n┃✰│ᴄʀᴇᴀᴛᴏʀ: *ꜱɪʟᴠᴀ*\n┃✰│ᴏʀɢᴀɴɪᴢᴀᴛɪᴏɴ: *ꜱɪʟᴠᴀ ᴛᴇᴄʜ ʜᴀʀᴢᴀʀᴅ ɪɴᴄ*\n┃✰│ᴜᴘᴅᴀᴛᴇᴅ: *ꜱᴇᴘᴛᴇᴍʙᴇʀ 2024*\n┃✰│https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v\n┃✰│\n┃✰│══〘 𝑺𝑰𝑳𝑽𝑨 𝑩𝑶𝑻 〙═══⊷❍`
+    const msg = `╭═══〘 𝑺𝑰𝑳𝑽𝑨 𝑩𝑶𝑻 〙═══⊷❍\n┃✰│ꜱɪʟᴠᴀ ᴍᴅ ʙᴏᴛ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴄᴏɴɴᴇᴄᴛᴇᴅ ᴛᴏ ᴛʜɪꜱ ᴅᴇᴠɪᴄᴇ\n┃✰│ᴘʀᴇꜰɪx: *ᴀʟʟ*\n┃✰│\n┃✰│ᴄʀᴇᴀᴛᴏʀ: *ꜱɪʟᴠᴀ*\n┃✰│ᴏʀɢᴀɴɪᴢᴀᴛɪᴏɴ: *ꜱɪʟᴠᴀ ᴛᴇᴄʜ ɪɴᴄ*\n┃✰│ᴜᴘᴅᴀᴛᴇᴅ: *OCTOBER 2024*\n┃✰│https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v\n┃✰│\n┃✰│══〘 𝑺𝑰𝑳𝑽𝑨 𝑩𝑶𝑻 〙═══⊷❍`
 
     await conn.sendMessage(jid, { text: msg, mentions: [jid] }, { quoted: null })
 
@@ -582,3 +582,9 @@ async function saafsafai() {
 setInterval(saafsafai, 10 * 60 * 1000)
 
 _quickTest().catch(console.error)
+
+
+
+
+
+

@@ -23,7 +23,7 @@ figlet(
 )
 
 figlet(
-  'Advanced Horny Whatsapp Bot',
+  'Advanced Whatsapp Bot',
   {
     horizontalLayout: 'default',
     verticalLayout: 'default',
@@ -98,11 +98,11 @@ async function start(file) {
     start('sylivanus.js')
   })
 
-  const pluginsFolder = path.join(path.dirname(currentFilePath), 'lazackcmds')
+  const pluginsFolder = path.join(path.dirname(currentFilePath), 'silvaXlab')
 
   fs.readdir(pluginsFolder, async (err, files) => {
     if (err) {
-      console.error(chalk.red(`Error reading lazackcmds folder: ${err}`))
+      console.error(chalk.red(`Error reading silvaXlab folder: ${err}`))
       return
     }
     console.log(chalk.yellow(`Installed ${files.length} plugins`))
@@ -129,3 +129,8 @@ process.on('exit', code => {
   console.error(chalk.red(`Bot will restart...`))
   start('sylivanus.js')
 })
+
+
+
+
+
