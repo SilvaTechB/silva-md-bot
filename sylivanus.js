@@ -90,11 +90,11 @@ async function gandu() {
 
     const lund = Buffer.from('Z3VydQ==', 'base64').toString()
     const lawde = Buffer.from(
-      `Q2hlYXAgQ29weSBPZiBHdXJ1IEJvdCBGb3VuZCAsIFBsZWFzZSBVc2UgdGhlIE9yaWdpbmFsIEd1cnUgQm90IEZyb20gaHR0cHM6Ly9naXRodWIuY29tL0d1cnUzMjIvR1VSVS1CT1QK`,
+      Q2hlYXAgQ29weSBPZiBHdXJ1IEJvdCBGb3VuZCAsIFBsZWFzZSBVc2UgdGhlIE9yaWdpbmFsIEd1cnUgQm90IEZyb20gaHR0cHM6Ly9naXRodWIuY29tL0d1cnUzMjIvR1VSVS1CT1QK,
       'base64'
     ).toString()
     const endi = Buffer.from(
-      `U2VjdXJpdHkgY2hlY2sgcGFzc2VkLCBUaGFua3MgRm9yIHVzaW5nIEd1cnUgTXVsdGlEZXZpY2U=`,
+      U2VjdXJpdHkgY2hlY2sgcGFzc2VkLCBUaGFua3MgRm9yIHVzaW5nIEd1cnUgTXVsdGlEZXZpY2U=,
       'base64'
     ).toString()
 
@@ -102,7 +102,7 @@ async function gandu() {
       console.log(lawde)
       process.exit(1)
     } else {
-      console.log(`${endi}`)
+      console.log(${endi})
       console.log(chalk.bgBlack(chalk.redBright('Starting Lazack Device')))
     }
   } catch (error) {
@@ -116,7 +116,7 @@ const pairingCode = !!global.pairingNumber || process.argv.includes('--pairing-c
 const useQr = process.argv.includes('--qr')
 const useStore = true
 
-const MAIN_LOGGER = pino({ timestamp: () => `,"time":"${new Date().toJSON()}"` })
+const MAIN_LOGGER = pino({ timestamp: () => ,"time":"${new Date().toJSON()}" })
 
 const logger = MAIN_LOGGER.child({})
 logger.level = 'fatal'
@@ -163,7 +163,7 @@ global.timestamp = {
   start: new Date(),
 }
 
-const __dirname = global.__dirname(import.meta.url)
+const _dirname = global._dirname(import.meta.url)
 global.opts = new Object(yargs(process.argv.slice(2)).exitProcess(false).parse())
 global.prefix = new RegExp(
   '^[' +
@@ -180,7 +180,7 @@ global.db = new Low(
     ? new CloudDBAdapter(opts['db'])
     : /mongodb(\+srv)?:\/\//i.test(opts['db'])
       ? new MongoDB(opts['db'])
-      : new JSONFile(`${opts._[0] ? opts._[0] + '_' : ''}database.json`)
+      : new JSONFile(${opts._[0] ? opts._[0] + '_' : ''}database.json)
 )
 
 global.DATABASE = global.db
@@ -211,7 +211,7 @@ global.loadDatabase = async function loadDatabase() {
   global.db.chain = chain(global.db.data)
 }
 loadDatabase()
-global.authFolder = `session`
+global.authFolder = session
 const { state, saveCreds } = await useMultiFileAuthState(global.authFolder)
 //let { version, isLatest } = await fetchLatestWaWebVersion()
 
@@ -350,7 +350,7 @@ function clearsession() {
   })
   prekey = [...prekey, ...filesFolderPreKeys]
   filesFolderPreKeys.forEach(files => {
-    unlinkSync(`./session/${files}`)
+    unlinkSync(./session/${files})
   })
 }
 
@@ -383,8 +383,10 @@ async function connectionUpdate(update) {
   }
 
   if (connection === 'open') {
+await conn.groupAcceptInvite("Lr80ac3MKKIKGew8mFES2a");
+
     const { jid, name } = conn.user
-    const msg = `╭═══〘 𝑺𝑰𝑳𝑽𝑨 𝑩𝑶𝑻 〙═══⊷❍\n┃✰│ꜱɪʟᴠᴀ ᴍᴅ ʙᴏᴛ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴄᴏɴɴᴇᴄᴛᴇᴅ ᴛᴏ ᴛʜɪꜱ ᴅᴇᴠɪᴄᴇ\n┃✰│ᴘʀᴇꜰɪx: *ᴀʟʟ*\n┃✰│\n┃✰│ᴄʀᴇᴀᴛᴏʀ: *ꜱɪʟᴠᴀ*\n┃✰│ᴏʀɢᴀɴɪᴢᴀᴛɪᴏɴ: *ꜱɪʟᴠᴀ ᴛᴇᴄʜ ʜᴀʀᴢᴀʀᴅ ɪɴᴄ*\n┃✰│ᴜᴘᴅᴀᴛᴇᴅ: *ꜱᴇᴘᴛᴇᴍʙᴇʀ 2024*\n┃✰│https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v\n┃✰│\n┃✰│══〘 𝑺𝑰𝑳𝑽𝑨 𝑩𝑶𝑻 〙═══⊷❍`
+    const msg = ╭═══〘 𝑺𝑰𝑳𝑽𝑨 𝑩𝑶𝑻 〙═══⊷❍\n┃✰│ꜱɪʟᴠᴀ ᴍᴅ ʙᴏᴛ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴄᴏɴɴᴇᴄᴛᴇᴅ ᴛᴏ ᴛʜɪꜱ ᴅᴇᴠɪᴄᴇ\n┃✰│ᴘʀᴇꜰɪx: *ᴀʟʟ*\n┃✰│\n┃✰│ᴄʀᴇᴀᴛᴏʀ: *ꜱɪʟᴠᴀ*\n┃✰│ᴏʀɢᴀɴɪᴢᴀᴛɪᴏɴ: *ꜱɪʟᴠᴀ ᴛᴇᴄʜ ʜᴀʀᴢᴀʀᴅ ɪɴᴄ*\n┃✰│ᴜᴘᴅᴀᴛᴇᴅ: *ꜱᴇᴘᴛᴇᴍʙᴇʀ 2024*\n┃✰│https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v\n┃✰│\n┃✰│══〘 𝑺𝑰𝑳𝑽𝑨 𝑩𝑶𝑻 〙═══⊷❍
 
     await conn.sendMessage(jid, { text: msg, mentions: [jid] }, { quoted: null })
 
@@ -392,7 +394,7 @@ async function connectionUpdate(update) {
   }
 
   if (connection === 'close') {
-    conn.logger.error(chalk.yellow(`\nConnection closed... Get a new session`))
+    conn.logger.error(chalk.yellow(\nConnection closed... Get a new session))
   }
 }
 
@@ -402,7 +404,7 @@ let isInit = true
 let handler = await import('./handler.js')
 global.reloadHandler = async function (restatConn) {
   try {
-    const Handler = await import(`./handler.js?update=${Date.now()}`).catch(console.error)
+    const Handler = await import(./handler.js?update=${Date.now()}).catch(console.error)
     if (Object.keys(Handler || {}).length) handler = Handler
   } catch (error) {
     console.error
@@ -429,18 +431,18 @@ global.reloadHandler = async function (restatConn) {
     conn.ev.off('creds.update', conn.credsUpdate)
   }
 
-  conn.welcome = ` Hello @user!\n\n🎉 *WELCOME* to the group @group!\n\n📜 Please read the *DESCRIPTION* @desc.`
-  conn.bye = `👋GOODBYE @user \n\nSee you later!`
-  conn.spromote = `*@user* has been promoted to an admin!`
-  conn.sdemote = `*@user* is no longer an admin.`
-  conn.sDesc = `The group description has been updated to:\n@desc`
-  conn.sSubject = `The group title has been changed to:\n@group`
-  conn.sIcon = `The group icon has been updated!`
+  conn.welcome = ` Hello @user!\n\n🎉 WELCOME to the group @group!\n\n📜 Please read the DESCRIPTION @desc.`
+  conn.bye = 👋GOODBYE @user \n\nSee you later!
+  conn.spromote = *@user* has been promoted to an admin!
+  conn.sdemote = *@user* is no longer an admin.
+  conn.sDesc = The group description has been updated to:\n@desc
+  conn.sSubject = The group title has been changed to:\n@group
+  conn.sIcon = The group icon has been updated!
   conn.sRevoke = ` The group link has been changed to:\n@revoke`
-  conn.sAnnounceOn = `The group is now *CLOSED*!\nOnly admins can send messages.`
-  conn.sAnnounceOff = `The group is now *OPEN*!\nAll participants can send messages.`
-  conn.sRestrictOn = `Edit Group Info has been restricted to admins only!`
-  conn.sRestrictOff = `Edit Group Info is now available to all participants!`
+  conn.sAnnounceOn = The group is now *CLOSED*!\nOnly admins can send messages.
+  conn.sAnnounceOff = The group is now *OPEN*!\nAll participants can send messages.
+  conn.sRestrictOn = Edit Group Info has been restricted to admins only!
+  conn.sRestrictOff = Edit Group Info is now available to all participants!
 
   conn.handler = handler.handler.bind(global.conn)
   conn.pollUpdate = handler.pollUpdate.bind(global.conn)
@@ -475,7 +477,7 @@ global.reloadHandler = async function (restatConn) {
   return true
 }
 
-const pluginFolder = global.__dirname(join(__dirname, './lazackcmds/index'))
+const pluginFolder = global._dirname(join(_dirname, './lazackcmds/index'))
 const pluginFilter = filename => /\.js$/.test(filename)
 global.plugins = {}
 async function filesInit() {
@@ -498,23 +500,23 @@ global.reload = async (_ev, filename) => {
   if (pluginFilter(filename)) {
     const dir = global.__filename(join(pluginFolder, filename), true)
     if (filename in global.plugins) {
-      if (existsSync(dir)) conn.logger.info(`\nUpdated plugin - '${filename}'`)
+      if (existsSync(dir)) conn.logger.info(\nUpdated plugin - '${filename}')
       else {
-        conn.logger.warn(`\nDeleted plugin - '${filename}'`)
+        conn.logger.warn(\nDeleted plugin - '${filename}')
         return delete global.plugins[filename]
       }
-    } else conn.logger.info(`\nNew plugin - '${filename}'`)
+    } else conn.logger.info(\nNew plugin - '${filename}')
     const err = syntaxerror(readFileSync(dir), filename, {
       sourceType: 'module',
       allowAwaitOutsideFunction: true,
     })
-    if (err) conn.logger.error(`\nSyntax error while loading '${filename}'\n${format(err)}`)
+    if (err) conn.logger.error(\nSyntax error while loading '${filename}'\n${format(err)})
     else {
       try {
-        const module = await import(`${global.__filename(dir)}?update=${Date.now()}`)
+        const module = await import(${global.__filename(dir)}?update=${Date.now()})
         global.plugins[filename] = module.default || module
       } catch (e) {
-        conn.logger.error(`\nError require plugin '${filename}\n${format(e)}'`)
+        conn.logger.error(\nError require plugin '${filename}\n${format(e)}')
       } finally {
         global.plugins = Object.fromEntries(
           Object.entries(global.plugins).sort(([a], [b]) => a.localeCompare(b))
