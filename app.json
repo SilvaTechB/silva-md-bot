@@ -17,16 +17,6 @@
       "required": true,
       "value": "SILVA-MD-BOT©®"
     },
-    "DATABASE_URL": {
-      "description": "your mongodb database url",
-      "required": false,
-      "value": ""
-    },
-    "SESSION_ID": {
-      "description": "your session id",
-      "required": false,
-      "value": ""
-    },
     "MODE": {
       "description": "mode public or private",
       "required": true,
@@ -35,16 +25,6 @@
     "PREFIX": {
       "description": "put any one symbol here except @ and + , leave it Blank if you want to use multiple prefix",
       "required": false,
-      "value": ""
-    },
-     "HEROKU API KEY": {
-      "description": "Put your Heroku api key Here , Get one from here https://dashboard.heroku.com/account",
-      "required": true,
-      "value": ""
-    },
-     "HEROKU APP NAME": {
-      "description": "Put the Heroku app name, same as above entered on app name",
-      "required": true,
       "value": ""
     },
     "statusview": {
@@ -61,11 +41,6 @@
       "description": "bot will forward deleted messages if you make it true",
       "required": false,
       "value": "true"
-    },
-     "REMOVEBG_KEY": {
-      "description": "your RemoveBg api key",
-      "required": false,
-      "value": ""
     }
     },
     "buildpacks": [
