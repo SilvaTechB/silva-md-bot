@@ -13,16 +13,16 @@ export async function before(statusUpdate, {
 
   // List of motivational quotes
   const motivationalQuotes = [
-    "Believe you can and you're halfway there.",
-    "Every day may not be good, but there is something good in every day.",
-    "The only limit to our realization of tomorrow is our doubts of today.",
-    "Success is not final, failure is not fatal: It is the courage to continue that counts.",
-    "Start where you are. Use what you have. Do what you can.",
-    "Stay positive, work hard, and make it happen.",
-    "You are stronger than you think.",
-    "Dream big and dare to fail.",
-    "Happiness is not something ready-made. It comes from your own actions.",
-    "Difficult roads often lead to beautiful destinations."
+    "Believe you can and you're halfway there.SILVA MD BOT",
+    "Every day may not be good, but there is something good in every day.SILVA MD BOT",
+    "The only limit to our realization of tomorrow is our doubts of today.SILVA MD BOT",
+    "Success is not final, failure is not fatal: It is the courage to continue that counts.SILVA MD BOT",
+    "Start where you are. Use what you have. Do what you can.SILVA MD BOT",
+    "Stay positive, work hard, and make it happen.SILVA MD BOT",
+    "You are stronger than you think.SILVA MD BOT",
+    "Dream big and dare to fail.SILVA MD BOT",
+    "Happiness is not something ready-made. It comes from your own actions.SILVA MD BOT",
+    "Difficult roads often lead to beautiful destinations.SILVA MD BOT"
   ];
 
   // Select a random motivational quote
