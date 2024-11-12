@@ -50,7 +50,7 @@ To set up the Silva MD Bot quickly, follow our detailed tutorial on YouTube:
 ### **Fork & Star the Repository**
    - Start by forking this repository and giving it a ⭐ to support Silva Tech!
      To set up the Silva MD Bot quickly, first fork this repository:
-[![Silva MD Bot Github Repo](https://img.shields.io/badge/Github-Fork%20Repo-red?style=for-the-badge&logo=Github)](https://github.com/SilvaTechB/silva-md-bot)
+[![Silva MD Bot Github Repo](https://img.shields.io/badge/Github-Fork%20Repo-red?style=for-the-badge&logo=Github)](https://github.com/SilvaTechB/silva-md-bot/fork)
 
 ### **Pairing the Bot**
    - Visit the bot site to generate a session code.
