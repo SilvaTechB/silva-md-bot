@@ -26,14 +26,14 @@
 
 <p align="center">
   <a href="https://github.com/SilvaTechB/silva-md-bot">
-    <img alt="Silva docs" height="300" src="https://i.imgur.com/Yj5nnVr.jpeg">
+    <img alt="Silva docs" height="500" src="https://i.imgur.com/7bSFO2O.jpeg">
   </a>
 </p>
 
 ## 🎬 Watch the Tutorial
 
 To set up the Silva MD Bot quickly, follow our detailed tutorial on YouTube:
-[![Silva MD Bot YouTube Tutorial](https://img.shields.io/badge/YouTube-Watch%20Tutorial-red?style=for-the-badge&logo=youtube)](https://www.youtube.com/watch?v=YOUR_TUTORIAL_LINK)
+[![Silva MD Bot YouTube Tutorial](https://img.shields.io/badge/YouTube-Watch%20Tutorial-red?style=for-the-badge&logo=youtube)](https://youtu.be/EXjuKlsASDQ?si=QWYvigE9yjUNGdRP)
 
 ---
 
@@ -49,9 +49,13 @@ To set up the Silva MD Bot quickly, follow our detailed tutorial on YouTube:
 
 ### **Fork & Star the Repository**
    - Start by forking this repository and giving it a ⭐ to support Silva Tech!
+     To set up the Silva MD Bot quickly, first fork this repository:
+[![Silva MD Bot Github Repo](https://img.shields.io/badge/Github-Fork%20Repo-red?style=for-the-badge&logo=Github)](https://github.com/SilvaTechB/silva-md-bot)
 
 ### **Pairing the Bot**
-   - Visit the [Pairing Session](https://creds-session.onrender.com) to generate a session code.
+   - Visit the bot site to generate a session code.
+
+     [![Silva MD Bot Github Repo](https://img.shields.io/badge/Whatsapp-Pair%20Code-green?style=for-the-badge&logo=Whatsapp)](https://silva-creds.onrender.com/)
    - Ensure to delete any existing `creds.json` file if redeploying.
 
 ### **Step-by-Step Deployment Guide**
@@ -69,7 +73,7 @@ To set up the Silva MD Bot quickly, follow our detailed tutorial on YouTube:
 2. Obtain a [Koyeb API Key](https://app.koyeb.com/account/api) and configure the [DATABASE_URL](https://github.com/SilvaTechB/silva-md-bot/wiki/DATABASE_URL).
 3. Deploy your app using the button below:
    <br>
-   <a href='https://github.com/SilvaTechB/s-ilva' target="_blank">
+   <a href='https://github.com/SilvaTechB/silva-md-bot' target="_blank">
       <img alt='Deploy on Koyeb' src='https://img.shields.io/badge/-DEPLOY-red?style=for-the-badge&logo=koyeb&logoColor=white'/>
    </a>
 
