@@ -105,6 +105,121 @@ To set up the Silva MD Bot quickly, follow our detailed tutorial on YouTube:
 
 ---
 
+<h1 align="center"> Silva MD Bot 🦾</h1>
+
+<p align="center">
+  <a href="https://github.com/SilvaTechB/silva-md-bot">
+    <img src="https://readme-typing-svg.herokuapp.com?font=Time+New+Roman&color=cyan&size=19&center=true&vCenter=true&width=600&height=100&lines=Welcome+to+Silva+MD+Bot's+Repository!;A+powerful+WhatsApp+bot+by+SilvaTechB;Automating+WhatsApp+with+fun+and+productivity+features!">
+  </a>
+</p>
+
+---
+
+### 📜 Table of Contents
+1. [About Silva MD Bot](#-about-silva-md-bot)
+2. [Features](#-features)
+3. [Installation](#-installation)
+4. [Usage](#-usage)
+5. [How to Contribute](#-how-to-contribute)
+6. [Connect with the Developer](#-connect-with-the-developer)
+
+---
+
+### 👾 About Silva MD Bot
+**Silva MD Bot** is a multi-functional WhatsApp bot designed for automatic reactions, status updates, motivational quotes, and music/media downloads. Built with the **Baileys API**, it aims to enhance user interaction with custom and automated responses. Whether you want fun interactions in a group, to download media from links, or to get motivational quotes, this bot does it all!
+
+Key features include:
+- **Auto-React to Group Messages** with humorous emojis
+- **Download Media** (audio/video) from URLs
+- **Send Motivational Quotes** in response to status updates
+- **Automatically React to Status Updates** with emojis
+- **Create "Would You Rather" polls** with shuffling answers
+- **Customizable Features**: Easily tweak settings for different bots!
+
+---
+### 🚀 Installation
+
+To get started with this project, follow the steps below:
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/SilvaTechB/silva-md-bot.git
+---
+
+### 💥 Features
+- **Automatic Reactions**: React to messages in groups, channels, and even when mentioned by your username with fun and dynamic emojis.
+- **Media Downloader**: Download music videos or audio from URLs (such as YouTube) in different formats.
+- **Motivational Quotes**: Respond to status updates with a motivational quote instead of a standard message.
+- **Interactive Polls**: Create "Would You Rather" polls when prompted with 'wyr' followed by options.
+- **Status Auto-React**: Set up reactions to status updates with green hearts or customized emojis.
+- **Multi-Functionality**: Designed to automate repetitive tasks on WhatsApp, making interactions smoother and more fun.
+
+---
+### 🛠 Usage
+
+Once the installation is complete and the bot is running, you can use the Silva MD Bot in your WhatsApp group or chat. Below are some key features and how to interact with them:
+
+#### 1. **Send a Motivational Quote**
+   - When someone views your status, the bot will automatically respond with a motivational quote.
+
+#### 2. **Auto-Reactions to Status Updates**
+   - The bot reacts to all status updates with a **green heart emoji** if the feature is enabled.
+
+#### 3. **Music Downloader**
+   - Enter a **YouTube song name** or **YouTube link** and choose whether you want the media in **audio** or **video** format.
+     - Example: `!download song_name`
+     - The bot will then send a button to select the format: **Audio** or **Video**.
+
+#### 4. **Group Reactions**
+   - The bot reacts to all messages in your WhatsApp group or channel with random humorous emojis.
+
+#### 5. **Would You Rather Poll**
+   - Type `wyr` followed by the bot’s prefix and it will generate a **Would You Rather** poll with two random choices.
+
+#### 6. **Tagging the Owner**
+   - Whenever the bot owner is tagged in a group, the bot will respond and react accordingly.
+
+#### 7. **Customization**
+   - You can enable or disable certain features like auto-reactions, music downloads, etc., through the bot's configuration file.
+
+For more information on configuring and customizing the bot, refer to the [configuration guide](docs/configuration.md).
+---
+### 🛠️ Usage
+Once you’ve set up the bot, you can begin interacting with it on WhatsApp:
+
+Reactions: Mention the bot or type in a group chat to see automatic reactions.
+Media Downloader: Send a media link (e.g., YouTube or SoundCloud) and select the format to download.
+Motivational Quotes: Enable status reaction mode to have the bot reply with a quote to every status you view.
+Create Polls: Start a "Would You Rather" poll by typing wyr followed by two options.
+### 🤝 How to Contribute
+We welcome contributions to Silva MD Bot! Here's how you can get involved:
+
+Fork the repository.
+Create a new branch for your feature.
+Commit your changes.
+Push your branch to your forked repository.
+Submit a pull request with a detailed description of your changes.
+### 🧑‍💻 Connect with the Developer
+
+<p align="center">
+  <a href="https://github.com/SilvaTechB">
+    <img src="https://img.shields.io/badge/GitHub-SilvaTechB-blue?style=for-the-badge&logo=github&logoColor=white">
+  </a>
+  <a href="https://twitter.com/silva">
+    <img src="https://img.shields.io/badge/Twitter-@Silva-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white">
+  </a>
+  <a href="https://wa.me/message/254743706010">
+    <img src="https://img.shields.io/badge/WhatsApp-Click%20Here%20to%20Message%20Me-25D366?style=for-the-badge&logo=whatsapp&logoColor=white">
+  </a>
+  <a href="https://tiktok.com/@silva.edits6">
+    <img src="https://img.shields.io/badge/TikTok-@silva.edits6-000000?style=for-the-badge&logo=tiktok&logoColor=white">
+  </a>
+</p>
+### 📄 License
+This project is licensed under the [MIT License](LICENSE) - see the LICENSE file for details.
+
+
+
 ## ⚠️ Disclaimer
 
 *Silva MD Bot is not affiliated with WhatsApp Inc. Misusing the bot could result in a temporary or permanent WhatsApp ban. Silva Tech is not responsible for any bans or restrictions that may occur.*
