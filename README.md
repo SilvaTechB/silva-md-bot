@@ -2,7 +2,7 @@
 
 ### 🌟 Connect With Me
 <p align="center">
-  <a href="https://wa.me/message/254700143167"><img src="https://raw.githubusercontent.com/shizothetechie/database/main/icon/WhatsApp.png" width="10%"></a>
+  <a href="https://wa.me/254700143167"><img src="https://raw.githubusercontent.com/shizothetechie/database/main/icon/WhatsApp.png" width="10%"></a>
   <a href="https://tiktok.com/@silva.edits6"><img src="https://raw.githubusercontent.com/shizothetechie/database/main/icon/Instagram.png" width="11%"></a>
   <a href="https://www.facebook.com/silva"><img src="https://raw.githubusercontent.com/shizothetechie/database/main/icon/Facebook.png" width="12%"></a>
   <a href="https://twitter.com/silva"><img src="https://raw.githubusercontent.com/shizothetechie/database/main/icon/twitter.png" width="10%"></a>
