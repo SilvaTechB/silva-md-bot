@@ -3,7 +3,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   let name = m.pushName || conn.getName(m.sender)
   var vn = 'https://cdn.jsdelivr.net/gh/SilvaTechB/silva-md-bot@main/media/Alive.mp3'
   let url = 'https://github.com/SilvaTechB/silva-md-bot'
-  let murl = 'https://youtu.be/3j_EIP--2t8?si=4TFWV0On6Bl1wr-e'
+  let murl = 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v'
   let img = 'https://files.catbox.moe/8324jm.jpg'
   let con = {
     key: {
