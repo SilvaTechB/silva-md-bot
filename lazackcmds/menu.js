@@ -1,160 +1,94 @@
-import { generateWAMessageFromContent } from '@whiskeysockets/baileys'
-const {
-    proto,
-    generateWAMessage,
-    areJidsSameUser,
-    prepareWAMessageMedia
-} = (await import('@whiskeysockets/baileys')).default
-import { createHash } from 'crypto'
-import PhoneNumber from 'awesome-phonenumber'
-import { canLevelUp, xpRange } from '../lib/levelling.js'
+import fs from 'fs';
 
-import fetch from 'node-fetch'
-import fs from 'fs'
-const { levelling } = '../lib/levelling.js'
-import moment from 'moment-timezone'
-import { promises } from 'fs'
-import { join } from 'path'
-const time = moment.tz('Africa/Nairobi').format('HH')
-let wib = moment.tz('Africa/Nairobi').format('HH:mm:ss')
-//import db from '../lib/database.js'
+let handler = async (m, { conn }) => {
+  // Load the audio file
+  const audioUrl = 'https://github.com/SilvaTechB/silva-md-bot/raw/main/media/Menu.mp3';
 
-let handler = async (m, { conn, usedPrefix, command}) => {
+  // Define Themes with Updated Menu Options
+  const themes = [
+    `
+    *╭───「 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 」───╮*
+    *│ 👋 Hi, ${m.pushName || 'User'}! Welcome to Silva MD Bot.*
+    *│ Explore my commands below:*
+    *╰─────────────────────╯*
 
-   let d = new Date(new Date + 3600000)
-    let locale = 'en'
-    let week = d.toLocaleDateString(locale, { weekday: 'long' })
-    let date = d.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })
-    let _uptime = process.uptime() * 1000
-    let uptime = clockString(_uptime)
-let who = m.quoted ? m.quoted.sender : m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender;
-if (!(who in global.db.data.users)) throw `✳️ The user is not found in my database`
-//let pp = (thumb)
-let user = global.db.data.users[m.sender]
-let { name, exp, diamond, lastclaim, registered, regTime, age, level, role, warn } = global.db.data.users[who]
-let { min, xp, max } = xpRange(user.level, global.multiplier)
-let username = conn.getName(who)
-let math = max - xp
-let prem = global.prems.includes(who.split`@`[0])
-let sn = createHash('md5').update(who).digest('hex')
-let totaluser = Object.values(global.db.data.users).length 
-let rtotalreg = Object.values(global.db.data.users).filter(user => user.registered == true).length 
-let more = String.fromCharCode(8206)
-let readMore = more.repeat(850) 
-let greeting = ucapan()
-let taguser = '@' + m.sender.split("@s.whatsapp.net")[0]
+    📋 *Main Commands:*
+       ➡️ !ping - Check bot speed.
+       ➡️ !menu - Display this menu.
+       ➡️ !alive - Check bot status.
 
-let str = ` ❤️ *_Hello ${name}, ${greeting}! Welcome to my menu!_* 🥳
-╭═══〘 𝑺𝑰𝑳𝑽𝑨 𝑩𝑶𝑻 〙═══⊷❍
-┃✰│━━━❮❮ CMD LINE ❯❯━━━━━━
-┃✰│𝙽𝚊𝚖𝚎: ${global.author}
-┃✰│𝚃𝚘𝚝𝚊𝚕: 700+ Features
-┃✰│Network:LTE
-┃✰│ᴠᴇʀꜱɪᴏɴ: BETA
-┃✰│ᴏᴡɴᴇʀ : *𝕊𝕀𝕃𝕍𝔸*      
-┃✰│ɴᴜᴍʙᴇʀ: 254743706010
-┃✰│HOSTER: *Silva Platform*
-┃✰│ᴍᴏᴅᴇ: *Unkown*
-┃✰│ᴘʀᴇғɪx: *Multi-Prefix*
-┃✰│Uptime: ${uptime}               
-┃✰│Today's Date: ${date}           
-┃✰│Current Time: ${wib}            
-┃✰│──────────●●►
-┃✰│𝕏 https://x.com/@silva_african
-┃✰│  ▎▍▌▌▉▏▎▌▉▐▏▌▎
-┃✰│  ▎▍▌▌▉▏▎▌▉▐▏▌▎
-┃✰│   ©𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓
-╰──────────────────
-Thank you for choosing silva md
-powered by Sylivanus❤️
-─═✧✧═─ 𝕊𝕀𝕃𝕍𝔸 𝔹𝕆𝕋 ─═✧✧═─`
+    🎵 *Media Commands:*
+       ➡️ !ytmp3 [link] - Download audio.
+       ➡️ !ytmp4 [link] - Download video.
 
-let msg = generateWAMessageFromContent(m.chat, {
+    🤖 *.botmenu* - The Bot's secret control panel. What's your command, oh great one?
 
-  viewOnceMessage: {
+    👑 *.ownermenu* - The sacred scroll only for the chosen one. Yep, that's you, Boss!
 
-    message: {
+    🧑‍🤝‍🧑 *.groupmenu* - Group shenanigans central! Unite, chat, conquer!
 
-        "messageContextInfo": {
-          "deviceListMetadata": {},
-          "deviceListMetadataVersion": 2
+    📥 *.dlmenu* - 'DL' stands for 'Delicious Loot'. Come grab your goodies!
+
+    🎉 *.funmenu* - The bot's party hat. Games, jokes, and instant ROFLs. Let's get this party started!
+
+    💰 *.economymenu* - Bling bling! Your personal vault of virtual economy. Spend or save? Choose wisely!
+
+    🎮 *.gamemenu* - Enter the gaming arena. May the odds be ever in your favor!
+
+    🎨 *.stickermenu* - A rainbow of stickers for your inner artist. Make your chats pop!
+
+    🧰 *.toolmenu* - Your handy-dandy toolkit. What's your pick, genius?
+
+    🎩 *.logomenu* - Create a logo that screams YOU. Or whispers. You choose the volume.
+
+    🌙 *.nsfwmenu* - The After Dark menu. But remember, sharing adult secrets must be consent-based.
+    `,
+    // Add similar blocks for the remaining themes...
+  ];
+
+  // Shuffle and pick a random theme
+  const randomTheme = themes[Math.floor(Math.random() * themes.length)];
+
+  // Send the menu message
+  await conn.sendMessage(
+    m.chat,
+    {
+      text: randomTheme,
+      contextInfo: {
+        externalAdReply: {
+          title: 'Silva MD Bot - Your Ultimate Bot',
+          body: 'Click here to explore more',
+          thumbnailUrl: 'https://files.catbox.moe/8324jm.jpg', // Replace with your preferred image
+          sourceUrl: 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v', // Replace with your bot's repo or website
         },
+      },
+    },
+    { quoted: m }
+  );
 
-        interactiveMessage: proto.Message.InteractiveMessage.create({
-          body: proto.Message.InteractiveMessage.Body.create({
-            text: str
-          }),
+  // Play the audio file smoothly
+  await conn.sendMessage(
+    m.chat,
+    {
+      audio: { url: audioUrl },
+      mimetype: 'audio/mp4',
+      ptt: false, // Set to true if you want it to appear as a voice note
+      contextInfo: {
+        externalAdReply: {
+          title: 'Silva MD Bot - Menu Music',
+          body: 'Enjoy the vibes!',
+          thumbnailUrl: 'https://files.catbox.moe/8324jm.jpg',
+          sourceUrl: 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v',
+        },
+      },
+    },
+    { quoted: m }
+  );
+};
 
-          footer: proto.Message.InteractiveMessage.Footer.create({
-            text: "Use The Below Buttons"
-          }),
+// Command Metadata
+handler.help = ['menu'];
+handler.tags = ['main'];
+handler.command = ['menu'];
 
-          header: proto.Message.InteractiveMessage.Header.create({
-          ...(await prepareWAMessageMedia({ image : { url: 'https://files.catbox.moe/8324jm.jpg'}}, { upload: conn.waUploadToServer})), 
-            title: null,
-            subtitle: null,
-            hasMediaAttachment: false
-
-          }),
-          nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
-            buttons: [
-              {
-                "name": "single_select",
-                "buttonParamsJson": 
-                                "{\"title\":\"TAP TO OPEN\",\"sections\":[{\"title\":\"HERE IS ALL LIST OF MENU\",\"highlight_label\":\"SILVA\",\"rows\":[{\"header\":\"\",\"title\":\"💀 Bot Menu\",\"description\":\"The Bot's secret control panel. What's your command, oh great one?\",\"id\":\".botmenu\"},{\"header\":\"\",\"title\":\"📚 Owner Menu\",\"description\":\"The sacred scroll only for the chosen one. Yep, that's you, Boss!\",\"id\":\".ownermenu\"},{\"header\":\"\",\"title\":\"🧑‍🤝‍🧑 Group Menu\",\"description\":\"Group shenanigans central! Unite, chat, conquer!\",\"id\":\".groupmenu\"},{\"header\":\"\",\"title\":\"📥 Download Menu\",\"description\":\"'DL' stands for 'Delicious Loot'. Come grab your goodies!\",\"id\":\".dlmenu\"},{\"header\":\"\",\"title\":\"🎉 Fun Menu\",\"description\":\"The bot's party hat. Games, jokes and instant ROFLs. Let's get this party started!\",\"id\":\".funmenu\"},{\"header\":\"\",\"title\":\"💰 Economy Menu\",\"description\":\"Bling bling! Your personal vault of virtual economy. Spend or save? Choose wisely!\",\"id\":\".economymenu\"},{\"header\":\"\",\"title\":\"🎮 Game Menu\",\"description\":\"Enter the gaming arena. May the odds be ever in your favor!\",\"id\":\".gamemenu\"},{\"header\":\"\",\"title\":\"🎨 Sticker Menu\",\"description\":\"A rainbow of stickers for your inner artist. Make your chats pop!\",\"id\":\".stickermenu\"},{\"header\":\"\",\"title\":\"🧰 Tool Menu\",\"description\":\"Your handy-dandy toolkit. What's your pick, genius?\",\"id\":\".toolmenu\"},{\"header\":\"\",\"title\":\"🎩 Logo Menu\",\"description\":\"Create a logo that screams YOU. Or whispers. You choose the volume.\",\"id\":\".logomenu\"},{\"header\":\"\",\"title\":\"🌙 NSFW Menu\",\"description\":\"The After Dark menu. But remember, sharing adult secrets must be consent-based.\",\"id\":\".nsfwmenu\"}]}]}" 
-                },
-                 {
-                "name": "quick_reply",
-                "buttonParamsJson": "{\"display_text\":\"Owner✨❤️\",\"id\":\".grp\"}"
-                 },
-                  {
-                  "name": "quick_reply",
-                  "buttonParamsJson": "{\"display_text\":\"SECOND MENU 📲\",\"id\":\".menu2\"}"
-                  },
-                  {
-                  "name": "cta_url",
-                 "buttonParamsJson": "{\"display_text\":\"BOT SC 🎉\",\"url\":\"https://github.com/SilvaTechB/silva-md-bot\",\"merchant_url\":\"https://github.com/SilvaTechB\"}"
-              }
-           ],
-          })
-        })
-    }
-  }
-}, {})
-
-await conn.relayMessage(msg.key.remoteJid, msg.message, {
-
-  messageId: msg.key.id
-
-})
-
-
-}
-handler.help = ['main']
-handler.tags = ['group']
-handler.command = ['menu', 'help','h','commands'] 
-
-export default handler
-function clockString(ms) {
-    let h = isNaN(ms) ? '--' : Math.floor(ms / 3600000)
-    let m = isNaN(ms) ? '--' : Math.floor(ms / 60000) % 60
-    let s = isNaN(ms) ? '--' : Math.floor(ms / 1000) % 60
-    return [h, m, s].map(v => v.toString().padStart(2, 0)).join(':')}  
-
-    function ucapan() {
-      const time = moment.tz('Africa/Nairobi').format('HH')
-      let res = "happy early in the day☀️"
-      if (time >= 4) {
-        res = "Good Morning 🥱"
-      }
-      if (time >= 10) {
-        res = "Good Afternoon 🫠"
-     }
-      if (time >= 15) {
-        res = "Good Afternoon 🌇"
-      }
-      if (time >= 18) {
-       res = "Good Night 🌙"
-      }
-      return res
-    }
+export default handler;
