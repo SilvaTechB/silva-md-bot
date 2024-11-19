@@ -86,6 +86,6 @@ handler.help = ["tiktok", "tikdown"];
 handler.tags = ["downloader"];
 handler.command = ["tiktok", "tikdown"];
 handler.owner = false;
-handler.private = false;
+handler.private = true;
 
 export default handler;
