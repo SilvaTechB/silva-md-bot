@@ -1,62 +1,52 @@
 import ytSearch from "yt-search";
+import { youtube } from "btch-downloader";
 
-const handler = async (message, { conn, command, text, usedPrefix }) => {
-  // Check if the search text is provided
-  if (!text) {
-    throw `🥳 *${usedPrefix + command}* 𝙰𝚢𝚊𝚊 𝚑𝚊𝚒 𝚋𝚞𝚕𝚊𝚠𝚊 𝙽𝚊𝚊𝚝...`;
-  }
+let handler = async (m, { conn, text, usedPrefix, command }) => {
+  if (!text) return m.reply(`Enter the title or YouTube link!\nExample: *${usedPrefix + command} Faded Alan Walker*`);
 
+  await m.reply("🔄 Please wait while I fetch the audio...");
   try {
-    // Perform search using ytSearch
-    const searchResults = await ytSearch(text);
-    const video = searchResults.videos[0];
+    const search = await ytSearch(text); // Search for the video
+    const video = search.videos[0];
 
-    // Check if a video is found
-    if (!video) {
-      throw "😭 Video/Audio not found";
+    if (!video) return m.reply("❌ No results found! Please try again with a different query.");
+    if (video.seconds >= 3600) return m.reply("❌ Video duration exceeds 1 hour. Please choose a shorter video!");
+
+    // Attempt to get the audio URL
+    let audioUrl;
+    try {
+      audioUrl = await youtube(video.url);
+    } catch (error) {
+      return m.reply("⚠️ Failed to fetch audio. Please try again later.");
     }
 
-    const { title, description, thumbnail, videoId, timestamp, views, ago, url } = video;
-
-    // Send reaction to indicate processing
-    await message.react("💦");
-    await message.react("🥵");
-
-    // Construct the response message
-    const responseText = `
- *𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 PLAY* 
-🍑TITLE: ${title}
-🍆UPLOAD: ${ago}
-💦DURATION: ${timestamp}
-🥵VIEWS: ${views.toLocaleString()}
-𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓
-YOUR PREMIUM USER BOT`;
-
-    // Send response with buttons for MP3 and MP4 options
-    await conn.sendButton(
-      message.chat,
-      responseText,
-      "𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓",
-      thumbnail,
-      [
-        ["🎵 AUDIO", `${usedPrefix}song ${text}`],
-        ["📼 VIDEO", `${usedPrefix}video ${text}`],
-        ["💗 SCRIPT", `${usedPrefix}repo`],
-        ["💕 MENU", `${usedPrefix}menu`],
-        ["🍆 SPEED", `${usedPrefix}ping`]
-      ],
-      null,
-      message
+    // Send audio file
+    await conn.sendMessage(
+      m.chat,
+      {
+        audio: { url: audioUrl.mp3 },
+        mimetype: "audio/mpeg",
+        contextInfo: {
+          externalAdReply: {
+            title: video.title,
+            body: "",
+            thumbnailUrl: video.image,
+            sourceUrl: video.url,
+            mediaType: 1,
+            showAdAttribution: true,
+            renderLargerThumbnail: true,
+          },
+        },
+      },
+      { quoted: m }
     );
   } catch (error) {
-    console.error(error);
-    throw "𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 An error occurred while processing the request.";
+    m.reply(`❌ Error: ${error.message}`);
   }
 };
 
 handler.help = ["play"];
-handler.tags = ["dl"];
-handler.command = ["play"];
-handler.disabled = false;
+handler.tags = ["downloader"];
+handler.command = /^play$/i;
 
 export default handler;
