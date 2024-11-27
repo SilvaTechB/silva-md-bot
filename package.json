@@ -55,7 +55,7 @@
         "aptoide-scraper": "^1.0.1",
         "awesome-phonenumber": "^3.4.0",
         "axios": "^1.4.0",
-        "btch-downloader": "^2.8.0",
+        "btch-downloader": "^2.2.9",
         "chalk": "^5.1.0",
         "cheerio": "^1.0.0-rc.12",
         "chess.js": "*",
