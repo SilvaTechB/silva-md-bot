@@ -9,6 +9,15 @@
 </p>
 
 ---
+# Support Silva Tech Inc ❤️
+
+[![Sponsor SilvaTechB](https://img.shields.io/badge/Sponsor-SilvaTechB-important)](https://github.com/sponsors/SilvaTechB)
+
+---
+
+**Empower innovation and creativity!** Become a sponsor of Silva Tech Inc to help us bring more amazing projects to life. Your support makes a big difference.  
+👉 [Click here to sponsor us](https://github.com/sponsors/SilvaTechB)
+
 
 
 [![Typing SVG](https://readme-typing-svg.demolab.com?font=Black+Ops+One&size=35&pause=750&color=952323&width=435&lines=Hello;Welcome+%F0%9F%98%8A+to+Silva+MD+bot;This+is+our+official+repository+;Updated+on+September+2024;Silva+team+is+offering+the+best;For+this+bot;Fork+and+give+a+star)](https://git.io/typing-svg)
