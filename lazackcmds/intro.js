@@ -1,7 +1,7 @@
 let handler = async (m, { conn, usedPrefix, command }) => {
   // Silva's Intro Details
   let name = m.pushName || conn.getName(m.sender);
-  let profileImage = 'https://telegra.ph/file/54efddccf41281ad7ec51.jpg'; // Silva's profile image
+  let profileImage = 'https://i.imgur.com/n3bO7Pj.jpeg'; // Silva's profile image
   let sourceURL = 'https://github.com/SilvaTechB/silva-md-bot'; // GitHub repo URL
   let contactLink = 'https://wa.me/254700143167'; // Silva's WhatsApp contact
   let channelLink = 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v'; // Channel URL
@@ -29,7 +29,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
 │ Name      : Silva Tech
 │ Location  : Nairobi, Kenya
 │ Gender    : Male
-│ Age       : 25
+│ Age       : 22
 │ Phone     : [Click Here](${contactLink})
 │ Projects  : Silva MD Bot, Silva APIs
 │ GitHub    : [GitHub Repo](${sourceURL})
@@ -51,7 +51,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
         title: 'Silva MD Bot Intro',
         body: 'Learn more about Silva Tech here!',
         thumbnailUrl: profileImage,
-        sourceUrl: sourceURL,
+        sourceUrl: 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v',
         mediaType: 1,
         renderLargerThumbnail: true,
       },
