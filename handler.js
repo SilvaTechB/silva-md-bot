@@ -75,7 +75,7 @@ export async function handler(chatUpdate) {
            /*
    Do Not Modify this Section ❌  👇👇
    Else Relationship Features Will Not Work 😔
-   Your Devs Friend Shizo The Techie
+   Your Devs Friend Silva
    */
    if (!('lover' in user)) user.lover = ''
    if (!('exlover' in user)) user.exlover = ''
@@ -90,7 +90,7 @@ export async function handler(chatUpdate) {
    /*
    Do Not Modify this Section ❌  ☝️☝️
    Else Relationship Features Will Not Work 😔
-   Your Devs Friend Shizo The Techie
+   Your Devs Friend Silva
    */
           exp: 0,
           credit: 0,
@@ -115,43 +115,43 @@ export async function handler(chatUpdate) {
       if (chat) {
         if (!('antiDelete' in chat)) chat.antiDelete = true
         if (!('antiLink' in chat)) chat.antiLink = false
-        if (!('antiSticker' in chat)) chat.antiSticker = false
+        if (!('antiSticker' in chat)) chat.antiSticker = true
         if (!('antiToxic' in chat)) chat.antiToxic = false
-        if (!('detect' in chat)) chat.detect = false
+        if (!('detect' in chat)) chat.detect = true
         if (!('getmsg' in chat)) chat.getmsg = true
         if (!('isBanned' in chat)) chat.isBanned = false
-        if (!('nsfw' in chat)) chat.nsfw = false
+        if (!('nsfw' in chat)) chat.nsfw = true
         if (!('sBye' in chat)) chat.sBye = ''
         if (!('sDemote' in chat)) chat.sDemote = ''
         if (!('simi' in chat)) chat.simi = false
         if (!('sPromote' in chat)) chat.sPromote = ''
         if (!('sWelcome' in chat)) chat.sWelcome = ''
-        if (!('useDocument' in chat)) chat.useDocument = false
-        if (!('viewOnce' in chat)) chat.viewOnce = false
-        if (!('viewStory' in chat)) chat.viewStory = false
+        if (!('useDocument' in chat)) chat.useDocument = true
+        if (!('viewOnce' in chat)) chat.viewOnce = true
+        if (!('viewStory' in chat)) chat.viewStory = true
         if (!('welcome' in chat)) chat.welcome = false
-        if (!('chatbot' in chat)) chat.chatbot = false
+        if (!('chatbot' in chat)) chat.chatbot = true
         if (!isNumber(chat.expired)) chat.expired = 0
       } else
         global.db.data.chats[m.chat] = {
           antiDelete: true,
           antiLink: false,
-          antiSticker: false,
+          antiSticker: true,
           antiToxic: false,
-          detect: false,
+          detect: true,
           expired: 0,
           getmsg: true,
           isBanned: false,
-          nsfw: false,
+          nsfw: true,
           sBye: '',
           sDemote: '',
           simi: false,
           sPromote: '',
           sticker: false,
           sWelcome: '',
-          useDocument: false,
-          viewOnce: false,
-          viewStory: false,
+          useDocument: true,
+          viewOnce: true,
+          viewStory: true,
           welcome: false,
           chatbot: false,
         }
@@ -786,7 +786,7 @@ export async function deleteUpdate(message) {
             ≡ deleted a message 
             ┌─⊷  𝘼𝙉𝙏𝙄 𝘿𝙀𝙇𝙀𝙏𝙀 
             ▢ *Number :* @${participant.split`@`[0]} 
-            └─────────────
+            └──────silva───────
             `.trim(),
       msg,
       {

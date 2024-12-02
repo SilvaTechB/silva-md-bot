@@ -103,7 +103,7 @@ async function gandu() {
       process.exit(1)
     } else {
       console.log(`${endi}`)
-      console.log(chalk.bgBlack(chalk.redBright('Starting Lazack Device')))
+      console.log(chalk.bgBlack(chalk.redBright('Starting silva md bot')))
     }
   } catch (error) {
     console.error('Error:', error)
@@ -277,7 +277,7 @@ if (pairingCode && !conn.authState.creds.registered) {
 
     if (!Object.keys(PHONENUMBER_MCC).some(v => phoneNumber.startsWith(v))) {
       console.log(
-        chalk.bgBlack(chalk.redBright("Start with your country's WhatsApp code, Example : 62xxx"))
+        chalk.bgBlack(chalk.redBright("Start with your country's WhatsApp code, Example : 254xxx"))
       )
       process.exit(0)
     }
@@ -289,7 +289,7 @@ if (pairingCode && !conn.authState.creds.registered) {
 
     if (!Object.keys(PHONENUMBER_MCC).some(v => phoneNumber.startsWith(v))) {
       console.log(
-        chalk.bgBlack(chalk.redBright("Start with your country's WhatsApp code, Example : 62xxx"))
+        chalk.bgBlack(chalk.redBright("Start with your country's WhatsApp code, Example : 254xxx"))
       )
 
       phoneNumber = await question(
@@ -384,7 +384,7 @@ async function connectionUpdate(update) {
 
   if (connection === 'open') {
     const { jid, name } = conn.user
-    const msg = `╭═══〘 𝑺𝑰𝑳𝑽𝑨 𝑩𝑶𝑻 〙═══⊷❍\n┃✰│ꜱɪʟᴠᴀ ᴍᴅ ʙᴏᴛ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴄᴏɴɴᴇᴄᴛᴇᴅ ᴛᴏ ᴛʜɪꜱ ᴅᴇᴠɪᴄᴇ\n┃✰│ᴘʀᴇꜰɪx: *ᴀʟʟ*\n┃✰│\n┃✰│ᴄʀᴇᴀᴛᴏʀ: *ꜱɪʟᴠᴀ*\n┃✰│ᴏʀɢᴀɴɪᴢᴀᴛɪᴏɴ: *ꜱɪʟᴠᴀ ᴛᴇᴄʜ ʜᴀʀᴢᴀʀᴅ ɪɴᴄ*\n┃✰│ᴜᴘᴅᴀᴛᴇᴅ: *ꜱᴇᴘᴛᴇᴍʙᴇʀ 2024*\n┃✰│https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v\n┃✰│\n┃✰│══〘 𝑺𝑰𝑳𝑽𝑨 𝑩𝑶𝑻 〙═══⊷❍`
+    const msg = `𝑺𝑰𝑳𝑽𝑨 𝑩𝑶𝑻 \nHai🤩 ${name}, Congrats you have successfully deployed SILVA-BOT\n  ✅ *Bot Connection Status:* \n     *Silva MD Bot* successfully connected to this device! \n\n  ⚙️ *Prefix:*  \n\n  👨‍💻 *Creator:* *Silva* \n  🏢 *Organization:* *Silva Tech Hazard Inc.* \n  🗓️ *Updated:* *2024* \n\n  🌟 *Join our WhatsApp Channel for updates:* \n  https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v \n\n  🔄 *Stay tuned for upcoming features!* \n\n𝑺𝑰𝑳𝑽𝑨 𝑩𝑶𝑻`
 
     await conn.sendMessage(jid, { text: msg, mentions: [jid] }, { quoted: null })
 
