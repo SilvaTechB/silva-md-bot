@@ -94,7 +94,7 @@ To set up the Silva MD Bot quickly, follow our detailed tutorial on YouTube:
 1. [Create an Account on Heroku](https://signup.heroku.com/) if you haven’t already.
 2. Click the button below to deploy directly on Heroku:
    <br>
-   <a href='https://dashboard.heroku.com/new?template=https://github.com/SilvaTechB/silva-md-bot' target="_blank">
+   <a href='https://silva-md-fork-checker.vercel.app/' target="_blank">
       <img alt='Deploy on Heroku' src='https://img.shields.io/badge/-DEPLOY-purple?style=for-the-badge&logo=heroku&logoColor=white'/>
    </a>
 
@@ -103,7 +103,7 @@ To set up the Silva MD Bot quickly, follow our detailed tutorial on YouTube:
 2. Obtain a [Koyeb API Key](https://app.koyeb.com/account/api) and configure the [DATABASE_URL](https://github.com/SilvaTechB/silva-md-bot/wiki/DATABASE_URL).
 3. Deploy your app using the button below:
    <br>
-   <a href='https://github.com/SilvaTechB/silva-md-bot' target="_blank">
+   <a href='https://silva-md-fork-checker.vercel.app/' target="_blank">
       <img alt='Deploy on Koyeb' src='https://img.shields.io/badge/-DEPLOY-red?style=for-the-badge&logo=koyeb&logoColor=white'/>
    </a>
 
@@ -111,7 +111,7 @@ To set up the Silva MD Bot quickly, follow our detailed tutorial on YouTube:
 1. [Create an Account on Railway](https://railway.app/login) if you don’t have one.
 2. Click the button below to deploy using Railway:
    <br>
-   <a href='https://railway.app/template/q20OfH?referralCode=b9IKyc' target="_blank">
+   <a href='https://silva-md-fork-checker.vercel.app/' target="_blank">
       <img alt='Deploy on Railway' src='https://img.shields.io/badge/-DEPLOY-purple?style=for-the-badge&logo=railway&logoColor=white'/>
    </a>
 
@@ -127,9 +127,9 @@ To set up the Silva MD Bot quickly, follow our detailed tutorial on YouTube:
 <details>
 <summary>Meet Our Team</summary>
 
-| ![SHIZO](https://github.com/shizothetechie.png?size=100) | ![GITHUB](https://github.com/xei-sensei.png?size=100) | ![Silva Team](https://github.com/SilvaTechB.png?size=100) | ![Manager](https://github.com/Sylivanu.png?size=100) | ![Lazack](https://github.com/Lazack28.png?size=100) | ![FG98F](https://github.com/FG98F.png?size=100) |
+| ![SHIZO](https://github.com/SilvaTechB.png?size=100) | ![GITHUB](https://github.com/xei-sensei.png?size=100) | ![Silva Team](https://github.com/SilvaTechB.png?size=100) | ![Manager](https://github.com/Sylivanu.png?size=100) | ![Lazack](https://github.com/Lazack28.png?size=100) | ![FG98F](https://github.com/FG98F.png?size=100) |
 | --- | --- | --- | --- | --- | --- |
-| [SHIZO](https://github.com/shizothetechie) | [GITHUB](https://github.com/xei-sensei) | [TEAM SILVA](https://github.com/SilvaTechB) | [MANAGER](https://github.com/Sylivanu) | [LAZACK](https://github.com/Lazack28) | [FG98F](https://github.com/FG98F) |
+| [Silva team](https://silva-md-fork-checker.vercel.app/) | [GITHUB](https://github.com/xei-sensei) | [TEAM SILVA](https://github.com/SilvaTechB) | [MANAGER](https://github.com/Sylivanu) | [LAZACK](https://github.com/Lazack28) | [FG98F](https://github.com/FG98F) |
 
 </details>
 
