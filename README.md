@@ -72,12 +72,20 @@ To set up the Silva MD Bot quickly, follow our detailed tutorial on YouTube:
 ### **Fork & Star the Repository**
    - Start by forking this repository and giving it a ⭐ to support Silva Tech!
      To set up the Silva MD Bot quickly, first fork this repository:
+     
 [![Silva MD Bot Github Repo](https://img.shields.io/badge/Github-Fork%20Repo-red?style=for-the-badge&logo=Github)](https://github.com/SilvaTechB/silva-md-bot/fork)
 
 ### **Pairing the Bot**
    - Visit the bot site to generate a session code.
+     
+      SERVER A
+     
+     [![A Silva MD Bot Github Repo](https://img.shields.io/badge/Whatsapp-Pair%20Code-green?style=for-the-badge&logo=Whatsapp)](https://creds-session.onrender.com/)
 
-     [![Silva MD Bot Github Repo](https://img.shields.io/badge/Whatsapp-Pair%20Code-green?style=for-the-badge&logo=Whatsapp)](https://silva-creds.onrender.com/)
+     SERVER B
+     
+      [![B Silva MD Bot Github Repo](https://img.shields.io/badge/Whatsapp-Pair%20Code-green?style=for-the-badge&logo=Whatsapp)](https://silva-creds.onrender.com/)
+    
    - Ensure to delete any existing `creds.json` file if redeploying.
 
 ### **Step-by-Step Deployment Guide**
