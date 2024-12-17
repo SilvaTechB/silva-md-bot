@@ -2,7 +2,7 @@
 
 ### 🌟 Connect With Me
 <p align="center">
-  <a href="https://wa.me/254700143167"><img src="https://raw.githubusercontent.com/shizothetechie/database/main/icon/WhatsApp.png" width="10%"></a>
+  <a href="https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v"><img src="https://raw.githubusercontent.com/shizothetechie/database/main/icon/WhatsApp.png" width="10%"></a>
   <a href="https://instagram.com/_its.silva"><img src="https://raw.githubusercontent.com/shizothetechie/database/main/icon/Instagram.png" width="11%"></a>
   <a href="https://www.facebook.com/profile.php?id=100055490090211"><img src="https://raw.githubusercontent.com/shizothetechie/database/main/icon/Facebook.png" width="12%"></a>
   <a href="https://x.com/silva_african"><img src="https://raw.githubusercontent.com/shizothetechie/database/main/icon/twitter.png" width="10%"></a>
@@ -40,7 +40,7 @@
   </a>
 </p>
 
-<img src="https://i.imgur.com/dBaSKWF.gif" height="90" width="100%">
+<img src="https://i.imgur.com/dBaSKWF.gif" height="50" width="60%">
 
 ---
 
@@ -78,13 +78,9 @@ To set up the Silva MD Bot quickly, follow our detailed tutorial on YouTube:
 ### **Pairing the Bot**
    - Visit the bot site to generate a session code.
      
-      SERVER A
-     
-     [![A Silva MD Bot Github Repo](https://img.shields.io/badge/Whatsapp-Pair%20Code-green?style=for-the-badge&logo=Whatsapp)](https://creds-session.onrender.com/)
 
-     SERVER B
      
-      [![B Silva MD Bot Github Repo](https://img.shields.io/badge/Whatsapp-Pair%20Code-green?style=for-the-badge&logo=Whatsapp)](https://silva-creds.onrender.com/)
+      [![B Silva MD Bot Github Repo](https://img.shields.io/badge/Whatsapp-Pair%20Code-green?style=for-the-badge&logo=Whatsapp)](https://silva-session-selector.vercel.app/)
     
    - Ensure to delete any existing `creds.json` file if redeploying.
 
