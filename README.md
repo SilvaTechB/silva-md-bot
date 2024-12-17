@@ -40,7 +40,7 @@
   </a>
 </p>
 
-<img src="https://i.imgur.com/dBaSKWF.gif" height="50" width="60%">
+<img src="https://i.imgur.com/dBaSKWF.gif" height="90" width="100%">
 
 ---
 
@@ -48,7 +48,7 @@
 
 <p align="center">
   <a href="https://github.com/SilvaTechB/silva-md-bot">
-    <img alt="Silva docs" height="500" src="https://i.imgur.com/7bSFO2O.jpeg">
+    <img alt="Silva docs" height="250" src="https://i.imgur.com/7bSFO2O.jpeg">
   </a>
 </p>
 
