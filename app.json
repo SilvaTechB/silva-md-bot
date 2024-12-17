@@ -17,6 +17,11 @@
       "required": true,
       "value": "SILVA-MD-BOT©®"
     },
+    "SESSION_ID": {
+      "description": "your session id",
+      "required": true,
+      "value": ""
+    },
     "MODE": {
       "description": "mode public or private",
       "required": true,
