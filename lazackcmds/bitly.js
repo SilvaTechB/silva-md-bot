@@ -1,4 +1,4 @@
-import { bitly } from '@shizodevs/wabotmodule';
+import { bitly } from '@whiskeysockets/baileys';
 
 let handler = async (m, { conn, args }) => {
   try {
