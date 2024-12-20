@@ -117,7 +117,7 @@ export async function handler(chatUpdate) {
         if (!('antiLink' in chat)) chat.antiLink = false
         if (!('antiSticker' in chat)) chat.antiSticker = true
         if (!('antiToxic' in chat)) chat.antiToxic = false
-        if (!('detect' in chat)) chat.detect = true
+        if (!('detect' in chat)) chat.detect = false
         if (!('getmsg' in chat)) chat.getmsg = true
         if (!('isBanned' in chat)) chat.isBanned = false
         if (!('nsfw' in chat)) chat.nsfw = true
@@ -138,7 +138,7 @@ export async function handler(chatUpdate) {
           antiLink: false,
           antiSticker: true,
           antiToxic: false,
-          detect: true,
+          detect: false,
           expired: 0,
           getmsg: true,
           isBanned: false,
