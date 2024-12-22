@@ -1,5 +1,5 @@
 {
-  "name": "SILVA AI",
+  "name": "𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓",
   "description": " with great power comes with great responsibilities. follow the deployment process below.",
   "keywords": [
     "whatsapp bot"
@@ -10,7 +10,7 @@
     "OWNERS": {
       "description": "owner numbers",
       "required": true,
-      "value": "254700143167"
+      "value": "254700143167;Silva;254743706010;𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓"
     },
     "BOTNAME": {
       "description": "Give your BOT a name",
@@ -38,9 +38,9 @@
       "value": "true"
     },
     "autoRead": {
-      "description": "make it true if you want bot to read messages",
+      "description": "make it true or false if you want bot to read messages leave it blank if you don't want it to read messages",
       "required": false,
-      "value": "false"
+      "value": ""
     },
     "antidelete": {
       "description": "bot will forward deleted messages if you make it true",
