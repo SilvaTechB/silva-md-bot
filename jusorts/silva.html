@@ -3,17 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Silva MD Status</title>
+    <title>Silva MD Bot Status</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f5f5f5;
+            background-color: #f0f4f8;
             margin: 0;
             padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            overflow: hidden;
+            background: linear-gradient(to bottom right, #4CAF50, #81C784);
         }
 
         .container {
@@ -21,80 +23,144 @@
             max-width: 450px;
             background-color: #fff;
             padding: 30px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
             text-align: center;
             position: relative;
+            transform: scale(0);
+            animation: fadeInUp 1s ease-out forwards;
+        }
+
+        @keyframes fadeInUp {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
 
         h1 {
-            font-size: 24px;
+            font-size: 26px;
             color: #4CAF50;
+            animation: fadeIn 1s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .status {
             font-size: 18px;
             margin-top: 10px;
-            color: #4CAF50;
+            color: #333;
+            animation: slideIn 1s ease-out forwards;
+        }
+
+        @keyframes slideIn {
+            0% {
+                opacity: 0;
+                transform: translateX(-100px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         .stat-item {
-            margin-top: 15px;
-            font-size: 16px;
-        }
-
-        .stat-item span {
-            font-weight: bold;
-            color: #333;
-        }
-
-        .loading {
-            display: none;
+            margin-top: 20px;
             font-size: 18px;
-            color: #888;
+            color: #4CAF50;
+            animation: fadeInStat 1s ease-out forwards;
         }
 
-        .loading.active {
-            display: block;
+        @keyframes fadeInStat {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .battery-status {
-            margin-top: 20px;
+            margin-top: 30px;
             font-size: 18px;
+            color: #4CAF50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: bounceIn 1s ease-out forwards;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            60% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
 
         .battery-circle {
-            display: inline-block;
-            position: relative;
-            width: 50px;
-            height: 50px;
+            margin-left: 10px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             border: 5px solid #4CAF50;
+            position: relative;
             background-color: transparent;
             animation: pulse 2s infinite ease-in-out;
         }
 
         @keyframes pulse {
-            0% { transform: scale(0.9); }
-            50% { transform: scale(1); }
-            100% { transform: scale(0.9); }
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+            }
         }
 
         .circle {
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             background-color: #4CAF50;
             border-radius: 50%;
-            animation: animate-circle 2s linear infinite;
+            animation: animateCircle 2s linear infinite;
             transform: translate(-50%, -50%);
         }
 
-        @keyframes animate-circle {
-            0% { transform: translate(-50%, -50%) scale(0); }
-            100% { transform: translate(-50%, -50%) scale(1); }
+        @keyframes animateCircle {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+            }
         }
 
         .animated-background {
@@ -105,6 +171,7 @@
             height: 100%;
             background-color: #f5f5f5;
             z-index: -1;
+            overflow: hidden;
         }
 
         /* Add loader styling */
@@ -113,34 +180,47 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 24px;
+            font-size: 30px;
             color: #4CAF50;
             font-weight: bold;
             display: none;
+            animation: bounceIn 1.5s ease-out forwards;
         }
 
         .loader.active {
             display: block;
+        }
+
+        .repo-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+        }
+
+        .repo-stats span {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            animation: fadeInStat 1.5s ease-out forwards;
+        }
+
+        .repo-stats span:hover {
+            color: #4CAF50;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Silva MD Bot Status</h1>
-
-        <!-- Real-time Stats Section -->
-        <div class="stat-item">
-            <span id="repo-forks">Forks: Loading...</span>
-        </div>
-        <div class="stat-item">
-            <span id="repo-stars">Stars: Loading...</span>
-        </div>
-        <div class="stat-item">
-            <span id="repo-users">Users: Loading...</span>
-        </div>
-
         <div class="status">
             <span id="silva-status">Silva MD is currently running...</span>
+        </div>
+
+        <div class="repo-stats">
+            <span id="repo-forks">Forks: Loading...</span>
+            <span id="repo-stars">Stars: Loading...</span>
+            <span id="repo-users">Users: Loading...</span>
         </div>
 
         <div class="battery-status">
@@ -161,39 +241,32 @@
     </div>
 
     <script>
-        // API URL to get GitHub repository stats
         const repoUrl = 'https://api.github.com/repos/SilvaTechB/silva-md-bot';
 
         async function fetchRepoStats() {
-            // Show loader while fetching data
             document.getElementById('loader').classList.add('active');
-
             try {
                 const response = await fetch(repoUrl);
                 const data = await response.json();
                 document.getElementById('repo-forks').innerText = `Forks: ${data.forks_count}`;
                 document.getElementById('repo-stars').innerText = `Stars: ${data.stargazers_count}`;
                 document.getElementById('repo-users').innerText = `Users: ${data.subscribers_count}`;
-
-                // Hide loader once data is fetched
                 document.getElementById('loader').classList.remove('active');
             } catch (error) {
                 console.error('Error fetching repo stats:', error);
                 document.getElementById('repo-forks').innerText = 'Forks: Error loading';
                 document.getElementById('repo-stars').innerText = 'Stars: Error loading';
                 document.getElementById('repo-users').innerText = 'Users: Error loading';
+                document.getElementById('loader').classList.remove('active');
             }
         }
 
-        // Update battery status dynamically using JavaScript
         function updateStatus() {
-            document.getElementById("battery-percentage").innerText = "90%"; // Example update
+            document.getElementById("battery-percentage").innerText = "90%";
         }
 
-        // Call the updateStatus function every 5 seconds
         setInterval(updateStatus, 5000);
 
-        // Fetch repository stats when page loads
         window.onload = fetchRepoStats;
     </script>
 </body>
