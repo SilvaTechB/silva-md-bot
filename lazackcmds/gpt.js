@@ -10,11 +10,26 @@ let handler = async (m, { text, conn, usedPrefix, command }) => {
   }
 
   try {
-    m.react(rwait)
-    
+    // Start the loading process
+    m.react('⏳') // React with a loading symbol
     conn.sendPresenceUpdate('composing', m.chat)
+    
     const prompt = encodeURIComponent(text)
+    
+    // Start a progress simulation for loading
+    let loadingMessage = await conn.sendMessage(m.chat, 'Loading... 0%', { quoted: m })
+    
+    let progress = 0
+    let loadingInterval = setInterval(() => {
+      progress += 10
+      if (progress <= 100) {
+        conn.sendMessage(m.chat, `Loading... ${progress}%`, { quoted: loadingMessage })
+      } else {
+        clearInterval(loadingInterval)
+      }
+    }, 1000)
 
+    // API call 1: GuruSensei
     const guru1 = `https://api.gurusensei.workers.dev/llama?prompt=${prompt}`
 
     try {
@@ -26,28 +41,36 @@ let handler = async (m, { text, conn, usedPrefix, command }) => {
         throw new Error('No valid JSON response from the first API')
       }
 
-      await conn.sendButton(m.chat,result, author, 'https://files.catbox.moe/8324jm.jpg', [['Script', `.sc`]], null, [['Follow Me', `https://github.com/SilvaTechB`]], m)
-      m.react(done)
+      // Add watermark to result
+      let watermarkedResult = `${result}\n\n*Powered by Silva MD Bot*`
+
+      // Send result with watermark
+      await conn.sendMessage(m.chat, watermarkedResult, { quoted: m })
+      m.react('✅') // React with a checkmark when done
     } catch (error) {
       console.error('Error from the first API:', error)
-
-      //const model = 'llama'
-     // const senderNumber = m.sender.replace(/[^0-9]/g, '')
-      //const session = `GURU_BOT_${senderNumber}`
+      
+      // API call 2: GuruAPI (fallback)
       const guru2 = `https://ultimetron.guruapi.tech/gpt3?prompt=${prompt}`
 
       let response = await fetch(guru2)
       let data = await response.json()
       let result = data.completion
 
-      await conn.sendButton(m.chat,result, author, 'https://files.catbox.moe/8324jm.jpg', [['Silva power', `.repo`]], null, [['Follow Me', `https://github.com/SilvaTechB`]], m)
-      m.react(done)
+      // Add watermark to result
+      let watermarkedResult = `${result}\n\n*Powered by Silva MD Bot*`
+
+      // Send result with watermark
+      await conn.sendMessage(m.chat, watermarkedResult, { quoted: m })
+      m.react('✅') // React with a checkmark when done
     }
+
   } catch (error) {
     console.error('Error:', error)
     throw `*ERROR*`
   }
 }
+
 handler.help = ['chatgpt']
 handler.tags = ['AI']
 handler.command = ['bro', 'chatgpt', 'ai', 'gpt']
