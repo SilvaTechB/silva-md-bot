@@ -46,6 +46,26 @@
       "description": "make it true or false. true to activate false to deactivate",
       "required": false,
       "value": "true"
+       },
+    "AUTO_STATUS_LIKE": {
+      "description": "make it true or false. true to activate false to deactivate",
+      "required": true,
+      "value": "true"
+       },
+    "AUTO_STATUS_LIKE_EMOJI": {
+      "description": "customize to any emoji you need 💚",
+      "required": false,
+      "value": "💚"
+       },
+    "STATUS_REPLY": {
+      "description": "make it true or false. true to activate false to deactivate",
+      "required": true,
+      "value": "false"
+       },
+    "STATUS_MSG": {
+      "description": "make it true or false. true to activate false to deactivate",
+      "required": false,
+      "value": "SILVA MD BOT SUCCESSFULLY VIEWED YOUR STATUS 💖💚"
     },
     "antidelete": {
       "description": "bot will forward deleted messages if you make it true",
