@@ -23,7 +23,7 @@ figlet(
 )
 
 figlet(
-  'Advanced Horny Whatsapp Bot',
+  'Silva Bot',
   {
     horizontalLayout: 'default',
     verticalLayout: 'default',
@@ -46,7 +46,7 @@ const __dirname = path.dirname(__filename);
 app.use(express.static(path.join(__dirname, 'jusorts')));
 
 app.get('/', (req, res) => {
-  res.redirect('./silva.html');
+  res.redirect('/silva.html');
 });
 
 app.listen(port, () => {
