@@ -3,82 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Silva MD Bot Status</title>
+    <title>Silva MD Bot - AI Status</title>
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #0e0e0e;
+            color: #fff;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
             overflow: hidden;
-            background: #000;
-        }
-
-        .glitch-background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url('https://www.transparenttextures.com/patterns/stripes.png');
-            animation: glitch 2s infinite linear;
-            background-size: 100% 100%;
-            z-index: -1;
-        }
-
-        @keyframes glitch {
-            0% {
-                background-position: 0 0;
-                opacity: 0.5;
-            }
-            25% {
-                background-position: 5% 5%;
-                opacity: 0.7;
-            }
-            50% {
-                background-position: -5% -5%;
-                opacity: 1;
-            }
-            75% {
-                background-position: 10% 10%;
-                opacity: 0.7;
-            }
-            100% {
-                background-position: 0 0;
-                opacity: 0.5;
-            }
+            position: relative;
         }
 
         .container {
-            width: 100%;
-            max-width: 450px;
-            background-color: rgba(255, 255, 255, 0.9);
+            max-width: 480px;
+            background: rgba(20, 20, 20, 0.8);
             padding: 30px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-            border-radius: 12px;
+            border-radius: 15px;
             text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             position: relative;
-            transform: scale(0);
-            animation: fadeInUp 1s ease-out forwards;
+            animation: slideUp 1s ease-out forwards;
         }
 
-        @keyframes fadeInUp {
+        @keyframes slideUp {
             0% {
-                transform: scale(0);
+                transform: translateY(100px);
                 opacity: 0;
             }
             100% {
-                transform: scale(1);
+                transform: translateY(0);
                 opacity: 1;
             }
         }
 
         h1 {
-            font-size: 26px;
+            font-size: 30px;
             color: #4CAF50;
+            margin-bottom: 20px;
             animation: fadeIn 1s ease-out forwards;
         }
 
@@ -95,48 +65,33 @@
 
         .status {
             font-size: 18px;
-            margin-top: 10px;
-            color: #333;
-            animation: slideIn 1s ease-out forwards;
+            color: #ddd;
+            margin-top: 15px;
+            animation: fadeInUp 1s ease-out forwards;
         }
 
-        @keyframes slideIn {
+        @keyframes fadeInUp {
             0% {
                 opacity: 0;
-                transform: translateX(-100px);
+                transform: translateY(30px);
             }
             100% {
                 opacity: 1;
-                transform: translateX(0);
+                transform: translateY(0);
             }
         }
 
         .battery-status {
-            margin-top: 30px;
-            font-size: 18px;
+            font-size: 20px;
             color: #4CAF50;
+            margin-top: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
-            animation: bounceIn 1s ease-out forwards;
-        }
-
-        @keyframes bounceIn {
-            0% {
-                transform: scale(0.5);
-                opacity: 0;
-            }
-            60% {
-                transform: scale(1.1);
-            }
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
         }
 
         .battery-circle {
-            margin-left: 10px;
+            margin-left: 15px;
             width: 40px;
             height: 40px;
             border-radius: 50%;
@@ -158,27 +113,15 @@
             }
         }
 
-        .animated-background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #f5f5f5;
-            z-index: -1;
-            overflow: hidden;
-        }
-
         .loader {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 30px;
+            font-size: 25px;
             color: #4CAF50;
             font-weight: bold;
             display: none;
-            animation: bounceIn 1.5s ease-out forwards;
         }
 
         .loader.active {
@@ -186,42 +129,60 @@
         }
 
         .repo-stats {
-            display: flex;
-            justify-content: space-around;
             margin-top: 30px;
-        }
-
-        .repo-stats span {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
             font-size: 18px;
             font-weight: bold;
-            color: #333;
+            color: #ddd;
             animation: fadeInStat 1.5s ease-out forwards;
         }
 
-        .repo-stats span:hover {
+        @keyframes fadeInStat {
+            0% {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .footer {
+            margin-top: 40px;
+            font-size: 14px;
+            color: #aaa;
+            text-align: center;
+            animation: fadeInFooter 1s ease-out forwards;
+        }
+
+        @keyframes fadeInFooter {
+            0% {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .footer a {
             color: #4CAF50;
-            cursor: pointer;
+            text-decoration: none;
         }
 
-        .flags {
-            margin-top: 20px;
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-        }
-
-        .flags img {
-            width: 30px;
-            height: 20px;
-            border-radius: 5px;
+        .footer a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <div class="glitch-background"></div>
-
     <div class="container">
-        <h1>Silva MD Bot Status</h1>
+        <h1>Silva MD Bot - AI Status</h1>
+
         <div class="status">
             <span id="silva-status">Silva MD is currently running...</span>
         </div>
@@ -240,21 +201,11 @@
         <!-- Loader Animation -->
         <div class="loader" id="loader">Loading...</div>
 
-        <div class="animated-background">
-            <div class="circle"></div>
-            <div class="circle"></div>
-            <div class="circle"></div>
-            <div class="circle"></div>
-            <div class="circle"></div>
-        </div>
-
-        <!-- Flags Section -->
-        <div class="flags">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Flag_of_Kenya.svg/2560px-Flag_of_Kenya.svg.png" alt="Kenyan Flag" title="Kenya">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Flag_of_United_States.svg" alt="USA Flag" title="USA">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/c/cf/Flag_of_Germany.svg" alt="Germany Flag" title="Germany">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/e/ef/Flag_of_South_Korea.svg" alt="South Korea Flag" title="South Korea">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/Flag_of_Japan.svg" alt="Japan Flag" title="Japan">
+        <div class="footer">
+            <p>Contact Developer via WhatsApp:</p>
+            <a href="https://wa.me/254700143167">+254700143167</a> | 
+            <a href="https://wa.me/254755257907">+254755257907</a> | 
+            <a href="https://wa.me/254743706010">+254743706010</a>
         </div>
     </div>
 
