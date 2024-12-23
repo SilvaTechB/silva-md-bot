@@ -2,6 +2,13 @@ export async function before(message, { conn }) {
   try {
     console.log("Processing incoming message...");
 
+    // Check if AUTO_RECORDING is enabled
+    const autoRecording = process.env.AUTO_RECORDING === "true";
+    if (!autoRecording) {
+      console.log("AUTO_RECORDING is disabled. Skipping recording presence.");
+      return true;
+    }
+
     // Ignore invalid or irrelevant messages
     const irrelevantTypes = ["protocolMessage", "pollUpdateMessage", "reactionMessage", "stickerMessage"];
     if (irrelevantTypes.includes(message.mtype) || message.isBaileys || message.fromMe) {
@@ -26,7 +33,7 @@ export async function before(message, { conn }) {
     setTimeout(async () => {
       await conn.sendPresenceUpdate("typing", message.chat);
       console.log("Presence reset to 'typing'.");
-    }, 200000); // 20 seconds
+    }, 20000); // 20 seconds
   } catch (error) {
     console.error("Error processing message:", error.message);
   }
