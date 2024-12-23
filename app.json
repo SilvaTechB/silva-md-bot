@@ -41,6 +41,11 @@
       "description": "make it true or false if you want bot to read messages leave it blank if you don't want it to read messages",
       "required": false,
       "value": ""
+      },
+    "AUTO_RECORDING": {
+      "description": "make it true or false. true to activate false to deactivate",
+      "required": false,
+      "value": "true"
     },
     "antidelete": {
       "description": "bot will forward deleted messages if you make it true",
