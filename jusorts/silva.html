@@ -7,7 +7,6 @@
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f0f4f8;
             margin: 0;
             padding: 0;
             display: flex;
@@ -15,13 +14,48 @@
             align-items: center;
             height: 100vh;
             overflow: hidden;
-            background: linear-gradient(to bottom right, #4CAF50, #81C784);
+            background: #000;
+        }
+
+        .glitch-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/stripes.png');
+            animation: glitch 2s infinite linear;
+            background-size: 100% 100%;
+            z-index: -1;
+        }
+
+        @keyframes glitch {
+            0% {
+                background-position: 0 0;
+                opacity: 0.5;
+            }
+            25% {
+                background-position: 5% 5%;
+                opacity: 0.7;
+            }
+            50% {
+                background-position: -5% -5%;
+                opacity: 1;
+            }
+            75% {
+                background-position: 10% 10%;
+                opacity: 0.7;
+            }
+            100% {
+                background-position: 0 0;
+                opacity: 0.5;
+            }
         }
 
         .container {
             width: 100%;
             max-width: 450px;
-            background-color: #fff;
+            background-color: rgba(255, 255, 255, 0.9);
             padding: 30px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
             border-radius: 12px;
@@ -77,24 +111,6 @@
             }
         }
 
-        .stat-item {
-            margin-top: 20px;
-            font-size: 18px;
-            color: #4CAF50;
-            animation: fadeInStat 1s ease-out forwards;
-        }
-
-        @keyframes fadeInStat {
-            0% {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
         .battery-status {
             margin-top: 30px;
             font-size: 18px;
@@ -142,27 +158,6 @@
             }
         }
 
-        .circle {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 8px;
-            height: 8px;
-            background-color: #4CAF50;
-            border-radius: 50%;
-            animation: animateCircle 2s linear infinite;
-            transform: translate(-50%, -50%);
-        }
-
-        @keyframes animateCircle {
-            0% {
-                transform: translate(-50%, -50%) scale(0);
-            }
-            100% {
-                transform: translate(-50%, -50%) scale(1);
-            }
-        }
-
         .animated-background {
             position: absolute;
             top: 0;
@@ -174,7 +169,6 @@
             overflow: hidden;
         }
 
-        /* Add loader styling */
         .loader {
             position: absolute;
             top: 50%;
@@ -208,9 +202,24 @@
             color: #4CAF50;
             cursor: pointer;
         }
+
+        .flags {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .flags img {
+            width: 30px;
+            height: 20px;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
+    <div class="glitch-background"></div>
+
     <div class="container">
         <h1>Silva MD Bot Status</h1>
         <div class="status">
@@ -238,6 +247,15 @@
             <div class="circle"></div>
             <div class="circle"></div>
         </div>
+
+        <!-- Flags Section -->
+        <div class="flags">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Flag_of_Kenya.svg/2560px-Flag_of_Kenya.svg.png" alt="Kenyan Flag" title="Kenya">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Flag_of_United_States.svg" alt="USA Flag" title="USA">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/c/cf/Flag_of_Germany.svg" alt="Germany Flag" title="Germany">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/e/ef/Flag_of_South_Korea.svg" alt="South Korea Flag" title="South Korea">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/Flag_of_Japan.svg" alt="Japan Flag" title="Japan">
+        </div>
     </div>
 
     <script>
@@ -248,9 +266,10 @@
             try {
                 const response = await fetch(repoUrl);
                 const data = await response.json();
-                document.getElementById('repo-forks').innerText = `Forks: ${data.forks_count}`;
+                const forksCount = data.forks_count;
+                document.getElementById('repo-forks').innerText = `Forks: ${forksCount}`;
                 document.getElementById('repo-stars').innerText = `Stars: ${data.stargazers_count}`;
-                document.getElementById('repo-users').innerText = `Users: ${data.subscribers_count}`;
+                document.getElementById('repo-users').innerText = `Users: ${forksCount * 2}`; // Users = Twice the number of forks
                 document.getElementById('loader').classList.remove('active');
             } catch (error) {
                 console.error('Error fetching repo stats:', error);
@@ -261,13 +280,13 @@
             }
         }
 
-        function updateStatus() {
-            document.getElementById("battery-percentage").innerText = "90%";
-        }
+        fetchRepoStats();
 
-        setInterval(updateStatus, 5000);
-
-        window.onload = fetchRepoStats;
+        // Simulate battery percentage change
+        setInterval(() => {
+            const batteryPercentage = Math.floor(Math.random() * 100);
+            document.getElementById('battery-percentage').innerText = `${batteryPercentage}%`;
+        }, 5000);
     </script>
 </body>
 </html>
