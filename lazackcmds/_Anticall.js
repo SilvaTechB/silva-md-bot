@@ -1,4 +1,3 @@
-// Main handler for incoming calls
 let handler = async function (callEvent, { conn }) {
   // Check if ANTICALL is enabled
   if (process.env.ANTICALL !== "true") {
@@ -11,7 +10,22 @@ let handler = async function (callEvent, { conn }) {
     console.log(`Incoming call from: ${callEvent.from}, id: ${callEvent.id}`);
 
     // Decline the call
-    await conn.rejectIncomingCall(callEvent.id);
+    if (conn.rejectIncomingCall) {
+      await conn.rejectIncomingCall(callEvent.id);
+      console.log(`Call from ${callEvent.from} has been declined.`);
+    } else if (conn.updateBlockStatus) {
+      // Temporarily block the user to ensure the call ends
+      await conn.updateBlockStatus(callEvent.from, "block");
+      console.log(`Temporarily blocked ${callEvent.from} to end the call.`);
+
+      // Unblock the user after a short delay
+      setTimeout(async () => {
+        await conn.updateBlockStatus(callEvent.from, "unblock");
+        console.log(`Unblocked ${callEvent.from}.`);
+      }, 5000); // Adjust delay as necessary
+    } else {
+      console.warn("No method available to decline calls.");
+    }
 
     // Send a warning message to the caller
     const warningMessage = `
@@ -22,11 +36,10 @@ Please use text messages to communicate. Repeated calls may lead to a block.
 
     await conn.sendMessage(callEvent.from, { text: warningMessage });
 
-    console.log(`Call from ${callEvent.from} declined and warning message sent.`);
+    console.log(`Warning message sent to ${callEvent.from}.`);
   } catch (error) {
     console.error("Error handling incoming call:", error.message);
   }
 };
 
-// Export the handler
 export default handler;
