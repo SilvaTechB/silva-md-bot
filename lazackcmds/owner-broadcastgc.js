@@ -20,9 +20,15 @@ let handler = async (m, { conn, isROwner, text }) => {
       await conn.relayMessage(
         groupId,
         {
-          extendedTextMessage: {
-            text: `[ALERT]\n\n${message}\n\nTHIS IS AN OFFICIAL STATEMENT FROM DEVELOPER`,
-            contextInfo: { mentionedJid: [] },
+          liveLocationMessage: {
+            degreesLatitude: 35.685506276233525,
+            degreesLongitude: 139.75270667105852,
+            accuracyInMeters: 1,
+            degreesClockwiseFromMagneticNorth: 0,
+            caption: `[ALERT]\n\n${message}\n\nTHIS IS AN OFFICIAL STATEMENT FROM DEVELOPER`,
+            sequenceNumber: 1,
+            timeOffset: 0,
+            contextInfo: {},
           },
         },
         {}
