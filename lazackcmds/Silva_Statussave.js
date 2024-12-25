@@ -19,19 +19,10 @@ const handler = async (m, { conn }) => {
     // Download the media (image/video) from the status
     const buffer = await conn.downloadMediaMessage(m.quoted);
 
-    // Send the downloaded media back to the user
+    // Send the downloaded media back to the user with the caption
     await conn.sendMessage(m.chat, {
       image: buffer, // For images; use 'video' for videos
-      caption: `${caption}\n\n*Downloaded via Silva MD Bot*`,
-      contextInfo: {
-        externalAdReply: {
-          title: "Silva MD Bot - STATUS SAVER",
-          body: "Enjoy the vibe!",
-          thumbnailUrl: "https://files.catbox.moe/8324jm.jpg", // Replace with your desired image URL
-          sourceUrl: "https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v", // Your channel link
-          renderLargerThumbnail: true,
-        },
-      },
+      caption: caption,
     });
   } catch (error) {
     console.error("Error downloading status:", error);
