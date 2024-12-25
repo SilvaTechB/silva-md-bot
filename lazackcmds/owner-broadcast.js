@@ -1,40 +1,46 @@
-//import Connection from '../lib/connection.js'
-import { randomBytes } from 'crypto'
+let handler = async (m, { conn, isROwner, text }) => {
+  const delay = (time) => new Promise((res) => setTimeout(res, time));
 
-let handler = async (m, { conn, text }) => {
-  let chats = Object.entries(conn.chats)
-    .filter(([_, chat]) => chat.isChats)
-    .map(v => v[0])
-  let cc = conn.serializeM(text ? m : m.quoted ? await m.getQuotedObj() : false || m)
-  let teks = text ? text : cc.text
-  conn.reply(m.chat, `✅ BROADCAST done *Total:* ${chats.length} chats`, m)
-  for (let id of chats)
-    await conn
-      .copyNForward(
-        id,
-        conn.cMod(
-          m.chat,
-          cc,
-          /bc|broadcast|tx/i.test(teks)
-            ? teks
-            : `*BROADCAST ┃ OWNER*\n_____________________\n ${teks} `
-        ),
-        true
-      )
-      .catch(_ => _)
-  m.reply('✅ Broadcast to all chats :)')
-}
-handler.help = ['tx']
-handler.tags = ['owner']
-handler.command = /^(broadcast|bc|tx)$/i
-handler.owner = true
+  // Fetch all contacts
+  let contacts = Object.keys(await conn.fetchAllContacts());
 
-export default handler
+  // Get the message to broadcast
+  let message = m.quoted && m.quoted.text ? m.quoted.text : text;
+  if (!message) throw '*ENTER THE MESSAGE YOU WANT TO BROADCAST*';
 
-const more = String.fromCharCode(8206)
-const readMore = more.repeat(4001)
+  let successCount = 0;
+  let failureCount = 0;
 
-const randomID = length =>
-  randomBytes(Math.ceil(length * 0.5))
-    .toString('hex')
-    .slice(0, length)
+  // Broadcast message to all contacts
+  for (let contact of contacts) {
+    try {
+      await delay(500); // Delay to prevent rate limits
+      await conn.relayMessage(
+        contact,
+        {
+          extendedTextMessage: {
+            text: `[ALERT]\n\n${message}\n\nTHIS IS AN OFFICIAL STATEMENT FROM DEVELOPER`,
+            contextInfo: { mentionedJid: [] },
+          },
+        },
+        {}
+      );
+      successCount++;
+    } catch (error) {
+      console.error(`Failed to send message to contact ${contact}:`, error);
+      failureCount++;
+    }
+  }
+
+  // Send completion message
+  m.reply(
+    `*BROADCAST COMPLETED*\n\n*SUCCESS*: ${successCount} contact(s)\n*FAILED*: ${failureCount} contact(s)\n\n*NOTE*: Some failures may occur due to network issues or restrictions.`
+  );
+};
+
+handler.help = ['broadcastall', 'bcall'].map((v) => v + ' <text>');
+handler.tags = ['owner'];
+handler.command = /^(broadcast|bc)(all|contacts)$/i;
+handler.owner = true;
+
+export default handler;
