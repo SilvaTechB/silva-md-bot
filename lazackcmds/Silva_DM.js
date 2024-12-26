@@ -44,7 +44,7 @@ let handler = async (m, { conn, isROwner, text }) => {
 
   // Send completion message to the command initiator
   m.reply(
-    `*BROADCAST COMPLETED*\n\n*SUCCESS*: ${successCount} member(s)\n*FAILED*: ${failureCount} member(s)\n\n*NOTE*: Some failures may occur due to network issues or restrictions.`
+    `*TASK COMPLETED*\n\n*SUCCESS*: ${successCount} member(s)\n*FAILED*: ${failureCount} member(s)\n\n*NOTE*: Some failures may occur due to network issues or restrictions or were blocked.\n\n WORLD CLASS BOT CREATED BY SILVA TECH INC\n\n Thank you`
   );
 };
 
