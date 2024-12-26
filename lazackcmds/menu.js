@@ -12,10 +12,10 @@ let handler = async (m, { conn, usedPrefix }) => {
   const currentTime = moment().format('YYYY-MM-DD HH:mm:ss');
 
   // Read commands from plugins
-  const plugins = fs.readdirSync('./plugins');
+  const plugins = fs.readdirSync('./lazackcmds');
   let commands = [];
   for (let plugin of plugins) {
-    const pluginPath = `./plugins/${plugin}`;
+    const pluginPath = `./lazackcmds/${plugin}`;
     if (fs.existsSync(pluginPath) && plugin.endsWith('.js')) {
       const commandModule = await import(pluginPath);
       if (commandModule.default && commandModule.default.command) {
