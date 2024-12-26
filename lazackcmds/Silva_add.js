@@ -17,22 +17,28 @@ handler.run = async (m, { conn, text, participants }) => {
 
     // Validate the phone number format
     const phoneNumber = text.replace(/[^0-9]/g, ''); // Remove non-numeric characters
-    if (!/^\d{9,15}$/.test(phoneNumber)) {
+    if (!/^(?:\d{1,3})?\d{9,15}$/.test(phoneNumber)) {
         return m.reply('Invalid phone number format. Ensure it is in international format without spaces. Example: 254700143167');
     }
 
+    // Append country code if missing
+    const fullPhoneNumber = phoneNumber.startsWith('254') ? phoneNumber : `254${phoneNumber}`;
+
     // Check if the user is already in the group
-    const memberExists = participants.some(member => member.id.includes(phoneNumber));
+    const memberExists = participants.some(member => member.id.includes(fullPhoneNumber));
     if (memberExists) {
         return m.reply('The user is already in the group.');
     }
 
     // Attempt to add the user to the group
     try {
-        await conn.groupAdd(m.chat, [`${phoneNumber}@s.whatsapp.net`]);
-        m.reply(`Silva Md Successfully added ${phoneNumber} to the group.`);
+        const response = await conn.groupParticipantsUpdate(m.chat, [`${fullPhoneNumber}@s.whatsapp.net`], 'add');
+        if (response && response[`${fullPhoneNumber}@s.whatsapp.net`] === "404") {
+            return m.reply('Failed to add the user. Make sure the number is on WhatsApp and reachable.');
+        }
+        m.reply(`Successfully added ${fullPhoneNumber} to the group.`);
     } catch (error) {
-        m.reply('Silva Md Failed to add the user. Make sure the number is on WhatsApp and the bot has the required permissions.');
+        m.reply('Failed to add the user. Ensure the bot has admin rights and the number is valid.');
         console.error(error);
     }
 };
