@@ -7,7 +7,7 @@ let handler = async (m, { conn, usedPrefix }) => {
   const audioUrl = 'https://github.com/SilvaTechB/silva-md-bot/raw/main/media/Menu.mp3';
 
   // Get system information
-  const ramUsage = `${(os.totalmem() - os.freemem()) / (1024 * 1024 * 1024).toFixed(2)} GB / ${(os.totalmem() / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+  const ramUsage = `${((os.totalmem() - os.freemem()) / (1024 * 1024 * 1024)).toFixed(2)} GB / ${(os.totalmem() / (1024 * 1024 * 1024)).toFixed(2)} GB`;
   const uptime = `${Math.floor(os.uptime() / 60)} minutes`;
   const currentTime = moment().format('YYYY-MM-DD HH:mm:ss');
 
@@ -17,9 +17,9 @@ let handler = async (m, { conn, usedPrefix }) => {
   for (let plugin of plugins) {
     const pluginPath = `./lazackcmds/${plugin}`;
     if (fs.existsSync(pluginPath) && plugin.endsWith('.js')) {
-      const commandModule = await import(pluginPath);
-      if (commandModule.default && commandModule.default.command) {
-        commands.push(...commandModule.default.command);
+      const { default: commandModule } = await import(pluginPath);
+      if (commandModule && commandModule.command) {
+        commands.push(...commandModule.command);
       }
     }
   }
@@ -32,7 +32,7 @@ let handler = async (m, { conn, usedPrefix }) => {
     ╭───「 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 」───
     *│ 👋 Hi, ${m.pushName || 'User'}!*
     *│Welcome to Silva MD Bot.*
-     ╭──────────────
+    ╭──────────────
     *│ 📅 Date & Time: ${currentTime}*
     *│ 💻 RAM Usage: ${ramUsage}*
     *│ ⏱️ Uptime: ${uptime}*
@@ -47,11 +47,32 @@ let handler = async (m, { conn, usedPrefix }) => {
     *📜 Main Menu:*
     *│ ${commands}*
     ◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+    『 *SHORTCUT MENU* 』
+    > *use these shortcuts*
+    ${usedPrefix}botmenu
+    ${usedPrefix}ownermenu
+    ${usedPrefix}groupmenu
+    ${usedPrefix}funmenu
+    ${usedPrefix}reactionmenu
+    ${usedPrefix}downloadermenu
+    ${usedPrefix}gamemenu
+    ${usedPrefix}logomenu
+    ${usedPrefix}stickermenu
+    ${usedPrefix}audiomenu
+    ${usedPrefix}newsmenu
+    ${usedPrefix}economymenu
+    ${usedPrefix}animemenu
+    ${usedPrefix}nsfwmenu
+    ${usedPrefix}toolsmenu
+    ${usedPrefix}aimenu
+    ${usedPrefix}religionmenu
+    ${usedPrefix}pluginmenu
+    ◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
     🚀 Powered by *SilvaTech Inc.*
     `,
   ];
 
-  // Shuffle and pick a random theme
+  // Shuffle and pick a random theme (if there are multiple themes)
   const randomTheme = themes[Math.floor(Math.random() * themes.length)];
 
   // Send the menu message
