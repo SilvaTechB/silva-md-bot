@@ -1,38 +1,50 @@
-import fs from 'fs'
-import os from 'os'
-import fetch from 'node-fetch'
+import axios from 'axios';
 
-let limit = 500
-let handler = async (m, { conn, args, isPrems, isOwner, usedPrefix, command }) => {
-  let chat = global.db.data.chats[m.chat]
-  if (!args || !args[0]) throw `✳️ Example:\n${usedPrefix + command} https://youtu.be/YzkTFFwxtXI`
-  if (!args[0].match(/youtu/gi)) throw `❎ Verify that the YouTube link`
+const handler = async (m, { conn, args }) => {
+  try {
+    const query = args[0];
+    if (!query) return m.reply('❓ *Example:* .ytmp4 <YouTube URL>');
 
-  var ggapi = `https://vihangayt.me/download/ytmp4?url=${encodeURIComponent(args)}`
+    // Notify user that the video is being fetched
+    await m.reply('🔍 *Fetching video details...*');
 
-  const response = await fetch(ggapi)
-  if (!response.ok) {
-    console.log('Error searching for song:', response.statusText)
-    throw 'Error searching for song'
+    // API URL for downloading the video
+    const apiUrl = `https://api.davidcyriltech.my.id/download/ytmp4?url=${encodeURIComponent(query)}`;
+    const response = await axios.get(apiUrl);
+
+    // Check if response data contains download_url
+    if (!response.data?.result?.download_url) {
+      return m.reply('🚫 *Error fetching video.* Please check the URL or try again later.');
+    }
+
+    // Extract video details
+    const { title, quality, thumbnail, download_url } = response.data.result;
+
+    // Prepare the caption for the video message
+    const caption = `🎥 *Title:* ${title}
+📊 *Quality:* ${quality}
+🖼️ *Thumbnail:* (${thumbnail})
+Silva MD bot 2025
+📥 *Download the video:* (${download_url})`;
+
+    // Send the video and the caption
+    await conn.sendMessage(m.chat, {
+      video: { url: download_url },
+      caption: caption,
+      thumbnail: { url: thumbnail },
+    }, { quoted: m });
+
+    // Notify user of successful completion
+    await m.reply('✅ *Video sent successfully!*');
+
+  } catch (error) {
+    console.error('Error in ytmp4 command:', error.message);
+    m.reply('⚠️ *An error occurred while processing your request.* Please try again later.');
   }
-  const data = await response.json()
+};
 
-  const caption = `✼ SILVA Y O U T U B E VIDEOS ✼
-	  
-  ❏ Title: ${data.data.title}
-  ❒ Link: ${args[0]}
-  ⊱─━⊱༻●༺⊰━─⊰`
-  let vres = data.data.vid_360p
+handler.help = ['ytmp4'];
+handler.tags = ['download'];
+handler.command = /^ytmp4$/i;
 
-  let vid = await fetch(vres)
-  const vidBuffer = await vid.buffer()
-
-  conn.sendFile(m.chat, vidBuffer, `error.mp4`, caption, m, false, { asDocument: chat.useDocument })
-}
-
-handler.help = ['ytmp4 <yt-link>']
-handler.tags = ['downloader']
-handler.command = ['ytmp4', 'video', 'ytv']
-handler.diamond = false
-
-export default handler
+export default handler;
