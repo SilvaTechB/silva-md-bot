@@ -12,10 +12,10 @@ let handler = async (m, { conn }) => {
     *│ 👋 Hi, ${m.pushName || 'User'}!*
     *│Welcome to Silva MD Bot.*
     ╭──────────────
-    *│ 📅 Date & Time: ${currentTime}*
+    *│ ⌛ Speed: super*
     *│ 💻 RAM Usage: 32.68GB of 2.65TB*
-    *│ ⏱️ Uptime: ${uptime}*
-    *│ 🔧 Prefix: ${usedPrefix}*
+    *│ ⏱️ Uptime: infinity*
+    *│ 🔧 Version: 2024/25 vr*
     *│ 👨‍💻 Developer: SilvaTechB*
     ╰──────────────
     *│ Explore my commands below:*
