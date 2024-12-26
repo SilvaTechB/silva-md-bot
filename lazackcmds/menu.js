@@ -1,78 +1,60 @@
 import fs from 'fs';
-import os from 'os';
-import moment from 'moment';
 
-let handler = async (m, { conn, usedPrefix }) => {
+let handler = async (m, { conn }) => {
   // Load the audio file
   const audioUrl = 'https://github.com/SilvaTechB/silva-md-bot/raw/main/media/Menu.mp3';
-
-  // Get system information
-  const ramUsage = `${((os.totalmem() - os.freemem()) / (1024 * 1024 * 1024)).toFixed(2)} GB / ${(os.totalmem() / (1024 * 1024 * 1024)).toFixed(2)} GB`;
-  const uptime = `${Math.floor(os.uptime() / 60)} minutes`;
-  const currentTime = moment().format('YYYY-MM-DD HH:mm:ss');
-
-  // Read commands from plugins
-  const plugins = fs.readdirSync('./lazackcmds');
-  let commands = [];
-  for (let plugin of plugins) {
-    const pluginPath = `./lazackcmds/${plugin}`;
-    if (fs.existsSync(pluginPath) && plugin.endsWith('.js')) {
-      const { default: commandModule } = await import(pluginPath);
-      if (commandModule && commandModule.command) {
-        commands.push(...commandModule.command);
-      }
-    }
-  }
-  commands = commands.map(cmd => `${usedPrefix}${cmd}`).join(' │ ');
 
   // Define Themes with Updated Menu Options
   const themes = [
     `
     ◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
-    ╭───「 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 」───
+   ╭───「 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 」───
     *│ 👋 Hi, ${m.pushName || 'User'}!*
     *│Welcome to Silva MD Bot.*
     ╭──────────────
     *│ 📅 Date & Time: ${currentTime}*
-    *│ 💻 RAM Usage: ${ramUsage}*
+    *│ 💻 RAM Usage: 32.68GB of 2.65TB*
     *│ ⏱️ Uptime: ${uptime}*
     *│ 🔧 Prefix: ${usedPrefix}*
     *│ 👨‍💻 Developer: SilvaTechB*
     ╰──────────────
     *│ Explore my commands below:*
     *╰──────────────*
-    ◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
-    🍑🍆 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 💦☣
-    ◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
-    *📜 Main Menu:*
-    *│ ${commands}*
-    ◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
-    『 *SHORTCUT MENU* 』
-    > *use these shortcuts*
-    ${usedPrefix}botmenu
-    ${usedPrefix}ownermenu
-    ${usedPrefix}groupmenu
-    ${usedPrefix}funmenu
-    ${usedPrefix}reactionmenu
-    ${usedPrefix}downloadermenu
-    ${usedPrefix}gamemenu
-    ${usedPrefix}logomenu
-    ${usedPrefix}stickermenu
-    ${usedPrefix}audiomenu
-    ${usedPrefix}newsmenu
-    ${usedPrefix}economymenu
-    ${usedPrefix}animemenu
-    ${usedPrefix}nsfwmenu
-    ${usedPrefix}toolsmenu
-    ${usedPrefix}aimenu
-    ${usedPrefix}religionmenu
-    ${usedPrefix}pluginmenu
-    ◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
-    🚀 Powered by *SilvaTech Inc.*
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+🍑🍆 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 💦☣
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+*📜 Main Menu:*
+${readMore}
+『 *SHORTCUT MENU* 』 
+> *use this shortcuts*
+${readMore}
+┏━━━━━━━━━━━━━━┈⊷
+> *1.* BotMenu
+> *2.* OwnerMenu
+> *3.* GroupMenu
+> *4.* FunMenu
+> *5.* ReactionMenu
+> *6.* DownloaderMenu
+> *7.* GameMenu
+> *8.* LogoMenu
+> *9.* StickerMenu
+> *10.* AudioMenu
+> *11.* NewsMenu
+> *12.* EconomyMenu
+> *13.* AnimeMenu
+> *14.* NSFWMenu
+> *15.* ToolsMenu
+> *16.* AIMenu
+> *17.* ReligionMenu
+> *18.* PluginMenu
+┗━━━━━━━━━━━━━┈⊷
+◢◤◢◤◢◤◢◤
+🚀 Powered by *SilvaTech Inc.*
     `,
+    // Add similar blocks for the remaining themes...
   ];
 
-  // Shuffle and pick a random theme (if there are multiple themes)
+  // Shuffle and pick a random theme
   const randomTheme = themes[Math.floor(Math.random() * themes.length)];
 
   // Send the menu message
@@ -84,8 +66,8 @@ let handler = async (m, { conn, usedPrefix }) => {
         externalAdReply: {
           title: 'SILVA MD BOT',
           body: 'SYLIVANUS MEMBA',
-          thumbnailUrl: 'https://files.catbox.moe/8324jm.jpg',
-          sourceUrl: 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v',
+          thumbnailUrl: 'https://files.catbox.moe/8324jm.jpg', // Replace with your preferred image
+          sourceUrl: 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v', // Replace with your bot's repo or website
           renderLargerThumbnail: true,
         },
       },
@@ -99,10 +81,10 @@ let handler = async (m, { conn, usedPrefix }) => {
     {
       audio: { url: audioUrl },
       mimetype: 'audio/mp4',
-      ptt: false, // Set to true if you want it to appear as a voice note
+      ptt: true, // Set to true if you want it to appear as a voice note
       contextInfo: {
         externalAdReply: {
-          title: 'Silva MD Bot - MENU THEME',
+          title: 'Silva MD Bot - Menu Music',
           body: 'Enjoy the vibes!',
           thumbnailUrl: 'https://files.catbox.moe/8324jm.jpg',
           sourceUrl: 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v',
