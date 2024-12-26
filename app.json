@@ -63,7 +63,7 @@
       "value": "false"
        },
     "STATUS_MSG": {
-      "description": "make it true or false. true to activate false to deactivate",
+      "description": "custmize with your message",
       "required": false,
       "value": "SILVA MD BOT SUCCESSFULLY VIEWED YOUR STATUS 💖💚"
     },
