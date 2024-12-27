@@ -17,8 +17,8 @@ let handler = async (m, { conn }) => {
     .join('\n');
 
   // Get system stats
-  const totalRAM = (os.totalmem() / (1024 ** 3)).toFixed(2) + 'GB';
-  const usedRAM = ((os.totalmem() - os.freemem()) / (1024 ** 3)).toFixed(2) + 'GB';
+  const totalRAM = (os.totalmem() / (1024 ** 3)).toFixed(2) + 'TB';
+  const usedRAM = ((os.totalmem() - os.freemem()) / (1024 ** 3)).toFixed(2) + 'TB';
   const uptime = os.uptime();
   const uptimeStr = new Date(uptime * 1000).toISOString().substr(11, 8); // HH:mm:ss format
 
@@ -26,7 +26,7 @@ let handler = async (m, { conn }) => {
   const currentTime = moment.tz('Africa/Nairobi').format('YYYY-MM-DD HH:mm:ss');
 
   // Define bot details
-  const botVersion = '2024/25 vr';
+  const botVersion = '3.0.1';
   const developer = 'SilvaTechB';
 
   // Define Menu Template
@@ -47,19 +47,19 @@ let handler = async (m, { conn }) => {
     *╰──────────────*
 ◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
 🍑🍆 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 💦☣
-◢◤◢◤◢◤◢◤
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
 *📜 Main Menu:*
 『 *COMMAND LIST* 』 
-> *use this shortcuts*
-┏━━━━━━━━━━━━━━┈⊷
+> *They are not commands this are the features*
+┏━━━━━━━━━━━┈⊷
 ${commandList}
-┗━━━━━━━━━━━━━┈⊷
-◢◤◢◤◢◤◢◤
+┗━━━━━━━━━━━┈⊷
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
 🚀 Powered by *SilvaTech Inc.*
   `;
 
   // Publicly accessible thumbnail URL
-  const thumbnailUrl = 'https://files.catbox.moe/8324jm.jpg'; // Replace if necessary
+  const thumbnailUrl = 'https://i.imgur.com/QThBEQ7.jpeg'; // Replace if necessary
 
   // Send the menu message with visible thumbnail
   await conn.sendMessage(
