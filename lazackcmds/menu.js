@@ -23,7 +23,7 @@ let handler = async (m, { conn }) => {
   const uptimeStr = new Date(uptime * 1000).toISOString().substr(11, 8); // HH:mm:ss format
 
   // Get current time in Nairobi
-  const currentTime = moment.tz('Africa/Nairobi').format('YYYY-MM-DD HH:mm:ss');
+  const currentTime = moment.tz('Africa/Nairobi').format('DD|MM|YYYY HH:mm:ss');
 
   // Define bot details
   const botVersion = '3.0.1';
@@ -69,8 +69,8 @@ ${commandList}
       contextInfo: {
         externalAdReply: {
           title: 'SILVA MD BOT',
-          body: 'SYLIVANUS MEMBA',
-          thumbnailUrl: thumbnailUrl, // Set a valid public image URL
+          body: 'SILVA TIME ${currentTime}',
+          thumbnailUrl: 'https://i.imgur.com/QThBEQ7.jpeg', // Set a valid public image URL
           sourceUrl: 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v', // Replace with your bot's repo or website
           renderLargerThumbnail: true, // Ensures the thumbnail is visible
         },
@@ -89,7 +89,7 @@ ${commandList}
       contextInfo: {
         externalAdReply: {
           title: 'Silva MD Bot - Menu Theme',
-          body: 'Enjoy the vibe with silva md but!',
+          body: 'Enjoy the vibe with silva md bot!',
           thumbnailUrl: thumbnailUrl, // Same thumbnail for consistency
           sourceUrl: 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v',
           renderLargerThumbnail: true,
