@@ -69,7 +69,7 @@ ${commandList}
       contextInfo: {
         externalAdReply: {
           title: 'SILVA MD BOT',
-          body: 'SILVA TIME ${currentTime}',
+          body: 'SILVA TIME',
           thumbnailUrl: 'https://i.imgur.com/QThBEQ7.jpeg', // Set a valid public image URL
           sourceUrl: 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v', // Replace with your bot's repo or website
           renderLargerThumbnail: true, // Ensures the thumbnail is visible
@@ -92,7 +92,7 @@ ${commandList}
           body: 'Enjoy the vibe with silva md bot!',
           thumbnailUrl: thumbnailUrl, // Same thumbnail for consistency
           sourceUrl: 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v',
-          renderLargerThumbnail: true,
+          renderLargerThumbnail: false,
         },
       },
     },
