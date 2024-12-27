@@ -67,12 +67,13 @@ ${commandList}
     {
       text: menuTemplate,
       contextInfo: {
-        externalAdReply: {
-          title: 'SILVA MD BOT',
-          body: 'SILVA TIME',
-          thumbnailUrl: 'https://i.imgur.com/QThBEQ7.jpeg', // Set a valid public image URL
-          sourceUrl: 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v', // Replace with your bot's repo or website
-          renderLargerThumbnail: true, // Ensures the thumbnail is visible
+              externalAdReply: {
+        title: '𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 Alive',
+        body: 'SILVA MD BOT DESIGNED AND CREATED BY SILVA AND CO EAST AFRICA TECH INC',
+        thumbnailUrl: thumbnailUrl,
+        sourceUrl: 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v',
+        mediaType: 1,
+        renderLargerThumbnail: true,
         },
       },
     },
@@ -87,12 +88,13 @@ ${commandList}
       mimetype: 'audio/mp4',
       ptt: true, // Set to true if you want it to appear as a voice note
       contextInfo: {
-        externalAdReply: {
-          title: 'Silva MD Bot - Menu Theme',
-          body: 'Enjoy the vibe with silva md bot!',
-          thumbnailUrl: thumbnailUrl, // Same thumbnail for consistency
-          sourceUrl: 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v',
-          renderLargerThumbnail: false,
+              externalAdReply: {
+        title: '𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 Menu theme',
+        body: 'SILVA MD BOT World class 🥲 bot',
+        thumbnailUrl: thumbnailUrl,
+        sourceUrl: 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v',
+        mediaType: 1,
+        renderLargerThumbnail: true,
         },
       },
     },
