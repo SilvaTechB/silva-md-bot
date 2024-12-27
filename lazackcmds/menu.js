@@ -1,16 +1,25 @@
 import fs from 'fs';
+import path from 'path';
 
 let handler = async (m, { conn }) => {
   // Load the audio file
   const audioUrl = 'https://github.com/SilvaTechB/silva-md-bot/raw/main/media/Menu.mp3';
 
-  // Define Themes with Updated Menu Options
-  const themes = [
-    `
-    ◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+  // Read commands from lazackcmds folder dynamically
+  const lazackPath = './lazackcmds';
+  const commands = fs.readdirSync(lazackPath).map(file => path.parse(file).name);
+
+  // Format commands into menu sections
+  const commandList = commands
+    .map((cmd, idx) => `> *${idx + 1}.* ${cmd}`)
+    .join('\n');
+
+  // Define Menu Template
+  const menuTemplate = `
+    ◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
    ╭───「 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 」───
     *│ 👋 Hi, ${m.pushName || 'User'}!*
-    *│Welcome to Silva MD Bot.*
+    *│ Welcome to Silva MD Bot.*
     ╭──────────────
     *│ ⌛ Speed: super*
     *│ 💻 RAM Usage: 32.68GB of 2.65TB*
@@ -20,46 +29,24 @@ let handler = async (m, { conn }) => {
     ╰──────────────
     *│ Explore my commands below:*
     *╰──────────────*
-◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
 🍑🍆 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 💦☣
-◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+◢◤◢◤◢◤◢◤
 *📜 Main Menu:*
-『 *SHORTCUT MENU* 』 
+『 *COMMAND LIST* 』 
 > *use this shortcuts*
 ┏━━━━━━━━━━━━━━┈⊷
-> *1.* BotMenu
-> *2.* OwnerMenu
-> *3.* GroupMenu
-> *4.* FunMenu
-> *5.* ReactionMenu
-> *6.* DownloaderMenu
-> *7.* GameMenu
-> *8.* LogoMenu
-> *9.* StickerMenu
-> *10.* AudioMenu
-> *11.* NewsMenu
-> *12.* EconomyMenu
-> *13.* AnimeMenu
-> *14.* NSFWMenu
-> *15.* ToolsMenu
-> *16.* AIMenu
-> *17.* ReligionMenu
-> *18.* PluginMenu
+${commandList}
 ┗━━━━━━━━━━━━━┈⊷
 ◢◤◢◤◢◤◢◤
 🚀 Powered by *SilvaTech Inc.*
-    `,
-    // Add similar blocks for the remaining themes...
-  ];
-
-  // Shuffle and pick a random theme
-  const randomTheme = themes[Math.floor(Math.random() * themes.length)];
+  `;
 
   // Send the menu message
   await conn.sendMessage(
     m.chat,
     {
-      text: randomTheme,
+      text: menuTemplate,
       contextInfo: {
         externalAdReply: {
           title: 'SILVA MD BOT',
