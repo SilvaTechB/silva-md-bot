@@ -1,5 +1,7 @@
+import os from 'os';
 import fs from 'fs';
 import path from 'path';
+import moment from 'moment-timezone';
 
 let handler = async (m, { conn }) => {
   // Load the audio file
@@ -14,6 +16,19 @@ let handler = async (m, { conn }) => {
     .map((cmd, idx) => `> *${idx + 1}.* ${cmd}`)
     .join('\n');
 
+  // Get system stats
+  const totalRAM = (os.totalmem() / (1024 ** 3)).toFixed(2) + 'GB';
+  const usedRAM = ((os.totalmem() - os.freemem()) / (1024 ** 3)).toFixed(2) + 'GB';
+  const uptime = os.uptime();
+  const uptimeStr = new Date(uptime * 1000).toISOString().substr(11, 8); // HH:mm:ss format
+
+  // Get current time in Nairobi
+  const currentTime = moment.tz('Africa/Nairobi').format('YYYY-MM-DD HH:mm:ss');
+
+  // Define bot details
+  const botVersion = '2024/25 vr';
+  const developer = 'SilvaTechB';
+
   // Define Menu Template
   const menuTemplate = `
     ◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
@@ -22,10 +37,11 @@ let handler = async (m, { conn }) => {
     *│ Welcome to Silva MD Bot.*
     ╭──────────────
     *│ ⌛ Speed: super*
-    *│ 💻 RAM Usage: 32.68GB of 2.65TB*
-    *│ ⏱️ Uptime: infinity*
-    *│ 🔧 Version: 2024/25 vr*
-    *│ 👨‍💻 Developer: SilvaTechB*
+    *│ 💻 RAM Usage: ${usedRAM} of ${totalRAM}*
+    *│ ⏱️ Uptime: ${uptimeStr}*
+    *│ 🕒 Current Time: ${currentTime}*
+    *│ 🔧 Version: ${botVersion}*
+    *│ 👨‍💻 Developer: ${developer}*
     ╰──────────────
     *│ Explore my commands below:*
     *╰──────────────*
@@ -42,7 +58,10 @@ ${commandList}
 🚀 Powered by *SilvaTech Inc.*
   `;
 
-  // Send the menu message
+  // Publicly accessible thumbnail URL
+  const thumbnailUrl = 'https://files.catbox.moe/8324jm.jpg'; // Replace if necessary
+
+  // Send the menu message with visible thumbnail
   await conn.sendMessage(
     m.chat,
     {
@@ -51,9 +70,9 @@ ${commandList}
         externalAdReply: {
           title: 'SILVA MD BOT',
           body: 'SYLIVANUS MEMBA',
-          thumbnailUrl: 'https://files.catbox.moe/8324jm.jpg', // Replace with your preferred image
+          thumbnailUrl: thumbnailUrl, // Set a valid public image URL
           sourceUrl: 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v', // Replace with your bot's repo or website
-          renderLargerThumbnail: true,
+          renderLargerThumbnail: true, // Ensures the thumbnail is visible
         },
       },
     },
@@ -69,9 +88,9 @@ ${commandList}
       ptt: true, // Set to true if you want it to appear as a voice note
       contextInfo: {
         externalAdReply: {
-          title: 'Silva MD Bot - Menu Music',
-          body: 'Enjoy the vibes!',
-          thumbnailUrl: 'https://files.catbox.moe/8324jm.jpg',
+          title: 'Silva MD Bot - Menu Theme',
+          body: 'Enjoy the vibe with silva md but!',
+          thumbnailUrl: thumbnailUrl, // Same thumbnail for consistency
           sourceUrl: 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v',
           renderLargerThumbnail: true,
         },
