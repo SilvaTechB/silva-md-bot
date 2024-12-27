@@ -24,10 +24,8 @@ let handler = async (m, { conn }) => {
 🍑🍆 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 💦☣
 ◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
 *📜 Main Menu:*
-${readMore}
 『 *SHORTCUT MENU* 』 
 > *use this shortcuts*
-${readMore}
 ┏━━━━━━━━━━━━━━┈⊷
 > *1.* BotMenu
 > *2.* OwnerMenu
