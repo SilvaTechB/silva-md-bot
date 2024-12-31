@@ -252,4 +252,4 @@ This project is licensed under the [MIT License](LICENSE) - see the LICENSE file
 
 ---
 
-<p align="center">© Silva Tech 2024</p>
+<p align="center">© Silva Tech 2025</p>
