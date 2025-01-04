@@ -60,7 +60,7 @@ let handler = async (_0xc1d18c, {
     }
     const _0x278283 = await _0x3eb333.json();
     const _0x5483ad = _0x278283[Math.floor(Math.random() * _0x278283.length)];
-    await _0x3aaaee.sendFile(_0xc1d18c.chat, _0x5483ad.url, '', "*Here is the result of: " + _0x22bbf7 + "*\n*𝙿𝙾𝚆𝙴𝚁𝙴𝙳 𝙱𝚈 © 𝚄𝙻𝚃𝚁𝙰-𝙼𝙳*", _0xc1d18c);
+    await _0x3aaaee.sendFile(_0xc1d18c.chat, _0x5483ad.url, '', "*Here is the result of: " + _0x22bbf7 + "*\n*𝙿𝙾𝚆𝙴𝚁𝙴𝙳 𝙱𝚈 © SILVA-𝙼𝙳*", _0xc1d18c);
     await _0xc1d18c.react('✅');
   } catch (_0x3b562a) {
     console.error("Error:", _0x3b562a);
