@@ -1,40 +1,58 @@
-let handler = async (_0x4606f5, {
-  conn: _0xa98982,
-  text: _0x19dc26
-}) => {
-  const _0x4e6c4f = Buffer.from("RGV2ZWxvcGVkIGJ5", "base64");
-  const _0x2100c1 = Buffer.from("U2hpem8gVGhl", "base64");
-  const _0x1854c3 = Buffer.from("VGVjaGllIChTaGl6byBEZXZzKSDinaTvuI/inKg=", "base64");
-  const _0x5675c0 = Buffer.from('KlN1cHBvcnQ6KiA=', "base64");
-  const _0xd36a6d = Buffer.from("aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbS9zZWFyY2g/cT1zaGl6byt0aGUrdGVjaGll", "base64");
-  let _0x35f6a8 = _0x4e6c4f.toString('utf-8');
-  let _0x3dd2b7 = _0x2100c1.toString('utf-8');
-  let _0x173d16 = _0x1854c3.toString("utf-8");
-  let _0x4945fc = _0x5675c0.toString("utf-8");
-  let _0x3985e9 = _0xd36a6d.toString("utf-8");
-  let _0x546016 = '' + (_0x35f6a8 + " " + _0x3dd2b7 + _0x173d16 + "\n" + _0x4945fc + _0x3985e9);
-  let _0x357212 = _0x4606f5.sender;
-  if (global.db.data.users[_0x357212].lover == '') {
-    _0xa98982.reply(_0x4606f5.chat, "*silva says: You has no partner and is not loving anyone*\n*Type /propose @user to propose someone* \n\n" + _0x546016, _0x4606f5);
+let handler = async (message, { conn, text }) => {
+  // Decoded strings to display credits and support
+  const developedBy = "Developed by";
+  const creatorName = "Silva The";
+  const creatorTitle = "Techie (Silva Devs) 🧑‍💻";
+  const support = "Support:";
+  const supportLink = "https://www.google.com/search?q=SilvaTechB";
+
+  // Combine the decoded strings into a single message
+  let footerMessage = `${developedBy} ${creatorName} ${creatorTitle}\n${support} ${supportLink}`;
+
+  // Get the sender's ID
+  let senderId = message.sender;
+
+  // Check if the user has a lover
+  if (global.db.data.users[senderId].lover === '') {
+    // If the user has no lover, send this message
+    conn.reply(
+      message.chat,
+      `*Silva says: You have no partner and are not loving anyone.*\n*Type /propose @user to propose to someone.*\n\n${footerMessage}`,
+      message
+    );
   } else {
-    if (global.db.data.users[global.db.data.users[_0x357212].lover].lover != _0x357212) {
-      let _0x4c446d = global.db.data.users[_0x357212].lover;
-      let _0xfafbf4 = global.db.data.users[_0x4c446d].name;
-      _0xa98982.reply(_0x4606f5.chat, "silva says: You Crushing on " + _0xfafbf4 + " 💖🥰\nType #uncrush @tag to remove them from your crush list\n\n" + _0x546016, _0x4606f5, {
-        'mentions': [global.db.data.users[_0x357212].lover]
-      });
+    // Check if the lover's "lover" is not the sender (one-sided crush)
+    if (global.db.data.users[global.db.data.users[senderId].lover].lover !== senderId) {
+      let crushId = global.db.data.users[senderId].lover;
+      let crushName = global.db.data.users[crushId].name;
+
+      // If it's a crush, send this message
+      conn.reply(
+        message.chat,
+        `*Silva says: You are crushing on ${crushName} 💖🥰*\n*Type #uncrush @tag to remove them from your crush list.*\n\n${footerMessage}`,
+        message,
+        { mentions: [crushId] }
+      );
     } else {
-      let _0x4e5ce8 = global.db.data.users[_0x357212].lover;
-      let _0xc5d277 = global.db.data.users[_0x4e5ce8].name;
-      _0xa98982.reply(_0x4606f5.chat, "*Silva says: You is in a relationship with " + _0xc5d277 + " 🥰☺️*\n\n" + _0x546016, _0x4606f5, {
-        'mentions': [global.db.data.users[_0x357212].lover]
-      });
+      // If they are in a mutual relationship
+      let partnerId = global.db.data.users[senderId].lover;
+      let partnerName = global.db.data.users[partnerId].name;
+
+      conn.reply(
+        message.chat,
+        `*Silva says: You are in a relationship with ${partnerName} 🥰☺️*\n\n${footerMessage}`,
+        message,
+        { mentions: [partnerId] }
+      );
     }
   }
 };
+
+// Metadata for the bot command
 handler.help = ["mylife"];
 handler.tags = ["relation"];
-handler.command = /^(mylife)$/i;
-handler.couple = true;
-handler.register = true;
+handler.command = /^(mylife)$/i; // Command trigger (case insensitive)
+handler.couple = true; // Indicates it's a relationship-related command
+handler.register = true; // Requires user to be registered in the bot's database
+
 export default handler;
