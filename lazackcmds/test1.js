@@ -49,8 +49,8 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     contextInfo: {
       mentionedJid: [m.sender],
       externalAdReply: {
-        title: '𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 Alive',
-        body: 'SILVA MD BOT OCTOBER 2024',
+        title: '𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 TESTING',
+        body: 'AM WORKING DONT YOU SEE',
         thumbnailUrl: img,
         sourceUrl: 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v',
         mediaType: 1,
@@ -62,8 +62,8 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   await conn.sendMessage(m.chat, doc, { quoted: con })
 }
 
-handler.help = ['alive']
+handler.help = ['test']
 handler.tags = ['main']
-handler.command = /^(alive1)$/i
+handler.command = /^(test)$/i
 
 export default handler
