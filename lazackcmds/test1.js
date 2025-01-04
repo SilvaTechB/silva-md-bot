@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 let handler = async (m, { conn, text, usedPrefix, command }) => { 
   // Sound
   let name = m.pushName || conn.getName(m.sender)
@@ -7,7 +9,8 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   let aliveJson;
   
   try {
-    aliveJson = await fetchJson(jsonUrl); // Assuming fetchJson is available
+    const response = await axios.get(jsonUrl); // Fetch the JSON from GitHub
+    aliveJson = response.data; // The fetched data
   } catch (err) {
     console.error('Error fetching Alive.json:', err);
     return conn.sendMessage(m.chat, 'Sorry, I could not fetch the audio link.', { quoted: m });
@@ -46,8 +49,8 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     contextInfo: {
       mentionedJid: [m.sender],
       externalAdReply: {
-        title: '𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 TESTING',
-        body: 'SYLIVANUS MOMANYI',
+        title: '𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 Alive',
+        body: 'SILVA MD BOT OCTOBER 2024',
         thumbnailUrl: img,
         sourceUrl: 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v',
         mediaType: 1,
@@ -61,6 +64,6 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
 handler.help = ['alive']
 handler.tags = ['main']
-handler.command = /^(test)$/i
+handler.command = /^(alive1)$/i
 
 export default handler
