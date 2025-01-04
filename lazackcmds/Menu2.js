@@ -51,14 +51,12 @@ let str = `
 ║ 🏆  *Rank:* ${role}                   
 ║ 🎮  *XP:* ${exp}                      
 ╚═══════════════════════╝
-
 ╔═══════════════════════╗
 ║ 📅 *Today's Sauce!* 📅                
 ╠═══════════════════════╣
 ║ 📆  *Today's Date:* ${date}           
 ║ ⏲️  *Current Time:* ${wib}            
 ╚═══════════════════════╝
-
 ╔═══════════════════════╗
 ║ 🤖 *BOT STATUS:* 🤖                   
 ╠═══════════════════════╣
@@ -69,7 +67,37 @@ let str = `
 ║ 💌  *Database:* ${rtotalreg} of ${totaluser} 
 ║ 📚  *Total Users:* ${totaluser}       
 ╚═══════════════════════╝
-
+◈┏━⟪ *MENU* ⟫━━⦿
+◈┃• groupmenu
+◈┃• animemenu
+◈┃• autoreact
+◈┃• infoanime
+◈┃• makermenu
+◈┃• ownermenu
+◈┃• stickermenu
+◈┃• toolsmenu
+◈┃• gamesmenu
+◈┃• logomenu
+◈┃• listplugin
+◈┃• economy
+◈┃• reactions
+◈┃• funmenu
+◈┃• nsfwmenu
+◈┃• randompic
+◈┃• randomvid
+◈┃• setprivacy
+◈┃• botmenu
+◈┃• listmenu
+◈┃• dlmenu
+◈┃• enable
+◈┃• aimenu
+◈┃• aeditor
+◈┃• imagen
+◈┃• menu
+◈┃• menu3
+◈┃• menu4
+◈┃• fancy
+◈┗━♪♪━★━☆━⦿
 💡 *_Remember, when in doubt, use ${usedPrefix}list or ${usedPrefix}help2. It's like my magic spell book!_* 💡
 `
 
