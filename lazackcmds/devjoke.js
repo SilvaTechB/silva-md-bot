@@ -1,6 +1,6 @@
 /**
  * Silva MD Bot Script for Developer Jokes
- * Fetches a random developer joke from the API and sends it as a response.
+ * Fetches a random developer joke from the API and sends it as a card.
  */
 
 const axios = require('axios');
@@ -16,9 +16,18 @@ let handler = async (m, { conn }) => {
         const $ = cheerio.load(html);
         const joke = $('body').text().trim(); // Extract the text from the body
 
-        // Send the joke as a response
+        // Send the joke as a card
         if (joke) {
-            conn.sendMessage(m.chat, { text: joke }, { quoted: m });
+            const templateMessage = {
+                text: 'Here\'s a developer joke for you:',
+                footer: 'Enjoy the humor and keep coding!',
+                templateButtons: [
+                    { index: 1, urlButton: { displayText: 'Source', url: 'https://readme-jokes.vercel.app/' } },
+                    { index: 2, quickReplyButton: { displayText: 'Another Joke', id: '.devjoke' } }
+                ]
+            };
+
+            conn.sendMessage(m.chat, templateMessage, { quoted: m });
         } else {
             conn.sendMessage(m.chat, { text: 'Sorry, I couldn\'t fetch a joke at the moment. Please try again later!' }, { quoted: m });
         }
@@ -33,4 +42,3 @@ handler.tags = ['fun'];
 handler.command = ['devjoke'];
 
 module.exports = handler;
-
