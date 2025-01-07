@@ -4,12 +4,17 @@
  */
 
 const axios = require('axios');
+const cheerio = require('cheerio'); // To parse HTML
 
 let handler = async (m, { conn }) => {
     try {
         // Fetch a random developer joke from the API
         const response = await axios.get('https://readme-jokes.vercel.app/api');
-        const joke = response.data;
+        const html = response.data;
+
+        // Parse the HTML to extract the joke
+        const $ = cheerio.load(html);
+        const joke = $('body').text().trim(); // Extract the text from the body
 
         // Send the joke as a response
         if (joke) {
@@ -28,3 +33,4 @@ handler.tags = ['fun'];
 handler.command = ['devjoke'];
 
 module.exports = handler;
+
