@@ -39,7 +39,7 @@ let handler = async (m, { conn, isROwner, text }) => {
             isForwarded: true,
             forwardedNewsletterMessageInfo: {
               newsletterJid: '120363200367779016@newsletter',
-              newsletterName: 'SILVA SPARK MD 💖🦄',
+              newsletterName: 'SILVA MD DIRECT MESSAGE 💖🦄',
               serverMessageId: 143
             }
           }
@@ -76,7 +76,7 @@ let handler = async (m, { conn, isROwner, text }) => {
             isForwarded: true,
             forwardedNewsletterMessageInfo: {
               newsletterJid: '120363200367779016@newsletter',
-              newsletterName: 'SILVA SPARK MD 💖🦄',
+              newsletterName: 'SILVA MD DIRECT MESSAGE 💖🦄',
               serverMessageId: 143
             }
           }
