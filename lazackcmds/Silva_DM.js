@@ -19,9 +19,13 @@ let handler = async (m, { conn, isROwner, text }) => {
 
   let successCount = 0;
   let failureCount = 0;
+  let sentMembers = new Set(); // To track members who have already received the message
 
   // Broadcast message to all group members
   for (let participant of participants) {
+    if (sentMembers.has(participant)) continue; // Skip if the member has already received the message
+    sentMembers.add(participant); // Mark member as sent
+
     try {
       await delay(500); // Delay to prevent rate limits
 
@@ -35,7 +39,7 @@ let handler = async (m, { conn, isROwner, text }) => {
             isForwarded: true,
             forwardedNewsletterMessageInfo: {
               newsletterJid: '120363200367779016@newsletter',
-              newsletterName: 'SILVA DIRECT MESSAGES 💖🦄',
+              newsletterName: 'SILVA SPARK MD 💖🦄',
               serverMessageId: 143
             }
           }
@@ -72,7 +76,7 @@ let handler = async (m, { conn, isROwner, text }) => {
             isForwarded: true,
             forwardedNewsletterMessageInfo: {
               newsletterJid: '120363200367779016@newsletter',
-              newsletterName: 'SILVA DIRECT MESSAGES 💖🦄',
+              newsletterName: 'SILVA SPARK MD 💖🦄',
               serverMessageId: 143
             }
           }
