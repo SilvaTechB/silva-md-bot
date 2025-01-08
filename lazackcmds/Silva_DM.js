@@ -2,13 +2,20 @@ let handler = async (m, { conn, isROwner, text }) => {
   const delay = (time) => new Promise((res) => setTimeout(res, time));
 
   // Ensure this command is used in a group
-  if (!m.isGroup) throw '*💀💀💀THIS COMMAND CAN ONLY BE USED IN GROUPS!*';
+  if (!m.isGroup) throw '*💀💀💀 THIS COMMAND CAN ONLY BE USED IN GROUPS!*';
   let groupMetadata = await conn.groupMetadata(m.chat);
   let participants = groupMetadata.participants.map((p) => p.id);
 
   // Get the message to broadcast
   let message = m.quoted && m.quoted.text ? m.quoted.text : text;
   if (!message) throw '*ENTER THE MESSAGE YOU WANT TO BROADCAST. 2025 SILVA MD BOT*';
+
+  // Check for media in the quoted message
+  let media = m.quoted ? await m.quoted.download() : null;
+  let mediaType = m.quoted ? m.quoted.mtype : null;
+
+  // Fallback media URL
+  let fallbackMediaUrl = 'https://i.imgur.com/PEZ5QL2.jpeg';
 
   let successCount = 0;
   let failureCount = 0;
@@ -17,24 +24,61 @@ let handler = async (m, { conn, isROwner, text }) => {
   for (let participant of participants) {
     try {
       await delay(500); // Delay to prevent rate limits
-      await conn.relayMessage(
-        participant,
-        {
-          extendedTextMessage: {
-            text: `${message}`,
-            contextInfo: {
-              externalAdReply: {
-                title: 'Silva MD Bot - PRIVATE MESSAGE',
-                body: 'THIS IS SILVA MD BOT CREATED BY SILVA TECH INC!',
-                thumbnailUrl: 'https://files.catbox.moe/8324jm.jpg', // Replace with your image URL
-                sourceUrl: 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v', // Replace with your channel link
-                renderLargerThumbnail: true,
-              },
-            },
-          },
-        },
-        {}
-      );
+
+      if (media) {
+        // Send the media with the appropriate type
+        let mediaOptions = {
+          caption: message,
+          contextInfo: {
+            mentionedJid: [m.sender],
+            forwardingScore: 999,
+            isForwarded: true,
+            forwardedNewsletterMessageInfo: {
+              newsletterJid: '120363200367779016@newsletter',
+              newsletterName: 'SILVA DIRECT MESSAGES 💖🦄',
+              serverMessageId: 143
+            }
+          }
+        };
+
+        switch (mediaType) {
+          case 'imageMessage':
+            mediaOptions.image = media;
+            break;
+          case 'videoMessage':
+            mediaOptions.video = media;
+            break;
+          case 'audioMessage':
+            mediaOptions.audio = media;
+            mediaOptions.ptt = true; // Set to true if sending as a voice note
+            break;
+          case 'documentMessage':
+            mediaOptions.document = media;
+            mediaOptions.mimetype = m.quoted.mimetype || 'application/pdf';
+            break;
+          default:
+            throw new Error('Unsupported media type');
+        }
+
+        await conn.sendMessage(participant, mediaOptions);
+      } else {
+        // Send fallback media or text if no quoted media
+        await conn.sendMessage(participant, {
+          image: { url: fallbackMediaUrl },
+          caption: message,
+          contextInfo: {
+            mentionedJid: [m.sender],
+            forwardingScore: 999,
+            isForwarded: true,
+            forwardedNewsletterMessageInfo: {
+              newsletterJid: '120363200367779016@newsletter',
+              newsletterName: 'SILVA DIRECT MESSAGES 💖🦄',
+              serverMessageId: 143
+            }
+          }
+        });
+      }
+
       successCount++;
     } catch (error) {
       console.error(`Failed to send message to ${participant}:`, error);
@@ -44,7 +88,7 @@ let handler = async (m, { conn, isROwner, text }) => {
 
   // Send completion message to the command initiator
   m.reply(
-    `*TASK COMPLETED*\n\n*SUCCESS*: ${successCount} member(s)\n*FAILED*: ${failureCount} member(s)\n\n*NOTE*: Some failures may occur due to network issues or restrictions or were blocked.\n\n WORLD CLASS BOT CREATED BY SILVA TECH INC\n\n Thank you`
+    `*TASK COMPLETED*\n\n*SUCCESS*: ${successCount} member(s)\n*FAILED*: ${failureCount} member(s)\n\n*NOTE*: Some failures may occur due to network issues, restrictions, or being blocked.\n\nWORLD-CLASS BOT CREATED BY SILVA TECH INC\n\nThank you`
   );
 };
 
