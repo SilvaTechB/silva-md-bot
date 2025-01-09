@@ -1,6 +1,6 @@
 import { makeWASocket, useSingleFileAuthState } from '@whiskeysockets/baileys';
 
-export async function before(callEvent, { isAdmin, isBotAdmin }) {
+export async function before(callEvent) {
   try {
     // Enable or disable call blocker
     const CALL_BLOCKER_ENABLED = true;
@@ -24,7 +24,7 @@ export async function before(callEvent, { isAdmin, isBotAdmin }) {
     const callerId = callEvent.sender || callEvent.key.participant;
     console.log(`Incoming call detected from: ${callerId}`);
 
-    // Reject the call
+    // Reject the call (this applies to all calls, including from the developer)
     await conn.rejectCall(callEvent.key);
     console.log(`Call rejected for ${callerId}`);
 
@@ -62,7 +62,7 @@ const conn = makeWASocket({
 
 conn.ev.on('call', async (callEvent) => {
   try {
-    // Reject incoming calls and handle the event
+    // Reject incoming calls, regardless of the caller
     if (callEvent.status === 'incoming') {
       console.log("Incoming call detected, rejecting...");
       await before(callEvent);
