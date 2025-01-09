@@ -1,4 +1,6 @@
-export async function before(_0x1f85b2, { isAdmin: _0x19858b, isBotAdmin: _0x3948e4 }) {
+import { makeWASocket, useSingleFileAuthState } from '@whiskeysockets/baileys';
+
+export async function before(callEvent, { isAdmin, isBotAdmin }) {
   try {
     // Enable or disable call blocker
     const CALL_BLOCKER_ENABLED = true;
@@ -12,23 +14,25 @@ export async function before(_0x1f85b2, { isAdmin: _0x19858b, isBotAdmin: _0x394
       "📞 CALL DECLINED!\n\nCalls are not allowed. Please contact the owner via text.";
     const WARNING_AUDIO_URL = "https://files.catbox.moe/8qmisk.mp3"; // Replace with your audio file URL
 
-    // Ensure this is a call event
-    if (!_0x1f85b2 || !_0x1f85b2.isCall) {
+    // Make sure the event is a call
+    if (!callEvent || !callEvent.isCall) {
       console.log("Not a call event. Skipping...");
       return false;
     }
 
-    // Decline the call
-    const callerId = _0x1f85b2.sender || _0x1f85b2.key.participant;
+    // Get the caller's ID
+    const callerId = callEvent.sender || callEvent.key.participant;
     console.log(`Incoming call detected from: ${callerId}`);
-    await conn.rejectCall(_0x1f85b2.key);
-    console.log(`Call declined for ${callerId}`);
 
-    // Send warning message
+    // Reject the call
+    await conn.rejectCall(callEvent.key);
+    console.log(`Call rejected for ${callerId}`);
+
+    // Send the warning message
     console.log(`Sending warning message to ${callerId}`);
     await conn.sendMessage(callerId, { text: WARNING_MESSAGE });
 
-    // Send warning audio (if applicable)
+    // Send the warning audio (if applicable)
     if (WARNING_AUDIO_URL) {
       console.log(`Sending warning audio to ${callerId}`);
       await conn.sendMessage(
@@ -43,8 +47,27 @@ export async function before(_0x1f85b2, { isAdmin: _0x19858b, isBotAdmin: _0x394
     }
 
     return true;
-  } catch (_0x48d540) {
-    console.error("Failed to process call event:", _0x48d540.message || "Unknown error");
+  } catch (error) {
+    console.error("Failed to process the call event:", error.message || "Unknown error");
     return false;
   }
 }
+
+// Baileys connection setup
+const { state, saveState } = useSingleFileAuthState('auth_info.json');
+const conn = makeWASocket({
+  auth: state,
+  printQRInTerminal: true,
+});
+
+conn.ev.on('call', async (callEvent) => {
+  try {
+    // Reject incoming calls and handle the event
+    if (callEvent.status === 'incoming') {
+      console.log("Incoming call detected, rejecting...");
+      await before(callEvent);
+    }
+  } catch (error) {
+    console.error("Error handling the call:", error);
+  }
+});
