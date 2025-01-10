@@ -10,7 +10,7 @@
     "OWNERS": {
       "description": "owner numbers",
       "required": true,
-      "value": "254700143167;Silva;254743706010;𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓"
+      "value": "254743706010;𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓"
     },
     "BOTNAME": {
       "description": "Give your BOT a name",
@@ -18,7 +18,7 @@
       "value": "SILVA-MD-BOT©®"
     },
     "SESSION_ID": {
-      "description": "your session id",
+      "description": "your session id. get session here https://silva-session-selector.vercel.app/",
       "required": true,
       "value": ""
     },
@@ -29,12 +29,12 @@
     },
     "PREFIX": {
       "description": "put any one symbol here except @ and + , leave it Blank if you want to use multiple prefix",
-      "required": false,
-      "value": ""
+      "required": true,
+      "value": "."
     },
     "statusview": {
       "description": "make it true if you want bot to view status",
-      "required": false,
+      "required": true,
       "value": "true"
     },
     "autoRead": {
@@ -55,7 +55,7 @@
     "AUTO_STATUS_LIKE_EMOJI": {
       "description": "customize to any emoji you need 💚",
       "required": false,
-      "value": "💚"
+      "value": "🦋"
        },
     "STATUS_REPLY": {
       "description": "make it true or false. true to activate false to deactivate",
