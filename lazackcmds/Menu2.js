@@ -1,140 +1,126 @@
+// handler.js
+// Menu command handler for Silva MD Bot
+
 import pkg from '@whiskeysockets/baileys';
-const { proto, prepareWAMessageMedia, generateWAMessageFromContent } = pkg;
 import moment from 'moment-timezone';
 import { createHash } from 'crypto';
 import { xpRange } from '../lib/levelling.js';
 
+const { proto, prepareWAMessageMedia, generateWAMessageFromContent } = pkg;
+
 let handler = async (m, { conn, usedPrefix }) => {
-    let d = new Date(new Date() + 3600000);
-    let locale = 'en';
-    let week = d.toLocaleDateString(locale, { weekday: 'long' });
-    let date = d.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
-    let _uptime = process.uptime() * 1000;
-    let uptime = clockString(_uptime);
+    try {
+        // Initialize date and time-related variables
+        const now = new Date(new Date().getTime() + 3600000);
+        const locale = 'en';
+        const weekDay = now.toLocaleDateString(locale, { weekday: 'long' });
+        const fullDate = now.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
+        const uptime = clockString(process.uptime() * 1000);
 
-    let who = m.quoted ? m.quoted.sender : m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender;
-    if (!(who in global.db.data.users)) throw `✳️ The user is not found in my database`;
+        // Determine the target user
+        const target = m.quoted?.sender || m.mentionedJid?.[0] || (m.fromMe ? conn.user.jid : m.sender);
 
-    let user = global.db.data.users[who];
-    let { level } = user;
-    let { min, xp, max } = xpRange(level, global.multiplier);
-    let greeting = ucapan();
-
-    let str = `
-      『 *silva md bot* 』  
-      © 2025 *silvatechinc*`;
-
-    let msg = generateWAMessageFromContent(m.chat, {
-        viewOnceMessage: {
-            message: {
-                "messageContextInfo": {
-                    "deviceListMetadata": {},
-                    "deviceListMetadataVersion": 2
-                },
-                interactiveMessage: proto.Message.InteractiveMessage.create({
-                    body: proto.Message.InteractiveMessage.Body.create({
-                        text: str
-                    }),
-                    footer: proto.Message.InteractiveMessage.Footer.create({
-                        text: "Use The Below Buttons"
-                    }),
-                    header: proto.Message.InteractiveMessage.Header.create({
-                        ...(await prepareWAMessageMedia({ image: { url: './media/shizo.jpg' } }, { upload: conn.waUploadToServer })),
-                        title: null,
-                        subtitle: null,
-                        hasMediaAttachment: false
-                    }),
-                    nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
-                        buttons: [
-                            {
-                                "name": "single_select",
-                                "buttonParamsJson": JSON.stringify({
-                                    "title": "TAP TO OPEN",
-                                    "sections": [{
-                                        "title": "HERE IS BUTTONS MENU",
-                                        "highlight_label": "silva",
-                                        "rows": [
-                                            { "header": "", "title": "🎁 Bot Menu", "description": "The Bot's secret control panel.", "id": `${usedPrefix}botmenu` },
-                                            { "header": "", "title": "🖲️ Owner Menu", "description": "Yep, that's for you, Boss!", "id": `${usedPrefix}ownermenu` },
-                                            { "header": "", "title": "🎉 AI Menu", "description": "Your Personal Artificial Intelligence Copilots", "id": `${usedPrefix}aimenu` },
-                                            { "header": "", "title": "🎧 Audio Menu", "description": "Tune The Mp3/Audio As You Wish", "id": `${usedPrefix}aeditor` },
-                                            { "header": "", "title": "🍫 Anime Menu", "description": "Animated Images, Stickers and Videos", "id": `${usedPrefix}animemenu` },
-                                            { "header": "", "title": "🪁 Anime Info", "description": "Full Information About Animes Like IMDB", "id": `${usedPrefix}infoanime` },
-                                            { "header": "", "title": "🛫 Group Menu", "description": "Group shenanigans central!", "id": `${usedPrefix}groupmenu` },
-                                            { "header": "", "title": "🗂️ Download Menu", "description": "'DL' stands for 'Delicious Loot'.", "id": `${usedPrefix}dlmenu` },
-                                            { "header": "", "title": "🎭 Fun Menu", "description": "The bot's party hat. Games, jokes and instant ROFLs.", "id": `${usedPrefix}funmenu` },
-                                            { "header": "", "title": "💵 Economy Menu", "description": "Your personal vault of virtual economy.", "id": `${usedPrefix}economymenu` },
-                                            { "header": "", "title": "🎮 Game Menu", "description": "Enter the gaming arena.", "id": `${usedPrefix}gamemenu` },
-                                            { "header": "", "title": "🫐 Sticker Menu", "description": "A rainbow of stickers.", "id": `${usedPrefix}stickermenu` },
-                                            { "header": "", "title": "🖍️ Fancy Text", "description": "Fancy Text Generator.", "id": `${usedPrefix}fancy` },
-                                            { "header": "", "title": "🎊 Tool Menu", "description": "Your handy-dandy toolkit.", "id": `${usedPrefix}toolmenu` },
-                                            { "header": "", "title": "🏵️ Logo Menu", "description": "Create a logo that screams You.", "id": `${usedPrefix}logomenu` },
-                                            { "header": "", "title": "🖌️ Fancy Text2", "description": "From Text To Fancy Text As jpg", "id": `${usedPrefix}fancy2` },
-                                            { "header": "", "title": "🌄 NSFW Menu", "description": "The After Dark menu.", "id": `${usedPrefix}nsfwmenu` }
-                                        ]
-                                    }]
-                                })
-                            },
-                            {
-                                "name": "quick_reply",
-                                "buttonParamsJson": JSON.stringify({
-                                    "display_text": "MENU ❇️",
-                                    "id": `${usedPrefix}menu`
-                                })
-                            },
-                            {
-                                "name": "cta_url",
-                                "buttonParamsJson": JSON.stringify({
-                                    "display_text": "OWNER 🌟",
-                                    "url": "https://wa.me/message/254700143167"
-                                })
-                            },
-                            {
-                                "name": "cta_url",
-                                "buttonParamsJson": JSON.stringify({
-                                    "display_text": "SCRIPT 💕",
-                                    "url": "https://github.com/SilvaTechB/silva-md-bot"
-                                })
-                            }
-                        ],
-                    })
-                })
-            }
+        if (!(target in global.db.data.users)) {
+            throw '✳️ The user is not found in my database.';
         }
-    }, {});
 
-    await conn.relayMessage(msg.key.remoteJid, msg.message, {
-        messageId: msg.key.id
-    });
-}
+        const user = global.db.data.users[target];
+        const { level } = user;
+        const { min, xp, max } = xpRange(level, global.multiplier);
+        const greeting = getGreeting();
 
-handler.help = ['main'];
+        const menuText = `
+『 *Silva MD Bot* 』  
+© 2025 *Silvatech Inc*
+
+Welcome to the Silva MD Bot. Use the menu below to interact with the bot effectively.`;
+
+        // Prepare menu content
+        const menuMessage = generateWAMessageFromContent(
+            m.chat,
+            {
+                viewOnceMessage: {
+                    message: {
+                        messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
+                        interactiveMessage: proto.Message.InteractiveMessage.create({
+                            body: { text: menuText },
+                            footer: { text: "Use the buttons below:" },
+                            header: {
+                                ...(await prepareWAMessageMedia({ image: { url: './media/shizo.jpg' } }, { upload: conn.waUploadToServer })),
+                                title: null,
+                                subtitle: null,
+                                hasMediaAttachment: false,
+                            },
+                            nativeFlowMessage: {
+                                buttons: [
+                                    {
+                                        name: "menu_buttons",
+                                        buttonParamsJson: JSON.stringify({
+                                            title: "Tap to Open",
+                                            sections: [
+                                                {
+                                                    title: "Here are the menu options:",
+                                                    highlight_label: "Silva",
+                                                    rows: [
+                                                        { title: "🎁 Bot Menu", description: "Control panel for the bot.", id: `${usedPrefix}botmenu` },
+                                                        { title: "🖲️ Owner Menu", description: "Admin options for the bot.", id: `${usedPrefix}ownermenu` },
+                                                        { title: "🎉 AI Menu", description: "Your AI assistants.", id: `${usedPrefix}aimenu` },
+                                                        { title: "🎧 Audio Menu", description: "Audio customization tools.", id: `${usedPrefix}aeditor` },
+                                                        { title: "🍫 Anime Menu", description: "Anime stickers, images, and videos.", id: `${usedPrefix}animemenu` },
+                                                        { title: "🛫 Group Menu", description: "Tools for managing groups.", id: `${usedPrefix}groupmenu` },
+                                                        { title: "💵 Economy Menu", description: "Virtual economy management.", id: `${usedPrefix}economymenu` },
+                                                        { title: "🎭 Fun Menu", description: "Games, jokes, and fun!", id: `${usedPrefix}funmenu` },
+                                                        { title: "🗂️ Download Menu", description: "Downloading tools.", id: `${usedPrefix}dlmenu` },
+                                                        { title: "🎮 Game Menu", description: "Enter the game zone.", id: `${usedPrefix}gamemenu` },
+                                                        { title: "🫐 Sticker Menu", description: "Sticker creation tools.", id: `${usedPrefix}stickermenu` },
+                                                        { title: "🏵️ Logo Menu", description: "Logo creation tools.", id: `${usedPrefix}logomenu` },
+                                                        { title: "🌄 NSFW Menu", description: "After dark content.", id: `${usedPrefix}nsfwmenu` },
+                                                    ],
+                                                },
+                                            ],
+                                        }),
+                                    },
+                                ],
+                            },
+                        }),
+                    },
+                },
+            },
+            {}
+        );
+
+        // Send the generated menu message
+        await conn.relayMessage(menuMessage.key.remoteJid, menuMessage.message, {
+            messageId: menuMessage.key.id,
+        });
+    } catch (error) {
+        console.error("Error generating menu:", error);
+        m.reply("An error occurred while generating the menu.");
+    }
+};
+
+handler.help = ['men2', 'hel2', 'h', 'commands2'];
 handler.tags = ['group'];
-handler.command = ['menu2', 'help2', 'h', 'commands2'];
+handler.command = ['men2', 'hel2', 'h', 'command2'];
 
 export default handler;
 
+// Utility Functions
+
+// Format uptime as HH:MM:SS
 function clockString(ms) {
-    let h = isNaN(ms) ? '--' : Math.floor(ms / 3600000);
-    let m = isNaN(ms) ? '--' : Math.floor(ms / 60000) % 60;
-    let s = isNaN(ms) ? '--' : Math.floor(ms / 1000) % 60;
-    return [h, m, s].map(v => v.toString().padStart(2, 0)).join(':');
+    const h = Math.floor(ms / 3600000) || 0;
+    const m = Math.floor((ms % 3600000) / 60000) || 0;
+    const s = Math.floor((ms % 60000) / 1000) || 0;
+    return [h, m, s].map((unit) => unit.toString().padStart(2, '0')).join(':');
 }
 
-function ucapan() {
-    const time = moment.tz('Asia/Karachi').format('HH');
-    let res = "happy early in the day☀️";
-    if (time >= 4) {
-        res = "Good Morning 🥱";
-    }
-    if (time >= 10) {
-        res = "Good Afternoon 🫠";
-    }
-    if (time >= 15) {
-        res = "Good Afternoon 🌇";
-    }
-    if (time >= 18) {
-        res = "Good Night 🌙";
-    }
-    return res;
+// Return a contextual greeting based on the current time
+function getGreeting() {
+    const hour = moment.tz('Asia/Karachi').hour();
+    if (hour < 4) return "Happy early morning ☀️";
+    if (hour < 10) return "Good morning 🌅";
+    if (hour < 15) return "Good afternoon 🕑";
+    if (hour < 18) return "Good evening 🌇";
+    return "Good night 🌙";
 }
