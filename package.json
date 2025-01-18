@@ -48,7 +48,6 @@
         "@StarlightsTeam/Scraper": "github:StarlightsTeam/StarlightsTeam-Scraper",
         "@vitalets/google-translate-api": "^9.2.0",
         "@whiskeysockets/baileys": "^6.6.0",
-        "gifted-baileys": "^1.5.1",
         "@google/generative-ai":"^0.1.3",
         "@SumiFX/Scraper": "github:SumiFX/SumiFX-Scraper",
         "@hapi/boom": "^10.0.0",
