@@ -22,30 +22,30 @@ let handler = async (m, { conn }) => {
 
 Need help? Contact Silva Tech Support by clicking the button below.`;
 
-        // Create the message with URL button
-        const urlButtonMessage = {
+        // Define the message with a URL button
+        const buttonMessage = {
             text: menuText,
             footer: "Silva Tech Support",
-            buttons: [
+            templateButtons: [
                 {
-                    buttonId: "support_url",
-                    buttonText: { displayText: "📞 Contact Support" },
-                    type: 2, // URL button type
-                    url: "https://wa.me/254700143167?text=Hello%20Silva%20Tech%20Support!", // WhatsApp link
+                    index: 1,
+                    urlButton: {
+                        displayText: "📞 Contact Support",
+                        url: "https://wa.me/254700143167?text=Hello%20Silva%20Tech%20Support!",
+                    },
                 },
             ],
-            headerType: 1, // Header type for text-based messages
         };
 
         // Send the message
-        await conn.sendMessage(m.chat, urlButtonMessage);
+        await conn.sendMessage(m.chat, buttonMessage);
     } catch (error) {
         console.error("Error generating URL button message:", error);
         m.reply("An error occurred while generating the contact button.");
     }
 };
 
-handler.help = ["call", "piga", "contact"];
+handler.help = ["support", "help", "contact"];
 handler.tags = ["utility"];
 handler.command = ["call", "piga", "contact"];
 
