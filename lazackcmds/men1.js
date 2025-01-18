@@ -3,7 +3,6 @@
 
 import pkg from '@whiskeysockets/baileys';
 import moment from 'moment-timezone';
-import { createHash } from 'crypto';
 import { xpRange } from '../lib/levelling.js';
 
 const { proto, prepareWAMessageMedia, generateWAMessageFromContent } = pkg;
@@ -17,74 +16,41 @@ let handler = async (m, { conn, usedPrefix }) => {
         const fullDate = now.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
         const uptime = clockString(process.uptime() * 1000);
 
-        // Determine the target user
-        const target = m.quoted?.sender || m.mentionedJid?.[0] || (m.fromMe ? conn.user.jid : m.sender);
-
-        if (!(target in global.db.data.users)) {
-            throw '✳️ The user is not found in my database.';
-        }
-
-        const user = global.db.data.users[target];
-        const { level } = user;
-        const { min, xp, max } = xpRange(level, global.multiplier);
         const greeting = getGreeting();
-
         const menuText = `
 『 *Silva MD Bot* 』  
 © 2025 *Silvatech Inc*
 
 Welcome to the Silva MD Bot. Use the menu below to interact with the bot effectively.`;
 
-        // Prepare menu content with buttons
-        const menuMessage = generateWAMessageFromContent(
-            m.chat,
-            {
-                templateMessage: {
-                    hydratedTemplate: {
-                        hydratedContentText: menuText,
-                        hydratedFooterText: "Use the buttons below:",
-                        hydratedButtons: [
-                            {
-                                quickReplyButton: {
-                                    displayText: "🎁 Bot Menu",
-                                    id: `${usedPrefix}botmenu`,
-                                },
-                            },
-                            {
-                                quickReplyButton: {
-                                    displayText: "🖲️ Owner Menu",
-                                    id: `${usedPrefix}ownermenu`,
-                                },
-                            },
-                            {
-                                quickReplyButton: {
-                                    displayText: "🎉 AI Menu",
-                                    id: `${usedPrefix}aimenu`,
-                                },
-                            },
-                            {
-                                quickReplyButton: {
-                                    displayText: "🎧 Audio Menu",
-                                    id: `${usedPrefix}aeditor`,
-                                },
-                            },
-                            {
-                                quickReplyButton: {
-                                    displayText: "🍫 Anime Menu",
-                                    id: `${usedPrefix}animemenu`,
-                                },
-                            },
-                        ],
-                    },
+        // Create List Message
+        const listMessage = {
+            text: menuText,
+            footer: "Powered by Silva MD Bot",
+            title: "Main Menu",
+            buttonText: "Open Menu",
+            sections: [
+                {
+                    title: "Bot Features",
+                    rows: [
+                        { title: "🎁 Bot Menu", description: "View all available bot commands", rowId: `${usedPrefix}botmenu` },
+                        { title: "🖲️ Owner Menu", description: "Manage bot settings and configurations", rowId: `${usedPrefix}ownermenu` },
+                        { title: "🎉 AI Menu", description: "Interact with AI features", rowId: `${usedPrefix}aimenu` },
+                        { title: "🎧 Audio Menu", description: "Audio editing commands", rowId: `${usedPrefix}aeditor` },
+                        { title: "🍫 Anime Menu", description: "Anime-related commands", rowId: `${usedPrefix}animemenu` },
+                    ],
                 },
-            },
-            {}
-        );
+                {
+                    title: "Contact Support",
+                    rows: [
+                        { title: "📞 Call Support", description: "Dial +254700143167 for assistance", rowId: `${usedPrefix}callSupport` },
+                    ],
+                },
+            ],
+        };
 
-        // Send the generated menu message
-        await conn.relayMessage(menuMessage.key.remoteJid, menuMessage.message, {
-            messageId: menuMessage.key.id,
-        });
+        // Send the List Message
+        await conn.sendMessage(m.chat, listMessage);
     } catch (error) {
         console.error("Error generating menu:", error);
         m.reply("An error occurred while generating the menu.");
