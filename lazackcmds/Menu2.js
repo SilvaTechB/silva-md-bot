@@ -35,7 +35,7 @@ let handler = async (m, { conn, usedPrefix }) => {
 
 Welcome to the Silva MD Bot. Use the menu below to interact with the bot effectively.`;
 
-        // Prepare menu content
+        // Prepare the message content
         const menuMessage = generateWAMessageFromContent(
             m.chat,
             {
@@ -89,17 +89,44 @@ Welcome to the Silva MD Bot. Use the menu below to interact with the bot effecti
             {}
         );
 
+        // Debug payload before sending
+        console.log("Generated Payload:", JSON.stringify(menuMessage, null, 2));
+
         // Send the generated menu message
         await conn.relayMessage(menuMessage.key.remoteJid, menuMessage.message, {
             messageId: menuMessage.key.id,
         });
+        console.log("Menu message sent successfully.");
     } catch (error) {
         console.error("Error generating menu:", error);
-        m.reply("An error occurred while generating the menu.");
+
+        // Fallback to listMessage if nativeFlowMessage fails
+        const fallbackMenuMessage = {
+            listMessage: {
+                title: "Silva MD Bot Menu",
+                description: "Use the menu below to interact with Silva MD Bot.",
+                buttonText: "Open Menu",
+                footerText: "Powered by SilvaTech Inc.",
+                sections: [
+                    {
+                        title: "Main Menu",
+                        rows: [
+                            { title: "🎁 Bot Menu", description: "Control panel for the bot.", rowId: `${usedPrefix}botmenu` },
+                            { title: "🖲️ Owner Menu", description: "Admin options for the bot.", rowId: `${usedPrefix}ownermenu` },
+                            { title: "🎉 AI Menu", description: "Your AI assistants.", rowId: `${usedPrefix}aimenu` },
+                        ],
+                    },
+                ],
+            },
+        };
+
+        // Send fallback menu
+        await conn.sendMessage(m.chat, fallbackMenuMessage, { quoted: m });
+        console.log("Fallback menu message sent successfully.");
     }
 };
 
-handler.help = ['men2', 'hel2', 'h', 'commands2'];
+handler.help = ['menu2', 'help2', 'h', 'commands2'];
 handler.tags = ['group'];
 handler.command = ['men2', 'hel2', 'h', 'command2'];
 
