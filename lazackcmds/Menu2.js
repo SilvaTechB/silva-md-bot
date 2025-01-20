@@ -1,7 +1,7 @@
 // handler.js
 // Menu command handler for Silva MD Bot
 
-import pkg from '@whiskeysockets/baileys';
+import pkg from 'silva-baileys';
 import moment from 'moment-timezone';
 import { createHash } from 'crypto';
 import { xpRange } from '../lib/levelling.js';
