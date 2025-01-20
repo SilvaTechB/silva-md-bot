@@ -53,7 +53,6 @@
         "@hapi/boom": "^10.0.0",
         "@xct007/frieren-scraper": "*",
         "@xct007/tiktok-scraper": "*",
-        "@SilvaTechB/Baileys": "github:SilvaTechB/Baileys",
         "acrcloud": "^1.4.0",
         "aptoide-scraper": "^1.0.1",
         "awesome-phonenumber": "^3.4.0",
