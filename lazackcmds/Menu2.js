@@ -6,7 +6,7 @@ import moment from 'moment-timezone';
 import { createHash } from 'crypto';
 import { xpRange } from '../lib/levelling.js';
 
-const { proto, prepareWAMessageMedia, generateWAMessageFromContent } = pkg;
+const { prepareWAMessageMedia, generateWAMessageFromContent } = pkg;
 
 let handler = async (m, { conn, usedPrefix }) => {
     try {
@@ -17,72 +17,113 @@ let handler = async (m, { conn, usedPrefix }) => {
         const fullDate = now.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
         const uptime = clockString(process.uptime() * 1000);
 
-        // Determine the target user
-        const target = m.quoted?.sender || m.mentionedJid?.[0] || (m.fromMe ? conn.user.jid : m.sender);
-
-        if (!(target in global.db.data.users)) {
-            throw '✳️ The user is not found in my database.';
-        }
-
-        const user = global.db.data.users[target];
-        const { level } = user;
-        const { min, xp, max } = xpRange(level, global.multiplier);
         const greeting = getGreeting();
 
         const menuText = `
-『 *Silva MD Bot* 』  
+『 *Silva MD Bot* 』
 © 2025 *Silvatech Inc*
 
-Welcome to the Silva MD Bot. Use the menu below to interact with the bot effectively.`;
+Welcome to the Silva MD Bot. Use the menu below to interact with the bot effectively.
+*Today*: ${weekDay}, ${fullDate}
+*Uptime*: ${uptime}
 
-        // Prepare menu content
+${greeting}`;
+
+        // Prepare media for the message
+        const media = await prepareWAMessageMedia(
+            { image: { url: './media/shizo.jpg' } },
+            { upload: conn.waUploadToServer }
+        );
+
+        // Create the menu message with interactive buttons
         const menuMessage = generateWAMessageFromContent(
             m.chat,
             {
-                viewOnceMessage: {
-                    message: {
-                        messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
-                        interactiveMessage: proto.Message.InteractiveMessage.create({
-                            body: { text: menuText },
-                            footer: { text: "Use the buttons below:" },
-                            header: {
-                                ...(await prepareWAMessageMedia({ image: { url: './media/shizo.jpg' } }, { upload: conn.waUploadToServer })),
-                                title: null,
-                                subtitle: null,
-                                hasMediaAttachment: false,
+                templateMessage: {
+                    hydratedTemplate: {
+                        hydratedContentText: menuText,
+                        hydratedFooterText: "Use the buttons below:",
+                        hydratedButtons: [
+                            {
+                                quickReplyButton: {
+                                    displayText: "🎁 Bot Menu",
+                                    id: `${usedPrefix}botmenu`,
+                                },
                             },
-                            nativeFlowMessage: {
-                                buttons: [
-                                    {
-                                        name: "menu_buttons",
-                                        buttonParamsJson: JSON.stringify({
-                                            title: "Tap to Open",
-                                            sections: [
-                                                {
-                                                    title: "Here are the menu options:",
-                                                    highlight_label: "Silva",
-                                                    rows: [
-                                                        { title: "🎁 Bot Menu", description: "Control panel for the bot.", id: `${usedPrefix}botmenu` },
-                                                        { title: "🖲️ Owner Menu", description: "Admin options for the bot.", id: `${usedPrefix}ownermenu` },
-                                                        { title: "🎉 AI Menu", description: "Your AI assistants.", id: `${usedPrefix}aimenu` },
-                                                        { title: "🎧 Audio Menu", description: "Audio customization tools.", id: `${usedPrefix}aeditor` },
-                                                        { title: "🍫 Anime Menu", description: "Anime stickers, images, and videos.", id: `${usedPrefix}animemenu` },
-                                                        { title: "🛫 Group Menu", description: "Tools for managing groups.", id: `${usedPrefix}groupmenu` },
-                                                        { title: "💵 Economy Menu", description: "Virtual economy management.", id: `${usedPrefix}economymenu` },
-                                                        { title: "🎭 Fun Menu", description: "Games, jokes, and fun!", id: `${usedPrefix}funmenu` },
-                                                        { title: "🗂️ Download Menu", description: "Downloading tools.", id: `${usedPrefix}dlmenu` },
-                                                        { title: "🎮 Game Menu", description: "Enter the game zone.", id: `${usedPrefix}gamemenu` },
-                                                        { title: "🫐 Sticker Menu", description: "Sticker creation tools.", id: `${usedPrefix}stickermenu` },
-                                                        { title: "🏵️ Logo Menu", description: "Logo creation tools.", id: `${usedPrefix}logomenu` },
-                                                        { title: "🌄 NSFW Menu", description: "After dark content.", id: `${usedPrefix}nsfwmenu` },
-                                                    ],
-                                                },
-                                            ],
-                                        }),
-                                    },
-                                ],
+                            {
+                                quickReplyButton: {
+                                    displayText: "🖲️ Owner Menu",
+                                    id: `${usedPrefix}ownermenu`,
+                                },
                             },
-                        }),
+                            {
+                                quickReplyButton: {
+                                    displayText: "🎉 AI Menu",
+                                    id: `${usedPrefix}aimenu`,
+                                },
+                            },
+                            {
+                                quickReplyButton: {
+                                    displayText: "🎧 Audio Menu",
+                                    id: `${usedPrefix}aeditor`,
+                                },
+                            },
+                            {
+                                quickReplyButton: {
+                                    displayText: "🍫 Anime Menu",
+                                    id: `${usedPrefix}animemenu`,
+                                },
+                            },
+                            {
+                                quickReplyButton: {
+                                    displayText: "🛫 Group Menu",
+                                    id: `${usedPrefix}groupmenu`,
+                                },
+                            },
+                            {
+                                quickReplyButton: {
+                                    displayText: "💵 Economy Menu",
+                                    id: `${usedPrefix}economymenu`,
+                                },
+                            },
+                            {
+                                quickReplyButton: {
+                                    displayText: "🎭 Fun Menu",
+                                    id: `${usedPrefix}funmenu`,
+                                },
+                            },
+                            {
+                                quickReplyButton: {
+                                    displayText: "🗂️ Download Menu",
+                                    id: `${usedPrefix}dlmenu`,
+                                },
+                            },
+                            {
+                                quickReplyButton: {
+                                    displayText: "🎮 Game Menu",
+                                    id: `${usedPrefix}gamemenu`,
+                                },
+                            },
+                            {
+                                quickReplyButton: {
+                                    displayText: "🫐 Sticker Menu",
+                                    id: `${usedPrefix}stickermenu`,
+                                },
+                            },
+                            {
+                                quickReplyButton: {
+                                    displayText: "🏵️ Logo Menu",
+                                    id: `${usedPrefix}logomenu`,
+                                },
+                            },
+                            {
+                                quickReplyButton: {
+                                    displayText: "🌄 NSFW Menu",
+                                    id: `${usedPrefix}nsfwmenu`,
+                                },
+                            },
+                        ],
+                        imageMessage: media.imageMessage,
                     },
                 },
             },
