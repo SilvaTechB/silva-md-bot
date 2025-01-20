@@ -16,9 +16,9 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
   try {
     const result = await fg.fbdl(args[0])
     const tex = `
-⊱ HERE IS YOUR VIDEO ⊰\n\n
-↳ *VIDEO TITLE:* ${result.title}\n\n
-⊱ THANKS FOR CHOOSING SILVA MD`
+> 🦋FACEBOOK DOWNLOAD🦋 ⊰\n\n
+> *VIDEO TITLE:* ${result.title}\n\n
+> THANKS FOR CHOOSING SILVA MD`
 
     const response = await fetch(result.videoUrl)
     const arrayBuffer = await response.arrayBuffer()
