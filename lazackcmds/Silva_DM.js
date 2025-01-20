@@ -15,7 +15,7 @@ let handler = async (m, { conn, isROwner, text }) => {
   let mediaType = m.quoted ? m.quoted.mtype : null;
 
   // Fallback media URL
-  let fallbackMediaUrl = 'https://i.imgur.com/PEZ5QL2.jpeg';
+  let fallbackMediaUrl = 'https://i.imgur.com/ihwVldr.png';
 
   let successCount = 0;
   let failureCount = 0;
