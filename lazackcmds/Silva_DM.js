@@ -92,7 +92,7 @@ let handler = async (m, { conn, isROwner, text }) => {
 
   // Send completion message to the command initiator
   m.reply(
-    `*TASK COMPLETED*\n\n*SUCCESS*: ${successCount} member(s)\n*FAILED*: ${failureCount} member(s)\n\n*NOTE*: Some failures may occur due to network issues, restrictions, or being blocked.\n\nWORLD-CLASS BOT CREATED BY SILVA TECH INC\n\nThank you`
+    `*SUCCESS*: ${successCount} member(s)\n*FAILED*: ${failureCount} member(s)\n\n*NOTE*: Some failures may occur due to network issues, restrictions, or being blocked.\n\nWORLD-CLASS BOT CREATED BY SILVA TECH INC\n\nThank you`
   );
 };
 
