@@ -3,30 +3,28 @@ import fs from 'fs';
 import path from 'path';
 
 let handler = async (m, { text, usedPrefix, command }) => {
-  if (!text) throw `Please provide a repository URL`;
-
   // Define the repository URL
-  const repoUrl = 'https://github.com/SilvaTechB/silva-md-bot.git'; 
+  const repoUrl = 'https://github.com/SilvaTechB/silva-md-bot';
 
   // Define the target folder
-  const targetFolder = 'lazackcmds';
+  const targetFolder = path.join(__dirname, 'lazackcmds'); // Ensure path compatibility
 
-  // Check if the target folder exists, if not, create it
+  // Check if the target folder exists; if not, create it
   if (!fs.existsSync(targetFolder)) {
-    fs.mkdirSync(targetFolder); 
+    fs.mkdirSync(targetFolder, { recursive: true }); // Create folders recursively if needed
   }
 
-  // Prepare the git command
-  const gitCommand = fs.existsSync(`${targetFolder}/.git`)
+  // Determine the git command to use
+  const gitCommand = fs.existsSync(path.join(targetFolder, '.git'))
     ? `git -C ${targetFolder} pull` // Pull updates if the folder is already a git repository
-    : `git clone ${repoUrl} ${targetFolder}`; // Clone the repository if it's not already a git repository
+    : `git clone ${repoUrl} ${targetFolder}`; // Clone the repository if not already a git repository
 
   try {
     // Execute the git command
     await new Promise((resolve, reject) => {
       exec(gitCommand, (err, stdout, stderr) => {
         if (err) {
-          reject(`Git command failed: ${stderr}`);
+          reject(new Error(`Git command failed:\n${stderr}`)); // Include detailed error messages
         } else {
           resolve(stdout);
         }
@@ -36,9 +34,9 @@ let handler = async (m, { text, usedPrefix, command }) => {
     // Send a success message
     m.reply('*✅ Silva MD Bot Update completed successfully!*');
   } catch (error) {
-    // Handle errors
-    console.error(error);
-    m.reply(`*Error during update:* ${error.message}`);
+    // Log and reply with error
+    console.error('Update error:', error);
+    m.reply(`*❌ Error during update:* ${error.message}`);
   }
 };
 
