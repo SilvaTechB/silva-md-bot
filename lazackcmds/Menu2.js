@@ -1,7 +1,7 @@
 // handler.js
 // Menu command handler for Silva MD Bot
 
-import pkg from 'silva-baileys';
+import pkg from 'SilvaTechB/Baileys'; // Import from your custom Baileys fork
 import moment from 'moment-timezone';
 import { createHash } from 'crypto';
 import { xpRange } from '../lib/levelling.js';
@@ -30,14 +30,10 @@ let handler = async (m, { conn, usedPrefix }) => {
         const greeting = getGreeting();
 
         const menuText = `
-『 *Silva MD Bot* 』
+『 *Silva MD Bot* 』  
 © 2025 *Silvatech Inc*
 
-Welcome to the Silva MD Bot. Use the menu below to interact with the bot effectively.
-*Today*: ${weekDay}, ${fullDate}
-*Uptime*: ${uptime}
-
-${greeting}`;
+Welcome to the Silva MD Bot. Use the menu below to interact with the bot effectively.`;
 
         // Prepare menu content
         const menuMessage = generateWAMessageFromContent(
@@ -121,7 +117,7 @@ function clockString(ms) {
 
 // Return a contextual greeting based on the current time
 function getGreeting() {
-    const hour = moment.tz('Africa/Nairobi').hour();
+    const hour = moment.tz('Asia/Karachi').hour();
     if (hour < 4) return "Happy early morning ☀️";
     if (hour < 10) return "Good morning 🌅";
     if (hour < 15) return "Good afternoon 🕑";
