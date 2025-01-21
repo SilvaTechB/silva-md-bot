@@ -1,12 +1,17 @@
 // Function to handle AFK status and respond to mentions/messages
 export async function before(message) {
   try {
-    if (!message || !message.sender) return; // Ensure the message object is valid
-    const user = global.db.data.users[message.sender] || {}; // Access or initialize user data
+    if (!message || !message.sender) return; // Ensure the message is valid
+    if (!global.db.data) global.db.data = { users: {} }; // Initialize database
+    if (!global.db.data.users[message.sender]) {
+      global.db.data.users[message.sender] = { afk: -1, afkReason: '' };
+    }
 
-    // Ensure AFK properties exist for the user
-    if (user.afk === undefined) user.afk = -1;
-    if (user.afkReason === undefined) user.afkReason = '';
+    const user = global.db.data.users[message.sender];
+
+    // Debugging log
+    console.log('Message received:', message.text);
+    console.log('User data:', user);
 
     // Command: Set AFK status
     if (message.text.toLowerCase().startsWith('afk ')) {
@@ -34,7 +39,7 @@ export async function before(message) {
       return true;
     }
 
-    // Handle mentions and private chats
+    // Handle mentions and quoted messages
     const mentionedJids = [
       ...(message.mentionedJid || []),
       ...(message.quoted ? [message.quoted.sender] : []),
