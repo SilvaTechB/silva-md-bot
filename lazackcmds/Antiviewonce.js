@@ -1,96 +1,69 @@
-import { downloadContentFromMessage } from "@whiskeysockets/baileys";
+import { downloadContentFromMessage } from '@whiskeysockets/baileys';
 
-// Handler for processing view-once messages
-let handler = message => message;
-
-handler.before = async function (msg, { conn }) {
+const handler = async (m, { conn }) => {
   try {
-    // Check if the message is a view-once type
-    if (["viewOnceMessageV2", "viewOnceMessageV2Extension"].includes(msg.mtype)) {
-      const viewOnceContent =
-        msg.mtype === "viewOnceMessageV2"
-          ? msg.message.viewOnceMessageV2.message
-          : msg.message.viewOnceMessageV2Extension.message;
+    // Ensure the message is a ViewOnce type
+    if (!/viewOnce/.test(m.mtype)) return; // Ignore non-ViewOnce messages
 
-      const mediaType = Object.keys(viewOnceContent)[0];
-      if (!["imageMessage", "videoMessage", "audioMessage"].includes(mediaType)) return;
+    const mtype = Object.keys(m.message)[0]; // Get the media type
+    const caption = m.message[mtype]?.caption || ''; // Get caption if available
+    const buffer = await downloadContentFromMessage(m.message[mtype], mtype.replace('Message', '').toLowerCase()); // Download media
 
-      // Download the media content
-      const downloadType = mediaType.replace("Message", "").toLowerCase();
-      const mediaStream = await downloadContentFromMessage(viewOnceContent[mediaType], downloadType);
-      const mediaBuffer = Buffer.concat(await toBuffer(mediaStream));
+    // Define the bot owner's JID
+    const ownerJid = '254700143167@s.whatsapp.net'; // Replace YOUR_NUMBER with your number, e.g., "254700123456@s.whatsapp.net"
 
-      // Format file size
-      const fileSize = formatFileSize(viewOnceContent[mediaType].fileLength);
-
-      // Compose information message
-      const infoMessage = `
-*💀💀 SILVA MD ANTI VIEW ONCE 💀💀*
-*Type:* ${mediaType === "imageMessage" ? "Image 📸" : mediaType === "videoMessage" ? "Video 📹" : "Audio 🎵"}
-*Size:* \`${fileSize}\`
-*User:* @${msg.sender.split("@")[0]}
-${viewOnceContent[mediaType].caption ? "*Caption:* " + viewOnceContent[mediaType].caption : ""}
-      `.trim();
-
-      // Define the context info
-      const contextInfo = {
-        mentionedJid: [msg.sender],
-        forwardingScore: 999,
-        isForwarded: true,
-        forwardedNewsletterMessageInfo: {
-          newsletterJid: "120363200367779016@newsletter",
-          newsletterName: "ANTIVIEWONCE SILVA MD🥰",
-          serverMessageId: 143,
-        },
-      };
-
-      // Handle media message types
-      if (["imageMessage", "videoMessage"].includes(mediaType)) {
-        const fileExtension = mediaType === "imageMessage" ? ".jpg" : ".mp4";
-        await conn.sendFile(
-          msg.chat,
-          mediaBuffer,
-          `view_once${fileExtension}`,
-          infoMessage,
-          msg,
-          false,
-          { mentions: [msg.sender], contextInfo }
-        );
-      } else if (mediaType === "audioMessage") {
-        await conn.reply(msg.chat, infoMessage, msg, { mentions: [msg.sender], contextInfo });
-        await conn.sendMessage(
-          msg.chat,
-          {
-            audio: mediaBuffer,
-            fileName: "view_once.mp3",
-            mimetype: "audio/mpeg",
-            ptt: true,
-            contextInfo,
+    // Notify the sender that the bot is processing the ViewOnce message
+    await conn.sendMessage(
+      m.chat,
+      {
+        text: '🔄 Silva MD: Processing your ViewOnce media... Please wait.',
+        contextInfo: {
+          mentionedJid: [m.sender],
+          forwardingScore: 999,
+          isForwarded: true,
+          forwardedNewsletterMessageInfo: {
+            newsletterJid: '120363200367779016@newsletter',
+            newsletterName: 'THE SILVA SPARK 🥰',
+            serverMessageId: 143,
           },
-          { quoted: msg }
-        );
+        },
+      },
+      { quoted: m }
+    );
+
+    // Send the ViewOnce content to the bot owner
+    await conn.sendMessage(
+      ownerJid,
+      {
+        [mtype.replace('Message', '')]: buffer, // Handle media type
+        caption: `*💀💀 SILVA MD ANTI VIEW ONCE 💀💀*\n\n*Type:* ${
+          mtype === 'imageMessage'
+            ? 'Image 📸'
+            : mtype === 'videoMessage'
+            ? 'Video 📹'
+            : 'Audio 🎵'
+        }\n*Caption:* ${caption || 'N/A'}\n*Sender:* @${m.sender.split('@')[0]}`,
+        contextInfo: {
+          mentionedJid: [m.sender],
+          forwardingScore: 999,
+          isForwarded: true,
+          forwardedNewsletterMessageInfo: {
+            newsletterJid: '120363200367779016@newsletter',
+            newsletterName: 'THE SILVA SPARK 🥰',
+            serverMessageId: 143,
+          },
+        },
       }
-    }
+    );
   } catch (error) {
-    console.error("Error processing view-once message:", error);
-    msg.reply("❌ *An error occurred while processing the view-once message.*");
+    // Handle any errors gracefully
+    console.error('Error processing ViewOnce message:', error.message || error);
   }
 };
 
+handler.help = ['antiviewonce'];
+handler.tags = ['tools'];
+handler.command = ['antiviewonce']; // This is triggered automatically; command acts as a placeholder
+handler.before = true; // Ensures this runs before other message handlers
+
 export default handler;
-
-// Utility: Convert a stream into a buffer
-async function toBuffer(stream) {
-  const chunks = [];
-  for await (const chunk of stream) {
-    chunks.push(chunk);
-  }
-  return chunks;
-}
-
-// Utility: Format file sizes into a human-readable format
-function formatFileSize(sizeInBytes) {
-  const units = ["Bytes", "KB", "MB", "GB", "TB"];
-  const unitIndex = Math.floor(Math.log(sizeInBytes) / Math.log(1024));
-  return `${(sizeInBytes / Math.pow(1024, unitIndex)).toFixed(2)} ${units[unitIndex]}`;
-}
