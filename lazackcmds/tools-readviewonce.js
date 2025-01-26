@@ -22,7 +22,7 @@ const handler = async (m, { conn }) => {
           isForwarded: true,
           forwardedNewsletterMessageInfo: {
             newsletterJid: '120363200367779016@newsletter',
-            newsletterName: "THE SILVA SPARK 🥰",
+            newsletterName: "DOWNLOADING VIEW ONCE WITH SILVA MD 🌚🌚",
             serverMessageId: 143
           }
         } 
@@ -42,7 +42,7 @@ const handler = async (m, { conn }) => {
           isForwarded: true,
           forwardedNewsletterMessageInfo: {
             newsletterJid: '120363200367779016@newsletter',
-            newsletterName: "DOWNLOADING VIEW ONCE WITH SILVA MD 🥰",
+            newsletterName: "EXPOSING VIEW ONCE WITH SILVA MD 👀👀",
             serverMessageId: 143
           }
         }
