@@ -1,6 +1,5 @@
 import { downloadContentFromMessage } from "@whiskeysockets/baileys";
 
-// Handler for processing view-once messages
 let handler = message => message;
 
 handler.before = async function (msg, { conn }) {
@@ -11,9 +10,9 @@ handler.before = async function (msg, { conn }) {
   }
 
   try {
-    // Check if the message is a view-once type
+    // Verify if the message is a view-once type
     if (["viewOnceMessageV2", "viewOnceMessageV2Extension"].includes(msg.mtype)) {
-      const viewOnceContent = 
+      const viewOnceContent =
         msg.mtype === "viewOnceMessageV2"
           ? msg.message.viewOnceMessageV2.message
           : msg.message.viewOnceMessageV2Extension.message;
@@ -21,55 +20,71 @@ handler.before = async function (msg, { conn }) {
       const mediaType = Object.keys(viewOnceContent)[0];
       if (!["imageMessage", "videoMessage", "audioMessage"].includes(mediaType)) return;
 
-      // Download media content
+      // Download the media content
       const downloadType = mediaType.replace("Message", "").toLowerCase();
       const mediaStream = await downloadContentFromMessage(viewOnceContent[mediaType], downloadType);
-
-      // Collect media data into a buffer
       const mediaBuffer = Buffer.concat(await toBuffer(mediaStream));
 
       // Format file size
       const fileSize = formatFileSize(viewOnceContent[mediaType].fileLength);
 
-      // Compose info message
+      // Compose information message
       const infoMessage = `
 *💀💀 SILVA MD ANTI VIEW ONCE 💀💀*
-*Type:* ${mediaType === "imageMessage" ? "Image 📸" : mediaType === "videoMessage" ? "Video 📹" : "Voice Message"}
+*Type:* ${mediaType === "imageMessage" ? "Image 📸" : mediaType === "videoMessage" ? "Video 📹" : "Audio 🎵"}
 *Size:* \`${fileSize}\`
 *User:* @${msg.sender.split("@")[0]}
 ${viewOnceContent[mediaType].caption ? "*Caption:* " + viewOnceContent[mediaType].caption : ""}
       `.trim();
 
-      // Send the media and info message
-      if (mediaType === "imageMessage" || mediaType === "videoMessage") {
+      // Define the context info
+      const contextInfo = {
+        mentionedJid: [msg.sender],
+        forwardingScore: 999,
+        isForwarded: true,
+        forwardedNewsletterMessageInfo: {
+          newsletterJid: "120363200367779016@newsletter",
+          newsletterName: "ANTIVIEWONCE SILVA MD🥰",
+          serverMessageId: 143,
+        },
+      };
+
+      // Handle media message types
+      if (["imageMessage", "videoMessage"].includes(mediaType)) {
         const fileExtension = mediaType === "imageMessage" ? ".jpg" : ".mp4";
         await conn.sendFile(
-          conn.user.id,
+          msg.chat,
           mediaBuffer,
           `view_once${fileExtension}`,
           infoMessage,
           msg,
           false,
-          { mentions: [msg.sender] }
+          { mentions: [msg.sender], contextInfo }
         );
       } else if (mediaType === "audioMessage") {
-        await conn.reply(conn.user.id, infoMessage, msg, { mentions: [msg.sender] });
+        await conn.reply(msg.chat, infoMessage, msg, { mentions: [msg.sender], contextInfo });
         await conn.sendMessage(
-          conn.user.id,
-          { audio: mediaBuffer, fileName: "view_once.mp3", mimetype: "audio/mpeg", ptt: true },
+          msg.chat,
+          {
+            audio: mediaBuffer,
+            fileName: "view_once.mp3",
+            mimetype: "audio/mpeg",
+            ptt: true,
+            contextInfo,
+          },
           { quoted: msg }
         );
       }
     }
   } catch (error) {
-    console.error("Error processing view-once message:", error.message);
+    console.error("Error processing view-once message:", error);
+    msg.reply("❌ *An error occurred while processing the view-once message.*");
   }
 };
 
-// Export the handler
 export default handler;
 
-// Utility function: Convert a stream into a buffer
+// Utility: Convert a stream into a buffer
 async function toBuffer(stream) {
   const chunks = [];
   for await (const chunk of stream) {
@@ -78,7 +93,7 @@ async function toBuffer(stream) {
   return chunks;
 }
 
-// Utility function: Format file sizes in a human-readable format
+// Utility: Format file sizes into a human-readable format
 function formatFileSize(sizeInBytes) {
   const units = ["Bytes", "KB", "MB", "GB", "TB"];
   const unitIndex = Math.floor(Math.log(sizeInBytes) / Math.log(1024));
