@@ -1,16 +1,11 @@
 import { downloadContentFromMessage } from "@whiskeysockets/baileys";
 
+// Handler for processing view-once messages
 let handler = message => message;
 
 handler.before = async function (msg, { conn }) {
-  // Check if ANTIVIEWONCE is enabled
-  if (process.env.ANTIVIEWONCE !== "true") {
-    console.log("Anti-View Once is disabled.");
-    return;
-  }
-
   try {
-    // Verify if the message is a view-once type
+    // Check if the message is a view-once type
     if (["viewOnceMessageV2", "viewOnceMessageV2Extension"].includes(msg.mtype)) {
       const viewOnceContent =
         msg.mtype === "viewOnceMessageV2"
