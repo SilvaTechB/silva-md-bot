@@ -57,6 +57,11 @@
       "required": false,
       "value": "🦋"
        },
+    "ANTIVIEWONCE": {
+      "description": "make it true if you want bot to send view once to your dm",
+      "required": true,
+      "value": "true"
+    },
     "STATUS_REPLY": {
       "description": "make it true or false. true to activate false to deactivate",
       "required": true,
