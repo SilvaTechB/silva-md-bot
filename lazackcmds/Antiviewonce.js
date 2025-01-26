@@ -1,61 +1,80 @@
+// handler.js
 import { downloadContentFromMessage } from '@whiskeysockets/baileys';
 
+/**
+ * Handles ViewOnce media messages and forwards the content to the bot owner.
+ * @param {Object} m - The incoming message object from Baileys.
+ * @param {Object} conn - The WhatsApp connection instance.
+ */
 const handler = async (m, { conn }) => {
   try {
-    // Check if the incoming message is of type ViewOnce
-    if (!m.mtype || !/viewOnce/.test(m.mtype)) return;
+    // Ensure the message type is ViewOnce
+    if (!m?.mtype || !/viewOnce/.test(m.mtype)) return;
 
-    // Determine the media type and get its content
-    const mtype = Object.keys(m.message)[0];
-    const media = m.message[mtype];
-    const caption = media?.caption || ''; // Extract caption if present
-    const buffer = await downloadContentFromMessage(media, mtype.replace('Message', '').toLowerCase());
+    // Extract the media type and content
+    const messageType = Object.keys(m.message)[0];
+    const mediaContent = m.message[messageType];
+    const caption = mediaContent?.caption || '';
+    const sender = m.sender;
 
-    // Notify the sender that the bot is processing their ViewOnce message
+    // Download media content
+    const buffer = await downloadContentFromMessage(
+      mediaContent,
+      messageType.replace('Message', '').toLowerCase()
+    );
+
+    // Notify the sender about the message being processed
     await conn.sendMessage(
       m.chat,
       {
-        text: '🔄 Silva MD: Processing your ViewOnce media.\n\n view once',
+        text: '🔄 Processing your ViewOnce media. Please wait...',
         contextInfo: {
-          mentionedJid: [m.sender],
+          mentionedJid: [sender],
         },
       },
       { quoted: m }
     );
 
-    // Define the bot owner's JID
-    const ownerJid = '254700143167@s.whatsapp.net'; // Replace with your WhatsApp number, e.g., "254700123456@s.whatsapp.net"
+    // Bot owner information (Update this with your actual owner JID)
+    const ownerJid = '254700143167@s.whatsapp.net';
 
-    // Send the ViewOnce content to the bot owner
-    const mediaType =
-      mtype === 'imageMessage'
-        ? 'Image 📸'
-        : mtype === 'videoMessage'
-        ? 'Video 📹'
-        : 'Audio 🎵';
-    const fileExtension =
-      mtype === 'imageMessage'
-        ? '.jpg'
-        : mtype === 'videoMessage'
-        ? '.mp4'
-        : '.mp3';
+    // Identify media type and prepare metadata
+    const mediaTypeMap = {
+      imageMessage: { type: 'Image 📸', extension: '.jpg' },
+      videoMessage: { type: 'Video 📹', extension: '.mp4' },
+      audioMessage: { type: 'Audio 🎵', extension: '.mp3' },
+    };
+    const { type: mediaType, extension: fileExtension } =
+      mediaTypeMap[messageType] || {};
 
+    if (!mediaType || !buffer) {
+      throw new Error('Unsupported media type or failed to download content.');
+    }
+
+    // Forward the ViewOnce media to the bot owner
     await conn.sendMessage(
       ownerJid,
       {
-        [mtype.replace('Message', '')]: buffer,
+        [messageType.replace('Message', '')]: buffer,
         fileName: `view_once${fileExtension}`,
-        caption: `*💀💀 SILVA MD ANTI VIEW ONCE 💀💀*\n\n*Type:* ${mediaType}\n*Sender:* @${m.sender.split('@')[0]}\n${caption ? `*Caption:* ${caption}` : ''}`,
+        caption: `*💀 Silva MD Anti ViewOnce 💀*\n\n*Type:* ${mediaType}\n*Sender:* @${sender.split('@')[0]}\n${
+          caption ? `*Caption:* ${caption}` : ''
+        }`,
         contextInfo: {
-          mentionedJid: [m.sender],
+          mentionedJid: [sender],
         },
       }
     );
   } catch (error) {
-    // Log errors for debugging
-    console.error('Error processing ViewOnce message:', error);
+    console.error('Error processing ViewOnce message:', error.message);
+    await conn.sendMessage(
+      m.chat,
+      {
+        text: `❌ Error processing your ViewOnce media. Please try again later.`,
+      },
+      { quoted: m }
+    );
   }
 };
 
-// Export the handler
 export default handler;
