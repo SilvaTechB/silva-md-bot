@@ -2,68 +2,60 @@ import { downloadContentFromMessage } from '@whiskeysockets/baileys';
 
 const handler = async (m, { conn }) => {
   try {
-    // Ensure the message is a ViewOnce type
-    if (!/viewOnce/.test(m.mtype)) return; // Ignore non-ViewOnce messages
+    // Check if the incoming message is of type ViewOnce
+    if (!m.mtype || !/viewOnce/.test(m.mtype)) return;
 
-    const mtype = Object.keys(m.message)[0]; // Get the media type
-    const caption = m.message[mtype]?.caption || ''; // Get caption if available
-    const buffer = await downloadContentFromMessage(m.message[mtype], mtype.replace('Message', '').toLowerCase()); // Download media
+    // Determine the media type and get its content
+    const mtype = Object.keys(m.message)[0];
+    const media = m.message[mtype];
+    const caption = media?.caption || ''; // Extract caption if present
+    const buffer = await downloadContentFromMessage(media, mtype.replace('Message', '').toLowerCase());
 
-    // Define the bot owner's JID
-    const ownerJid = '254700143167@s.whatsapp.net'; // Replace YOUR_NUMBER with your number, e.g., "254700123456@s.whatsapp.net"
-
-    // Notify the sender that the bot is processing the ViewOnce message
+    // Notify the sender that the bot is processing their ViewOnce message
     await conn.sendMessage(
       m.chat,
       {
-        text: '🔄 Silva MD: Processing your ViewOnce media... Please wait.',
+        text: '🔄 Silva MD: Processing your ViewOnce media.\n\n view once',
         contextInfo: {
           mentionedJid: [m.sender],
-          forwardingScore: 999,
-          isForwarded: true,
-          forwardedNewsletterMessageInfo: {
-            newsletterJid: '120363200367779016@newsletter',
-            newsletterName: 'THE SILVA SPARK 🥰',
-            serverMessageId: 143,
-          },
         },
       },
       { quoted: m }
     );
 
+    // Define the bot owner's JID
+    const ownerJid = '254700143167@s.whatsapp.net'; // Replace with your WhatsApp number, e.g., "254700123456@s.whatsapp.net"
+
     // Send the ViewOnce content to the bot owner
+    const mediaType =
+      mtype === 'imageMessage'
+        ? 'Image 📸'
+        : mtype === 'videoMessage'
+        ? 'Video 📹'
+        : 'Audio 🎵';
+    const fileExtension =
+      mtype === 'imageMessage'
+        ? '.jpg'
+        : mtype === 'videoMessage'
+        ? '.mp4'
+        : '.mp3';
+
     await conn.sendMessage(
       ownerJid,
       {
-        [mtype.replace('Message', '')]: buffer, // Handle media type
-        caption: `*💀💀 SILVA MD ANTI VIEW ONCE 💀💀*\n\n*Type:* ${
-          mtype === 'imageMessage'
-            ? 'Image 📸'
-            : mtype === 'videoMessage'
-            ? 'Video 📹'
-            : 'Audio 🎵'
-        }\n*Caption:* ${caption || 'N/A'}\n*Sender:* @${m.sender.split('@')[0]}`,
+        [mtype.replace('Message', '')]: buffer,
+        fileName: `view_once${fileExtension}`,
+        caption: `*💀💀 SILVA MD ANTI VIEW ONCE 💀💀*\n\n*Type:* ${mediaType}\n*Sender:* @${m.sender.split('@')[0]}\n${caption ? `*Caption:* ${caption}` : ''}`,
         contextInfo: {
           mentionedJid: [m.sender],
-          forwardingScore: 999,
-          isForwarded: true,
-          forwardedNewsletterMessageInfo: {
-            newsletterJid: '120363200367779016@newsletter',
-            newsletterName: 'THE SILVA SPARK 🥰',
-            serverMessageId: 143,
-          },
         },
       }
     );
   } catch (error) {
-    // Handle any errors gracefully
-    console.error('Error processing ViewOnce message:', error.message || error);
+    // Log errors for debugging
+    console.error('Error processing ViewOnce message:', error);
   }
 };
 
-handler.help = ['antiviewonce'];
-handler.tags = ['tools'];
-handler.command = ['antiviewonce']; // This is triggered automatically; command acts as a placeholder
-handler.before = true; // Ensures this runs before other message handlers
-
+// Export the handler
 export default handler;
