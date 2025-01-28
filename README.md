@@ -55,6 +55,7 @@
 ## 🎬 Watch the Tutorial
 
 To set up the Silva MD Bot quickly, follow our detailed tutorial on YouTube:
+
 [![Silva MD Bot YouTube Tutorial](https://img.shields.io/badge/YouTube-Watch%20Tutorial-red?style=for-the-badge&logo=youtube)](https://youtu.be/EXjuKlsASDQ?si=QWYvigE9yjUNGdRP)
 
 ---
