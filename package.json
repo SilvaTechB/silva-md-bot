@@ -1,6 +1,6 @@
 {
     "name": "SILVA MD",
-    "version": "2.1.0",
+    "version": "3.0.0",
     "description": "Advanced WhatsApp",
     "main": "silva.js",
     "type": "module",
