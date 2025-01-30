@@ -1,75 +1,90 @@
-// handler.js
+
 import pkg from '@whiskeysockets/baileys';
+import moment from 'moment-timezone';
 
 const { generateWAMessageFromContent } = pkg;
 
 let handler = async (m, { conn }) => {
     try {
-        // Date/time configuration
-        const now = new Date();
-        const options = { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric', 
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true,
-            timeZone: 'Africa/Nairobi'
-        };
-        
-        const formattedDate = now.toLocaleDateString('en-KE', options);
-        const [dayName, dateString, timeString] = formattedDate.split(/\s*,\s*/);
+        // Nairobi time formatting
+        const nairobiTime = moment().tz('Africa/Nairobi').format('h:mm A');
+        const nairobiDate = moment().tz('Africa/Nairobi').format('dddd, MMMM D, YYYY');
 
-        // Message content
-        const menuText = `
-『 *Silva MD Bot* 』
-© 2025 *Silvatech Inc*
-
-📅 *${dayName}, ${dateString}*
-⏰ *${timeString}*
-
-Need immediate assistance? Click below to contact support`;
-
-        // Create interactive message
+        // Create carousel with swipeable cards
         const message = {
-            text: menuText,
-            footer: "Silva Tech Support - 24/7 Service",
-            buttons: [
+            text: `『 *Silva MD Bot* 』\n© 2025 *Silvatech Inc*`,
+            footer: `📅 ${nairobiDate} | ⏰ ${nairobiTime}`,
+            title: "TECH SUPPORT CARDS",
+            buttonText: "VIEW CARDS",
+            sections: [
                 {
-                    type: 'url',
-                    title: '📞 Call Support Now',
-                    payload: 'https://wa.me/254700143167?text=Hello%20Silva%20Tech%20Support!'
+                    title: "CONTACT CARD",
+                    rows: [
+                        {
+                            title: "📞 Immediate Support",
+                            description: "24/7 Technical Assistance",
+                            rowId: ".call",
+                        },
+                        {
+                            title: "🛠️ System Status",
+                            description: "Check server operational status",
+                            rowId: ".status"
+                        }
+                    ]
+                },
+                {
+                    title: "SUPPORT OPTIONS",
+                    rows: [
+                        {
+                            title: "💬 Live Chat",
+                            description: "Chat with support agent",
+                            rowId: ".chat"
+                        },
+                        {
+                            title: "📩 Email Support",
+                            description: "support@silvatech.co.ke",
+                            rowId: ".email"
+                        }
+                    ]
                 }
             ],
-            headerType: 1
-        };
-
-        // Send message with working button
-        await conn.sendMessage(m.chat, {
-            text: message.text,
-            footer: message.footer,
             templateButtons: [
                 {
-                    index: 1,
                     urlButton: {
-                        displayText: '📞 Contact Support',
-                        url: 'https://wa.me/254700143167?text=Hello%20Silva%20Tech%20Support!'
+                        displayText: "📲 Call Now",
+                        url: "https://wa.me/254700143167?text=Hello%20Silva%20Tech%20Support!"
+                    }
+                },
+                {
+                    quickReplyButton: {
+                        displayText: "🏠 Main Menu",
+                        id: "!menu"
                     }
                 }
             ]
+        };
+
+        // Send as interactive carousel
+        await conn.sendMessage(m.chat, {
+            text: message.text,
+            footer: message.footer,
+            templateButtons: message.templateButtons,
+            sections: message.sections,
+            title: message.title,
+            buttonText: message.buttonText,
+            viewOnce: true
         });
-        
+
     } catch (error) {
-        console.error("Error generating message:", error);
+        console.error("Error generating carousel:", error);
         await conn.sendMessage(m.chat, { 
-            text: "⚠️ Failed to load button. Please contact support directly: https://wa.me/254700143167"
+            text: `⚠️ Error loading interface. Direct contact: https://wa.me/254700143167\n${nairobiTime} | ${nairobiDate}`
         });
     }
 };
 
 handler.help = ["support", "help", "contact"];
 handler.tags = ["utility"];
-handler.command = ["call", "piga", "contact"];
+handler.command = ["call", "piga", "contact", "cards"];
 
 export default handler;
