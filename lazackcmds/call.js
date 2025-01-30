@@ -1,47 +1,70 @@
 // handler.js
-// URL button handler for Silva MD Bot
-
 import pkg from '@whiskeysockets/baileys';
-import moment from 'moment-timezone';
 
 const { generateWAMessageFromContent } = pkg;
 
 let handler = async (m, { conn }) => {
     try {
-        // Initialize date and time variables
-        const now = new Date(new Date().getTime() + 3600000);
-        const locale = 'en';
-        const fullDate = now.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
+        // Date/time configuration
+        const now = new Date();
+        const options = { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric', 
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+            timeZone: 'Africa/Nairobi'
+        };
+        
+        const formattedDate = now.toLocaleDateString('en-KE', options);
+        const [dayName, dateString, timeString] = formattedDate.split(/\s*,\s*/);
 
         // Message content
         const menuText = `
 『 *Silva MD Bot* 』
 © 2025 *Silvatech Inc*
 
-📆 *${fullDate}*
+📅 *${dayName}, ${dateString}*
+⏰ *${timeString}*
 
-Need help? Contact Silva Tech Support by clicking the button below.`;
+Need immediate assistance? Click below to contact support`;
 
-        // Define the message with a URL button
-        const buttonMessage = {
+        // Create interactive message
+        const message = {
             text: menuText,
-            footer: "Silva Tech Support",
+            footer: "Silva Tech Support - 24/7 Service",
+            buttons: [
+                {
+                    type: 'url',
+                    title: '📞 Call Support Now',
+                    payload: 'https://wa.me/254700143167?text=Hello%20Silva%20Tech%20Support!'
+                }
+            ],
+            headerType: 1
+        };
+
+        // Send message with working button
+        await conn.sendMessage(m.chat, {
+            text: message.text,
+            footer: message.footer,
             templateButtons: [
                 {
                     index: 1,
                     urlButton: {
-                        displayText: "📞 Contact Support",
-                        url: "https://wa.me/254700143167?text=Hello%20Silva%20Tech%20Support!",
-                    },
-                },
-            ],
-        };
-
-        // Send the message
-        await conn.sendMessage(m.chat, buttonMessage);
+                        displayText: '📞 Contact Support',
+                        url: 'https://wa.me/254700143167?text=Hello%20Silva%20Tech%20Support!'
+                    }
+                }
+            ]
+        });
+        
     } catch (error) {
-        console.error("Error generating URL button message:", error);
-        m.reply("An error occurred while generating the contact button.");
+        console.error("Error generating message:", error);
+        await conn.sendMessage(m.chat, { 
+            text: "⚠️ Failed to load button. Please contact support directly: https://wa.me/254700143167"
+        });
     }
 };
 
