@@ -11,120 +11,134 @@ let handler = async (m, { conn }) => {
   // Read commands from lazackcmds folder dynamically
   const lazackPath = './lazackcmds';
   const commands = fs.readdirSync(lazackPath).map(file => path.parse(file).name);
+  const commandList = commands.map((cmd, idx) => `> *${idx + 1}.* ${cmd}`).join('\n');
 
-  // Format commands into menu sections
-  const commandList = commands
-    .map((cmd, idx) => `> *${idx + 1}.* ${cmd}`)
-    .join('\n');
+  // System information
+  const sysInfo = {
+    totalRAM: (os.totalmem() / (1024 ** 3)).toFixed(2) + ' GB',
+    usedRAM: ((os.totalmem() - os.freemem()) / (1024 ** 3)).toFixed(2) + ' GB',
+    uptime: new Date(os.uptime() * 1000).toISOString().substr(11, 8),
+    currentTime: moment.tz('Africa/Nairobi').format('HH:mm:ss'),
+    currentDate: moment.tz('Africa/Nairobi').format('DD/MM/YYYY'),
+    currentDay: moment.tz('Africa/Nairobi').format('dddd'),
+    battery: 'N/A',
+    deviceState: 'N/A',
+    osInfo: `${os.type()} ${os.release()}`,
+    botVersion: '3.0.1',
+    developer: 'SilvaTechB'
+  };
 
-  // Get system stats
-  const totalRAM = (os.totalmem() / (1024 ** 3)).toFixed(2) + ' GB';
-  const usedRAM = ((os.totalmem() - os.freemem()) / (1024 ** 3)).toFixed(2) + ' GB';
-  const uptime = os.uptime();
-  const uptimeStr = new Date(uptime * 1000).toISOString().substr(11, 8); // HH:mm:ss format
+  // Theme configurations
+  const themes = [
+    {
+      name: 'Cyberpunk',
+      template: (data) => `
+┌───────────────
+│ ⚡️ *SILVA MD CYBER EDITION* ⚡️
+│ 👤 User: ${data.userName}
+├───────────────
+│ 💾 RAM: ${data.usedRAM}/${data.totalRAM}
+│ 🕹 Uptime: ${data.uptime}
+│ 📟 ${data.currentTime} | ${data.currentDate}
+│ 🔋 Power: ${data.battery} (${data.deviceState})
+├───────────────
+│ 🌐 ${data.osInfo}
+│ 📦 Version: ${data.botVersion}
+│ 👨💻 Dev: ${data.developer}
+└───────────────
+📁 *COMMAND LIST:*
+${data.commandList}
+      `.trim()
+    },
+    {
+      name: 'Neon',
+      template: (data) => `
+✦♯◆♯✦♯◆♯✦♯◆♯✦
+   *NEON SILVA MD*
+✦♯◆♯✦♯◆♯✦♯◆♯✦
+➤ User: ${data.userName}
+✦♯◆♯✦♯◆♯✦♯◆♯✦
+➤ System Stats:
+├ RAM: ${data.usedRAM}/${data.totalRAM}
+├ Active: ${data.uptime}
+├ Time: ${data.currentTime}
+├ Date: ${data.currentDate}
+└ Power: ${data.battery} (${data.deviceState})
+✦♯◆♯✦♯◆♯✦♯◆♯✦
+➤ Commands:
+${data.commandList}
+✦♯◆♯✦♯◆♯✦♯◆♯✦
+      `.trim()
+    },
+    {
+      name: 'Minimal',
+      template: (data) => `
+──────────────
+ SILVA MD BOT
+──────────────
+• User: ${data.userName}
+• RAM: ${data.usedRAM}/${data.totalRAM}
+• Uptime: ${data.uptime}
+• Time: ${data.currentTime}
+• OS: ${data.osInfo}
+──────────────
+Available Commands:
+${data.commandList}
+──────────────
+      `.trim()
+    }
+  ];
 
-  // Get current time, date, and day in Nairobi
-  const currentTime = moment.tz('Africa/Nairobi').format('HH:mm:ss');
-  const currentDate = moment.tz('Africa/Nairobi').format('DD/MM/YYYY');
-  const currentDay = moment.tz('Africa/Nairobi').format('dddd');
+  // Randomly select a theme
+  const selectedTheme = themes[Math.floor(Math.random() * themes.length)];
 
-  // Get device battery percentage and state
-  let batteryPercentage = 'N/A';
-  let deviceState = 'N/A';
-  if (os.platform() === 'linux') {
-    exec('upower -i /org/freedesktop/UPower/devices/battery_BAT0', (error, stdout) => {
-      if (!error) {
-        const batteryInfo = stdout.match(/percentage:\s+(\d+)%/);
-        const stateInfo = stdout.match(/state:\s+(\w+)/);
-        if (batteryInfo) batteryPercentage = batteryInfo[1] + '%';
-        if (stateInfo) deviceState = stateInfo[1];
-      }
-    });
-  }
+  // Generate menu content
+  const menuContent = selectedTheme.template({
+    userName: m.pushName || 'User',
+    commandList,
+    ...sysInfo
+  });
 
-  // Define bot details
-  const botVersion = '3.0.1';
-  const developer = 'SilvaTechB';
-  const osInfo = `${os.type()} ${os.release()}`;
-
-  // Define Menu Template
-  const menuTemplate = `
-    ◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
-   ╭───「 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 」───
-    *│ 👋 Hi, ${m.pushName || 'User'}!*
-    *│ Welcome to Silva MD Bot.*
-    ╭──────────────
-    *│ ⌛ Speed: super*
-    *│ 💻 RAM Usage: ${usedRAM} of ${totalRAM}*
-    *│ ⏱️ Uptime: ${uptimeStr}*
-    *│ 🕒 Current Time: ${currentTime}*
-    *│ 📅 Current Date: ${currentDate}*
-    *│ 📅 Current Day: ${currentDay}*
-    *│ 🔋 Battery: ${batteryPercentage} (${deviceState})*
-    *│ 🖥️ OS: ${osInfo}*
-    *│ 🔧 Version: ${botVersion}*
-    *│ 👨‍💻 Developer: ${developer}*
-    ╰──────────────
-    *│ Explore my commands below:*
-    *╰──────────────*
-◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
-🍑🍆 𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 💦☣
-◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
-*📜 Main Menu:*
-『 *COMMAND LIST* 』 
-> *They are not commands this are the features*
-┏━━━━━━━━━━━┈⊷
-${commandList}
-┗━━━━━━━━━━━┈⊷
-◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
-🚀 Powered by *SilvaTech Inc.*
-  `;
-
-  // Publicly accessible thumbnail URL
-  const thumbnailUrl = 'https://i.imgur.com/QThBEQ7.jpeg'; // Replace if necessary
-
-  // Send the menu message with visible thumbnail
+  // Send menu with theme
+  const thumbnailUrl = 'https://i.imgur.com/QThBEQ7.jpeg';
   await conn.sendMessage(
     m.chat,
     {
-      text: menuTemplate,
+      text: menuContent,
       contextInfo: {
         externalAdReply: {
-          title: '𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 Alive',
-          body: 'SILVA MD BOT DESIGNED AND CREATED BY SILVA AND CO EAST AFRICA TECH INC',
+          title: `SILVA MD - ${selectedTheme.name} Theme`,
+          body: 'Next-gen WhatsApp Bot Framework',
           thumbnailUrl: thumbnailUrl,
           sourceUrl: 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v',
-          mediaType: 1,
-          renderLargerThumbnail: true,
-        },
-      },
+          mediaType: 1
+        }
+      }
     },
     { quoted: m }
   );
 
-  // Play the audio file smoothly
+  // Send audio
   await conn.sendMessage(
     m.chat,
     {
       audio: { url: audioUrl },
       mimetype: 'audio/mp4',
-      ptt: true, // Set to true if you want it to appear as a voice note
+      ptt: true,
       contextInfo: {
         externalAdReply: {
-          title: '𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 Menu theme',
-          body: 'SILVA MD BOT World class 🥲 bot',
+          title: '🚀 SILVA MD Menu Theme',
+          body: 'Experience next-level bot interactions',
           thumbnailUrl: thumbnailUrl,
           sourceUrl: 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v',
-          mediaType: 1,
-          renderLargerThumbnail: true,
-        },
-      },
+          mediaType: 1
+        }
+      }
     },
     { quoted: m }
   );
 };
 
-// Command Metadata
 handler.help = ['menu'];
 handler.tags = ['main'];
 handler.command = ['menu'];
