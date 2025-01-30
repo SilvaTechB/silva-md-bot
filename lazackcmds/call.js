@@ -1,90 +1,96 @@
-
+// handler.js
 import pkg from '@whiskeysockets/baileys';
-import moment from 'moment-timezone';
 
 const { generateWAMessageFromContent } = pkg;
 
 let handler = async (m, { conn }) => {
     try {
         // Nairobi time formatting
-        const nairobiTime = moment().tz('Africa/Nairobi').format('h:mm A');
-        const nairobiDate = moment().tz('Africa/Nairobi').format('dddd, MMMM D, YYYY');
+        const timeOptions = {
+            hour: 'numeric',
+            minute: 'numeric',
+            hour12: true,
+            timeZone: 'Africa/Nairobi'
+        };
+        const dateOptions = { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric', 
+            timeZone: 'Africa/Nairobi'
+        };
+        
+        const nairobiTime = new Date().toLocaleTimeString('en-KE', timeOptions);
+        const nairobiDate = new Date().toLocaleDateString('en-KE', dateOptions);
 
-        // Create carousel with swipeable cards
+        // Main message structure
         const message = {
-            text: `『 *Silva MD Bot* 』\n© 2025 *Silvatech Inc*`,
-            footer: `📅 ${nairobiDate} | ⏰ ${nairobiTime}`,
-            title: "TECH SUPPORT CARDS",
-            buttonText: "VIEW CARDS",
+            text: `『 *Silva MD Bot* 』\n© 2025 *Silvatech Inc*\n\n⏰ *${nairobiTime}*\n📅 *${nairobiDate}*`,
+            footer: "Swipe left/right for options ▼",
+            title: "SILVA SUPPORT PANEL",
+            buttonText: "OPEN MENU",
             sections: [
                 {
-                    title: "CONTACT CARD",
+                    title: "CONTACT OPTIONS",
                     rows: [
                         {
-                            title: "📞 Immediate Support",
-                            description: "24/7 Technical Assistance",
-                            rowId: ".call",
+                            title: "📞 Voice Call",
+                            description: "Instant voice support",
+                            rowId: "#call"
                         },
                         {
-                            title: "🛠️ System Status",
-                            description: "Check server operational status",
-                            rowId: ".status"
+                            title: "💬 Live Chat",
+                            description: "Chat with an agent",
+                            rowId: "#chat"
                         }
                     ]
                 },
                 {
-                    title: "SUPPORT OPTIONS",
+                    title: "TECHNICAL SUPPORT",
                     rows: [
                         {
-                            title: "💬 Live Chat",
-                            description: "Chat with support agent",
-                            rowId: ".chat"
+                            title: "🛠️ System Status",
+                            description: "Check server health",
+                            rowId: "#status"
                         },
                         {
-                            title: "📩 Email Support",
-                            description: "support@silvatech.co.ke",
-                            rowId: ".email"
+                            title: "🔧 Troubleshooting",
+                            description: "Common fixes guide",
+                            rowId: "#help"
                         }
                     ]
                 }
             ],
-            templateButtons: [
+            buttons: [
                 {
-                    urlButton: {
-                        displayText: "📲 Call Now",
-                        url: "https://wa.me/254700143167?text=Hello%20Silva%20Tech%20Support!"
-                    }
-                },
-                {
-                    quickReplyButton: {
-                        displayText: "🏠 Main Menu",
-                        id: "!menu"
-                    }
+                    buttonId: '#contact',
+                    buttonText: { displayText: "📲 CALL NOW" },
+                    type: 1
                 }
             ]
         };
 
-        // Send as interactive carousel
+        // Send as interactive list message
         await conn.sendMessage(m.chat, {
             text: message.text,
             footer: message.footer,
-            templateButtons: message.templateButtons,
+            buttons: message.buttons,
             sections: message.sections,
             title: message.title,
             buttonText: message.buttonText,
-            viewOnce: true
+            mentions: [m.sender]
         });
 
     } catch (error) {
-        console.error("Error generating carousel:", error);
+        console.error("Error:", error);
         await conn.sendMessage(m.chat, { 
-            text: `⚠️ Error loading interface. Direct contact: https://wa.me/254700143167\n${nairobiTime} | ${nairobiDate}`
+            text: `⚠️ Failed to load menu. Direct contact:\nhttps://wa.me/254700143167\n\nCurrent Nairobi Time: ${nairobiTime}`
         });
     }
 };
 
-handler.help = ["support", "help", "contact"];
-handler.tags = ["utility"];
-handler.command = ["call", "piga", "contact", "cards"];
+handler.help = ["support"];
+handler.tags = ["main"];
+handler.command = ["menu", "support", "help"];
 
 export default handler;
