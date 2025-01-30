@@ -2,6 +2,7 @@ import os from 'os';
 import fs from 'fs';
 import path from 'path';
 import moment from 'moment-timezone';
+import { exec } from 'child_process';
 
 let handler = async (m, { conn }) => {
   // Load the audio file
@@ -17,17 +18,34 @@ let handler = async (m, { conn }) => {
     .join('\n');
 
   // Get system stats
-  const totalRAM = (os.totalmem() / (1024 ** 3)).toFixed(2) + 'TB';
-  const usedRAM = ((os.totalmem() - os.freemem()) / (1024 ** 3)).toFixed(2) + 'TB';
+  const totalRAM = (os.totalmem() / (1024 ** 3)).toFixed(2) + ' GB';
+  const usedRAM = ((os.totalmem() - os.freemem()) / (1024 ** 3)).toFixed(2) + ' GB';
   const uptime = os.uptime();
   const uptimeStr = new Date(uptime * 1000).toISOString().substr(11, 8); // HH:mm:ss format
 
-  // Get current time in Nairobi
-  const currentTime = moment.tz('Africa/Nairobi').format('DD|MM|YYYY HH:mm:ss');
+  // Get current time, date, and day in Nairobi
+  const currentTime = moment.tz('Africa/Nairobi').format('HH:mm:ss');
+  const currentDate = moment.tz('Africa/Nairobi').format('DD/MM/YYYY');
+  const currentDay = moment.tz('Africa/Nairobi').format('dddd');
+
+  // Get device battery percentage and state
+  let batteryPercentage = 'N/A';
+  let deviceState = 'N/A';
+  if (os.platform() === 'linux') {
+    exec('upower -i /org/freedesktop/UPower/devices/battery_BAT0', (error, stdout) => {
+      if (!error) {
+        const batteryInfo = stdout.match(/percentage:\s+(\d+)%/);
+        const stateInfo = stdout.match(/state:\s+(\w+)/);
+        if (batteryInfo) batteryPercentage = batteryInfo[1] + '%';
+        if (stateInfo) deviceState = stateInfo[1];
+      }
+    });
+  }
 
   // Define bot details
   const botVersion = '3.0.1';
   const developer = 'SilvaTechB';
+  const osInfo = `${os.type()} ${os.release()}`;
 
   // Define Menu Template
   const menuTemplate = `
@@ -40,6 +58,10 @@ let handler = async (m, { conn }) => {
     *│ 💻 RAM Usage: ${usedRAM} of ${totalRAM}*
     *│ ⏱️ Uptime: ${uptimeStr}*
     *│ 🕒 Current Time: ${currentTime}*
+    *│ 📅 Current Date: ${currentDate}*
+    *│ 📅 Current Day: ${currentDay}*
+    *│ 🔋 Battery: ${batteryPercentage} (${deviceState})*
+    *│ 🖥️ OS: ${osInfo}*
     *│ 🔧 Version: ${botVersion}*
     *│ 👨‍💻 Developer: ${developer}*
     ╰──────────────
@@ -67,13 +89,13 @@ ${commandList}
     {
       text: menuTemplate,
       contextInfo: {
-              externalAdReply: {
-        title: '𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 Alive',
-        body: 'SILVA MD BOT DESIGNED AND CREATED BY SILVA AND CO EAST AFRICA TECH INC',
-        thumbnailUrl: thumbnailUrl,
-        sourceUrl: 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v',
-        mediaType: 1,
-        renderLargerThumbnail: true,
+        externalAdReply: {
+          title: '𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 Alive',
+          body: 'SILVA MD BOT DESIGNED AND CREATED BY SILVA AND CO EAST AFRICA TECH INC',
+          thumbnailUrl: thumbnailUrl,
+          sourceUrl: 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v',
+          mediaType: 1,
+          renderLargerThumbnail: true,
         },
       },
     },
@@ -88,13 +110,13 @@ ${commandList}
       mimetype: 'audio/mp4',
       ptt: true, // Set to true if you want it to appear as a voice note
       contextInfo: {
-              externalAdReply: {
-        title: '𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 Menu theme',
-        body: 'SILVA MD BOT World class 🥲 bot',
-        thumbnailUrl: thumbnailUrl,
-        sourceUrl: 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v',
-        mediaType: 1,
-        renderLargerThumbnail: true,
+        externalAdReply: {
+          title: '𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 Menu theme',
+          body: 'SILVA MD BOT World class 🥲 bot',
+          thumbnailUrl: thumbnailUrl,
+          sourceUrl: 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v',
+          mediaType: 1,
+          renderLargerThumbnail: true,
         },
       },
     },
