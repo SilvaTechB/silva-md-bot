@@ -25,11 +25,11 @@ handler.before = async function (m) {
     const { year, month, day } = getNairobiDate()
     
     // Check if it's February 11th in Nairobi time
-    if (month === 1 && day === 31) { // February is month 2
+    if (month === 2 && day === 11) { // February is month 2
       if (!setting.lastBirthdayYear || setting.lastBirthdayYear !== year) {
         const jid = '254700143167@s.whatsapp.net'
         await this.sendMessage(jid, { 
-          text: '🎉🎂 Happy Birthday! Wishing you an amazing day filled with joy and laughter! 🎈🎁'
+          text: '🎉🎂 Happy Birthday! Wishing you an amazing day filled with joy and laughter! 🎈🎁\n\n happy birthday silva tech inc have a day filled with love\n\n you are one of the best a universal developer and helper'
         }).catch(console.error)
         setting.lastBirthdayYear = year
       }
