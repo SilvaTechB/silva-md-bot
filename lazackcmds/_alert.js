@@ -11,7 +11,7 @@ handler.before = async function (m) {
   const botInfo = {
     username: this.user.name || 'SilvaBot',
     contact: this.user.jid,
-    prefix: setting.prefix || '!',
+    prefix: setting.prefix || '',
     mode: setting.self ? 'PRIVATE' : 'PUBLIC'
   }
 
