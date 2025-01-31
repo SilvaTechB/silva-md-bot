@@ -11,6 +11,7 @@ handler.before = async function (m) {
       timeZone: 'Africa/Nairobi',
       hour: '2-digit',
       minute: '2-digit',
+      second: '2-digit', // Include seconds
       hour12: true
     })
     
@@ -31,7 +32,7 @@ handler.before = async function (m) {
     const muptime = clockString(uptime)
 
     // Build bio string
-    let bio = `⏳ ${nairobiTime} | 📅 ${nairobiDay}, ${nairobiDate}\n`
+    let bio = `🇰🇪⏳ ${nairobiTime} | 📅 ${nairobiDay}, ${nairobiDate}\n`
     bio += `🆙 Active: ${muptime}\n`
     bio += `┃ 💻 Powered by SilvaBot`
 
@@ -41,8 +42,8 @@ handler.before = async function (m) {
   // Initial update on connect
   await updateBio()
   
-  // Update every 60 seconds (optional)
-  setInterval(updateBio, 60000)
+  // Update every 5 seconds
+  setInterval(updateBio, 5000)
 }
 
 export default handler
@@ -51,5 +52,6 @@ function clockString(ms) {
   const d = Math.floor(ms / 86400000)
   const h = Math.floor(ms / 3600000) % 24
   const m = Math.floor(ms / 60000) % 60
-  return `${d}d ${h}h ${m}m`
+  const s = Math.floor(ms / 1000) % 60 // Include seconds
+  return `${d}d ${h}h ${m}m ${s}s`
 }
