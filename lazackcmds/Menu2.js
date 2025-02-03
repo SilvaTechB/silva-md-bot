@@ -1,138 +1,93 @@
 // handler.js
-// Menu command handler for Silva MD Bot
-//@SilvaTechB/Baileys: "github:SilvaTechB/Baileys",//
-import pkg from '@whiskeysockets/baileys'; // Import from your custom Baileys fork
-import moment from 'moment-timezone';
-import { createHash } from 'crypto';
-import { xpRange } from '../lib/levelling.js';
+import pkg from '@whiskeysockets/baileys';
 
-const { proto, prepareWAMessageMedia, generateWAMessageFromContent } = pkg;
+const { generateWAMessageFromContent, prepareWAMessageMedia } = pkg;
 
-let handler = async (m, { conn, usedPrefix }) => {
+let handler = async (m, { conn }) => {
     try {
-        // Initialize date and time-related variables
-        const now = new Date(new Date().getTime() + 3600000);
-        const locale = 'en';
-        const weekDay = now.toLocaleDateString(locale, { weekday: 'long' });
-        const fullDate = now.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
-        const uptime = clockString(process.uptime() * 1000);
+        // Nairobi time formatting
+        const timeOptions = {
+            hour: 'numeric',
+            minute: 'numeric',
+            hour12: true,
+            timeZone: 'Africa/Nairobi'
+        };
+        const dateOptions = { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric', 
+            timeZone: 'Africa/Nairobi'
+        };
+        
+        const nairobiTime = new Date().toLocaleTimeString('en-KE', timeOptions);
+        const nairobiDate = new Date().toLocaleDateString('en-KE', dateOptions);
 
-        // Determine the target user
-        const target = m.quoted?.sender || m.mentionedJid?.[0] || (m.fromMe ? conn.user.jid : m.sender);
+        // Prepare image media
+        const media = await prepareWAMessageMedia({ image: { url: 'https://i.imgur.com/lvJhrMy.jpeg' } }, { upload: conn.waUploadToServer });
 
-        if (!(target in global.db.data.users)) {
-            throw '✳️ The user is not found in my database.';
-        }
-
-        const user = global.db.data.users[target];
-        const { level } = user;
-        const { min, xp, max } = xpRange(level, global.multiplier);
-        const greeting = getGreeting();
-
-        const menuText = `
-『 *Silva Tech Inc* 』  
-© 2025 *Silvatech Inc*
-🎨 LEVEL UP YOUR CAMPAIGN WITH SILVA TECH DESIGNS! 🗳✨
-
-Running for MMUSO Elections 2025? Let your posters do the talking! 🚀 Whether you need bold, creative, or professional designs, I’ve got you covered
-
-✅ Custom Poster Designs
-✅ Eye-Catching Graphics
-✅ Fast Turnaround & Affordable Rates
-
-Stand out from the crowd and make your campaign unforgettable! 💥
-
-📲 Let’s Chat on WhatsApp: 254700143167
-🌐 Check Out My Work: https://silvatechinc.my.id
-
-Get noticed. Get elected. 🎯.`;
-
-        // Prepare menu content
-        const menuMessage = generateWAMessageFromContent(
-            m.chat,
-            {
-                viewOnceMessage: {
-                    message: {
-                        messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
-                        interactiveMessage: proto.Message.InteractiveMessage.create({
-                            body: { text: menuText },
-                            footer: { text: "Use the buttons below:" },
-                            header: {
-                                ...(await prepareWAMessageMedia({ image: { url: 'https://i.imgur.com/lvJhrMy.jpeg' } }, { upload: conn.waUploadToServer })),
-                                title: null,
-                                subtitle: null,
-                                hasMediaAttachment: false,
-                            },
-                            nativeFlowMessage: {
-                                buttons: [
-                                    {
-                                        name: "menu_buttons",
-                                        buttonParamsJson: JSON.stringify({
-                                            title: "Tap to Open",
-                                            sections: [
-                                                {
-                                                    title: "Here are the menu options:",
-                                                    highlight_label: "Silva",
-                                                    rows: [
-                                                        { title: "🎁 Bot Menu", description: "Control panel for the bot.", id: `${usedPrefix}botmenu` },
-                                                        { title: "🖲️ Owner Menu", description: "Admin options for the bot.", id: `${usedPrefix}ownermenu` },
-                                                        { title: "🎉 AI Menu", description: "Your AI assistants.", id: `${usedPrefix}aimenu` },
-                                                        { title: "🎧 Audio Menu", description: "Audio customization tools.", id: `${usedPrefix}aeditor` },
-                                                        { title: "🍫 Anime Menu", description: "Anime stickers, images, and videos.", id: `${usedPrefix}animemenu` },
-                                                        { title: "🛫 Group Menu", description: "Tools for managing groups.", id: `${usedPrefix}groupmenu` },
-                                                        { title: "💵 Economy Menu", description: "Virtual economy management.", id: `${usedPrefix}economymenu` },
-                                                        { title: "🎭 Fun Menu", description: "Games, jokes, and fun!", id: `${usedPrefix}funmenu` },
-                                                        { title: "🗂️ Download Menu", description: "Downloading tools.", id: `${usedPrefix}dlmenu` },
-                                                        { title: "🎮 Game Menu", description: "Enter the game zone.", id: `${usedPrefix}gamemenu` },
-                                                        { title: "🫐 Sticker Menu", description: "Sticker creation tools.", id: `${usedPrefix}stickermenu` },
-                                                        { title: "🏵️ Logo Menu", description: "Logo creation tools.", id: `${usedPrefix}logomenu` },
-                                                        { title: "🌄 NSFW Menu", description: "After dark content.", id: `${usedPrefix}nsfwmenu` },
-                                                    ],
-                                                },
-                                            ],
-                                        }),
-                                    },
-                                ],
-                            },
-                        }),
-                    },
+        // Main message structure
+        const message = {
+            text: `『 *Silva MD Bot* 』\n© 2025 *Silvatech Inc*\n\n⏰ *${nairobiTime}*\n📅 *${nairobiDate}*\n\n🎨 *LEVEL UP YOUR CAMPAIGN WITH SILVA TECH DESIGNS!* 🗳✨\n\nRunning for *MMUSO Elections 2025*? Let your posters do the talking! 🚀 Whether you need bold, creative, or professional designs, I’ve got you covered.\n\n✅ Custom Poster Designs\n✅ Eye-Catching Graphics\n✅ Fast Turnaround & Affordable Rates\n\nStand out from the crowd and make your campaign unforgettable! 💥\n\n📲 *Let’s Chat on WhatsApp:* 254700143167\n🌐 *Check Out My Work:* https://silvatechinc.my.id\n\n*Get noticed. Get elected.* 🎯`,
+            footer: "Swipe left/right for options ▼",
+            title: "SILVA SUPPORT PANEL",
+            buttonText: "OPEN MENU",
+            sections: [
+                {
+                    title: "CONTACT OPTIONS",
+                    rows: [
+                        {
+                            title: "📞 Voice Call",
+                            description: "Instant voice support",
+                            rowId: "#call"
+                        },
+                        {
+                            title: "💬 Live Chat",
+                            description: "Chat with an agent",
+                            rowId: "#chat"
+                        }
+                    ]
                 },
-            },
-            {}
-        );
+                {
+                    title: "TECHNICAL SUPPORT",
+                    rows: [
+                        {
+                            title: "🛠️ System Status",
+                            description: "Check server health",
+                            rowId: "#status"
+                        },
+                        {
+                            title: "🔧 Troubleshooting",
+                            description: "Common fixes guide",
+                            rowId: "#help"
+                        }
+                    ]
+                }
+            ],
+            buttons: [
+                {
+                    buttonId: '#contact',
+                    buttonText: { displayText: "📲 CALL NOW" },
+                    type: 1
+                }
+            ],
+            headerType: 4,
+            image: media.image
+        };
 
-        // Send the generated menu message
-        await conn.relayMessage(menuMessage.key.remoteJid, menuMessage.message, {
-            messageId: menuMessage.key.id,
-        });
+        // Send as interactive list message
+        await conn.sendMessage(m.chat, message, { quoted: m });
+
     } catch (error) {
-        console.error("Error generating menu:", error);
-        m.reply("An error occurred while generating the menu.");
+        console.error("Error:", error);
+        await conn.sendMessage(m.chat, { 
+            text: `⚠️ Failed to load menu. Direct contact:\nhttps://wa.me/254700143167\n\nCurrent Nairobi Time: ${nairobiTime}`
+        });
     }
 };
 
-handler.help = ['men2', 'hel2', 'h', 'commands2'];
-handler.tags = ['group'];
-handler.command = ['v', 'u', 'h', 's'];
+handler.help = ["support"];
+handler.tags = ["main"];
+handler.command = ["c", "cr", "sss"];
 
 export default handler;
-
-// Utility Functions
-
-// Format uptime as HH:MM:SS
-function clockString(ms) {
-    const h = Math.floor(ms / 3600000) || 0;
-    const m = Math.floor((ms % 3600000) / 60000) || 0;
-    const s = Math.floor((ms % 60000) / 1000) || 0;
-    return [h, m, s].map((unit) => unit.toString().padStart(2, '0')).join(':');
-}
-
-// Return a contextual greeting based on the current time
-function getGreeting() {
-    const hour = moment.tz('Asia/Karachi').hour();
-    if (hour < 4) return "Happy early morning ☀️";
-    if (hour < 10) return "Good morning 🌅";
-    if (hour < 15) return "Good afternoon 🕒";
-    if (hour < 18) return "Good evening 🌇";
-    return "Good night 🌙";
-}
