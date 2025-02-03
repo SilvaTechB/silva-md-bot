@@ -1,7 +1,7 @@
 // handler.js
 // Menu command handler for Silva MD Bot
 //@SilvaTechB/Baileys: "github:SilvaTechB/Baileys",//
-import pkg from '@SilvaTechB/Baileys'; // Import from your custom Baileys fork
+import pkg from '@whiskeysockets/baileys'; // Import from your custom Baileys fork
 import moment from 'moment-timezone';
 import { createHash } from 'crypto';
 import { xpRange } from '../lib/levelling.js';
