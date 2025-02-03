@@ -23,10 +23,9 @@ let handler = async (m, { conn }) => {
         const nairobiTime = new Date().toLocaleTimeString('en-KE', timeOptions);
         const nairobiDate = new Date().toLocaleDateString('en-KE', dateOptions);
 
-        // Prepare image media
-        const media = await conn.sendMessage(m.chat, { 
-            image: { url: 'https://i.imgur.com/lvJhrMy.jpeg' }, 
-            caption: `『 *Silva Tech Design* 』\n© *Silvatech Inc*\n\n⏰ *${nairobiTime}*\n📅 *${nairobiDate}*\n\n🎨 *LEVEL UP YOUR CAMPAIGN WITH SILVA TECH DESIGNS!* 🗳✨\n\nRunning for *MMUSO Elections*? Let your posters do the talking! 🚀 Whether you need bold, creative, or professional designs, I’ve got you covered.\n\n✅ Custom Poster Designs\n✅ Eye-Catching Graphics\n✅ Fast Turnaround & Affordable Rates\n\nStand out from the crowd and make your campaign unforgettable! 💥\n\n📲 *Let’s Chat on WhatsApp:* 254700143167\n🌐 *Check Out My Work:* https://silvatechinc.my.id\n\n*Get noticed. Get elected.* 🎯`,
+        // Send image as a preview (non-downloadable) with caption and button
+        await conn.sendMessage(m.chat, { 
+            text: `『 *Silva Tech Inc* 』\n© *Silvatech Inc Design*\n\n⏰ *${nairobiTime}*\n📅 *${nairobiDate}*\n\n🎨 *LEVEL UP YOUR CAMPAIGN WITH SILVA TECH DESIGNS!* 🗳✨\n\nRunning for *MMUSO Elections*? Let your posters do the talking! 🚀 Whether you need bold, creative, or professional designs, I’ve got you covered.\n\n✅ Custom Poster Designs\n✅ Eye-Catching Graphics\n✅ Fast Turnaround & Affordable Rates\n\nStand out from the crowd and make your campaign unforgettable! 💥\n\n📲 *Let’s Chat on WhatsApp:* 254700143167\n🌐 *Check Out My Work:* https://silvatechinc.my.id\n\n*Get noticed. Get elected.* 🎯`,
             footer: "Swipe left/right for options ▼",
             buttons: [
                 {
@@ -35,44 +34,17 @@ let handler = async (m, { conn }) => {
                     type: 1
                 }
             ],
-            headerType: 4  // Ensuring image is treated as a header
-        }, { quoted: m });
-
-        // Send the interactive list message after the image
-        await conn.sendMessage(m.chat, {
-            text: "Select an option below:",
-            sections: [
-                {
-                    title: "CONTACT OPTIONS",
-                    rows: [
-                        {
-                            title: "📞 Voice Call",
-                            description: "Instant voice support",
-                            rowId: "#call"
-                        },
-                        {
-                            title: "💬 Live Chat",
-                            description: "Chat with an agent",
-                            rowId: "#chat"
-                        }
-                    ]
-                },
-                {
-                    title: "TECHNICAL SUPPORT",
-                    rows: [
-                        {
-                            title: "🛠️ System Status",
-                            description: "Check server health",
-                            rowId: "#status"
-                        },
-                        {
-                            title: "🔧 Troubleshooting",
-                            description: "Common fixes guide",
-                            rowId: "#help"
-                        }
-                    ]
+            headerType: 4,
+            contextInfo: {
+                externalAdReply: {
+                    title: "Silva Tech Designs",
+                    body: "Stand out with custom campaign designs!",
+                    thumbnailUrl: 'https://i.imgur.com/lvJhrMy.jpeg',
+                    mediaType: 1,
+                    renderLargerThumbnail: true,
+                    sourceUrl: 'https://wa.me/254700143167'
                 }
-            ]
+            }
         }, { quoted: m });
 
     } catch (error) {
