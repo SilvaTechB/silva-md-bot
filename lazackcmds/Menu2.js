@@ -1,6 +1,6 @@
 // handler.js
 // Menu command handler for Silva MD Bot
-//"@SilvaTechB/Baileys": "github:SilvaTechB/Baileys",//
+//@SilvaTechB/Baileys: "github:SilvaTechB/Baileys",//
 import pkg from '@SilvaTechB/Baileys'; // Import from your custom Baileys fork
 import moment from 'moment-timezone';
 import { createHash } from 'crypto';
@@ -30,10 +30,22 @@ let handler = async (m, { conn, usedPrefix }) => {
         const greeting = getGreeting();
 
         const menuText = `
-『 *Silva MD Bot* 』  
+『 *Silva Tech Inc* 』  
 © 2025 *Silvatech Inc*
+🎨 LEVEL UP YOUR CAMPAIGN WITH SILVA TECH DESIGNS! 🗳✨
 
-Welcome to the Silva MD Bot. Use the menu below to interact with the bot effectively.`;
+Running for MMUSO Elections 2025? Let your posters do the talking! 🚀 Whether you need bold, creative, or professional designs, I’ve got you covered
+
+✅ Custom Poster Designs
+✅ Eye-Catching Graphics
+✅ Fast Turnaround & Affordable Rates
+
+Stand out from the crowd and make your campaign unforgettable! 💥
+
+📲 Let’s Chat on WhatsApp: 254700143167
+🌐 Check Out My Work: https://silvatechinc.my.id
+
+Get noticed. Get elected. 🎯.`;
 
         // Prepare menu content
         const menuMessage = generateWAMessageFromContent(
@@ -46,7 +58,7 @@ Welcome to the Silva MD Bot. Use the menu below to interact with the bot effecti
                             body: { text: menuText },
                             footer: { text: "Use the buttons below:" },
                             header: {
-                                ...(await prepareWAMessageMedia({ image: { url: './media/shizo.jpg' } }, { upload: conn.waUploadToServer })),
+                                ...(await prepareWAMessageMedia({ image: { url: 'https://i.imgur.com/lvJhrMy.jpeg' } }, { upload: conn.waUploadToServer })),
                                 title: null,
                                 subtitle: null,
                                 hasMediaAttachment: false,
@@ -101,7 +113,7 @@ Welcome to the Silva MD Bot. Use the menu below to interact with the bot effecti
 
 handler.help = ['men2', 'hel2', 'h', 'commands2'];
 handler.tags = ['group'];
-handler.command = ['men2', 'hel2', 'h', 'command2'];
+handler.command = ['v', 'u', 'h', 's'];
 
 export default handler;
 
@@ -120,7 +132,7 @@ function getGreeting() {
     const hour = moment.tz('Asia/Karachi').hour();
     if (hour < 4) return "Happy early morning ☀️";
     if (hour < 10) return "Good morning 🌅";
-    if (hour < 15) return "Good afternoon 🕑";
+    if (hour < 15) return "Good afternoon 🕒";
     if (hour < 18) return "Good evening 🌇";
     return "Good night 🌙";
 }
