@@ -24,14 +24,23 @@ let handler = async (m, { conn }) => {
         const nairobiDate = new Date().toLocaleDateString('en-KE', dateOptions);
 
         // Prepare image media
-        const media = await prepareWAMessageMedia({ image: { url: 'https://i.imgur.com/lvJhrMy.jpeg' } }, { upload: conn.waUploadToServer });
-
-        // Main message structure
-        const message = {
-            text: `『 *Silva MD Bot* 』\n© 2025 *Silvatech Inc*\n\n⏰ *${nairobiTime}*\n📅 *${nairobiDate}*\n\n🎨 *LEVEL UP YOUR CAMPAIGN WITH SILVA TECH DESIGNS!* 🗳✨\n\nRunning for *MMUSO Elections 2025*? Let your posters do the talking! 🚀 Whether you need bold, creative, or professional designs, I’ve got you covered.\n\n✅ Custom Poster Designs\n✅ Eye-Catching Graphics\n✅ Fast Turnaround & Affordable Rates\n\nStand out from the crowd and make your campaign unforgettable! 💥\n\n📲 *Let’s Chat on WhatsApp:* 254700143167\n🌐 *Check Out My Work:* https://silvatechinc.my.id\n\n*Get noticed. Get elected.* 🎯`,
+        const media = await conn.sendMessage(m.chat, { 
+            image: { url: 'https://i.imgur.com/lvJhrMy.jpeg' }, 
+            caption: `『 *Silva MD Bot* 』\n© 2025 *Silvatech Inc*\n\n⏰ *${nairobiTime}*\n📅 *${nairobiDate}*\n\n🎨 *LEVEL UP YOUR CAMPAIGN WITH SILVA TECH DESIGNS!* 🗳✨\n\nRunning for *MMUSO Elections 2025*? Let your posters do the talking! 🚀 Whether you need bold, creative, or professional designs, I’ve got you covered.\n\n✅ Custom Poster Designs\n✅ Eye-Catching Graphics\n✅ Fast Turnaround & Affordable Rates\n\nStand out from the crowd and make your campaign unforgettable! 💥\n\n📲 *Let’s Chat on WhatsApp:* 254700143167\n🌐 *Check Out My Work:* https://silvatechinc.my.id\n\n*Get noticed. Get elected.* 🎯`,
             footer: "Swipe left/right for options ▼",
-            title: "SILVA SUPPORT PANEL",
-            buttonText: "OPEN MENU",
+            buttons: [
+                {
+                    buttonId: '#contact',
+                    buttonText: { displayText: "📲 CALL NOW" },
+                    type: 1
+                }
+            ],
+            headerType: 4  // Ensuring image is treated as a header
+        }, { quoted: m });
+
+        // Send the interactive list message after the image
+        await conn.sendMessage(m.chat, {
+            text: "Select an option below:",
             sections: [
                 {
                     title: "CONTACT OPTIONS",
@@ -63,20 +72,8 @@ let handler = async (m, { conn }) => {
                         }
                     ]
                 }
-            ],
-            buttons: [
-                {
-                    buttonId: '#contact',
-                    buttonText: { displayText: "📲 CALL NOW" },
-                    type: 1
-                }
-            ],
-            headerType: 1,  // Set to 1 for image header
-            image: media.image  // Attach the image
-        };
-
-        // Send as interactive list message
-        await conn.sendMessage(m.chat, message, { quoted: m });
+            ]
+        }, { quoted: m });
 
     } catch (error) {
         console.error("Error:", error);
