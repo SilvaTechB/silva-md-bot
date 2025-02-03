@@ -1,47 +1,54 @@
 import fetch from 'node-fetch';
 
-const guru1 = (prompt) => `https://api.gurusensei.workers.dev/llama?prompt=${encodeURIComponent(prompt)}`;
-
-let elementHandler = async (m, { conn, text }) => {
-  if (!text) throw 'Please provide an element symbol or name.';
+const elementHandler = async (m, { conn, text }) => {
+  if (!text) {
+    await conn.reply(m.chat, 'Please provide an element symbol or name.', m);
+    return;
+  }
 
   try {
-    // Fetch element data from the API
-    let res = await fetch(`https://api.popcat.xyz/periodic-table?element=${text}`);
+    const response = await fetch(`https://api.popcat.xyz/periodic-table?element=${encodeURIComponent(text)}`);
 
-    if (!res.ok) {
-      // If the element is not found, ask the guru1 API for an explanation
-      let prompt = `Is "${text}" a chemical element or something related to chemistry? Explain in simple terms.`;
-      let guruResponse = await fetch(guru1(prompt));
-      let guruData = await guruResponse.json();
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
+    }
 
-      if (guruData.response) {
-        await conn.reply(m.chat, `Did you attend chemistry classes? What is "${text}"?\n\nHere's an explanation:\n${guruData.response}`, m);
-      } else {
-        await conn.reply(m.chat, `Did you attend chemistry classes? What is "${text}"?`, m);
-      }
+    const data = await response.json();
+
+    // Check if the API returned valid data
+    if (!data.name) {
+      await conn.reply(m.chat, `Did you attend chemistry classes? What is "${text}"? 😂`, m);
       return;
     }
 
-    // Parse the element data
-    let json = await res.json();
+    // Check for "chemical look-alike" elements (e.g., typos or similar names)
+    const userInput = text.toLowerCase();
+    const elementName = data.name.toLowerCase();
+    const elementSymbol = data.symbol.toLowerCase();
+
+    if (userInput !== elementName && userInput !== elementSymbol) {
+      await conn.reply(m.chat, `Did you mean *${data.name}* (${data.symbol})? 😉`, m);
+      return;
+    }
 
     // Format the element information
-    let elementInfo = `*Silva md Element Information:*\n
-     • *Name:* ${json.name}\n
-     • *Symbol:* ${json.symbol}\n
-     • *Atomic Number:* ${json.atomic_number}\n
-     • *Atomic Mass:* ${json.atomic_mass}\n
-     • *Period:* ${json.period}\n
-     • *Phase:* ${json.phase}\n
-     • *Discovered By:* ${json.discovered_by}\n
-     • *Summary:* ${json.summary}`;
+    const elementInfo = `
+*Silva Element Information:*
+• *Name:* ${data.name}
+• *Symbol:* ${data.symbol}
+• *Atomic Number:* ${data.atomic_number}
+• *Atomic Mass:* ${data.atomic_mass}
+• *Period:* ${data.period}
+• *Phase:* ${data.phase}
+• *Discovered By:* ${data.discovered_by}
+• *Summary:* ${data.summary}
+    `.trim();
 
     // Send the element image and information
-    await conn.sendFile(m.chat, json.image, 'element.jpg', elementInfo, m);
+    await conn.sendFile(m.chat, data.image, 'element.jpg', elementInfo, m);
   } catch (error) {
-    console.error(error);
-    await conn.reply(m.chat, `An error occurred: ${error.message}`, m);
+    console.error('Error fetching element data:', error);
+    await conn.reply(m.chat, 'An error occurred while fetching the element data. Please try again later.', m);
   }
 };
 
