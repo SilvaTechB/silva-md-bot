@@ -1,6 +1,6 @@
 let handler = m => m
 
-// Run immediately when bot connects
+// Run immediately when bot connect
 handler.before = async function (m) {
   let setting = global.db.data.settings[this.user.jid]
   
