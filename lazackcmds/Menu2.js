@@ -1,7 +1,7 @@
 // handler.js
 import pkg from '@whiskeysockets/baileys';
 
-const { generateWAMessageFromContent, prepareWAMessageMedia } = pkg;
+const { prepareWAMessageMedia } = pkg;
 
 let handler = async (m, { conn }) => {
     try {
@@ -71,8 +71,8 @@ let handler = async (m, { conn }) => {
                     type: 1
                 }
             ],
-            headerType: 4,
-            image: media.image
+            headerType: 1,  // Set to 1 for image header
+            image: media.image  // Attach the image
         };
 
         // Send as interactive list message
