@@ -47,6 +47,11 @@
       "required": false,
       "value": "true"
        },
+    "AUTO_TYPING": {
+      "description": "make it true or false. true to activate false to deactivate",
+      "required": false,
+      "value": "true"
+       },
     "AUTO_STATUS_LIKE": {
       "description": "make it true or false. true to activate false to deactivate",
       "required": true,
