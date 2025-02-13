@@ -384,7 +384,7 @@ async function connectionUpdate(update) {
 
   if (connection === 'open') {
     const { jid, name } = conn.user
-    const msg = `𝑺𝑰𝑳𝑽𝑨 𝑩𝑶𝑻 \nHai🤩 ${name}, Congrats you have successfully deployed SILVA-BOT\n  ✅ *Bot Connection Status:* \n     *Silva MD Bot* successfully connected to this device! \n\n  ⚙️ *Prefix:*  \n\n  👨‍💻 *Creator:* *Silva* \n  🏢 *Organization:* *Silva Tech Hazard Inc.* \n  🗓️ *Updated:* *2024* \n\n  🌟 *Join our WhatsApp Channel for updates:* \n  https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v \n\n  🔄 *Stay tuned for upcoming features!* \n\n𝑺𝑰𝑳𝑽𝑨 𝑩𝑶𝑻`
+    const msg = `💖𝑺𝑰𝑳𝑽𝑨 𝑴𝑫 𝑩𝑶𝑻💖 \n\nHello🤩 ${name}, Congrats you have successfully deployed *Silva MD Bot* \n\n ✅ *Bot Connection Status:* \n  *Silva MD Bot* is now connected to this device! \n\n ⚙️ *Prefix:* (Use the bot’s prefix for commands) \n\n 👨‍💻 *Creator:* *Silva* \n 🏢 *Organization:* *Silva Tech Inc.* \n 🗓️ *Updated:* *2025* \n\n 🌟 *Follow our WhatsApp Channel for updates:* \n https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v \n\n 🔄 *New features coming soon. Stay tuned!* \n\n𝑺𝑰𝑳𝑽𝑨 𝑴𝑫 𝑩𝑶𝑻\n\n based on Sylivanus Momanyi\nfounder of Silva Tech Inc`
 
     await conn.sendMessage(jid, { text: msg, mentions: [jid] }, { quoted: null })
 
