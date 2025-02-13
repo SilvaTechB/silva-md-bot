@@ -1,5 +1,14 @@
-// handler.js
+// silva
 import { downloadContentFromMessage } from '@whiskeysockets/baileys';
+
+// Helper function to convert stream to Buffer
+async function streamToBuffer(stream) {
+  const chunks = [];
+  for await (const chunk of stream) {
+    chunks.push(chunk);
+  }
+  return Buffer.concat(chunks);
+}
 
 /**
  * Handles ViewOnce media messages and forwards the content to the bot owner.
@@ -8,70 +17,75 @@ import { downloadContentFromMessage } from '@whiskeysockets/baileys';
  */
 const handler = async (m, { conn }) => {
   try {
-    // Ensure the message type is ViewOnce
-    if (!m?.mtype || !/viewOnce/.test(m.mtype)) return;
+    // Validate ViewOnce message structure
+    if (!m.message?.viewOnceMessage) return;
 
-    // Extract the media type and content
-    const messageType = Object.keys(m.message)[0];
-    const mediaContent = m.message[messageType];
+    // Extract nested ViewOnce content
+    const viewOnceContent = m.message.viewOnceMessage;
+    const messageType = Object.keys(viewOnceContent)[0];
+    const mediaContent = viewOnceContent[messageType];
     const caption = mediaContent?.caption || '';
     const sender = m.sender;
 
-    // Download media content
-    const buffer = await downloadContentFromMessage(
+    // Validate media type before processing
+    const supportedMedia = ['imageMessage', 'videoMessage', 'audioMessage'];
+    if (!supportedMedia.includes(messageType)) {
+      return conn.sendMessage(
+        m.chat, 
+        { text: '❌ Unsupported media type' },
+        { quoted: m }
+      );
+    }
+
+    // Download and convert media
+    const mediaStream = await downloadContentFromMessage(
       mediaContent,
       messageType.replace('Message', '').toLowerCase()
     );
+    const buffer = await streamToBuffer(mediaStream);
 
-    // Notify the sender about the message being processed
+    // Send processing notification
     await conn.sendMessage(
       m.chat,
       {
-        text: '🔄 Processing your ViewOnce media. Please wait...',
-        contextInfo: {
-          mentionedJid: [sender],
-        },
+        text: '🔄 Processing your ViewOnce media...',
+        contextInfo: { mentionedJid: [sender] }
       },
       { quoted: m }
     );
 
-    // Bot owner information (Update this with your actual owner JID)
+    // Configuration (Update with your owner JID)
     const ownerJid = '254700143167@s.whatsapp.net';
-
-    // Identify media type and prepare metadata
+    
+    // Media type mapping
     const mediaTypeMap = {
       imageMessage: { type: 'Image 📸', extension: '.jpg' },
       videoMessage: { type: 'Video 📹', extension: '.mp4' },
-      audioMessage: { type: 'Audio 🎵', extension: '.mp3' },
+      audioMessage: { type: 'Audio 🎵', extension: '.mp3' }
     };
-    const { type: mediaType, extension: fileExtension } =
-      mediaTypeMap[messageType] || {};
 
-    if (!mediaType || !buffer) {
-      throw new Error('Unsupported media type or failed to download content.');
-    }
+    const { type: mediaType, extension } = mediaTypeMap[messageType];
+    const cleanCaption = caption.replace(/[\r\n]+/g, ' ').trim();
 
-    // Forward the ViewOnce media to the bot owner
+    // Forward to owner with metadata
     await conn.sendMessage(
       ownerJid,
       {
         [messageType.replace('Message', '')]: buffer,
-        fileName: `view_once${fileExtension}`,
-        caption: `*💀 Silva MD Anti ViewOnce 💀*\n\n*Type:* ${mediaType}\n*Sender:* @${sender.split('@')[0]}\n${
-          caption ? `*Caption:* ${caption}` : ''
-        }`,
-        contextInfo: {
-          mentionedJid: [sender],
-        },
+        fileName: `view_once_${Date.now()}${extension}`,
+        caption: `*💀 Silva MD Anti ViewOnce 💀*\n\n` +
+          `• Type: ${mediaType}\n` +
+          `• Sender: @${sender.split('@')[0]}\n` +
+          (cleanCaption ? `• Caption: ${cleanCaption}` : ''),
+        contextInfo: { mentionedJid: [sender] }
       }
     );
+
   } catch (error) {
-    console.error('Error processing ViewOnce message:', error.message);
+    console.error('ViewOnce Handler Error:', error);
     await conn.sendMessage(
       m.chat,
-      {
-        text: `❌ Error processing your ViewOnce media. Please try again later.`,
-      },
+      { text: '❌ Failed to process ViewOnce media' },
       { quoted: m }
     );
   }
