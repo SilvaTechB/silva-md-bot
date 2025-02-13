@@ -26,7 +26,7 @@ let handler = async (m, { text, usedPrefix, command }) => {
       const pluginName = file.filename
 
       // Construct the path to save the plugin
-      const pluginPath = path.join('plugins', `${pluginName}`)
+      const pluginPath = path.join('lazackcmds', `${pluginName}`)
 
       // Write the Gist file content to the plugin file
       await fs.promises.writeFile(pluginPath, file.content)
