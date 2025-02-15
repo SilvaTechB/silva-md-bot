@@ -32,7 +32,7 @@ let handler = async (m, { conn, usedPrefix }) => {
             },
             interactiveMessage: proto.Message.InteractiveMessage.create({
               body: proto.Message.InteractiveMessage.Body.create({
-                text: "Fizzxy Dev"
+                text: "Silva Spark MD"
               }),
               footer: proto.Message.InteractiveMessage.Footer.create({
                 text: "Bot"
@@ -50,14 +50,14 @@ let handler = async (m, { conn, usedPrefix }) => {
                   },
                   {
                     "name": "cta_reply",
-                    "buttonParamsJson": "{\"display_text\":\"quick_reply\",\"id\":\"message\"}"
+                    "buttonParamsJson": "{\"display_text\":\"MENU 📜","id":"" + usedPrefix + "botmenu\",\"id\":\"message\"}"
                   },
                   {
-                    "name": "cta_url",
+                    "name": "cta_Script 💕","url":"https://github.com/SilvaTechB/silva-md-bot","merchant_url":"https://github.com/SilvaTechB/silva-md-bot",
                     "buttonParamsJson": "{\"display_text\":\"url\",\"url\":\"https://www.google.com\",\"merchant_url\":\"https://www.google.com\"}"
                   },
                   {
-                    "name": "cta_call",
+                    "name": "cta_OWNER 🌟","url":"https://wa.me/message/254700143167",
                     "buttonParamsJson": "{\"display_text\":\"call\",\"id\":\"message\"}"
                   },
                   {
