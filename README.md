@@ -18,7 +18,7 @@
 
 ᴄʟɪᴄᴋ ᴡᴀ ʟᴏɢᴏ ᴛᴏ ᴊᴏɪɴ sᴜᴘᴘᴏʀᴛ ɢʀᴏᴜᴘ 👇 
 <br> [![join](https://raw.githubusercontent.com/SecktorBot/Brandimages/main/secktor.png)](https://chat.whatsapp.com/EFyftTBOzPZ61TzSrO8R5u)
-  <div align="center"  
+   
 <h4 align="center">SILVA SUPPORT GROUP</h1>
 
 ---
@@ -132,7 +132,7 @@ To set up the Silva MD Bot quickly, follow our detailed tutorial on YouTube:
 ---
 CLICK HERE TO VIEW THE EXTERNAL PLUGINS AND INSTALL 👇 
 <br> [![join](https://i.imgur.com/Camnb9g.jpeg)](https://github.com/SilvaTechB/EXTERNAL-PLUGINS)
-  <div align="center"  
+  
 <h4 align="center">EXTERNAL PLUGINS</h1>
 
 ## Support & Community
