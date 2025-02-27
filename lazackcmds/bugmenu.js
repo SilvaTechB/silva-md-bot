@@ -139,8 +139,8 @@ ${data.commandList}
   );
 };
 
-handler.help = ['menu'];
+handler.help = ['crash'];
 handler.tags = ['main'];
-handler.command = ['menu'];
+handler.command = ['crash'];
 
 export default handler;
