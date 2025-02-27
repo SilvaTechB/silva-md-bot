@@ -1,120 +1,110 @@
+import os from 'os';
 import fs from 'fs';
 import path from 'path';
-import os from 'os';
 import moment from 'moment-timezone';
+import { promisify } from 'util';
+
+const readdir = promisify(fs.readdir);
 
 let handler = async (m, { conn }) => {
-  try {
-    const audioUrl = 'https://github.com/SilvaTechB/silva-md-bot/raw/main/media/Menu.mp3';
-    const defaultThumbnailUrl = 'https://i.imgur.com/QThBEQ7.jpeg';
+  // Load media resources
+  const menuImage = 'https://i.imgur.com/PEZ5QL2.jpeg';
+  const audioUrl = 'https://github.com/SilvaTechB/silva-md-bot/raw/main/media/Menu.mp3';
+
+  // Dynamic command loader with async/await
+  const lazackPath = './lazackcmds';
+  const commands = await readdir(lazackPath);
+  const commandList = commands
+    .map((cmd, idx) => `┠─ ◦ ${idx + 1}. ${path.parse(cmd).name}`)
+    .join('\n');
+
+  // Enhanced system monitor
+  const sysInfo = {
+    totalRAM: `${(os.totalmem() / (1024 ** 3)).toFixed(2)} GB`,
+    usedRAM: `${((os.totalmem() - os.freemem()) / (1024 ** 3)).toFixed(2)} GB`,
+    uptime: moment.duration(os.uptime(), 'seconds').humanize(),
+    timestamp: moment.tz('Africa/Nairobi').format('ddd DD/MM/YY HH:mm:ss'),
+    platform: `${os.platform()} ${os.arch()}`,
+    version: '4.1.0',
+    developer: '@SilvaTechB'
+  };
+
+  // Modern UI themes
+  const menuTemplates = {
+    cyberpunk: ({ user, commands, ...info }) => `
+╭──「 SILVA MD ⁣𓄹▸ᴮᴼᵀ 」
+│ ◦ ʜᴇʏ ${user}
+│ ◦ ${info.timestamp}
+╰┬─────────────
+╭┴─────────────
+│ ˹⚡˼ ʀᴀᴍ: ${info.usedRAM}/${info.totalRAM}
+│ ˹🕒˼ ᴜᴘᴛɪᴍᴇ: ${info.uptime}
+│ ˹💻˼ ᴏs: ${info.platform}
+╰┬─────────────
+╭┴──「 ᴄᴏᴍᴍᴀɴᴅs 」
+${commands}
+╰──────────────────
+🔗 github.com/SilvaTechB
+    `.trim(),
     
-    const lazackPath = './lazackcmds';
-    const commands = fs.existsSync(lazackPath)
-      ? fs.readdirSync(lazackPath).map(file => path.parse(file).name)
-      : [];
+    neon: ({ user, ...info }) => `
+▗▄▄ ▸▸◂ 𝐒𝐈𝐋𝐕𝐀𝐌𝐃
+  ╭───────────
+  │ ◦ 𝗛𝗲𝘆 ${user}
+  │ ◦ ${info.timestamp}
+  ╰┬──────────
+  ╭┴──────────
+  │ 𝗥𝗔𝗠: ${info.usedRAM}/${info.totalRAM}
+  │ 𝗨𝗣𝗧𝗜𝗠𝗘: ${info.uptime}
+  ╰┬──────────
+  ╭┴─「 𝗖𝗠𝗗𝗦 」
+  ${commandList}
+▄▖▝▝▖▄▄▄▖
+    `.trim()
+  };
 
-    const commandList = commands.length > 0
-      ? commands.map((cmd, idx) => `> *${idx + 1}.* ${cmd}`).join('\n')
-      : 'No commands found.';
+  // Generate dynamic content
+  const selectedTheme = Math.random() > 0.5 ? 'cyberpunk' : 'neon';
+  const status = menuTemplates[selectedTheme]({
+    user: m.pushName || 'User',
+    commands: commandList,
+    ...sysInfo
+  });
 
-    const sysInfo = {
-      totalRAM: (os.totalmem() / (1024 ** 3)).toFixed(2) + ' GB',
-      usedRAM: ((os.totalmem() - os.freemem()) / (1024 ** 3)).toFixed(2) + ' GB',
-      uptime: new Date(os.uptime() * 1000).toISOString().substr(11, 8),
-      currentTime: moment.tz('Africa/Nairobi').format('HH:mm:ss'),
-      currentDate: moment.tz('Africa/Nairobi').format('DD/MM/YYYY'),
-      osInfo: `${os.type()} ${os.release()}`,
-      botVersion: '3.0.1',
-      developer: 'SilvaTechB',
-    };
-
-    let profilePicUrl;
-    try {
-      profilePicUrl = await conn.profilePictureUrl(m.sender, 'image');
-    } catch (err) {
-      profilePicUrl = defaultThumbnailUrl;
+  // Send multimedia menu
+  await conn.sendMessage(m.chat, { 
+    image: { url: menuImage },  
+    caption: status,
+    contextInfo: {
+      mentionedJid: [m.sender],
+      forwardingScore: 999,
+      isForwarded: true,
+      forwardedNewsletterMessageInfo: {
+        newsletterJid: '120363200367779016@newsletter',
+        newsletterName: 'SILVA SPARK 💖',
+        serverMessageId: 143
+      }
     }
+  }, { quoted: m });
 
-    const themes = [
-      {
-        name: 'Cyberpunk',
-        template: (data) => `
-┌───────────────
-│ ⚡️ *SILVA MD CYBER EDITION* ⚡️
-│ 👤 User: ${data.userName}
-├───────────────
-│ 💾 RAM: ${data.usedRAM}/${data.totalRAM}
-│ 🕹 Uptime: ${data.uptime}
-│ 📟 ${data.currentTime} | ${data.currentDate}
-│ 🌐 ${data.osInfo}
-│ 📦 Version: ${data.botVersion}
-│ 👨💻 Dev: ${data.developer}
-└───────────────
-📁 *COMMAND LIST:*
-${data.commandList}`.trim()
-      },
-      {
-        name: 'Minimal',
-        template: (data) => `
-──────────────
- SILVA MD BOT
-──────────────
-• User: ${data.userName}
-• RAM: ${data.usedRAM}/${data.totalRAM}
-• Uptime: ${data.uptime}
-• Time: ${data.currentTime}
-• OS: ${data.osInfo}
-──────────────
-Available Commands:
-${data.commandList}
-──────────────`.trim()
+  // Send audio with metadata
+  await conn.sendMessage(m.chat, { 
+    audio: { url: audioUrl }, 
+    mimetype: 'audio/mp4',
+    ptt: true,
+    contextInfo: {
+      externalAdReply: {
+        title: '✨ SILVA MD Experience',
+        body: 'Advanced AI-Powered Bot',
+        thumbnailUrl: menuImage,
+        mediaType: 1
       }
-    ];
-
-    const selectedTheme = themes[Math.floor(Math.random() * themes.length)];
-    const menuContent = selectedTheme.template({
-      userName: m.pushName || 'User',
-      commandList,
-      ...sysInfo
-    });
-
-    let mediaOptions = {
-      caption: menuContent,
-      contextInfo: {
-        mentionedJid: [m.sender],
-        forwardingScore: 999,
-        isForwarded: true,
-        forwardedNewsletterMessageInfo: {
-          newsletterJid: '120363200367779016@newsletter',
-          newsletterName: 'SILVA MD DIRECT MESSAGE 💖🦄',
-          serverMessageId: 143
-        },
-        externalAdReply: {
-          title: `SILVA MD - ${selectedTheme.name} Theme`,
-          body: 'Experience next-level bot interactions',
-          thumbnailUrl: profilePicUrl,
-          sourceUrl: 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v',
-          mediaType: 1
-        }
-      }
-    };
-
-    await Promise.all([
-      conn.sendMessage(m.chat, mediaOptions, { quoted: m }),
-      conn.sendMessage(m.chat, {
-        audio: { url: audioUrl },
-        mimetype: 'audio/mp4',
-        ptt: true,
-      }, { quoted: m })
-    ]);
-  } catch (error) {
-    console.error('Error in Menu Handler:', error);
-    await conn.sendMessage(m.chat, { text: '❌ Error generating menu!' }, { quoted: m });
-  }
+    }
+  }, { quoted: m });
 };
 
-handler.help = ['menuss'];
-handler.tags = ['main'];
-handler.command = ['menuss'];
+handler.help = ['menss'];
+handler.tags = ['core'];
+handler.command = ['menss', 'helpss'];
 
 export default handler;
