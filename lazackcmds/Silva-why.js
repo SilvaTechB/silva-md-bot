@@ -35,18 +35,48 @@ let handler = async (m, { conn }) => {
       profilePicUrl = defaultThumbnailUrl;
     }
 
-    const menuContent = `
-┌───[ *SILVA MD BOT* ]───┐
-│ 👤 User: ${m.pushName || 'User'}
-│ 💾 RAM: ${sysInfo.usedRAM}/${sysInfo.totalRAM}
-│ 🕹 Uptime: ${sysInfo.uptime}
-│ ⏰ ${sysInfo.currentTime} | 📅 ${sysInfo.currentDate}
-│ 📟 OS: ${sysInfo.osInfo}
-│ 🤖 Version: ${sysInfo.botVersion}
-│ 👨💻 Dev: ${sysInfo.developer}
-├───[ COMMANDS ]───┤
-${commandList}
-└──────────────────┘`.trim();
+    const themes = [
+      {
+        name: 'Cyberpunk',
+        template: (data) => `
+┌───────────────
+│ ⚡️ *SILVA MD CYBER EDITION* ⚡️
+│ 👤 User: ${data.userName}
+├───────────────
+│ 💾 RAM: ${data.usedRAM}/${data.totalRAM}
+│ 🕹 Uptime: ${data.uptime}
+│ 📟 ${data.currentTime} | ${data.currentDate}
+│ 🌐 ${data.osInfo}
+│ 📦 Version: ${data.botVersion}
+│ 👨💻 Dev: ${data.developer}
+└───────────────
+📁 *COMMAND LIST:*
+${data.commandList}`.trim()
+      },
+      {
+        name: 'Minimal',
+        template: (data) => `
+──────────────
+ SILVA MD BOT
+──────────────
+• User: ${data.userName}
+• RAM: ${data.usedRAM}/${data.totalRAM}
+• Uptime: ${data.uptime}
+• Time: ${data.currentTime}
+• OS: ${data.osInfo}
+──────────────
+Available Commands:
+${data.commandList}
+──────────────`.trim()
+      }
+    ];
+
+    const selectedTheme = themes[Math.floor(Math.random() * themes.length)];
+    const menuContent = selectedTheme.template({
+      userName: m.pushName || 'User',
+      commandList,
+      ...sysInfo
+    });
 
     let mediaOptions = {
       caption: menuContent,
@@ -60,7 +90,7 @@ ${commandList}
           serverMessageId: 143
         },
         externalAdReply: {
-          title: `SILVA MD - Your Bot Assistant`,
+          title: `SILVA MD - ${selectedTheme.name} Theme`,
           body: 'Experience next-level bot interactions',
           thumbnailUrl: profilePicUrl,
           sourceUrl: 'https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v',
@@ -83,7 +113,7 @@ ${commandList}
   }
 };
 
-handler.help = ['menu'];
+handler.help = ['menuss'];
 handler.tags = ['main'];
 handler.command = ['menuss'];
 
