@@ -1,60 +1,66 @@
 const axios = require("axios");
 const { Sticker, StickerTypes } = require("wa-sticker-formatter");
 
-const sleep = (ms) => {
-  return new Promise((resolve) => { setTimeout(resolve, ms) });
-};
+const BOT_TOKEN = "7025486524:AAGNJ3lMa8610p7OAIycwLtNmF9vG8GfboM";
+const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
-module.exports = async (context) => {
-  const { client, m, author, text, botname } = context;
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+let handler = async (m, { conn, text }) => {
   if (!text) {
-    await client.sendMessage(m.chat, { text: "Provide a search term for the sticker!" }, { quoted: m });
-    return;
+    return conn.sendMessage(m.chat, { text: "❌ Please provide a sticker pack link!" }, { quoted: m });
   }
-
-  let lien = text;
-  let name = lien.split('/addstickers/')[1];
-  let api = `https://api.telegram.org/bot7025486524:AAGNJ3lMa8610p7OAIycwLtNmF9vG8GfboM/getStickerSet?name=${encodeURIComponent(name)}`;
 
   try {
-    let stickers = await axios.get(api);
-    let type = stickers.data.result.is_animated || stickers.data.result.is_video ? 'animated sticker' : 'not animated sticker';
+    let name = text.split("/addstickers/")[1];
+    if (!name) throw new Error("Invalid sticker pack link!");
 
-    let msg = `*Silva Md tgsticker*\n\n*Name:* ${stickers.data.result.name}\n*Type:* ${type}\n*Length:* ${stickers.data.result.stickers.length}\n\nsilva Downloading...`;
+    let apiUrl = `${TELEGRAM_API}/getStickerSet?name=${encodeURIComponent(name)}`;
+    let { data } = await axios.get(apiUrl);
 
-    await client.sendMessage(m.chat, { text: msg }, { quoted: m });
-
-    for (let i = 0; i < stickers.data.result.stickers.length; i++) {
-      let file = await axios.get(`https://api.telegram.org/bot7025486524:AAGNJ3lMa8610p7OAIycwLtNmF9vG8GfboM/getFile?file_id=${stickers.data.result.stickers[i].file_id}`);
-      let buffer = await axios({
-        method: 'get',
-        url: `https://api.telegram.org/file/bot7025486524:AAGNJ3lMa8610p7OAIycwLtNmF9vG8GfboM/${file.data.result.file_path}`,
-        responseType: 'arraybuffer',
-      });
-
-      const sticker = new Sticker(buffer.data, {
-        pack: botname,
-        author: author,
-        type: StickerTypes.FULL,
-        categories: ['🤩', '🎉'],
-        id: '12345',
-        quality: 50,
-        background: '#000000'
-      });
-
-      const stickerBuffer = await sticker.toBuffer(); // Convert the sticker to a buffer
-
-      await client.sendMessage(
-        m.chat,
-        {
-          sticker: stickerBuffer, // Use the buffer directly in the message object
-        },
-        { quoted: m }
-      );
+    if (!data.result || !data.result.stickers.length) {
+      throw new Error("Sticker pack not found or empty!");
     }
 
+    let isAnimated = data.result.is_animated || data.result.is_video;
+    let packInfo = `*🎨 Sticker Pack Found!*\n\n📛 *Name:* ${data.result.name}\n🎭 *Type:* ${isAnimated ? "Animated" : "Static"}\n📦 *Stickers:* ${data.result.stickers.length}\n\n⏳ *Downloading...*`;
+
+    await conn.sendMessage(m.chat, { text: packInfo }, { quoted: m });
+
+    for (const sticker of data.result.stickers) {
+      try {
+        let fileRes = await axios.get(`${TELEGRAM_API}/getFile?file_id=${sticker.file_id}`);
+        let filePath = fileRes.data.result.file_path;
+
+        let stickerBuffer = await axios({
+          method: "get",
+          url: `https://api.telegram.org/file/bot${BOT_TOKEN}/${filePath}`,
+          responseType: "arraybuffer",
+        });
+
+        let stickerObj = new Sticker(stickerBuffer.data, {
+          pack: "Silva MD",
+          author: "Silva",
+          type: StickerTypes.FULL,
+          categories: ["🤩", "🎉"],
+          id: Date.now().toString(),
+          quality: 70,
+          background: "#000000",
+        });
+
+        await conn.sendMessage(m.chat, { sticker: await stickerObj.toBuffer() }, { quoted: m });
+        await sleep(1000);
+      } catch (stickerError) {
+        console.error("Sticker processing error:", stickerError.message);
+      }
+    }
   } catch (error) {
-    await client.sendMessage(m.chat, { text: `We got an error: ${error.message}` }, { quoted: m });
+    await conn.sendMessage(m.chat, { text: `❌ Error: ${error.message}` }, { quoted: m });
   }
 };
+
+handler.help = ["tgs"];
+handler.tags = ["sticker"];
+handler.command = ["tgs"];
+
+module.exports = handler;
