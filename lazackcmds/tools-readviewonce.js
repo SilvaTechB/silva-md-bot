@@ -1,26 +1,68 @@
-var handler = async (m, { conn }) => {
+import pkg from '@whiskeysockets/baileys';
+const { downloadMediaMessage } = pkg;
+import config from '../config.js';
+
+let handler = async (m, { Matrix }) => {
+  const botNumber = Matrix.user.id.split(':')[0] + '@s.whatsapp.net';
+  const ownerNumber = config.OWNERS + '@s.whatsapp.net';
+  const prefix = config.PREFIX;
+
+  const secretKeywords = ['🔥', 'wow', 'nice'];
+  const isOwner = m.sender === ownerNumber;
+  const isBot = m.sender === botNumber;
+
+  const cmd = m.body.startsWith(prefix)
+    ? m.body.slice(prefix.length).split(' ')[0].toLowerCase()
+    : secretKeywords.includes(m.body.toLowerCase())
+      ? 'vv2'
+      : '';
+
+  if (!['vv', 'vv2', 'vv3'].includes(cmd) || !m.quoted) return;
+  
+  let msg = m.quoted.message;
+  msg = msg.viewOnceMessageV2?.message || msg.viewOnceMessage?.message || msg;
+  if (!msg) return m.reply('This is not a View Once message!');
+
+  if (['vv2', 'vv3'].includes(cmd) && !isOwner && !isBot) {
+    return m.reply('Only the owner or bot can use this command!');
+  }
+  if (cmd === 'vv' && !isOwner && !isBot) {
+    return m.reply('Only the owner or bot can use this command to send media!');
+  }
+
   try {
-    if (!m.quoted || !/viewOnce/.test(m.quoted.mtype)) {
-      throw '✳️❇️ It\'s not a ViewOnce message';
+    const messageType = Object.keys(msg)[0];
+    const buffer = await downloadMediaMessage(m.quoted, 'buffer', {}, { type: messageType === 'audioMessage' ? 'audio' : undefined });
+    if (!buffer) return m.reply('Failed to retrieve media!');
+
+    const mimetype = msg.audioMessage?.mimetype || 'audio/ogg';
+    const caption = '*© Powered By Silva*';
+    const recipient = cmd === 'vv2' || secretKeywords.includes(m.body.toLowerCase())
+      ? botNumber
+      : cmd === 'vv3'
+        ? ownerNumber
+        : m.from;
+
+    const mediaOptions = {
+      imageMessage: { image: buffer, caption },
+      videoMessage: { video: buffer, caption, mimetype: 'video/mp4' },
+      audioMessage: { audio: buffer, mimetype, ptt: true }
+    };
+
+    if (mediaOptions[messageType]) {
+      await Matrix.sendMessage(recipient, mediaOptions[messageType]);
+    } else {
+      return m.reply('Unsupported media type!');
     }
-
-    let mtype = Object.keys(m.quoted.message || {})[0];
-    if (!mtype) throw '❌ Unable to determine message type';
-
-    let buffer = await m.quoted.download();
-    if (!buffer) throw '❌ Failed to download message';
-
-    let caption = m.quoted.message[mtype]?.caption || '';
-
-    await conn.sendMessage(m.chat, { [mtype.replace(/Message/, '')]: buffer, caption }, { quoted: m });
-  } catch (err) {
-    console.error(err);
-    await conn.sendMessage(m.chat, { text: err.toString() }, { quoted: m });
+  } catch (error) {
+    console.error(error);
+    await m.reply('Failed to process View Once message!');
   }
 };
 
-handler.help = ['readvo'];
-handler.tags = ['tools'];
-handler.command = ['readviewonce', 'read', 'vv', 'readvo'];
+handler.help = ['vv', 'vv2', 'vv3'];
+handler.tags = ['owner'];
+handler.command = ['vv', 'vv2', 'vv3'];
+handler.owner = true;
 
 export default handler;
