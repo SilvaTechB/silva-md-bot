@@ -2,6 +2,11 @@ import pkg from '@whiskeysockets/baileys';
 const { downloadMediaMessage } = pkg;
 
 let handler = async (m, { Matrix }) => {
+  if (!Matrix?.user?.id) {
+    console.error("Matrix object is undefined or missing user data.");
+    return m.reply("Bot error: Matrix is not initialized properly!");
+  }
+
   const botNumber = Matrix.user.id.split(':')[0] + '@s.whatsapp.net';
   const ownerNumber = '254743706010@s.whatsapp.net';
 
@@ -53,7 +58,7 @@ let handler = async (m, { Matrix }) => {
       return m.reply('Unsupported media type!');
     }
   } catch (error) {
-    console.error(error);
+    console.error("Error processing View Once message:", error);
     await m.reply('Failed to process View Once message!');
   }
 };
