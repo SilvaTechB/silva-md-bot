@@ -1,10 +1,12 @@
 import pkg from '@whiskeysockets/baileys';
 const { downloadMediaMessage } = pkg;
 
-const botNumber = '254743706010@s.whatsapp.net'; // Manually set bot number
+const botNumber = '254743706010@s.whatsapp.net'; // Bot's number
 const ownerNumber = '254743706010@s.whatsapp.net'; // Owner's number
 
 let handler = async (m) => {
+  if (!m.quoted) return m.reply('Reply to a View Once message with this command!');
+  
   const secretKeywords = ['🔥', 'wow', 'nice'];
   const isOwner = m.sender === ownerNumber;
   const isBot = m.sender === botNumber;
@@ -13,10 +15,13 @@ let handler = async (m) => {
     ? 'vv2'
     : m.body?.split(' ')[0]?.toLowerCase() || '';
 
-  if (!['vv', 'vv2', 'vv3'].includes(cmd) || !m.quoted?.message) return;
+  if (!['vv', 'vv2', 'vv3'].includes(cmd)) return;
 
+  // Extract View Once message properly
   let msg = m.quoted.message;
-  msg = msg.viewOnceMessageV2?.message || msg.viewOnceMessage?.message || msg;
+  if (msg?.viewOnceMessageV2) msg = msg.viewOnceMessageV2.message;
+  else if (msg?.viewOnceMessage) msg = msg.viewOnceMessage.message;
+
   if (!msg) return m.reply('This is not a View Once message!');
 
   if (['vv2', 'vv3'].includes(cmd) && !isOwner && !isBot) {
@@ -30,6 +35,7 @@ let handler = async (m) => {
     const messageType = Object.keys(msg)[0];
     if (!messageType) return m.reply('Unsupported or missing media type!');
 
+    // Use 'conn' if available globally; otherwise, keep 'downloadMediaMessage'
     const buffer = await downloadMediaMessage(m.quoted, 'buffer', {}, { type: messageType === 'audioMessage' ? 'audio' : undefined });
     if (!buffer) return m.reply('Failed to retrieve media!');
 
@@ -41,6 +47,7 @@ let handler = async (m) => {
         ? ownerNumber
         : m.from;
 
+    // Define media options dynamically
     const mediaOptions = {
       imageMessage: { image: buffer, caption },
       videoMessage: { video: buffer, caption, mimetype: 'video/mp4' },
@@ -48,7 +55,7 @@ let handler = async (m) => {
     };
 
     if (mediaOptions[messageType]) {
-      await conn.sendMessage(recipient, mediaOptions[messageType]);
+      await conn.sendMessage(recipient, mediaOptions[messageType]); // Ensure 'conn' is available
     } else {
       return m.reply('Unsupported media type!');
     }
@@ -61,6 +68,6 @@ let handler = async (m) => {
 handler.help = ['vv', 'vv2', 'vv3'];
 handler.tags = ['owner'];
 handler.command = ['vv', 'vv2', 'vv3'];
-handler.owner = true;
+handler.owner = false;
 
 export default handler;
