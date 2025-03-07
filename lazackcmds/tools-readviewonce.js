@@ -1,15 +1,10 @@
 import pkg from '@whiskeysockets/baileys';
 const { downloadMediaMessage } = pkg;
 
-let handler = async (m, { Matrix }) => {
-  if (!Matrix?.user?.id) {
-    console.error("Matrix object is undefined or missing user data.");
-    return m.reply("Bot error: Matrix is not initialized properly!");
-  }
+const botNumber = '254743706010@s.whatsapp.net'; // Manually set bot number
+const ownerNumber = '254743706010@s.whatsapp.net'; // Owner's number
 
-  const botNumber = Matrix.user.id.split(':')[0] + '@s.whatsapp.net';
-  const ownerNumber = '254743706010@s.whatsapp.net';
-
+let handler = async (m) => {
   const secretKeywords = ['🔥', 'wow', 'nice'];
   const isOwner = m.sender === ownerNumber;
   const isBot = m.sender === botNumber;
@@ -19,7 +14,7 @@ let handler = async (m, { Matrix }) => {
     : m.body?.split(' ')[0]?.toLowerCase() || '';
 
   if (!['vv', 'vv2', 'vv3'].includes(cmd) || !m.quoted?.message) return;
-  
+
   let msg = m.quoted.message;
   msg = msg.viewOnceMessageV2?.message || msg.viewOnceMessage?.message || msg;
   if (!msg) return m.reply('This is not a View Once message!');
@@ -53,7 +48,7 @@ let handler = async (m, { Matrix }) => {
     };
 
     if (mediaOptions[messageType]) {
-      await Matrix.sendMessage(recipient, mediaOptions[messageType]);
+      await conn.sendMessage(recipient, mediaOptions[messageType]);
     } else {
       return m.reply('Unsupported media type!');
     }
