@@ -10,37 +10,46 @@ let handler = async (m, { text, conn }) => {
   }
 
   try {
-    m.react(rwait);
-
+    m.react('⏳'); // React with waiting emoji
     conn.sendPresenceUpdate('composing', m.chat);
-    const prompt = encodeURIComponent(text);
 
+    const prompt = encodeURIComponent(text);
     const guru1 = `https://api.gurusensei.workers.dev/llama?prompt=${prompt}`;
 
-    try {
-      let response = await fetch(guru1);
-      let data = await response.json();
-      let result = data.response.response;
+    let response = await fetch(guru1);
+    let data = await response.json();
+    let result = data.response?.response;
 
-      if (!result) {
-        throw new Error('No valid JSON response from the first API');
-      }
+    if (!result) {
+      throw new Error('No valid response from the first API');
+    }
 
-      await conn.sendMessage(
-        m.chat,
-        {
-          text: `${result}\n\n*~ Silva MD Bot*`,
-          caption: '',
-          image: { url: 'https://files.catbox.moe/8324jm.jpg' },
+    // Send AI response with contextInfo
+    await conn.sendMessage(
+      m.chat,
+      {
+        text: `${result}\n\n*~ Silva MD Bot*`,
+        image: { url: 'https://files.catbox.moe/8324jm.jpg' },
+        contextInfo: {
+          mentionedJid: [m.sender],
+          forwardingScore: 999,
+          isForwarded: true,
+          forwardedNewsletterMessageInfo: {
+            newsletterJid: '120363200367779016@newsletter',
+            newsletterName: 'SILVA AI RESULTS🥰🥰',
+            serverMessageId: 143,
+          },
         },
-        { quoted: m }
-      );
-      m.react(done);
-    } catch (error) {
-      console.error('Error from the first API:', error);
+      },
+      { quoted: m }
+    );
+    m.react('✅'); // React with success emoji
+  } catch (error) {
+    console.error('Error from first API:', error);
 
-      const guru2 = `https://ultimetron.guruapi.tech/gpt3?prompt=${prompt}`;
-
+    // 🔄 Fallback to second API
+    try {
+      const guru2 = `https://ultimetron.guruapi.tech/gpt3?prompt=${encodeURIComponent(text)}`;
       let response = await fetch(guru2);
       let data = await response.json();
       let result = data.completion;
@@ -49,16 +58,26 @@ let handler = async (m, { text, conn }) => {
         m.chat,
         {
           text: `${result}\n\n*~ Silva MD Bot*`,
-          caption: '',
           image: { url: 'https://files.catbox.moe/8324jm.jpg' },
+          contextInfo: {
+            mentionedJid: [m.sender],
+            forwardingScore: 999,
+            isForwarded: true,
+            forwardedNewsletterMessageInfo: {
+              newsletterJid: '120363200367779016@newsletter',
+              newsletterName: 'SILVA AI RESULTS🥰🥰',
+              serverMessageId: 143,
+            },
+          },
         },
         { quoted: m }
       );
-      m.react(done);
+      m.react('🥳');
+    } catch (error) {
+      console.error('Error from second API:', error);
+      m.react('😭');
+      throw `❌ *AI Response Failed!*`;
     }
-  } catch (error) {
-    console.error('Error:', error);
-    throw `*ERROR*`;
   }
 };
 
