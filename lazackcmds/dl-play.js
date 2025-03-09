@@ -4,6 +4,8 @@ import ytSearch from "yt-search";
 let handler = async (m, { conn, text, botname }) => {
   if (!text) return m.reply("❌ What song do you want to download?");
 
+  await m.reply("🔄 *Silva md bot Fetching your audio... Please wait...*");
+
   try {
     let search = await ytSearch(text);
     let video = search.videos[0];
@@ -34,16 +36,18 @@ let handler = async (m, { conn, text, botname }) => {
             m.chat,
             {
               image: { url: songData.thumbnail },
-              caption: `
+              caption: `SYLIVANUS THE SILVA MD BOT
 ╭═════════════════⊷
 ║ 🎶 *Title:* ${songData.title}
 ║ 🎤 *Artist:* ${songData.artist}
-║ 🔗 *Url:* ${songData.videoUrl}
+║ 🔗 THANK YOU SORRY NO URL TO BE SHARED
 ╰═════════════════⊷
-*Powered by ${botname}*`
+*Powered by SILVA MD BOT*`
             },
             { quoted: m }
           );
+
+          await m.reply("📤 *Sending your audio...*");
 
           // Send as an audio file
           await conn.sendMessage(
@@ -55,6 +59,8 @@ let handler = async (m, { conn, text, botname }) => {
             { quoted: m }
           );
 
+          await m.reply("📤 *Sending your MP3 file...*");
+
           // Send as a document file
           await conn.sendMessage(
             m.chat,
@@ -65,6 +71,9 @@ let handler = async (m, { conn, text, botname }) => {
             },
             { quoted: m }
           );
+
+          // Send success message
+          await m.reply("✅ *Silva MD – World-class bot just successfully sent you what you requested! 🎶*");
 
           return; // Stop execution if successful
         }
