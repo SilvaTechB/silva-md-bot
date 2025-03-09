@@ -1,20 +1,25 @@
 let isAway = false;
-let lastSeen = new Date();
+let lastSeen = null;
 
-let handler = async (m, { conn, text, command }) => {
+let handler = async (m, { conn, command }) => {
   if (command === "away") {
+    if (isAway) return m.reply("🚀 *Away Mode is already enabled!*");
+
     isAway = true;
-    lastSeen = new Date();
-    return m.reply("✅ *Away Mode Activated!*\n\nI will auto-reply to messages until you type *active*.");
+    lastSeen = Date.now();
+    return m.reply("✅ *Away Mode Activated!*\n\nI will auto-reply until you type *active*.");
   }
 
   if (command === "active") {
+    if (!isAway) return m.reply("✅ *You are already active!*");
+
     isAway = false;
     return m.reply("✅ *Away Mode Deactivated!*\n\nI am back online.");
   }
 
+  // If Away Mode is ON, notify the sender
   if (isAway) {
-    let now = new Date();
+    let now = Date.now();
     let diff = now - lastSeen;
 
     let seconds = Math.floor(diff / 1000) % 60;
@@ -24,17 +29,17 @@ let handler = async (m, { conn, text, command }) => {
 
     let lastSeenText = `*${days}d ${hours}h ${minutes}m ${seconds}s*`;
 
-    return await conn.sendMessage(
+    await conn.sendMessage(
       m.chat,
       {
-        text: `🤖 *BIP BOP! THIS IS SILVA MD BOT*\n\n🚀 *MY OWNER IS AWAY!*\n📅 *Last Seen:* ${lastSeenText}`,
+        text: `🤖 *BIP BOP! THIS IS SILVA MD BOT*\n\n🚀 *MY OWNER IS AWAY!*\n📅 *Last Seen:* ${lastSeenText}\n\nI will respond when my owner is back.`,
         contextInfo: {
           mentionedJid: [m.sender],
           forwardingScore: 999,
           isForwarded: true,
           forwardedNewsletterMessageInfo: {
             newsletterJid: "120363200367779016@newsletter",
-            newsletterName: "SILVA IS AWAY 🥰🥰",
+            newsletterName: "SILVA IS AWAY 🥳",
             serverMessageId: 143,
           },
         },
