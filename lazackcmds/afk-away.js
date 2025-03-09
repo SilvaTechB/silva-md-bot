@@ -1,73 +1,51 @@
-import fetch from "node-fetch";
+let isAway = false;
+let lastSeen = new Date();
 
-// Store Away state and reason
-let awayState = {
-    isAway: false,
-    reason: '',
-    notifiedUsers: new Set(), // Track notified users to avoid spamming
+let handler = async (m, { conn, text, command }) => {
+  if (command === "away") {
+    isAway = true;
+    lastSeen = new Date();
+    return m.reply("✅ *Away Mode Activated!*\n\nI will auto-reply to messages until you type *active*.");
+  }
+
+  if (command === "active") {
+    isAway = false;
+    return m.reply("✅ *Away Mode Deactivated!*\n\nI am back online.");
+  }
+
+  if (isAway) {
+    let now = new Date();
+    let diff = now - lastSeen;
+
+    let seconds = Math.floor(diff / 1000) % 60;
+    let minutes = Math.floor(diff / (1000 * 60)) % 60;
+    let hours = Math.floor(diff / (1000 * 60 * 60)) % 24;
+    let days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+    let lastSeenText = `*${days}d ${hours}h ${minutes}m ${seconds}s*`;
+
+    return await conn.sendMessage(
+      m.chat,
+      {
+        text: `🤖 *BIP BOP! THIS IS SILVA MD BOT*\n\n🚀 *MY OWNER IS AWAY!*\n📅 *Last Seen:* ${lastSeenText}`,
+        contextInfo: {
+          mentionedJid: [m.sender],
+          forwardingScore: 999,
+          isForwarded: true,
+          forwardedNewsletterMessageInfo: {
+            newsletterJid: "120363200367779016@newsletter",
+            newsletterName: "SILVA IS AWAY 🥰🥰",
+            serverMessageId: 143,
+          },
+        },
+      },
+      { quoted: m }
+    );
+  }
 };
 
-// Command to activate Away mode
-export async function handleAwayCommand(conn, message, reason) {
-    awayState.isAway = true;
-    awayState.reason = reason || 'I am currently away.';
-    awayState.notifiedUsers.clear(); // Clear previously notified users
+handler.help = ["away", "active"];
+handler.tags = ["tools"];
+handler.command = ["away", "active"];
 
-    await conn.sendMessage(message.key.remoteJid, { text: `Away mode activated. Reason: ${awayState.reason}` });
-}
-
-// Command to deactivate Away mode
-export async function handleActiveCommand(conn, message) {
-    awayState.isAway = false;
-    awayState.reason = '';
-    awayState.notifiedUsers.clear();
-
-    await conn.sendMessage(message.key.remoteJid, { text: 'Away mode deactivated. Welcome back!' });
-}
-
-// Handle incoming messages
-export async function handleIncomingMessage(conn, message) {
-    const senderId = message.key.remoteJid;
-    const isPrivateChat = !senderId.endsWith('@g.us');
-
-    if (awayState.isAway && isPrivateChat && !awayState.notifiedUsers.has(senderId)) {
-        // Notify the sender if Away
-        const replyMessage = `I am currently away: ${awayState.reason}`;
-        await conn.sendMessage(senderId, { text: replyMessage });
-        awayState.notifiedUsers.add(senderId);
-    }
-}
-
-// Command parser and execution
-export async function onCommand(conn, message) {
-    try {
-        const text = message.message?.conversation || '';
-        const args = text.split(' ');
-        const command = args[0].toLowerCase();
-
-        if (command === 'away') {
-            const reason = args.slice(1).join(' ');
-            await handleAwayCommand(conn, message, reason);
-        } else if (command === 'active') {
-            await handleActiveCommand(conn, message);
-        }
-    } catch (error) {
-        console.error("Error processing command:", error);
-        await conn.sendMessage(message.key.remoteJid, { text: "An error occurred while processing your command." });
-    }
-}
-
-// Handler metadata
-const handler = {
-    help: ["away", "active"],
-    tags: ["utility"],
-    command: ["away", "active"],
-};
-
-export default {
-    handleAwayCommand,
-    handleActiveCommand,
-    handleIncomingMessage,
-    onCommand,
-    handler,
-};
+export default handler;
