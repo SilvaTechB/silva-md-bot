@@ -16,6 +16,6 @@ _${mssg.afkmsg}_
 handler.help = ['afk']
 handler.tags = ['fun']
 handler.command = ['afk']
-handler.group = true
+handler.group = false
 
 export default handler
