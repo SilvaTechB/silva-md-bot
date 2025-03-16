@@ -1,49 +1,48 @@
-import { exec } from 'child_process';
-import fs from 'fs';
-import path from 'path';
+import { exec } from "child_process";
+import fs from "fs";
+import path from "path";
 
-let handler = async (m, { text, usedPrefix, command }) => {
-  // Define the repository URL
-  const repoUrl = 'https://github.com/SilvaTechB/silva-md-bot';
+let handler = async (m, { text }) => {
+  const repoUrl = "https://github.com/SilvaTechB/silva-md-bot";
+  const targetFolder = path.join(process.cwd(), "lazackcmds"); // Ensure correct path usage
 
-  // Define the target folder
-  const targetFolder = path.join(__dirname, 'lazackcmds'); // Ensure path compatibility
-
-  // Check if the target folder exists; if not, create it
+  // Ensure the target directory exists
   if (!fs.existsSync(targetFolder)) {
-    fs.mkdirSync(targetFolder, { recursive: true }); // Create folders recursively if needed
+    fs.mkdirSync(targetFolder, { recursive: true });
   }
 
-  // Determine the git command to use
-  const gitCommand = fs.existsSync(path.join(targetFolder, '.git'))
-    ? `git -C ${targetFolder} pull` // Pull updates if the folder is already a git repository
-    : `git clone ${repoUrl} ${targetFolder}`; // Clone the repository if not already a git repository
+  // Check if the directory is a Git repository
+  let isGitRepo = fs.existsSync(path.join(targetFolder, ".git"));
+  if (!isGitRepo) {
+    try {
+      await execPromise(`git clone ${repoUrl} ${targetFolder}`);
+      m.reply("✅ *Silva MD Bot has been successfully cloned!* 🚀");
+    } catch (error) {
+      return m.reply(`❌ *Failed to clone the repository:* ${error.message}`);
+    }
+  }
 
+  // Pull updates from the repository
   try {
-    // Execute the git command
-    await new Promise((resolve, reject) => {
-      exec(gitCommand, (err, stdout, stderr) => {
-        if (err) {
-          reject(new Error(`Git command failed:\n${stderr}`)); // Include detailed error messages
-        } else {
-          resolve(stdout);
-        }
-      });
-    });
-
-    // Send a success message
-    m.reply('*✅ Silva MD Bot Update completed successfully!*');
+    await execPromise(`git -C ${targetFolder} pull`);
+    m.reply("✅ *Silva MD Bot is up to date! 🎉*");
   } catch (error) {
-    // Log and reply with error
-    console.error('Update error:', error);
-    m.reply(`*❌ Error during update:* ${error.message}`);
+    m.reply(`⚠️ *Update failed:* ${error.message}\nTry updating manually.`);
   }
 };
 
-handler.help = ['update'];
-handler.tags = ['system'];
-handler.command = /^update$/i;
+// Helper function to execute shell commands with better error handling
+const execPromise = (command) =>
+  new Promise((resolve, reject) => {
+    exec(command, (err, stdout, stderr) => {
+      if (err) return reject(new Error(stderr.trim() || err.message));
+      resolve(stdout.trim());
+    });
+  });
 
+handler.help = ["update"];
+handler.tags = ["system"];
+handler.command = /^update$/i;
 handler.owner = true;
 
 export default handler;
