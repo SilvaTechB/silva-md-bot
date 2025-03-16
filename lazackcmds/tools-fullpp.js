@@ -1,67 +1,62 @@
-import fs from 'fs';
-import { createRequire } from 'module';
+import fs from "fs";
+import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 const Jimp = require("jimp"); // Using Jimp for image processing
 
-let handler = async (m, { text, conn, command, usedPrefix }) => {
-  let message = m.quoted ? m.quoted : m;
-  let mimeType = (message.msg ? message.msg : message).mimetype ? message.mimetype : message.mediaType || '';
-  
-  if (/image/g.test(mimeType) && !/webp/g.test(mimeType)) {
-    try {
-      let downloadedImage = await message.download();
-      let botJid = await conn.user.jid;
+let handler = async (m, { conn, command, usedPrefix }) => {
+    let message = m.quoted ? m.quoted : m;
+    let mimeType = message.mimetype || message.mediaType || "";
 
-      // Processing the image using the 'pepe' function
-      let { img } = await processImage(downloadedImage);
-
-      // Sending the image to the bot's profile
-      await conn.query({
-        tag: 'iq',
-        attrs: {
-          to: botJid,
-          type: 'set',
-          xmlns: "w:profile:picture"
-        },
-        content: [{
-          tag: "picture",
-          attrs: {
-            type: "image"
-          },
-          content: img
-        }]
-      });
-      
-      m.reply("SilvaBot has successfully updated your profile picture.");
-    } catch (error) {
-      console.error(error);
-      m.reply("An error occurred while processing the image. Please try again later.");
+    if (!mimeType || !mimeType.startsWith("image/")) {
+        return m.reply(`⚠️ *Send an image with the caption* \`${usedPrefix + command}\` *or tag an image that has already been sent.*`);
     }
-  } else {
-    m.reply(`Send an image with the caption "${usedPrefix + command}" or tag an image that has already been sent.`);
-  }
+
+    try {
+        let downloadedImage = await conn.downloadMediaMessage(message);
+        if (!downloadedImage) throw new Error("Failed to download the image.");
+
+        let botJid = conn.user.jid;
+        let processedImage = await processImage(downloadedImage);
+
+        // Sending the image to update the bot's profile picture
+        await conn.query({
+            tag: "iq",
+            attrs: {
+                to: botJid,
+                type: "set",
+                xmlns: "w:profile:picture",
+            },
+            content: [
+                {
+                    tag: "picture",
+                    attrs: { type: "image" },
+                    content: processedImage,
+                },
+            ],
+        });
+
+        m.reply("✅ *Silva MD Bot's profile picture has been successfully updated!* 🎨");
+
+    } catch (error) {
+        console.error("❌ Profile Picture Update Error:", error);
+        m.reply("⚠️ *An error occurred while updating the profile picture. Please try again!*");
+    }
 };
 
-handler.help = ['setppbotfull'];
+handler.help = ["setppbotfull"];
 handler.tags = ["owner"];
 handler.command = /^(fullpp)$/i;
 handler.owner = true;
 
 export default handler;
 
-// Image processing function using Jimp
+// 🔹 Image processing function using Jimp
 async function processImage(imageBuffer) {
-  try {
-    const image = await Jimp.read(imageBuffer);
-    const width = image.getWidth();
-    const height = image.getHeight();
-
-    // Cropping and resizing the image
-    const croppedImage = image.crop(0, 0, width, height);
-    const img = await croppedImage.scaleToFit(720, 720).getBufferAsync(Jimp.MIME_JPEG); // Resize to 720x720 for profile picture
-
-    return { img };
-  } catch (error) {
-    throw new Error("Failed to process the image.");
-  }
+    try {
+        const image = await Jimp.read(imageBuffer);
+        const resizedImage = await image.scaleToFit(720, 720).quality(80).getBufferAsync(Jimp.MIME_JPEG);
+        return resizedImage;
+    } catch (error) {
+        throw new Error("⚠️ Failed to process the image.");
+    }
 }
