@@ -1,7 +1,7 @@
 import fs from "fs";
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
-const Jimp = require("jimp"); // Using Jimp for image processing
+const Jimp = require("jimp"); // Using Jimp for image processing................
 
 let handler = async (m, { conn, command, usedPrefix }) => {
     let message = m.quoted ? m.quoted : m;
