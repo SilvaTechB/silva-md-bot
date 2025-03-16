@@ -2,32 +2,31 @@ import { exec } from "child_process";
 import fs from "fs";
 import path from "path";
 
-let handler = async (m, { text }) => {
+let handler = async (m) => {
   const repoUrl = "https://github.com/SilvaTechB/silva-md-bot";
   const targetFolder = path.join(process.cwd(), "lazackcmds"); // Ensure correct path usage
+  const gitFolder = path.join(targetFolder, ".git"); // Git folder path
 
-  // Ensure the target directory exists
+  // Check if the target folder exists
   if (!fs.existsSync(targetFolder)) {
     fs.mkdirSync(targetFolder, { recursive: true });
   }
 
-  // Check if the directory is a Git repository
-  let isGitRepo = fs.existsSync(path.join(targetFolder, ".git"));
-  if (!isGitRepo) {
-    try {
-      await execPromise(`git clone ${repoUrl} ${targetFolder}`);
-      m.reply("✅ *Silva MD Bot has been successfully cloned!* 🚀");
-    } catch (error) {
-      return m.reply(`❌ *Failed to clone the repository:* ${error.message}`);
-    }
-  }
-
-  // Pull updates from the repository
   try {
+    // Check if the folder is a Git repository
+    if (!fs.existsSync(gitFolder)) {
+      m.reply("⚠️ *Existing folder detected, but it's not a Git repository.*\n🔄 *Resetting...*");
+      await execPromise(`rm -rf ${targetFolder}`); // Remove non-git folder
+      await execPromise(`git clone ${repoUrl} ${targetFolder}`);
+      return m.reply("✅ *Silva MD Bot successfully cloned and ready!* 🚀");
+    }
+
+    // Pull updates if it's already a Git repository
     await execPromise(`git -C ${targetFolder} pull`);
     m.reply("✅ *Silva MD Bot is up to date! 🎉*");
+
   } catch (error) {
-    m.reply(`⚠️ *Update failed:* ${error.message}\nTry updating manually.`);
+    m.reply(`❌ *Update failed:* ${error.message}\nTry updating manually.`);
   }
 };
 
