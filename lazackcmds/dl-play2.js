@@ -15,16 +15,24 @@ let handler = async (m, { conn, text }) => {
     let link = video.url;
     let apis = [
       `https://apis.davidcyriltech.my.id/youtube/mp3?url=${link}`,
-      `https://api.ryzendesu.vip/api/downloader/ytmp3?url=${link}`
+      `https://api.ryzendesu.vip/api/downloader/ytmp3?url=${link}`,
+      `https://api.akuari.my.id/downloader/youtubeaudio?link=${link}`
     ];
 
-    // Fetch from the first successful API
-    let response = await Promise.any(
-      apis.map(api => axios.get(api).catch(() => null))
-    );
+    // Fetch from the first working API
+    let response;
+    for (let api of apis) {
+      try {
+        response = await axios.get(api);
+        if (response.data.status === 200 || response.data.success) break; // Exit loop if success
+      } catch (error) {
+        console.error(`❌ API Error: ${api} - ${error.message}`);
+        continue; // Try the next API
+      }
+    }
 
     if (!response || !response.data || !(response.data.status === 200 || response.data.success)) {
-      return m.reply("⚠️ *All servers failed! Please try again later.*");
+      return m.reply("⚠️ *All servers failed! The APIs might be down, please try again later.*");
     }
 
     let data = response.data.result || response.data;
@@ -38,7 +46,6 @@ let handler = async (m, { conn, text }) => {
     // Delete loading message
     await conn.sendMessage(m.chat, { delete: loadingMsg.key });
 
-    // 🎨 Stylish UI for music response with contextInfo
     let caption = `🎧 *Silva MD Bot - Music Download* 🎶
 
 📌 *Title:* ${songData.title}
@@ -55,7 +62,7 @@ let handler = async (m, { conn, text }) => {
         isForwarded: true,
         forwardedNewsletterMessageInfo: {
           newsletterJid: '120363200367779016@newsletter',
-          newsletterName: 'SILVA MUSIC PLAY 💖',
+          newsletterName: 'SILVA MUSIC PLAYER 💖',
           serverMessageId: 143
         }
       }
@@ -71,7 +78,7 @@ let handler = async (m, { conn, text }) => {
         isForwarded: true,
         forwardedNewsletterMessageInfo: {
           newsletterJid: '120363200367779016@newsletter',
-          newsletterName: 'SILVA MUSIC PLAY 💖',
+          newsletterName: 'SILVA MUSIC PLAYER 💖',
           serverMessageId: 143
         }
       }
@@ -88,7 +95,7 @@ let handler = async (m, { conn, text }) => {
         isForwarded: true,
         forwardedNewsletterMessageInfo: {
           newsletterJid: '120363200367779016@newsletter',
-          newsletterName: 'SILVA MUSIC PLAY 💖',
+          newsletterName: 'SILVA MUSIC PLAYER 💖',
           serverMessageId: 143
         }
       }
@@ -97,7 +104,7 @@ let handler = async (m, { conn, text }) => {
     m.reply("✅ *Silva MD Bot successfully delivered your audio! Enjoy 🎶*");
 
   } catch (error) {
-    console.error("Error:", error.message);
+    console.error("❌ Error:", error.message);
     m.reply("❌ *Something went wrong! Please try again later.*");
   }
 };
