@@ -1,79 +1,55 @@
-import pkg from '@whiskeysockets/baileys';
-const { downloadMediaMessage } = pkg;
+import uploadtoimgur from "../lib/imgur.js";
+import fs from "fs";
+import path from "path";
 
-const OWNER_NUMBER = '254743706010'; // Replace with actual owner number
+let handler = async (m) => {
+    let message = m.quoted ? m.quoted : m;
+    let mimeType = message.mimetype || "";
 
-let handler = async (m, { conn }) => {
-  console.log(`📩 Received: ${m.text}`); // Debugging
-
-  if (!m.text || !m.quoted) return; // Ignore empty or non-quoted messages
-
-  const botNumber = conn.user?.id.split(':')[0] + '@s.whatsapp.net';
-  const ownerNumber = OWNER_NUMBER + '@s.whatsapp.net';
-
-  // Extract command
-  const cmd = m.text.trim().toLowerCase();
-  if (!['vv', 'vv2', 'vv3'].includes(cmd)) return;
-
-  console.log(`✅ Command detected: ${cmd}`); // Debugging
-
-  // Ensure quoted message exists
-  if (!m.quoted.message) return m.reply('No quoted message detected!');
-
-  // Extract View Once message properly
-  let msg = m.quoted.message;
-  if (msg?.viewOnceMessageV2) msg = msg.viewOnceMessageV2.message;
-  else if (msg?.viewOnceMessage) msg = msg.viewOnceMessage.message;
-  else return m.reply('This is not a View Once message!');
-
-  // Restrict access for vv2 & vv3
-  const isOwner = m.sender === ownerNumber;
-  const isBot = m.sender === botNumber;
-  if (['vv2', 'vv3'].includes(cmd) && !isOwner && !isBot) {
-    return m.reply('Only the owner or bot can use this command!');
-  }
-
-  try {
-    const messageType = Object.keys(msg)[0];
-    if (!messageType) return m.reply('Unsupported or missing media type!');
-
-    let buffer = await downloadMediaMessage(m.quoted, 'buffer', {}, { type: messageType === 'audioMessage' ? 'audio' : undefined });
-    if (!buffer) return m.reply('Failed to retrieve media!');
-
-    let mimetype = msg.audioMessage?.mimetype || 'audio/ogg';
-    let caption = '*© Powered By Silva MD Bot*';
-
-    // Determine recipient based on command
-    let recipient =
-      cmd === 'vv2' ? botNumber :
-      cmd === 'vv3' ? ownerNumber :
-      m.chat; // .vv sends to the same chat
-
-    console.log(`📤 Sending media to: ${recipient}`); // Debugging
-
-    // Send media accordingly
-    const mediaOptions = {
-      imageMessage: { image: buffer, caption },
-      videoMessage: { video: buffer, caption, mimetype: 'video/mp4' },
-      audioMessage: { audio: buffer, mimetype, ptt: true }
-    };
-
-    if (mediaOptions[messageType]) {
-      await conn.sendMessage(recipient, mediaOptions[messageType]);
-    } else {
-      return m.reply('Unsupported media type!');
+    if (!mimeType) {
+        return m.reply("❌ *Please reply to an image or video to upload!*");
     }
 
-    console.log('✅ Media sent successfully'); // Debugging
-  } catch (error) {
-    console.error('❌ Error processing View Once message:', error);
-    await m.reply('Failed to process View Once message!');
-  }
+    try {
+        let mediaBuffer = await message.download();
+        let fileSizeMB = (mediaBuffer.length / (1024 * 1024)).toFixed(2);
+
+        if (mediaBuffer.length > 10 * 1024 * 1024) {
+            return m.reply("⚠️ *Media size exceeds 10MB. Please upload a smaller file!*");
+        }
+
+        let tmpDir = path.join(process.cwd(), "tmp");
+        if (!fs.existsSync(tmpDir)) {
+            fs.mkdirSync(tmpDir, { recursive: true });
+        }
+
+        let fileExtension = mimeType.split("/")[1] || "unknown";
+        let mediaPath = path.join(tmpDir, `media_${Date.now()}.${fileExtension}`);
+
+        fs.writeFileSync(mediaPath, mediaBuffer);
+
+        let isSupportedMedia = /image\/(png|jpe?g|gif)|video\/mp4/.test(mimeType);
+
+        if (isSupportedMedia) {
+            let uploadLink = await uploadtoimgur(mediaPath);
+
+            await m.reply(`✅ *SILVA MD VIEW ONCE MESSAGES!*\n📁 *File Size:* ${fileSizeMB} MB\n🔗 *MEDIA URL:* ${uploadLink}\n\n click the link to view and download the message`);
+
+        } else {
+            await m.reply(`⚠️ *sorry Unsupported file type!*\n📁 *Size:* ${fileSizeMB} MB`);
+        }
+
+        // Cleanup
+        fs.unlinkSync(mediaPath);
+
+    } catch (error) {
+        console.error("❌ Media Upload Error:", error);
+        return m.reply("⚠️ *An error occurred while uploading the media. Please try again!*");
+    }
 };
 
-handler.help = ['vv', 'vv2', 'vv3'];
-handler.tags = ['owner'];
-handler.command = ['vv', 'vv2', 'vv3'];
-handler.owner = true;
+handler.help = ["vv"];
+handler.tags = ["tools"];
+handler.command = ["vv", "view"];
 
 export default handler;
