@@ -9,7 +9,7 @@ const handler = async (m, { conn, args }) => {
     await m.reply('🔍 *Fetching video details...*');
 
     // API URL for downloading the video
-    const apiUrl = `https://api.davidcyriltech.my.id/download/ytmp4?url=${encodeURIComponent(query)}`;
+    const apiUrl = `https://keith-api.vercel.app/download/dlmp4?url=${link}`;
     const response = await axios.get(apiUrl);
 
     // Check if response data contains download_url
