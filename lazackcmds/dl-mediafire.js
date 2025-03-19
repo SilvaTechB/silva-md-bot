@@ -49,7 +49,7 @@ ${isLimit ? `\n⚠️ The file size exceeds the download limit of *${limit} MB*.
 handler.help = ['mediafire <url>'];
 handler.tags = ['downloader', 'premium'];
 handler.command = ['mediafire', 'mfire'];
-handler.credit = true;
+handler.credit = false;
 handler.premium = false;
 
 export default handler;
