@@ -14,22 +14,17 @@ const handler = async (m, { conn }) => {
         🍑🍆 *SILVA MD BOT* 💦☣
         
 📂 *Repository:* ${repoData.name}
-📝 *Description:* ${repoData.description || 'No description available'}
 👤 *Owner:* ${repoData.owner.login}
 ⭐ *Stars:* ${repoData.stargazers_count}
 🍴 *Forks:* ${repoData.forks_count}
 🌐 *URL:* ${repoData.html_url}
+📝 *Description:* ${repoData.description || 'No description available'}
         
 🚀 *OUR REPOSITORY*
 _Welcome to Silva MD! 🤖✨_
 
-🔥 **Get Started:** Fork and customize Silva MD WhatsApp bot!
-
-📌 **How to Use:**
-1️⃣ *Fork the Repository* – Click “Fork” to create your copy.
-2️⃣ *Setup Your Bot* – Follow the README instructions.
-3️⃣ *Enjoy Silva MD* – Experience its powerful features! 💬
-
+OUR CHANNEL: https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v
+OFFICIAL GROUP: https://chat.whatsapp.com/Ik0YpP0dM8jHVjScf1Ay5S
 ⚡ *DEPLOY SILVA MD BOT NOW!*
 \`\`\` USER FRIENDLY SILVA MD BOT 💥 \`\`\`
         `.trim();
