@@ -17,7 +17,7 @@
 [![Sponsor SilvaTechB](https://img.shields.io/badge/Sponsor-SilvaTechB-important)](https://github.com/sponsors/SilvaTechB)
 
 ᴄʟɪᴄᴋ ᴡᴀ ʟᴏɢᴏ ᴛᴏ ᴊᴏɪɴ sᴜᴘᴘᴏʀᴛ ɢʀᴏᴜᴘ 👇 
-<br> [![join](https://raw.githubusercontent.com/SecktorBot/Brandimages/main/secktor.png)](https://chat.whatsapp.com/EFyftTBOzPZ61TzSrO8R5u)
+<br> [![join](https://raw.githubusercontent.com/SecktorBot/Brandimages/main/secktor.png)](https://chat.whatsapp.com/Ik0YpP0dM8jHVjScf1Ay5S)
    
 <h4 align="center">SILVA SUPPORT GROUP</h1>
 
