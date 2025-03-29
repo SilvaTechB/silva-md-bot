@@ -1,178 +1,188 @@
+import fetch from 'node-fetch';
 
 let handler = async (m, { conn, args, text, usedPrefix, command }) => {
-	
-   let tee = `✳️ ${mssg.notext}\n\n📌 ${mssg.example}: *${usedPrefix + command}* Ultra`
-   let too = `✳️ ${mssg.textSe} *+* \n\n📌 ${mssg.example}: \n*${usedPrefix + command}* Silva *+* TechInfo`
-    m.react(rwait)
+   let tee = `👀 ${mssg.notext}\n\n📌 ${mssg.example}: *${usedPrefix + command}* SILVA MD`
+   m.react('🧠')
 
-switch (command) {
-	
-	case 'logololi':
-	if (!text) throw tee
-	let img = global.API('fgmods', '/api/maker/loli', { text }, 'apikey')
-	conn.sendFile(m.chat, img, 'logo.png', `✅ ${mssg.result}`, m)
-	m.react(done)
-	break 
-	case 'neon': 
-	if (!text) throw tee
-	let ne = global.API('fgmods', '/api/textpro/neon', { text }, 'apikey')
-	conn.sendFile(m.chat, ne, 'logo.png', `✅ ${mssg.result}`, m)
-	m.react(done)
-	break 
-	case 'devil': 
-	if (!text) throw tee
-	let de = global.API('fgmods', '/api/textpro/devil', { text }, 'apikey')
-	conn.sendFile(m.chat, de, 'logo.png', `✅ ${mssg.result}`, m)
-	m.react(done)
-	break 
-	case 'transformer': 
-	if (!text) throw tee
-	let tra = global.API('fgmods', '/api/textpro/transformers', { text }, 'apikey')
-	conn.sendFile(m.chat, tra, 'logo.png', `✅ ${mssg.result}`, m)
-	m.react(done)
-	break 
-	case 'thunder': 
-	if (!text) throw tee
-	let thu = global.API('fgmods', '/api/textpro/thunder', { text }, 'apikey')
-	conn.sendFile(m.chat, thu, 'logo.png', `✅ ${mssg.result}`, m)
-	m.react(done)
-	break  
-	case 'graffiti': 
-	if (!text) throw too
-	if (!text.includes('+')) throw too  
-	let [c, d] = text.split`+`
-	let gff = global.API('fgmods', '/api/textpro/graffiti', { text: c, text2: d}, 'apikey')
-	conn.sendFile(m.chat, gff, 'logo.png', `✅ ${mssg.result}`, m)
-	m.react(done)
-	break
-	case 'bpink': 
-	if (!text) throw tee
-	let bpin = global.API('fgmods', '/api/textpro/blackpink', { text }, 'apikey')
-	conn.sendFile(m.chat, bpin, 'logo.png', `✅${mssg.result}`, m)
-	m.react(done)
-	break 
-	case 'joker': 
-	if (!text) throw tee
-	let jok = global.API('fgmods', '/api/textpro/joker', { text }, 'apikey')
-	conn.sendFile(m.chat, jok, 'logo.png', `✅ ${mssg.result}`, m)
-	m.react(done)
-	break 
-	case 'matrix': 
-	if (!text) throw tee
-	let ma = global.API('fgmods', '/api/textpro/matrix', { text }, 'apikey')
-	conn.sendFile(m.chat, ma, 'logo.png', `✅ ${mssg.result}`, m)
-	m.react(done)
-	break 
-	case 'wolf': 
-   if (!text) throw tee
-   let wo = global.API('fgmods', '/api/textpro/logowolf', { text: 'FG98', text2: text}, 'apikey')
-	conn.sendFile(m.chat, wo, 'logo.png', `✅ ${mssg.result}`, m)
-	m.react(done)
-	break
-	case 'glow': 
-	if (!text) throw tee
-	let glo = global.API('fgmods', '/api/textpro/advancedglow', { text }, 'apikey')
-	conn.sendFile(m.chat, glo, 'logo.png', `✅ ${mssg.result}`, m)
-	m.react(done)
-	break 
-	case 'phlogo': 
-	if (!text) throw too
-	if (!text.includes('+')) throw too  
-	let [a, b] = text.split`+`   
-	let ph = global.API('fgmods', '/api/textpro/pornhub', { text: a, text2: b}, 'apikey')
-	conn.sendFile(m.chat, ph, 'logo.png', `✅ ${mssg.result}`, m)
-	m.react(done)
-	break
-	case 'ballon': 
-	if (!text) throw tee
-	let ball = global.API('fgmods', '/api/textpro/ballon', { text }, 'apikey')
-	conn.sendFile(m.chat, ball, 'logo.png', `✅ ${mssg.result}`, m)
-	m.react(done)
-	break
-	case 'dmd': 
-	if (!text) throw tee
-	let dm = global.API('fgmods', '/api/textpro/diamond', { text }, 'apikey')
-	conn.sendFile(m.chat, dm, 'logo.png', `✅ ${mssg.result}`, m)
-	m.react(done)
-	break
-	case 'lightglow': 
-	if (!text) throw tee
-	let lglo = global.API('fgmods', '/api/textpro/lightglow', { text }, 'apikey')
-	conn.sendFile(m.chat, lglo, 'logo.png', `✅ ${mssg.result}`, m)
-	m.react(done)
-	break 
-	case 'american': 
-	if (!text) throw tee
-	let am = global.API('fgmods', '/api/textpro/American-flag', { text }, 'apikey')
-	conn.sendFile(m.chat, am, 'logo.png', `✅ ${mssg.result}`, m)
-	m.react(done)
-	break 
-	case 'halloween': 
-	if (!text) throw tee
-	let hall = global.API('fgmods', '/api/textpro/halloween', { text }, 'apikey')
-	conn.sendFile(m.chat, hall, 'logo.png', `✅ ${mssg.result}`, m)
-	m.react(done)
-	break 
-	case 'green': 
-	if (!text) throw tee
-	let hgre = global.API('fgmods', '/api/textpro/green-horror', { text }, 'apikey')
-	conn.sendFile(m.chat, hgre, 'logo.png', `✅ ${mssg.result}`, m)
-	m.react(done)
-	break 
-	case 'glitch': 
-	if (!text) throw tee
-	let igli = global.API('fgmods', '/api/textpro/impressive-glitch', { text }, 'apikey')
-	conn.sendFile(m.chat, igli, 'logo.png', `✅ ${mssg.result}`, m)
-	m.react(done)
-	break
-	case 'paper': 
-	if (!text) throw tee
-	let pap = global.API('fgmods', '/api/textpro/art-paper-cut', { text }, 'apikey')
-	conn.sendFile(m.chat, pap, 'logo.png', `✅ ${mssg.result}`, m)
-	m.react(done)
-	break
-	case 'marvel': 
-	if (!text) throw too
-	if (!text.includes('+')) throw too  
-	let [e, f] = text.split`+`   
-	let marv = global.API('fgmods', '/api/textpro/marvel', { text: e, text2: f}, 'apikey')
-	conn.sendFile(m.chat, marv, 'logo.png', `✅ ${mssg.result}`, m)
-	m.react(done)
-	break
-	case 'ninja': 
-	if (!text) throw too
-	if (!text.includes('+')) throw too  
-	let [g, h] = text.split`+`   
-	let nin = global.API('fgmods', '/api/textpro/ninja', { text: g, text2: h}, 'apikey')
-	conn.sendFile(m.chat, nin, 'logo.png', `✅ ${mssg.result}`, m)
-	m.react(done)
-	break
-	case 'future': 
-	if (!text) throw tee
-	let futu = global.API('fgmods', '/api/textpro/futuristic', { text }, 'apikey')
-	conn.sendFile(m.chat, futu, 'logo.png', `✅ ${mssg.result}`, m)
-	m.react(done)
-	break
-	case '3dbox': 
-	if (!text) throw tee
-	let box = global.API('fgmods', '/api/textpro/3dboxtext', { text }, 'apikey')
-	conn.sendFile(m.chat, box, 'logo.png', `✅ ${mssg.result}`, m)
-	m.react(done)
-	break
-	case 'graffiti2': 
-	if (!text) throw too
-	if (!text.includes('+')) throw too  
-	let [i, j] = text.split`+`
-	let gff2 = global.API('fgmods', '/api/textpro/graffiti2', { text: i, text2: j}, 'apikey')
-	conn.sendFile(m.chat, gff2, 'logo.png', `✅ ${mssg.result}`, m)
-	m.react(done)
-	break 
-	default:
-} 
-} 
-handler.help = ['logololi', 'graffiti2', '3dbox', 'future', 'ninja', 'marvel', 'paper', 'glitch', 'halloween', 'green', 'american', 'neon', 'devil', 'wolf', 'phlogo', 'transformer', 'thunder', 'graffiti', 'bpink', 'joker', 'matrix', 'glow', 'ballon', 'dmd', 'lightglow']
-handler.tags = ['maker']
-handler.command = /^(logololi|graffiti2|3dbox|future|ninja|marvel|paper|glitch|neon|green|halloween|american|devil|wolf|phlogo|transformer|thunder|graffiti|bpink|joker|matrix|glow|ballon|dmd|lightglow)$/i
-handler.diamond = true
+   let apiUrl;
+   switch (command) {
+      case 'mascot':
+         if (!text) throw tee;
+         apiUrl = `https://gtech-api-xtp1.onrender.com/api/ephoto/mascot?apikey=APIKEY&text=${encodeURIComponent(text)}`;
+         break;
+         
+      case 'foggy':
+         if (!text) throw tee;
+         apiUrl = `https://gtech-api-xtp1.onrender.com/api/ephoto/foggy?apikey=APIKEY&text=${encodeURIComponent(text)}`;
+         break;
 
-export default handler
+      case 'golden':
+         if (!text) throw tee;
+         apiUrl = `https://gtech-api-xtp1.onrender.com/api/ephoto/golden?apikey=APIKEY&text=${encodeURIComponent(text)}`;
+         break;
+
+      case 'wgalaxy':
+         if (!text) throw tee;
+         apiUrl = `https://gtech-api-xtp1.onrender.com/api/ephoto/wgalaxy?apikey=APIKEY&text=${encodeURIComponent(text)}`;
+         break;
+
+      case 'metallic':
+         if (!text) throw tee;
+         apiUrl = `https://gtech-api-xtp1.onrender.com/api/ephoto/mettalic?apikey=APIKEY&text=${encodeURIComponent(text)}`;
+         break;
+         
+      case 'gradient':
+         if (!text) throw tee;
+         apiUrl = `https://gtech-api-xtp1.onrender.com/api/ephoto/gradient?apikey=APIKEY&text=${encodeURIComponent(text)}`;
+         break;
+
+      case 'snake':
+         if (!text) throw tee;
+         apiUrl = `https://gtech-api-xtp1.onrender.com/api/ephoto/snake?apikey=APIKEY&text=${encodeURIComponent(text)}`;
+         break;
+
+      case '3dsilver':
+         if (!text) throw tee;
+         apiUrl = `https://gtech-api-xtp1.onrender.com/api/ephoto/3dsilver?apikey=APIKEY&text=${encodeURIComponent(text)}`;
+         break;
+
+      case 'jewel':
+         if (!text) throw tee;
+         apiUrl = `https://gtech-api-xtp1.onrender.com/api/ephoto/jewel?apikey=APIKEY&text=${encodeURIComponent(text)}`;
+         break;
+
+      case 'metal':
+         if (!text) throw tee;
+         apiUrl = `https://gtech-api-xtp1.onrender.com/api/ephoto/metal?apikey=APIKEY&text=${encodeURIComponent(text)}`;
+         break;
+
+      case 'galaxy':
+         if (!text) throw tee;
+         apiUrl = `https://gtech-api-xtp1.onrender.com/api/ephoto/galaxy?apikey=APIKEY&text=${encodeURIComponent(text)}`;
+         break;
+
+      case 'blackpink':
+         if (!text) throw tee;
+         apiUrl = `https://gtech-api-xtp1.onrender.com/api/ephoto/blackpink?apikey=APIKEY&text=${encodeURIComponent(text)}`;
+         break;
+
+      case 'sand':
+         if (!text) throw tee;
+         apiUrl = `https://gtech-api-xtp1.onrender.com/api/ephoto/sand?apikey=APIKEY&text=${encodeURIComponent(text)}`;
+         break;
+
+      case 'cubic':
+         if (!text) throw tee;
+         apiUrl = `https://gtech-api-xtp1.onrender.com/api/ephoto/cubic?apikey=APIKEY&text=${encodeURIComponent(text)}`;
+         break;
+
+      case 'nigeria':
+         if (!text) throw tee;
+         apiUrl = `https://gtech-api-xtp1.onrender.com/api/ephoto/nigeria?apikey=APIKEY&text=${encodeURIComponent(text)}`;
+         break;
+
+      case 'gaming':
+         if (!text) throw tee;
+         apiUrl = `https://gtech-api-xtp1.onrender.com/api/ephoto/gaming?apikey=APIKEY&text=${encodeURIComponent(text)}`;
+         break;
+
+      case 'gold':
+         if (!text) throw tee;
+         apiUrl = `https://gtech-api-xtp1.onrender.com/api/ephoto/gold?apikey=APIKEY&text=${encodeURIComponent(text)}`;
+         break;
+
+      case 'splat':
+         if (!text) throw tee;
+         apiUrl = `https://gtech-api-xtp1.onrender.com/api/ephoto/paintsplat?apikey=APIKEY&text=${encodeURIComponent(text)}`;
+         break;
+
+      case 'color':
+         if (!text) throw tee;
+         apiUrl = `https://gtech-api-xtp1.onrender.com/api/ephoto/colorful?apikey=APIKEY&text=${encodeURIComponent(text)}`;
+         break;
+
+      case 'matrix':
+         if (!text) throw tee;
+         apiUrl = `https://gtech-api-xtp1.onrender.com/api/ephoto/matrix?apikey=APIKEY&text=${encodeURIComponent(text)}`;
+         break;
+
+      case 'wings':
+         if (!text) throw tee;
+         apiUrl = `https://gtech-api-xtp1.onrender.com/api/ephoto/angelwing?apikey=APIKEY&text=${encodeURIComponent(text)}`;
+         break;
+
+      case 'papercut':
+         if (!text) throw tee;
+         apiUrl = `https://gtech-api-xtp1.onrender.com/api/ephoto/papercut?apikey=APIKEY&text=${encodeURIComponent(text)}`;
+         break;
+
+      case 'gsilver':
+         if (!text) throw tee;
+         apiUrl = `https://gtech-api-xtp1.onrender.com/api/ephoto/gsilver?apikey=APIKEY&text=${encodeURIComponent(text)}`;
+         break;
+
+      case 'hacker':
+         if (!text) throw tee;
+         apiUrl = `https://gtech-api-xtp1.onrender.com/api/ephoto/hacker?apikey=APIKEY&text=${encodeURIComponent(text)}`;
+         break;
+
+      case 'balon':
+         if (!text) throw tee;
+         apiUrl = `https://gtech-api-xtp1.onrender.com/api/ephoto/ballon?apikey=APIKEY&text=${encodeURIComponent(text)}`;
+         break;
+
+      case 'galaxy2':
+         if (!text) throw tee;
+         apiUrl = `https://gtech-api-xtp1.onrender.com/api/ephoto/galaxy2?apikey=APIKEY&text=${encodeURIComponent(text)}`;
+         break;
+
+      case 'typo':
+         if (!text) throw tee;
+         apiUrl = `https://gtech-api-xtp1.onrender.com/api/ephoto/typography?apikey=APIKEY&text=${encodeURIComponent(text)}`;
+         break;
+
+      case 'circle':
+         if (!text) throw tee;
+         apiUrl = `https://gtech-api-xtp1.onrender.com/api/ephoto/circlemascot?apikey=APIKEY&text=${encodeURIComponent(text)}`;
+         break;
+
+      case 'star':
+         if (!text) throw tee;
+         apiUrl = `https://gtech-api-xtp1.onrender.com/api/ephoto/star?apikey=APIKEY&text=${encodeURIComponent(text)}`;
+         break;
+
+      default:
+         throw 'Command not recognized.';
+   }
+
+   // Fetch the image URL from the API
+   try {
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+
+      if (data.status && data.result && data.result.imageUrl) {
+         // Send the image to the user with the correct file extension
+         const imageUrl = data.result.imageUrl;
+         const fileExtension = imageUrl.split('.').pop(); // Extract the file extension
+         conn.sendFile(m.chat, imageUrl, `logo.${fileExtension}`, `*SILVA MD BOT*`, m);
+         m.react('💖');
+      } else {
+         throw '😭😭😭I Failed to generate the image. Please try again later.';
+      }
+   } catch (error) {
+      console.error('Error fetching image:', error);
+      m.reply('An error occurred while fetching the image. Please try again later.');
+   }
+}
+   
+// Updated help and command properties
+handler.help = [
+   'mascot', 'foggy', 'golden', 'wgalaxy', 'metallic', 'gradient', 'snake', '3dsilver', 'jewel', 
+   'metal', 'galaxy', 'blackpink', 'sand', 'cubic', 'nigeria', 'gaming', 'gold', 'splat', 'color', 
+   'matrix', 'wings', 'papercut', 'gsilver', 'hacker', 'balon', 'galaxy2', 'typo', 'circle', 'star'
+];
+handler.tags = ['maker'];
+handler.command = /^(mascot|foggy|golden|wgalaxy|metallic|gradient|snake|3dsilver|jewel|metal|galaxy|blackpink|sand|cubic|nigeria|gaming|gold|splat|color|matrix|wings|papercut|gsilver|hacker|balon|galaxy2|typo|circle|star)$/i;
+
+export default handler;
+            
