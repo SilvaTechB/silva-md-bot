@@ -145,9 +145,9 @@ CLICK HERE TO VIEW THE EXTERNAL PLUGINS AND INSTALL 👇
 <details>
 <summary>Meet Our Team</summary>
 
-| ![SHIZO](https://github.com/SilvaTechB.png?size=100) | ![GITHUB](https://github.com/xei-sensei.png?size=100) | ![Silva Team](https://github.com/SilvaTechB.png?size=100) | ![Manager](https://github.com/Sylivanu.png?size=100) | ![Lazack](https://github.com/Lazack28.png?size=100) | ![FG98F](https://github.com/FG98F.png?size=100) |
+| ![SHIZO](https://github.com/SilvaTechB.png?size=100) | ![GITHUB](https://github.com/shizothetechie.png?size=100) | ![Silva Team](https://github.com/SilvaTechB.png?size=100) | ![Manager](https://github.com/Sylivanu.png?size=100) | ![Lazack](https://github.com/Lazack28.png?size=100) | ![FG98F](https://github.com/FG98F.png?size=100) |
 | --- | --- | --- | --- | --- | --- |
-| [Silva team](https://silva-md-fork-checker.vercel.app/) | [GITHUB](https://github.com/xei-sensei) | [TEAM SILVA](https://github.com/SilvaTechB) | [MANAGER](https://github.com/Sylivanu) | [LAZACK](https://github.com/Lazack28) | [FG98F](https://github.com/FG98F) |
+| [Silva team](https://silva-md-fork-checker.vercel.app/) | [SHIZO](https://github.com/shizothetechie) | [TEAM SILVA](https://github.com/SilvaTechB) | [MANAGER](https://github.com/Sylivanu) | [LAZACK](https://github.com/Lazack28) | [FG98F](https://github.com/FG98F) |
 
 </details>
 
