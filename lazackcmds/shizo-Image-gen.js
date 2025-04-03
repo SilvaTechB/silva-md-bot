@@ -19,7 +19,7 @@ const shizoaigen = async (m, { conn, usedPrefix, command }) => {
   let shizoart = `https://api.shizo.top/api/ai/imagine?apikey=${shizokey}&prompt=${text}`
     if (shizoart) {
       const tag = `@${m.sender.split("@")[0]}`;
-      await conn.sendMessage(m.chat, { image: { url: shizoart }, caption: `🎨 *Generated Art* 🖌️\n\n📝 *Prompt:* ${text}\n\n👤 Requested by: ${mention}`, mentions: [m.sender], }, { quoted: m, });
+      await conn.sendMessage(m.chat, { image: { url: shizoart }, caption: `🎨 *Generated Art* 🖌️\n\n📝 *Prompt:* ${text}\n\n👤 Requested by: ${tag}`, mentions: [m.sender], }, { quoted: m, });
     } else console.log("No response from ShizoApi");
   } catch (error) {
     console.error("There is an error :", error), m.react("🐞");
