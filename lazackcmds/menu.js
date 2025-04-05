@@ -25,7 +25,7 @@ let handler = async (m, { conn }) => {
     uptime: moment.duration(os.uptime(), 'seconds').humanize(),
     timestamp: moment.tz('Africa/Nairobi').format('ddd DD/MM/YY HH:mm:ss'),
     platform: `${os.platform()} ${os.arch()}`,
-    version: '4.2.0',
+    version: '2.1.2',
     developer: '@SilvaTechB'
   };
 
@@ -42,7 +42,20 @@ let handler = async (m, { conn }) => {
 │ ˹💻˼ ᴏs: ${info.platform}
 ╰┬─────────────
 ╭┴──「 ᴄᴏᴍᴍᴀɴᴅs 」
-${commands}
+🤖 botmenu
+👑 ownermenu
+🧑‍🤝‍🧑 groupmenu
+📥 dlmenu
+🎉 funmenu
+💰 economymenu
+🎮 gamemenu
+🎨 stickermenu
+🧰 toolmenu
+🎩 logomenu
+🌙 nsfwmenu
+🙈 list
+🌚 menu2
+🧠 gpt
 ╰──────────────────
 🔗 github.com/SilvaTechB
     `.trim(),
@@ -58,7 +71,20 @@ ${commands}
   │ 𝗨𝗣𝗧𝗜𝗠𝗘: ${info.uptime}
   ╰┬──────────
   ╭┴─「 𝗖𝗠𝗗𝗦 」
-  ${commandList}
+  🤖 botmenu
+👑 ownermenu
+🧑‍🤝‍🧑 groupmenu
+📥 dlmenu
+🎉 funmenu
+💰 economymenu
+🎮 gamemenu
+🎨 stickermenu
+🧰 toolmenu
+🎩 logomenu
+🌙 nsfwmenu
+🙈 list
+🌚 menu2
+🧠 gpt
 ▄▖▝▝▖▄▄▄▖
     `.trim(),
 
@@ -76,7 +102,20 @@ ${commands}
 ║ » OS: ${info.platform}
 ╠═══════════════
 ║ COMMANDS:
-${commandList}
+🤖 botmenu
+👑 ownermenu
+🧑‍🤝‍🧑 groupmenu
+📥 dlmenu
+🎉 funmenu
+💰 economymenu
+🎮 gamemenu
+🎨 stickermenu
+🧰 toolmenu
+🎩 logomenu
+🌙 nsfwmenu
+🙈 list
+🌚 menu2
+🧠 gpt
 ╚═══════════════
     `.trim(),
 
@@ -93,7 +132,20 @@ ${commandList}
 │     Platform: ${info.platform}
 ├─────────────────────────
 │  Available Commands:
-${commandList}
+🤖 botmenu
+👑 ownermenu
+🧑‍🤝‍🧑 groupmenu
+📥 dlmenu
+🎉 funmenu
+💰 economymenu
+🎮 gamemenu
+🎨 stickermenu
+🧰 toolmenu
+🎩 logomenu
+🌙 nsfwmenu
+🙈 list
+🌚 menu2
+🧠 gpt
 └─────────────────────────
     `.trim(),
 
@@ -108,7 +160,20 @@ ${commandList}
 • OS: ${info.platform}
 ──────────────
 Commands:
-${commandList}
+🤖 botmenu
+👑 ownermenu
+🧑‍🤝‍🧑 groupmenu
+📥 dlmenu
+🎉 funmenu
+💰 economymenu
+🎮 gamemenu
+🎨 stickermenu
+🧰 toolmenu
+🎩 logomenu
+🌙 nsfwmenu
+🙈 list
+🌚 menu2
+🧠 gpt
 ──────────────
     `.trim()
   };
