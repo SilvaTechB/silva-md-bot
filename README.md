@@ -108,7 +108,7 @@ To set up the Silva MD Bot quickly, follow our detailed tutorial on YouTube:
 1. [Sign Up on Talkdrove](https://talkdrove.com/auth/signup).
 2. Deploy your app using the button below:
    <br>
-   <a href='https://talkdrove.com/dashboard/select-bot/prepare-deployment?botId=95' target="_blank">
+   <a href='https://host.talkdrove.com/share-bot/49' target="_blank">
       <img alt='Deploy on Koyeb' src='https://img.shields.io/badge/-DEPLOY-blue?style=for-the-badge&logo=whatsapp&logoColor=white'/>
    </a>
    
