@@ -42,6 +42,16 @@
       "required": false,
       "value": ""
       },
+    "WELCOME_MSG": {
+      "description": "make it true or false if you want bot to Send welcome message when someone joins a group",
+      "required": false,
+      "value": ""
+      },
+    "GOODBYE_MSG": {
+      "description": "make it true or false if you want bot to Send goodbye message when someone leaves a group",
+      "required": false,
+      "value": ""
+      },
     "AUTO_RECORDING": {
       "description": "make it true or false. true to activate false to deactivate",
       "required": false,
