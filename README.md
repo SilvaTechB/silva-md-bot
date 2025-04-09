@@ -29,6 +29,9 @@
 </p>
 
 <img src="https://i.imgur.com/dBaSKWF.gif" height="90" width="100%">
+🍴 Fork our repo and star to show love
+
+[![Fork the repo](https://img.shields.io/badge/Fork%20this%20Repo-30363d?style=for-the-badge&logo=github&logoColor=white)](https://github.com/SilvaTechB/silva-md-bot/fork)
 
  🌐 Get Your Session ID or Creds.json File 
  
