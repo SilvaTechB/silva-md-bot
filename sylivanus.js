@@ -384,7 +384,7 @@ async function connectionUpdate(update) {
 
   if (connection === 'open') {
     const { jid, name } = conn.user
-    const msg = `💖𝑺𝑰𝑳𝑽𝑨 𝑴𝑫 𝑩𝑶𝑻💖 \n\nHello🤩 ${name}, Congrats you have successfully deployed *Silva MD Bot* \n\n ✅ *Bot Connection Status:* \n  *Silva MD Bot* is now connected to this device! \n\n ⚙️ *Prefix:* (Use the bot’s prefix for commands) \n\n 👨‍💻 *Creator:* *Silva* \n 🏢 *Organization:* *Silva Tech Inc.* \n 🗓️ *CREATED:* *2024* \n\n 🌟 *Follow our WhatsApp Channel for updates:* \n https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v \n\n 🔄 *New features coming soon. Stay tuned!* \n\n𝑺𝑰𝑳𝑽𝑨 𝑴𝑫 𝑩𝑶𝑻\n\n Developer Sylivanus Momanyi\nfounder of Silva Tech Inc`
+    const msg = `💖𝑺𝑰𝑳𝑽𝑨 𝑴𝑫 𝑩𝑶𝑻💖 \n\nGreetings ${name}, ✅ Congrats you have successfully deployed *Silva MD Bot* \n\n if your bot sent a message to 254743706010 it is running perfect\n if not relink using silva tech session gen\n ⚙️ *Prefix:*\n 🏢 *Organization:* *Silva Tech Inc.* \n 🗓️ *CREATED:* *Sep 2024* \n\n 🌟 *Follow our WhatsApp Channel for updates:* \n https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v \n\n 🔄 *New features coming soon. Stay tuned!* \n\n Developer Sylivanus Momanyi\nfounder of Silva Tech Inc`
 
     await conn.sendMessage(jid, { text: msg, mentions: [jid] }, { quoted: null })
 
