@@ -1,224 +1,135 @@
 import os from 'os';
-import fs from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
 import moment from 'moment-timezone';
-import { promisify } from 'util';
-
-const readdir = promisify(fs.readdir);
 
 let handler = async (m, { conn }) => {
-  // Media resources
-  const menuThumbnail = 'https://i.imgur.com/GomcuUg.jpeg';
-  const audioUrl = 'https://github.com/SilvaTechB/silva-md-bot/raw/main/media/Menu.mp3';
+  try {
+    const menuThumbnail = 'https://i.imgur.com/GomcuUg.jpeg';
+    const audioUrl = 'https://github.com/SilvaTechB/silva-md-bot/raw/main/media/Menu.mp3';
 
-  // Dynamic command loader
-  const lazackPath = './lazackcmds';
-  const commands = await readdir(lazackPath);
-  const commandList = commands
-    .map((cmd, idx) => `┠─ ◦ ${idx + 1}. ${path.parse(cmd).name}`)
-    .join('\n');
+    const lazackPath = path.join(process.cwd(), 'lazackcmds');
+    const files = await fs.readdir(lazackPath);
+    const loadedCommands = files.filter(file => file.endsWith('.js'));
 
-  // Enhanced system monitor
-  const sysInfo = {
-    totalRAM: `${(os.totalmem() / (1024 ** 3)).toFixed(2)} GB`,
-    usedRAM: `${((os.totalmem() - os.freemem()) / (1024 ** 3)).toFixed(2)} GB`,
-    uptime: moment.duration(os.uptime(), 'seconds').humanize(),
-    timestamp: moment.tz('Africa/Nairobi').format('ddd DD/MM/YY HH:mm:ss'),
-    platform: `${os.platform()} ${os.arch()}`,
-    version: '2.1.2',
-    developer: '@SilvaTechB'
-  };
+    const featureCategories = [
+      { emoji: '🤖', title: 'botmenu' },
+      { emoji: '👑', title: 'ownermenu' },
+      { emoji: '🧑‍🤝‍🧑', title: 'groupmenu' },
+      { emoji: '📥', title: 'dlmenu' },
+      { emoji: '🎉', title: 'funmenu' },
+      { emoji: '💰', title: 'economymenu' },
+      { emoji: '🎮', title: 'gamemenu' },
+      { emoji: '🎨', title: 'stickermenu' },
+      { emoji: '🧰', title: 'toolmenu' },
+      { emoji: '🎩', title: 'logomenu' },
+      { emoji: '🌙', title: 'nsfwmenu' },
+      { emoji: '🙈', title: 'list' },
+      { emoji: '🌚', title: 'menu2' },
+      { emoji: '🧠', title: 'gpt' },
+    ];
 
-  // Expanded theme collection
-  const menuTemplates = {
-    cyberpunk: ({ user, commands, ...info }) => `
-╭──「 SILVA MD ⁣𓄹▸ᴮᴼᵀ 」
-│ ◦ ʜᴇʏ ${user}
-│ ◦ ${info.timestamp}
-╰┬─────────────
-╭┴─────────────
-│ ˹⚡˼ ʀᴀᴍ: ${info.usedRAM}/${info.totalRAM}
-│ ˹🕒˼ ᴜᴘᴛɪᴍᴇ: ${info.uptime}
-│ ˹💻˼ ᴏs: ${info.platform}
-╰┬─────────────
-╭┴──「 ᴄᴏᴍᴍᴀɴᴅs 」
-🤖 botmenu
-👑 ownermenu
-🧑‍🤝‍🧑 groupmenu
-📥 dlmenu
-🎉 funmenu
-💰 economymenu
-🎮 gamemenu
-🎨 stickermenu
-🧰 toolmenu
-🎩 logomenu
-🌙 nsfwmenu
-🙈 list
-🌚 menu2
-🧠 gpt
-╰──────────────────
-🔗 github.com/SilvaTechB
-    `.trim(),
+    const totalRAM = `${(os.totalmem() / (1024 ** 3)).toFixed(2)} GB`;
+    const usedRAM = `${((os.totalmem() - os.freemem()) / (1024 ** 3)).toFixed(2)} GB`;
+    const uptime = moment.duration(os.uptime(), 'seconds').humanize();
+    const timestamp = moment.tz('Africa/Nairobi').format('ddd DD/MM/YY HH:mm:ss');
+    const platform = `${os.platform()} ${os.arch()}`;
 
-    neon: ({ user, ...info }) => `
-▗▄▄ ▸▸◂ 𝐒𝐈𝐋𝐕𝐀𝐌𝐃
-  ╭───────────
-  │ ◦ 𝗛𝗲𝘆 ${user}
-  │ ◦ ${info.timestamp}
-  ╰┬──────────
-  ╭┴──────────
-  │ 𝗥𝗔𝗠: ${info.usedRAM}/${info.totalRAM}
-  │ 𝗨𝗣𝗧𝗜𝗠𝗘: ${info.uptime}
-  ╰┬──────────
-  ╭┴─「 𝗖𝗠𝗗𝗦 」
-  🤖 botmenu
-👑 ownermenu
-🧑‍🤝‍🧑 groupmenu
-📥 dlmenu
-🎉 funmenu
-💰 economymenu
-🎮 gamemenu
-🎨 stickermenu
-🧰 toolmenu
-🎩 logomenu
-🌙 nsfwmenu
-🙈 list
-🌚 menu2
-🧠 gpt
-▄▖▝▝▖▄▄▄▖
-    `.trim(),
+    const sysInfo = {
+      totalRAM,
+      usedRAM,
+      uptime,
+      timestamp,
+      platform,
+      version: '2.1.2',
+      developer: '@SilvaTechB',
+    };
 
-    matrix: ({ user, ...info }) => `
-╔═══════════════
-║ █▀▀▀▀▀▀▀▀▀▀▀▀█
-║ █ SILVA-MD █
-║ █▄▄▄▄▄▄▄▄▄▄▄▄█
-╠═══════════════
-║ ◦ User: ${user}
-║ ◦ ${info.timestamp}
-╠═══════════════
-║ » RAM: ${info.usedRAM}/${info.totalRAM}
-║ » Uptime: ${info.uptime}
-║ » OS: ${info.platform}
-╠═══════════════
-║ COMMANDS:
-🤖 botmenu
-👑 ownermenu
-🧑‍🤝‍🧑 groupmenu
-📥 dlmenu
-🎉 funmenu
-💰 economymenu
-🎮 gamemenu
-🎨 stickermenu
-🧰 toolmenu
-🎩 logomenu
-🌙 nsfwmenu
-🙈 list
-🌚 menu2
-🧠 gpt
-╚═══════════════
-    `.trim(),
+    const themes = {
+      cyberpunk: ({ user, features, ...info }) => `
+╭─❒ *SILVA MD | CYBERPUNK STYLE*
+│  👤 ᴜꜱᴇʀ: ${user}
+│  ⏱️ ᴜᴘᴛɪᴍᴇ: ${info.uptime}
+│  💾 ʀᴀᴍ: ${info.usedRAM}/${info.totalRAM}
+│  🧠 ᴅᴇᴠ: ${info.developer}
+│  📍 ᴘʟᴀᴛꜰᴏʀᴍ: ${info.platform}
+│  🗓️ ᴛɪᴍᴇ: ${info.timestamp}
+├───⌬ *Fᴇᴀᴛᴜʀᴇ Mᴇɴᴜs:*
+${features}
+╰────────────╮
+       github.com/SilvaTechB`.trim(),
 
-    futuristic: ({ user, ...info }) => `
-┌─────────────────────────
-│  ⚡ SILVA MD FUTURE EDITION ⚡
-├─────────────────────────
-│  ◦ User: ${user}
-│  ◦ ${info.timestamp}
-├─────────────────────────
-│  » System Resources:
-│     RAM: ${info.usedRAM}/${info.totalRAM}
-│     Uptime: ${info.uptime}
-│     Platform: ${info.platform}
-├─────────────────────────
-│  Available Commands:
-🤖 botmenu
-👑 ownermenu
-🧑‍🤝‍🧑 groupmenu
-📥 dlmenu
-🎉 funmenu
-💰 economymenu
-🎮 gamemenu
-🎨 stickermenu
-🧰 toolmenu
-🎩 logomenu
-🌙 nsfwmenu
-🙈 list
-🌚 menu2
-🧠 gpt
-└─────────────────────────
-    `.trim(),
+      futuristic: ({ user, features, ...info }) => `
+⚡ *SILVA MD - FUTURISTIC MODE* ⚡
+━━━━━━━━━━━━━━━━━━━━━
+👤 ᴜꜱᴇʀ: ${user}
+🕰️ ᴛɪᴍᴇ: ${info.timestamp}
+🖥️ ᴘʟᴀᴛꜰᴏʀᴍ: ${info.platform}
+📊 ʀᴀᴍ: ${info.usedRAM}/${info.totalRAM}
+⏱️ ᴜᴘᴛɪᴍᴇ: ${info.uptime}
+🧑‍💻 ᴅᴇᴠ: ${info.developer}
+━━━━━━━━━━━━━━━━━━━━━
+📚 *Fᴇᴀᴛᴜʀᴇs:*
+${features}
+🔗 github.com/SilvaTechB`.trim(),
 
-    minimal: ({ user, ...info }) => `
-──────────────
- SILVA MD BOT
-──────────────
-• User: ${user}
-• RAM: ${info.usedRAM}/${info.totalRAM}
-• Uptime: ${info.uptime}
-• Time: ${info.timestamp}
-• OS: ${info.platform}
-──────────────
-Commands:
-🤖 botmenu
-👑 ownermenu
-🧑‍🤝‍🧑 groupmenu
-📥 dlmenu
-🎉 funmenu
-💰 economymenu
-🎮 gamemenu
-🎨 stickermenu
-🧰 toolmenu
-🎩 logomenu
-🌙 nsfwmenu
-🙈 list
-🌚 menu2
-🧠 gpt
-──────────────
-    `.trim()
-  };
+      neon: ({ user, features, ...info }) => `
+🌈 *SILVA MD - NEON VIBES* 🌈
+━━━━━━━━━━━━━━━━━━━━━
+👤 ᴜꜱᴇʀ: ${user}
+📆 ᴛɪᴍᴇ: ${info.timestamp}
+🖥️ ᴘʟᴀᴛꜰᴏʀᴍ: ${info.platform}
+📟 ʀᴀᴍ: ${info.usedRAM}/${info.totalRAM}
+⏱️ ᴜᴘᴛɪᴍᴇ: ${info.uptime}
+👨‍💻 ᴅᴇᴠ: ${info.developer}
+━━━━━━━━━━━━━━━━━━━━━
+✨ *Mᴇɴᴜs:*
+${features}
+📍 github.com/SilvaTechB`.trim(),
+    };
 
-  // Select random theme
-  const themes = Object.keys(menuTemplates);
-  const selectedTheme = themes[Math.floor(Math.random() * themes.length)];
+    const selectedTheme = Object.keys(themes)[Math.floor(Math.random() * 3)];
+    const featuresText = featureCategories.map((cat, i) => `├── ${cat.emoji} ${cat.title}`).join('\n');
 
-  // Generate dynamic content
-  const status = menuTemplates[selectedTheme]({
-    user: m.pushName || 'User',
-    commands: commandList,
-    ...sysInfo
-  });
+    const status = themes[selectedTheme]({
+      user: m.pushName || 'User',
+      features: featuresText,
+      ...sysInfo
+    });
 
-  // Send multimedia menu with thumbnail
-  await conn.sendMessage(m.chat, { 
-    image: { url: menuThumbnail },  
-    caption: status,
-    contextInfo: {
-      mentionedJid: [m.sender],
-      forwardingScore: 999,
-      isForwarded: true,
-      forwardedNewsletterMessageInfo: {
-        newsletterJid: '120363200367779016@newsletter',
-        newsletterName: 'SILVA MD BOT 💖',
-        serverMessageId: 143
+    await conn.sendMessage(m.chat, {
+      image: { url: menuThumbnail },
+      caption: `🧾 *SILVA MD Menu — ${selectedTheme.toUpperCase()} Style*\n\n${status}`,
+      contextInfo: {
+        mentionedJid: [m.sender],
+        forwardingScore: 999,
+        isForwarded: true,
+        forwardedNewsletterMessageInfo: {
+          newsletterJid: '120363200367779016@newsletter',
+          newsletterName: 'SILVA MD BOT 💖',
+          serverMessageId: 143
+        }
       }
-    }
-  }, { quoted: m });
+    }, { quoted: m });
 
-  // Send audio with metadata
-  await conn.sendMessage(m.chat, { 
-    audio: { url: audioUrl }, 
-    mimetype: 'audio/mp4',
-    ptt: true,
-    contextInfo: {
-      externalAdReply: {
-        title: '✨ SILVA MD Experience',
-        body: 'Advanced AI-Powered Bot',
-        thumbnailUrl: menuThumbnail,
-        mediaType: 1
+    await conn.sendMessage(m.chat, {
+      audio: { url: audioUrl },
+      mimetype: 'audio/mp4',
+      ptt: true,
+      contextInfo: {
+        externalAdReply: {
+          title: '✨ SILVA MD Experience',
+          body: 'AI-Powered WhatsApp Bot',
+          thumbnailUrl: menuThumbnail,
+          mediaType: 1
+        }
       }
-    }
-  }, { quoted: m });
+    }, { quoted: m });
+
+  } catch (err) {
+    console.error('[Menu Error]', err);
+    m.reply('⚠️ Oops! Something went wrong while loading the menu.');
+  }
 };
 
 handler.help = ['menu'];
