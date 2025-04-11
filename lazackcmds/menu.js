@@ -2,18 +2,16 @@ const os = require('os');
 const moment = require('moment-timezone');
 
 let handler = async (m, { conn }) => {
-  const menuThumbnails = [
+  const thumbnails = [
     'https://i.imgur.com/RDhF6iP.jpeg',
-    'https://i.imgur.com/RDhF6iP.jpeg',
-    'https://i.imgur.com/RDhF6iP.jpeg'
-  ];
-  const audioUrls = [
-    'https://github.com/SilvaTechB/silva-md-bot/raw/main/media/Menu.mp3',
-    'https://github.com/SilvaTechB/silva-md-bot/raw/main/media/Menu.mp3'
   ];
 
-  const randomThumbnail = menuThumbnails[Math.floor(Math.random() * menuThumbnails.length)];
-  const randomAudio = audioUrls[Math.floor(Math.random() * audioUrls.length)];
+  const audios = [
+    'https://github.com/SilvaTechB/silva-md-bot/raw/main/media/Menu.mp3',
+  ];
+
+  const thumbnail = thumbnails[Math.floor(Math.random() * thumbnails.length)];
+  const audio = audios[Math.floor(Math.random() * audios.length)];
 
   const formatBytes = (bytes) => {
     if (bytes === 0) return '0 Bytes';
@@ -26,7 +24,7 @@ let handler = async (m, { conn }) => {
   const cpuUsage = process.cpuUsage();
   const cpuPercent = ((cpuUsage.system + cpuUsage.user) / 1000).toFixed(2);
 
-  const sysInfo = {
+  const sys = {
     totalRAM: formatBytes(os.totalmem()),
     usedRAM: formatBytes(os.totalmem() - os.freemem()),
     cpuLoad: `${cpuPercent}%`,
@@ -38,7 +36,7 @@ let handler = async (m, { conn }) => {
     developer: '@SilvaTechB'
   };
 
-  const menuTemplates = {
+  const templates = {
     cyberpunk: ({ user, ...info }) => `
 ╭──「 𝗦𝗜𝗟𝗩𝗔 𝗠𝗗 𝗩𝟯 」
 │ ✧ 𝗛𝗲𝘆 ${user}!
@@ -66,37 +64,7 @@ let handler = async (m, { conn }) => {
 🌚 menu2
 🧠 gpt
 ╰──────────────────
-🔗 github.com/SilvaTechB
-    `.trim(),
-
-    neon: ({ user, ...info }) => `
-▗▄▄ ▸▸◂ 𝗦𝗜𝗟𝗩𝗔-𝗠𝗗 𝗩𝟯
-  ╭───────────
-  │ ✧ 𝗛𝗲𝘆 ${user}!
-  │ ✧ ${info.timestamp}
-  ╰┬──────────
-  ╭┴──────────
-  │ ⚡ 𝗥𝗔𝗠: ${info.usedRAM}
-  │ 🖥️ 𝗖𝗣𝗨: ${info.cpuLoad}
-  │ 🕒 𝗨𝗽𝘁𝗶𝗺𝗲: ${info.uptime}
-  ╰┬──────────
-  ╭┴─「 𝗖𝗼𝗺𝗺𝗮𝗻𝗱𝘀 」
-🤖 botmenu
-👑 ownermenu
-🧑‍🤝‍🧑 groupmenu
-📥 dlmenu
-🎉 funmenu
-💰 economymenu
-🎮 gamemenu
-🎨 stickermenu
-🧰 toolmenu
-🎩 logomenu
-🌙 nsfwmenu
-🙈 list
-🌚 menu2
-🧠 gpt
-▄▖▝▝▖▄▄▄▖
-    `.trim(),
+🔗 github.com/SilvaTechB`.trim(),
 
     modern: ({ user, ...info }) => `
 ┌─────────────────────────────
@@ -126,68 +94,33 @@ let handler = async (m, { conn }) => {
 🙈 list
 🌚 menu2
 🧠 gpt
-└─────────────────────────────
-    `.trim(),
-
-    futuristic: ({ user, ...info }) => `
-┌───────────────────────────────
-│  ⚡ 𝗦𝗜𝗟𝗩𝗔-𝗠𝗗 𝗙𝗨𝗧𝗨𝗥𝗘 𝗘𝗗𝗜𝗧𝗜𝗢𝗡
-├───────────────────────────────
-│  👤 𝗨𝘀𝗲𝗿: ${user}
-│  🕒 ${info.timestamp}
-├───────────────────────────────
-│  🖥 𝗦𝘆𝘀𝘁𝗲𝗺 𝗦𝘁𝗮𝘁𝘂𝘀:
-│  • 𝗥𝗔𝗠: ${info.usedRAM}/${info.totalRAM}
-│  • 𝗖𝗣𝗨: ${info.cpuLoad}
-│  • 𝗨𝗽𝘁𝗶𝗺𝗲: ${info.uptime}
-│  • 𝗡𝗢: ${info.platform}
-├───────────────────────────────
-│  𝗖𝗼𝗺𝗺𝗮𝗻𝗱 𝗖𝗮𝘁𝗲𝗴𝗼𝗿𝗶𝗲𝘀:
-🤖 botmenu
-👑 ownermenu
-🧑‍🤝‍🧑 groupmenu
-📥 dlmenu
-🎉 funmenu
-💰 economymenu
-🎮 gamemenu
-🎨 stickermenu
-🧰 toolmenu
-🎩 logomenu
-🌙 nsfwmenu
-🙈 list
-🌚 menu2
-🧠 gpt
-└───────────────────────────────
-    `.trim()
+└─────────────────────────────`.trim()
   };
 
-  const themes = {
-    cyberpunk: 0.3,
-    neon: 0.25,
-    modern: 0.25,
-    futuristic: 0.2
+  const themeWeights = {
+    cyberpunk: 0.6,
+    modern: 0.4
   };
 
-  const weightedRandom = (obj) => {
-    const entries = Object.entries(obj);
-    const total = entries.reduce((sum, [, weight]) => sum + weight, 0);
-    let r = Math.random() * total;
+  const chooseWeighted = (weights) => {
+    const entries = Object.entries(weights);
+    const total = entries.reduce((acc, [, w]) => acc + w, 0);
+    let rand = Math.random() * total;
     for (const [key, weight] of entries) {
-      if ((r -= weight) < 0) return key;
+      if ((rand -= weight) < 0) return key;
     }
   };
 
-  const selectedTheme = weightedRandom(themes);
-
-  const status = menuTemplates[selectedTheme]({
+  const selected = chooseWeighted(themeWeights);
+  const caption = templates[selected]({
     user: m.pushName || 'User',
-    ...sysInfo
+    ...sys
   });
 
-  // Send menu with newsletter forward style
+  // Send menu image with context info
   await conn.sendMessage(m.chat, {
-    image: { url: randomThumbnail },
-    caption: status,
+    image: { url: thumbnail },
+    caption,
     contextInfo: {
       mentionedJid: [m.sender],
       forwardingScore: 999,
@@ -198,9 +131,9 @@ let handler = async (m, { conn }) => {
         serverMessageId: 143
       },
       externalAdReply: {
-        title: `SILVA MD ${sysInfo.botVersion}`,
+        title: `SILVA MD ${sys.botVersion}`,
         body: 'Next Generation WhatsApp Bot',
-        thumbnailUrl: randomThumbnail,
+        thumbnailUrl: thumbnail,
         mediaType: 1,
         mediaUrl: 'https://github.com/SilvaTechB',
         sourceUrl: 'https://github.com/SilvaTechB/silva-md-bot'
@@ -208,16 +141,16 @@ let handler = async (m, { conn }) => {
     }
   }, { quoted: m });
 
-  // Send menu audio
+  // Send audio response
   await conn.sendMessage(m.chat, {
-    audio: { url: randomAudio },
+    audio: { url: audio },
     mimetype: 'audio/mpeg',
     ptt: false,
     contextInfo: {
       externalAdReply: {
         title: '✨ SILVA MD Experience',
         body: 'Advanced AI-Powered Bot',
-        thumbnailUrl: randomThumbnail,
+        thumbnailUrl: thumbnail,
         mediaType: 1,
         mediaUrl: 'https://github.com/SilvaTechB',
         sourceUrl: 'https://github.com/SilvaTechB/silva-md-bot'
