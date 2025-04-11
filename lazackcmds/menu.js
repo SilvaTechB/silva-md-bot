@@ -1,99 +1,160 @@
-const os = require('os');
-const moment = require('moment-timezone');
+import { generateWAMessageFromContent } from '@whiskeysockets/baileys'
+const {
+    proto,
+    generateWAMessage,
+    areJidsSameUser,
+    prepareWAMessageMedia
+} = (await import('@whiskeysockets/baileys')).default
+import { createHash } from 'crypto'
+import PhoneNumber from 'awesome-phonenumber'
+import { canLevelUp, xpRange } from '../lib/levelling.js'
 
-let handler = async (m, { conn }) => {
-  try {
-    const thumbnailUrl = 'https://i.imgur.com/RDhF6iP.jpeg';
-    const audioUrl = 'https://github.com/SilvaTechB/silva-md-bot/raw/main/media/Menu.mp3';
+import fetch from 'node-fetch'
+import fs from 'fs'
+const { levelling } = '../lib/levelling.js'
+import moment from 'moment-timezone'
+import { promises } from 'fs'
+import { join } from 'path'
+const time = moment.tz('Africa/Nairobi').format('HH')
+let wib = moment.tz('Africa/Nairobi').format('HH:mm:ss')
+//import db from '../lib/database.js'
 
-    const formatBytes = (bytes) => {
-      if (bytes === 0) return '0 Bytes';
-      const k = 1024;
-      const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
-      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    };
+let handler = async (m, { conn, usedPrefix, command}) => {
 
-    const cpuUsage = process.cpuUsage();
-    const cpuPercent = ((cpuUsage.system + cpuUsage.user) / 1000).toFixed(2);
+   let d = new Date(new Date + 3600000)
+    let locale = 'en'
+    let week = d.toLocaleDateString(locale, { weekday: 'long' })
+    let date = d.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })
+    let _uptime = process.uptime() * 1000
+    let uptime = clockString(_uptime)
+let who = m.quoted ? m.quoted.sender : m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender;
+if (!(who in global.db.data.users)) throw `✳️ The user is not found in my database`
+//let pp = (thumb)
+let user = global.db.data.users[m.sender]
+let { name, exp, diamond, lastclaim, registered, regTime, age, level, role, warn } = global.db.data.users[who]
+let { min, xp, max } = xpRange(user.level, global.multiplier)
+let username = conn.getName(who)
+let math = max - xp
+let prem = global.prems.includes(who.split`@`[0])
+let sn = createHash('md5').update(who).digest('hex')
+let totaluser = Object.values(global.db.data.users).length 
+let rtotalreg = Object.values(global.db.data.users).filter(user => user.registered == true).length 
+let more = String.fromCharCode(8206)
+let readMore = more.repeat(850) 
+let greeting = ucapan()
+let taguser = '@' + m.sender.split("@s.whatsapp.net")[0]
 
-    const sysInfo = {
-      totalRAM: formatBytes(os.totalmem()),
-      usedRAM: formatBytes(os.totalmem() - os.freemem()),
-      cpuLoad: `${cpuPercent}%`,
-      uptime: moment.duration(os.uptime(), 'seconds').humanize(),
-      timestamp: moment.tz('Africa/Nairobi').format('ddd DD/MM/YY HH:mm:ss'),
-      platform: `${os.platform()} ${os.arch()}`,
-      nodeVersion: process.version,
-      botVersion: '3.0.0',
-      developer: '@SilvaTechB'
-    };
+let str = ` ❤️ *_Hello ${name}, ${greeting}! Welcome to my menu!_* 🥳
+╭═══〘 𝑺𝑰𝑳𝑽𝑨 𝑩𝑶𝑻 〙═══⊷❍
+┃✰│━━━❮❮ CMD LINE ❯❯━━━━━━
+┃✰│𝙽𝚊𝚖𝚎: ${global.author}
+┃✰│𝚃𝚘𝚝𝚊𝚕: 700+ Features
+┃✰│Network:LTE
+┃✰│ᴠᴇʀꜱɪᴏɴ: BETA
+┃✰│ᴏᴡɴᴇʀ : *𝕊𝕀𝕃𝕍𝔸*      
+┃✰│ɴᴜᴍʙᴇʀ: 254743706010
+┃✰│HOSTER: *Silva Platform*
+┃✰│ᴍᴏᴅᴇ: *Unkown*
+┃✰│ᴘʀᴇғɪx: *Multi-Prefix*
+┃✰│Uptime: ${uptime}               
+┃✰│Today's Date: ${date}           
+┃✰│Current Time: ${wib}            
+┃✰│──────────●●►
+┃✰│𝕏 https://x.com/@silva_african
+┃✰│  ▎▍▌▌▉▏▎▌▉▐▏▌▎
+┃✰│  ▎▍▌▌▉▏▎▌▉▐▏▌▎
+┃✰│   ©𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓
+╰──────────────────
+Thank you for choosing silva md
+powered by Sylivanus❤️
+─═✧✧═─ 𝕊𝕀𝕃𝕍𝔸 𝔹𝕆𝕋 ─═✧✧═─`
 
-    const menuText = `
-┌──[ 𝗦𝗜𝗟𝗩𝗔 𝗠𝗗 𝗩𝟯 ]
-│  👋 Hello ${m.pushName || 'User'}
-│  🕒 ${sysInfo.timestamp}
-├──[ 𝗦𝘆𝘀𝘁𝗲𝗺 ]
-│  🧠 CPU: ${sysInfo.cpuLoad}
-│  💾 RAM: ${sysInfo.usedRAM} / ${sysInfo.totalRAM}
-│  ⏳ Uptime: ${sysInfo.uptime}
-│  💻 OS: ${sysInfo.platform}
-├──[ 𝗖𝗼𝗺𝗺𝗮𝗻𝗱 𝗟𝗶𝘀𝘁 ]
-🤖 botmenu   👑 ownermenu
-🧑‍🤝‍🧑 groupmenu 📥 dlmenu
-🎉 funmenu   💰 economymenu
-🎮 gamemenu  🎨 stickermenu
-🧰 toolmenu  🎩 logomenu
-🌙 nsfwmenu  🙈 list
-🌚 menu2     🧠 gpt
-├────────────────────
-🌐 github.com/SilvaTechB
-    `.trim();
+let msg = generateWAMessageFromContent(m.chat, {
 
-    // Send Image + Menu
-    await conn.sendMessage(m.chat, {
-      image: { url: thumbnailUrl },
-      caption: menuText,
-      contextInfo: {
-        mentionedJid: [m.sender],
-        forwardingScore: 999,
-        isForwarded: true,
-        externalAdReply: {
-          title: `SILVA MD ${sysInfo.botVersion}`,
-          body: 'Next Generation WhatsApp Bot',
-          thumbnailUrl: thumbnailUrl,
-          mediaType: 1,
-          mediaUrl: 'https://github.com/SilvaTechB',
-          sourceUrl: 'https://github.com/SilvaTechB/silva-md-bot'
-        }
-      }
-    }, { quoted: m });
+  viewOnceMessage: {
 
-    // Send Audio
-    await conn.sendMessage(m.chat, {
-      audio: { url: audioUrl },
-      mimetype: 'audio/mpeg',
-      ptt: false,
-      contextInfo: {
-        externalAdReply: {
-          title: '🎧 Menu Audio - SILVA MD',
-          body: 'AI Bot Powered by SilvaTech',
-          thumbnailUrl: thumbnailUrl,
-          mediaType: 1,
-          mediaUrl: 'https://github.com/SilvaTechB',
-          sourceUrl: 'https://github.com/SilvaTechB/silva-md-bot'
-        }
-      }
-    }, { quoted: m });
+    message: {
 
-  } catch (err) {
-    console.error(err);
-    m.reply('❌ Menu failed to load.');
+        "messageContextInfo": {
+          "deviceListMetadata": {},
+          "deviceListMetadataVersion": 2
+        },
+
+        interactiveMessage: proto.Message.InteractiveMessage.create({
+          body: proto.Message.InteractiveMessage.Body.create({
+            text: str
+          }),
+
+          footer: proto.Message.InteractiveMessage.Footer.create({
+            text: "Use The Below Buttons"
+          }),
+
+          header: proto.Message.InteractiveMessage.Header.create({
+          ...(await prepareWAMessageMedia({ image : { url: 'https://files.catbox.moe/8324jm.jpg'}}, { upload: conn.waUploadToServer})), 
+            title: null,
+            subtitle: null,
+            hasMediaAttachment: false
+
+          }),
+          nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
+            buttons: [
+              {
+                "name": "single_select",
+                "buttonParamsJson": 
+                                "{\"title\":\"TAP TO OPEN\",\"sections\":[{\"title\":\"HERE IS ALL LIST OF MENU\",\"highlight_label\":\"SILVA\",\"rows\":[{\"header\":\"\",\"title\":\"💀 Bot Menu\",\"description\":\"The Bot's secret control panel. What's your command, oh great one?\",\"id\":\".botmenu\"},{\"header\":\"\",\"title\":\"📚 Owner Menu\",\"description\":\"The sacred scroll only for the chosen one. Yep, that's you, Boss!\",\"id\":\".ownermenu\"},{\"header\":\"\",\"title\":\"🧑‍🤝‍🧑 Group Menu\",\"description\":\"Group shenanigans central! Unite, chat, conquer!\",\"id\":\".groupmenu\"},{\"header\":\"\",\"title\":\"📥 Download Menu\",\"description\":\"'DL' stands for 'Delicious Loot'. Come grab your goodies!\",\"id\":\".dlmenu\"},{\"header\":\"\",\"title\":\"🎉 Fun Menu\",\"description\":\"The bot's party hat. Games, jokes and instant ROFLs. Let's get this party started!\",\"id\":\".funmenu\"},{\"header\":\"\",\"title\":\"💰 Economy Menu\",\"description\":\"Bling bling! Your personal vault of virtual economy. Spend or save? Choose wisely!\",\"id\":\".economymenu\"},{\"header\":\"\",\"title\":\"🎮 Game Menu\",\"description\":\"Enter the gaming arena. May the odds be ever in your favor!\",\"id\":\".gamemenu\"},{\"header\":\"\",\"title\":\"🎨 Sticker Menu\",\"description\":\"A rainbow of stickers for your inner artist. Make your chats pop!\",\"id\":\".stickermenu\"},{\"header\":\"\",\"title\":\"🧰 Tool Menu\",\"description\":\"Your handy-dandy toolkit. What's your pick, genius?\",\"id\":\".toolmenu\"},{\"header\":\"\",\"title\":\"🎩 Logo Menu\",\"description\":\"Create a logo that screams YOU. Or whispers. You choose the volume.\",\"id\":\".logomenu\"},{\"header\":\"\",\"title\":\"🌙 NSFW Menu\",\"description\":\"The After Dark menu. But remember, sharing adult secrets must be consent-based.\",\"id\":\".nsfwmenu\"}]}]}" 
+                },
+                 {
+                "name": "quick_reply",
+                "buttonParamsJson": "{\"display_text\":\"Owner✨❤️\",\"id\":\".grp\"}"
+                 },
+                  {
+                  "name": "quick_reply",
+                  "buttonParamsJson": "{\"display_text\":\"SECOND MENU 📲\",\"id\":\".menu2\"}"
+                  },
+                  {
+                  "name": "cta_url",
+                 "buttonParamsJson": "{\"display_text\":\"BOT SC 🎉\",\"url\":\"https://github.com/SilvaTechB/silva-md-bot\",\"merchant_url\":\"https://github.com/SilvaTechB\"}"
+              }
+           ],
+          })
+        })
+    }
   }
-};
+}, {})
 
-handler.help = ['menu', 'help'];
-handler.tags = ['core'];
-handler.command = ['menu', 'help', 'm', 'cmd'];
+await conn.relayMessage(msg.key.remoteJid, msg.message, {
 
-module.exports = handler;
+  messageId: msg.key.id
+
+})
+
+
+}
+handler.help = ['main']
+handler.tags = ['group']
+handler.command = ['menu', 'help','h','commands'] 
+
+export default handler
+function clockString(ms) {
+    let h = isNaN(ms) ? '--' : Math.floor(ms / 3600000)
+    let m = isNaN(ms) ? '--' : Math.floor(ms / 60000) % 60
+    let s = isNaN(ms) ? '--' : Math.floor(ms / 1000) % 60
+    return [h, m, s].map(v => v.toString().padStart(2, 0)).join(':')}  
+
+    function ucapan() {
+      const time = moment.tz('Africa/Nairobi').format('HH')
+      let res = "happy early in the day☀️"
+      if (time >= 4) {
+        res = "Good Morning 🥱"
+      }
+      if (time >= 10) {
+        res = "Good Afternoon 🫠"
+     }
+      if (time >= 15) {
+        res = "Good Afternoon 🌇"
+      }
+      if (time >= 18) {
+       res = "Good Night 🌙"
+      }
+      return res
+    }
