@@ -1,10 +1,7 @@
-import os from 'os';
-import fs from 'fs';
-import path from 'path';
-import moment from 'moment-timezone';
+const os = require('os');
+const moment = require('moment-timezone');
 
 let handler = async (m, { conn }) => {
-  // Enhanced media resources with fallbacks
   const menuThumbnails = [
     'https://i.imgur.com/RDhF6iP.jpeg',
     'https://i.imgur.com/RDhF6iP.jpeg',
@@ -15,17 +12,15 @@ let handler = async (m, { conn }) => {
     'https://github.com/SilvaTechB/silva-md-bot/raw/main/media/Menu.mp3'
   ];
 
-  // Random selection for media
   const randomThumbnail = menuThumbnails[Math.floor(Math.random() * menuThumbnails.length)];
   const randomAudio = audioUrls[Math.floor(Math.random() * audioUrls.length)];
 
-  // Modern system monitor with additional metrics
   const formatBytes = (bytes) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
   const cpuUsage = process.cpuUsage();
@@ -43,7 +38,6 @@ let handler = async (m, { conn }) => {
     developer: '@SilvaTechB'
   };
 
-  // Modern menu templates with emoji variants
   const menuTemplates = {
     cyberpunk: ({ user, ...info }) => `
 ╭──「 𝗦𝗜𝗟𝗩𝗔 𝗠𝗗 𝗩𝟯 」
@@ -87,7 +81,7 @@ let handler = async (m, { conn }) => {
   │ 🕒 𝗨𝗽𝘁𝗶𝗺𝗲: ${info.uptime}
   ╰┬──────────
   ╭┴─「 𝗖𝗼𝗺𝗺𝗮𝗻𝗱𝘀 」
- 🤖 botmenu
+🤖 botmenu
 👑 ownermenu
 🧑‍🤝‍🧑 groupmenu
 📥 dlmenu
@@ -148,7 +142,7 @@ let handler = async (m, { conn }) => {
 │  • 𝗨𝗽𝘁𝗶𝗺𝗲: ${info.uptime}
 │  • 𝗡𝗢: ${info.platform}
 ├───────────────────────────────
-│  � 𝗖𝗼𝗺𝗺𝗮𝗻𝗱 𝗖𝗮𝘁𝗲𝗴𝗼𝗿𝗶𝗲𝘀:
+│  𝗖𝗼𝗺𝗺𝗮𝗻𝗱 𝗖𝗮𝘁𝗲𝗴𝗼𝗿𝗶𝗲𝘀:
 🤖 botmenu
 👑 ownermenu
 🧑‍🤝‍🧑 groupmenu
@@ -167,30 +161,42 @@ let handler = async (m, { conn }) => {
     `.trim()
   };
 
-  // Select random theme with weights
   const themes = {
     cyberpunk: 0.3,
     neon: 0.25,
     modern: 0.25,
     futuristic: 0.2
   };
-  const selectedTheme = Object.keys(themes).reduce((a, b) => 
-    Math.random() < themes[b] ? b : a, 'modern');
 
-  // Generate dynamic content
+  const weightedRandom = (obj) => {
+    const entries = Object.entries(obj);
+    const total = entries.reduce((sum, [, weight]) => sum + weight, 0);
+    let r = Math.random() * total;
+    for (const [key, weight] of entries) {
+      if ((r -= weight) < 0) return key;
+    }
+  };
+
+  const selectedTheme = weightedRandom(themes);
+
   const status = menuTemplates[selectedTheme]({
     user: m.pushName || 'User',
     ...sysInfo
   });
 
-  // Send multimedia menu with enhanced metadata
-  await conn.sendMessage(m.chat, { 
-    image: { url: randomThumbnail },  
+  // Send menu with newsletter forward style
+  await conn.sendMessage(m.chat, {
+    image: { url: randomThumbnail },
     caption: status,
     contextInfo: {
       mentionedJid: [m.sender],
       forwardingScore: 999,
       isForwarded: true,
+      forwardedNewsletterMessageInfo: {
+        newsletterJid: '120363200367779016@newsletter',
+        newsletterName: 'SILVA MD BOT 💖',
+        serverMessageId: 143
+      },
       externalAdReply: {
         title: `SILVA MD ${sysInfo.botVersion}`,
         body: 'Next Generation WhatsApp Bot',
@@ -202,9 +208,9 @@ let handler = async (m, { conn }) => {
     }
   }, { quoted: m });
 
-  // Send audio with improved metadata
-  await conn.sendMessage(m.chat, { 
-    audio: { url: randomAudio }, 
+  // Send menu audio
+  await conn.sendMessage(m.chat, {
+    audio: { url: randomAudio },
     mimetype: 'audio/mpeg',
     ptt: false,
     contextInfo: {
@@ -224,4 +230,4 @@ handler.help = ['menu', 'help', 'commands'];
 handler.tags = ['core'];
 handler.command = ['menu', 'help', 'm', 'cmd'];
 
-export default handler;
+module.exports = handler;
