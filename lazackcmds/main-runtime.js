@@ -37,18 +37,18 @@ ${dotAnim}
 `;
 
   await conn.sendMessage(m.chat, {
-    caption: text.trim(),
-    contextInfo: {
-      mentionedJid: [m.sender],
-      forwardingScore: 999,
-      isForwarded: true,
-      forwardedNewsletterMessageInfo: {
-        newsletterJid: '120363200367779016@newsletter',
-        newsletterName: 'SILVA MD RUNTIME 💖🦄',
-        serverMessageId: 143
-      }
+  text: text.trim(),
+  contextInfo: {
+    mentionedJid: [m.sender],
+    forwardingScore: 999,
+    isForwarded: true,
+    forwardedNewsletterMessageInfo: {
+      newsletterJid: '120363200367779016@newsletter',
+      newsletterName: 'SILVA MD RUNTIME 💖🦄',
+      serverMessageId: 143
     }
-  }, { quoted: m });
+  }
+}, { quoted: m });
 };
 
 handler.help = ['runtime', 'uptime'];
