@@ -1,5 +1,5 @@
-let handler = async (m, { conn, args, text, command, isGroup }) => {
-  if (!isGroup) return m.reply("❌ This command only works in groups.");
+let handler = async (m, { conn, args, text, command }) => {
+  if (!m.isGroup) return m.reply("❌ This command only works in groups.");
 
   if (!text) return m.reply(`📌 Use like this:\n.confess I have a crush on someone here...`);
 
@@ -48,10 +48,10 @@ let handler = async (m, { conn, args, text, command, isGroup }) => {
     }
   });
 
-  // Auto delete the confession after 60 seconds
+  // Auto delete after 60 seconds
   setTimeout(async () => {
     await conn.sendMessage(m.chat, { delete: sentMsg.key });
-  }, 100000); // 60 seconds
+  }, 60000);
 };
 
 handler.help = ["confess"];
