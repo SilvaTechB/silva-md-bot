@@ -11,11 +11,13 @@ let handler = async (m, { conn, args, text, command, isGroup }) => {
     confession = text.replace("#reveal", "").trim();
   }
 
-  const name = reveal ? `🙋‍♂️ *Confessed by:* @${m.sender.split("@")[0]}` : "🙊 *Anonymous Confession*";
+  const senderId = m.sender.split("@")[0];
+  const name = reveal ? `🙋‍♂️ *Confessed by:* @${senderId}` : "🙊 *Anonymous Confession*";
+  const replyLink = `wa.me/${senderId}?text=Hey!%20I%20saw%20your%20confession%20in%20the%20group%20😊`;
 
-  let msg = `╭────[ 🕵️ *CONFESSION* ]────╮\n\n📩 *Message:*\n${confession}\n\n${name}\n╰──────────────────────────╯`;
+  const msg = `┌───「 💌 *CONFESSION* 」───┐\n\n📩 *Message:*\n${confession}\n\n${name}\n\n🌐 [Reply privately](https://${replyLink})\n└──────────────────────────┘`;
 
-  await conn.sendMessage(m.chat, {
+  let sentMsg = await conn.sendMessage(m.chat, {
     text: msg,
     mentions: reveal ? [m.sender] : [],
     contextInfo: {
@@ -25,17 +27,31 @@ let handler = async (m, { conn, args, text, command, isGroup }) => {
       forwardedNewsletterMessageInfo: {
         newsletterJid: '120363200367779016@newsletter',
         newsletterName: 'SILVA MD CONFESSIONS 💌',
-        serverMessageId: 143
+        serverMessageId: 143,
+      },
+      externalAdReply: {
+        title: "SILVA CONFESSIONS 💖",
+        body: "Tap to reply anonymously",
+        thumbnailUrl: "https://i.imgur.com/RvEKtPJ.jpeg",
+        sourceUrl: `https://${replyLink}`,
+        mediaType: 1,
+        renderLargerThumbnail: true,
       }
     }
   });
 
+  // React to original message
   await conn.sendMessage(m.chat, {
     react: {
       text: "💌",
       key: m.key
     }
   });
+
+  // Auto delete the confession after 60 seconds
+  setTimeout(async () => {
+    await conn.sendMessage(m.chat, { delete: sentMsg.key });
+  }, 100000); // 60 seconds
 };
 
 handler.help = ["confess"];
