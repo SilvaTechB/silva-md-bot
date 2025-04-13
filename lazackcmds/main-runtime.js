@@ -1,17 +1,9 @@
-// Made with ❤️ by Silva
+// Made with ❤️ by SilvaTech
 import { cpus as _cpus } from 'os';
 import { performance } from 'perf_hooks';
-import { sizeFormatter } from 'human-readable';
-
-let format = sizeFormatter({
-  std: 'JEDEC',
-  decimalPlaces: 2,
-  keepTrailingZeroes: false,
-  render: (literal, symbol) => `${literal} ${symbol}B`,
-});
 
 let handler = async (m, { conn }) => {
-  let name = m.pushName || conn.getName(m.sender);
+  const name = m.pushName || conn.getName(m.sender);
   let _muptime;
 
   if (process.send) {
@@ -22,9 +14,9 @@ let handler = async (m, { conn }) => {
     }) * 1000;
   }
 
-  let start = performance.now();
+  const start = performance.now();
 
-  // React with ⏱️ to show processing
+  // React with ⏱️
   await conn.sendMessage(m.chat, {
     react: {
       text: '⏱️',
@@ -32,37 +24,43 @@ let handler = async (m, { conn }) => {
     },
   });
 
-  // Animated countdown for 2 seconds
-  for (let i = 0; i <= 2; i++) {
-    let animatedUptime = clockString(_muptime + i * 1000);
+  const animationFrames = [
+    `⚡ Booting up Silva MD...`,
+    `➤ Connecting to core services...`,
+    `➠ Syncing uptime and CPU stats...`,
+    `➤ Finalizing report...`,
+    `✨ Done! Sending details...`,
+  ];
+
+  for (let frame of animationFrames) {
     await conn.sendMessage(m.chat, {
-      text: `🔄 Updating Runtime...\n\n⏱️ *${animatedUptime.trim()}*`,
+      text: `🛠️ *Runtime Monitor*\n${frame}`,
     }, { quoted: m });
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(res => setTimeout(res, 400)); // 0.4 sec per frame
   }
 
-  let end = performance.now();
-  let latency = (end - start).toFixed(2);
-  let cpu = _cpus()[0];
+  const end = performance.now();
+  const latency = (end - start).toFixed(2);
+  const cpu = _cpus()[0];
+  const cpuModel = cpu.model.trim().split(' ').slice(0, 5).join(' ');
+  const cores = _cpus().length;
+  const uptimeText = clockString(_muptime);
 
-  const finalText = `
-╭─❏ SILVA MD UPTIME
-*💻 SILVA MD RUNTIME STATS 💻*
+  const message = `
+🎯 *SILVA MD RUNTIME REPORT*
 
-⏱️ *Uptime:*\n${clockString(_muptime)}
-📡 *Latency:* ${latency} ms
+⏱️ *Uptime:*\n${uptimeText}
 
-🛠️ *Processor Details:*
-- Cores: ${_cpus().length}
-- Speed: ${cpu.speed} MHz
-- Model: ${cpu.model}
+📶 *Latency:* ${latency} ms
+🧠 *CPU:* ${cpuModel}
+🔩 *Cores:* ${cores}
+⚙️ *Speed:* ${cpu.speed} MHz
 
-✨ Powered by *Silva MD*
-  `.trim();
+💖 Powered by *Silva MD Engine*
+`.trim();
 
-  // Send final fancy response
   await conn.sendMessage(m.chat, {
-    text: finalText,
+    text: message,
     contextInfo: {
       mentionedJid: [m.sender],
       forwardingScore: 999,
@@ -82,16 +80,10 @@ handler.command = /^(uptime|runtime)$/i;
 
 export default handler;
 
-// Helper function
 function clockString(ms) {
   let d = isNaN(ms) ? '--' : Math.floor(ms / 86400000);
   let h = isNaN(ms) ? '--' : Math.floor(ms / 3600000) % 24;
   let m = isNaN(ms) ? '--' : Math.floor(ms / 60000) % 60;
   let s = isNaN(ms) ? '--' : Math.floor(ms / 1000) % 60;
-  return [
-    d + ' Days ☀️',
-    h + ' Hours 🕐',
-    m + ' Minutes ⏰',
-    s + ' Seconds ⏱️',
-  ].join('\n');
+  return `🗓️ ${d}d ${h}h ${m}m ${s}s`;
 }
