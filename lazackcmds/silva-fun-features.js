@@ -1,150 +1,123 @@
-// 🌀 Silva MD: Group Mood Analyzer
-let moodAnalyzer = async (m, { conn }) => {
-  const Sentiment = require('sentiment');
-  const analyzer = new Sentiment();
-  let msgs = await conn.fetchMessages(m.chat, 50);
-  let scores = { positive: 0, negative: 0, neutral: 0 };
+let handler = async (m, { conn, command }) => {
+  if (command === 'vibescan') {
+    let msgs = await conn.fetchMessages(m.chat, 50);
+    let happy = ['lol', '😂', 'happy', 'good', 'nice', 'awesome'];
+    let sad = ['sad', 'bad', '😭', 'hate', 'angry', 'mad'];
+    let positive = 0, negative = 0;
 
-  for (let msg of msgs) {
-    let text = msg.message?.conversation || '';
-    let result = analyzer.analyze(text);
-    if (result.score > 0) scores.positive++;
-    else if (result.score < 0) scores.negative++;
-    else scores.neutral++;
+    for (let msg of msgs) {
+      let txt = msg?.message?.conversation?.toLowerCase() || '';
+      if (happy.some(w => txt.includes(w))) positive++;
+      if (sad.some(w => txt.includes(w))) negative++;
+    }
+
+    let mood = '😐 Neutral';
+    if (positive > negative) mood = '😄 Positive Vibes';
+    else if (negative > positive) mood = '😡 Toxic Vibes';
+    else if (positive + negative === 0) mood = '💀 Dead Chat';
+
+    await conn.sendMessage(m.chat, {
+      text: `🧠 *Group Vibe Scanner Result:*\n${mood}`,
+      contextInfo: {
+        mentionedJid: [m.sender],
+        forwardingScore: 999,
+        isForwarded: true,
+        forwardedNewsletterMessageInfo: {
+          newsletterJid: '120363200367779016@newsletter',
+          newsletterName: 'SILVA VIBE SCANNER 💬',
+          serverMessageId: 143
+        }
+      }
+    });
   }
 
-  let mood = '😐 Neutral';
-  if (scores.positive > scores.negative) mood = '😄 Happy';
-  else if (scores.negative > scores.positive) mood = '😡 Toxic';
-  else if (scores.positive + scores.negative === 0) mood = '💀 Dead';
-
-  let message = `🧠 *Group Mood:* ${mood}`;
-  await conn.sendMessage(m.chat, {
-    text: message,
-    contextInfo: {
-      mentionedJid: [m.sender],
-      forwardingScore: 999,
-      isForwarded: true,
-      forwardedNewsletterMessageInfo: {
-        newsletterJid: '120363200367779016@newsletter',
-        newsletterName: 'GROUP MOOD ANALYZER 🧠',
-        serverMessageId: 143
+  if (command === 'mirror') {
+    let last = m.quoted?.text || m.text;
+    let mirrored = last.split('').reverse().join('');
+    await conn.sendMessage(m.chat, {
+      text: `🪞 *Mirrored Message:*\n${mirrored}`,
+      contextInfo: {
+        mentionedJid: [m.sender],
+        forwardingScore: 999,
+        isForwarded: true,
+        forwardedNewsletterMessageInfo: {
+          newsletterJid: '120363200367779016@newsletter',
+          newsletterName: 'SILVA MIRROR TOOL 🪞',
+          serverMessageId: 143
+        }
       }
-    }
-  });
-};
-moodAnalyzer.help = ['moodcheck'];
-moodAnalyzer.tags = ['fun'];
-moodAnalyzer.command = ['moodcheck'];
-moodAnalyzer.group = true;
+    });
+  }
 
-// 💌 Secret Admirer
-let secretAdmirer = async (m, { conn }) => {
-  let user = m.mentionedJid[0];
-  if (!user) return m.reply('Tag someone to admire.');
-  await conn.sendMessage(user, {
-    text: '💌 Someone in your group secretly admires you! Keep shining! ✨',
-  });
-  let message = '✅ Your secret message has been sent anonymously.';
-  await conn.sendMessage(m.chat, {
-    text: message,
-    contextInfo: {
-      mentionedJid: [m.sender],
-      forwardingScore: 999,
-      isForwarded: true,
-      forwardedNewsletterMessageInfo: {
-        newsletterJid: '120363200367779016@newsletter',
-        newsletterName: 'SECRET ADMIRER 💌',
-        serverMessageId: 143
+  if (command === 'topchatters') {
+    let msgs = await conn.fetchMessages(m.chat, 50);
+    let counts = {};
+    msgs.forEach(msg => {
+      let sender = msg.key.participant || msg.key.remoteJid;
+      counts[sender] = (counts[sender] || 0) + 1;
+    });
+
+    let sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    let top = sorted.slice(0, 5).map(([u, c], i) => `${i + 1}. @${u.split('@')[0]} – ${c} msgs`).join('\n');
+
+    await conn.sendMessage(m.chat, {
+      text: `📊 *Top Chatters (last 50 msgs):*\n${top}`,
+      mentions: sorted.map(x => x[0]),
+      contextInfo: {
+        mentionedJid: [m.sender],
+        forwardingScore: 999,
+        isForwarded: true,
+        forwardedNewsletterMessageInfo: {
+          newsletterJid: '120363200367779016@newsletter',
+          newsletterName: 'SILVA CHAT STATS 📈',
+          serverMessageId: 143
+        }
       }
-    }
-  });
-};
-secretAdmirer.help = ['admire'];
-secretAdmirer.tags = ['fun'];
-secretAdmirer.command = ['admire'];
-secretAdmirer.group = true;
-secretAdmirer.admin = true;
+    });
+  }
 
-// 🧘 AI Life Advice
-const advice = async (m, { conn }) => {
-  let tips = [
-    'Don’t chase people. Be an example. Attract them. 💫',
-    'Your vibe attracts your tribe. 🔥',
-    'Protect your peace. ✌️',
-    'You are one decision away from a totally different life. 🌍'
-  ];
-  let tip = tips[Math.floor(Math.random() * tips.length)];
-  let message = `🧘 *AI Life Advice:*\n${tip}`;
-  await conn.sendMessage(m.chat, {
-    text: message,
-    contextInfo: {
-      mentionedJid: [m.sender],
-      forwardingScore: 999,
-      isForwarded: true,
-      forwardedNewsletterMessageInfo: {
-        newsletterJid: '120363200367779016@newsletter',
-        newsletterName: 'AI LIFE ADVICE 🧘',
-        serverMessageId: 143
+  if (command === 'flipcoin') {
+    const sides = ['🪙 Heads', '🔄 Tails'];
+    const result = sides[Math.floor(Math.random() * sides.length)];
+    await conn.sendMessage(m.chat, {
+      text: `🎲 *Coin Flip Result:*\n${result}`,
+      contextInfo: {
+        mentionedJid: [m.sender],
+        forwardingScore: 999,
+        isForwarded: true,
+        forwardedNewsletterMessageInfo: {
+          newsletterJid: '120363200367779016@newsletter',
+          newsletterName: 'SILVA COINFLIP 🎲',
+          serverMessageId: 143
+        }
       }
-    }
-  });
-};
-advice.help = ['adviceme'];
-advice.tags = ['fun'];
-advice.command = ['adviceme'];
+    });
+  }
 
-// 🎭 Emoji Persona Detector
-const emojiMe = async (m, { conn }) => {
-  let emojis = ['💅', '🔥', '🧠', '😂', '😈', '😴', '👑'];
-  let result = emojis[Math.floor(Math.random() * emojis.length)];
-  let message = `🧬 *Your Vibe:* ${result}`;
-  await conn.sendMessage(m.chat, {
-    text: message,
-    contextInfo: {
-      mentionedJid: [m.sender],
-      forwardingScore: 999,
-      isForwarded: true,
-      forwardedNewsletterMessageInfo: {
-        newsletterJid: '120363200367779016@newsletter',
-        newsletterName: 'EMOJI VIBE DETECTOR 🎭',
-        serverMessageId: 143
+  if (command === 'poem') {
+    let poems = [
+      "Chase your dream with silent speed,\nLet your actions plant the seed.\nEven storms will clear your sky,\nSo spread your wings and learn to fly.",
+      "You are fire, you are flame,\nNever let them dim your name.\nPower lives inside your chest,\nBurn, don't settle for less."
+    ];
+    let poem = poems[Math.floor(Math.random() * poems.length)];
+    await conn.sendMessage(m.chat, {
+      text: `📜 *Here's your spark poem:*\n\n${poem}`,
+      contextInfo: {
+        mentionedJid: [m.sender],
+        forwardingScore: 999,
+        isForwarded: true,
+        forwardedNewsletterMessageInfo: {
+          newsletterJid: '120363200367779016@newsletter',
+          newsletterName: 'SILVA POEM DROP 📝',
+          serverMessageId: 143
+        }
       }
-    }
-  });
+    });
+  }
 };
-emojiMe.help = ['whatsmyemoji'];
-emojiMe.tags = ['fun'];
-emojiMe.command = ['whatsmyemoji'];
 
-// 📖 MyStory Generator
-const storyGen = async (m, { conn, text }) => {
-  if (!text) return m.reply('Give me 2-3 keywords like: .mystory moon picnic');
-  let [a, b, c] = text.split(" ");
-  let story = `Under the ${a}, they met unexpectedly for a ${b}. As the ${c || 'rain'} poured, secrets unraveled, and hearts whispered the truth they always hid.`;
-  let message = `📖 *Generated Story:*\n${story}`;
-  await conn.sendMessage(m.chat, {
-    text: message,
-    contextInfo: {
-      mentionedJid: [m.sender],
-      forwardingScore: 999,
-      isForwarded: true,
-      forwardedNewsletterMessageInfo: {
-        newsletterJid: '120363200367779016@newsletter',
-        newsletterName: 'STORY GENERATOR 📖',
-        serverMessageId: 143
-      }
-    }
-  });
-};
-storyGen.help = ['mystory'];
-storyGen.tags = ['fun'];
-storyGen.command = ['mystory'];
+handler.help = ['vibescan', 'mirror', 'topchatters', 'flipcoin', 'poem'];
+handler.tags = ['fun', 'tools', 'group'];
+handler.command = ['vibescan', 'mirror', 'topchatters', 'flipcoin', 'poem'];
 
-export default [
-  moodAnalyzer,
-  secretAdmirer,
-  advice,
-  emojiMe,
-  storyGen
-];
+export default handler;
