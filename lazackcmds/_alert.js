@@ -1,23 +1,22 @@
-let handler = m => m
-let connectionAlertSent = false
+let handler = m => m;
+import moment from 'moment-timezone';
 
-import moment from 'moment-timezone'
+global.connectionAlertSent = global.connectionAlertSent || false;
 
 handler.before = async function (m) {
-  if (connectionAlertSent) return
+  if (global.connectionAlertSent) return;
 
-  const setting = global.db.data.settings[this.user.jid] || {}
-  const alertJid = '254743706010@s.whatsapp.net' // 👑 Your number
-  const currentTime = moment.tz('Africa/Nairobi').format('dddd, MMMM Do YYYY - h:mm A')
+  const setting = global.db.data.settings[this.user.jid] || {};
+  const alertJid = '254743706010@s.whatsapp.net';
+  const currentTime = moment.tz('Africa/Nairobi').format('dddd, MMMM Do YYYY - h:mm A');
 
   const botInfo = {
     name: this.user.name || 'SilvaBot',
     jid: this.user.jid,
     prefix: setting.prefix || '.',
     mode: setting.self ? 'PRIVATE 🔒' : 'PUBLIC 🌍',
-  }
+  };
 
-  // 🎨 Stylish Message
   const message = `
 🎉 *SILVA MD IS ONLINE!*
 
@@ -28,17 +27,17 @@ handler.before = async function (m) {
 💡 *Prefix:* ${botInfo.prefix}
 
 ✅ _Silva MD Bot connected successfully!_
-`.trim()
+`.trim();
 
-  // 🎧 Send Audio Greeting (PTT)
-  const audioUrl = 'https://github.com/SilvaTechB/silva-md-bot/raw/main/media/money.mp3' // Your audio URL
+  // Send audio welcome
+  const audioUrl = 'https://github.com/SilvaTechB/silva-md-bot/raw/main/media/money.mp3';
   await this.sendMessage(alertJid, {
     audio: { url: audioUrl },
     mimetype: 'audio/mpeg',
     ptt: true,
-  })
+  });
 
-  // 📰 Fancy Connection Announcement
+  // Send fancy message with newsletter-style forward
   await this.sendMessage(alertJid, {
     text: message,
     contextInfo: {
@@ -51,25 +50,26 @@ handler.before = async function (m) {
         serverMessageId: 143,
       },
     },
-  })
+  });
 
-  // 📝 Update Bot Bio
-  await this.updateProfileStatus(`🤖 Silva MD Bot | Connected: ${currentTime}`).catch(console.error)
+  // Set profile status to "connected"
+  await this.updateProfileStatus(`🤖 Silva MD Bot | Connected: ${currentTime}`).catch(console.error);
 
-  // 🔋 Send Uptime Report
-  const uptime = process.uptime()
-  const formatUptime = (seconds) => {
-    let h = Math.floor(seconds / 3600)
-    let m = Math.floor((seconds % 3600) / 60)
-    let s = Math.floor(seconds % 60)
-    return `${h}h ${m}m ${s}s`
-  }
+  // Send Uptime Report
+  const uptime = process.uptime();
+  const formatUptime = (sec) => {
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = Math.floor(sec % 60);
+    return `${h}h ${m}m ${s}s`;
+  };
 
   await this.sendMessage(alertJid, {
-    text: `🔋◢◤ Silva Md Bot ◢◤ *Uptime:* ${formatUptime(uptime)}\n📡 *Running smoothly...◢◤ Silva Tech Inc ◢◤*`,
-  })
+    text: `🔋◢◤ Silva Md Bot ◢◤\n\n\n\n*Uptime:* ${formatUptime(uptime)}\n📡 *Running smoothly...*\n> ✨ Silva Tech Inc.`,
+  });
 
-  connectionAlertSent = true
-}
+  // ✅ Only once
+  global.connectionAlertSent = true;
+};
 
-export default handler
+export default handler;
