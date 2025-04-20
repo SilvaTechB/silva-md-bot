@@ -1,4 +1,4 @@
-[![Typing SVG](https://readme-typing-svg.demolab.com?font=Black+Ops+One&size=35&pause=750&color=952323&center=true&width=435&lines=Hello;Welcome+%F0%9F%98%8A+to+Silva+MD+bot;This+is+our+official+repository+;Updated+on+September+2024;Silva+team+is+offering+the+best;For+this+bot;Fork+and+give+a+star)](https://git.io/typing-svg)
+[![Typing SVG](https://readme-typing-svg.demolab.com?font=Black+Ops+One&size=28&pause=750&color=952323&center=true&width=435&lines=Hello;Welcome+%F0%9F%98%8A+to+Silva+MD+bot;This+is+our+official+repository+;Updated+on+September+2024;Silva+team+is+offering+the+best;For+this+bot;Fork+and+give+a+star)](https://git.io/typing-svg)
 
 <img src="https://i.imgur.com/dBaSKWF.gif" height="90" width="100%">
 
