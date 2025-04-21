@@ -1,6 +1,5 @@
 let handler = async (m, { conn, usedPrefix, command }) => {
   let { performance } = require('perf_hooks')
-  let os = require('os')
   let moment = require('moment-timezone')
 
   let user = global.db.data.users[m.sender]
@@ -14,12 +13,11 @@ let handler = async (m, { conn, usedPrefix, command }) => {
   let mode = global.opts['self'] ? 'Self' : 'Public'
   let ping = performance.now()
 
-  let pp = './media/shizo.jpg'
+  let pp = './media/shizo.jpg'  // Make sure the image path is correct.
   let more = String.fromCharCode(8206)
   let readMore = more.repeat(900)
 
   let menu = `
-  ◢◤ Silva Md Bot ◢◤
 ╭━━━[ 👋 𝗛𝗲𝗹𝗹𝗼, *${name}* ]
 ┃📅 Date: *${date}*
 ┃⏰ Time: *${time}*
@@ -169,9 +167,9 @@ let handler = async (m, { conn, usedPrefix, command }) => {
 
 🎉 *Extra Hidden Features*  
 ╭━━━━━━━━━━━━━━━━━━
-┃   🎁 easteregg1 
+┃   🎁 easteregg1  
 ┃   🎁 easteregg2  
-┃   🎁 easteregg3 
+┃   🎁 easteregg3  
 ╰━━━━━━━━━━━━━━━━━━
 
 🌐 *Silva MD - Innovation that Connects 💖*  
@@ -203,8 +201,8 @@ function clockString(ms) {
   return [h, m, s].map(v => v.toString().padStart(2, '0')).join(':')
 }
 
-handler.help = ['king']
+handler.help = ['main']
 handler.tags = ['main']
-handler.command = ['king']
+handler.command = ['main']
 
 export default handler
