@@ -146,7 +146,7 @@ Here are your command gateways:
       isForwarded: true,
       forwardedNewsletterMessageInfo: {
         newsletterJid: '120363200367779016@newsletter',
-        newsletterName: 'SILVA MD DIRECT MESSAGE 💖🦄',
+        newsletterName: '◢◤ Silva Md Bot ◢◤',
         serverMessageId: 143
       }
     }
