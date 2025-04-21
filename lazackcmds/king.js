@@ -202,8 +202,8 @@ function clockString(ms) {
   return [h, m, s].map(v => v.toString().padStart(2, '0')).join(':')
 }
 
-handler.help = ['king']
+handler.help = ['main']
 handler.tags = ['main']
-handler.command = ['king']
+handler.command = ['main']
 
 export default handler
