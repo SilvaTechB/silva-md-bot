@@ -1,19 +1,20 @@
-let handler = async (m, { conn, usedPrefix, command }) => {
-  let { performance } = require('perf_hooks')
-  let moment = require('moment-timezone')
+import { performance } from 'perf_hooks'
+import moment from 'moment-timezone'
+import { promisify } from 'util'
 
+let handler = async (m, { conn, usedPrefix, command }) => {
   let user = global.db.data.users[m.sender]
   let name = conn.getName(m.sender)
   let date = moment.tz('Africa/Nairobi').format('dddd, MMMM Do YYYY')
   let time = moment.tz('Africa/Nairobi').format('hh:mm A')
   let uptime = process.uptime() * 1000
-  let muptime = await (await import('util')).default.promisify(setTimeout)(0).then(() => process.uptime() * 1000)
+  let muptime = await promisify(setTimeout)(0).then(() => process.uptime() * 1000)
   let _muptime = muptime
 
   let mode = global.opts['self'] ? 'Self' : 'Public'
   let ping = performance.now()
 
-  let pp = './media/shizo.jpg'  // Make sure the image path is correct.
+  let pp = './media/shizo.jpg'  // Ensure this is a valid image path.
   let more = String.fromCharCode(8206)
   let readMore = more.repeat(900)
 
@@ -201,8 +202,8 @@ function clockString(ms) {
   return [h, m, s].map(v => v.toString().padStart(2, '0')).join(':')
 }
 
-handler.help = ['main']
+handler.help = ['king']
 handler.tags = ['main']
-handler.command = ['main']
+handler.command = ['king']
 
 export default handler
