@@ -1,26 +1,41 @@
-import { config } from "dotenv";
-config();
+var { proto } = require('@whiskeysockets/baileys');
 
-let handler = async (m, { conn }) => {
-    if (!process.env.ANTICALL || process.env.ANTICALL.toLowerCase() !== "true") return;
+// Load env variables
+var anticallEnabled = process.env.ANTICALL === 'true';
+var autoBlockEnabled = process.env.AUTOBLOCK_CALL === 'true';
 
-    let chat = global.db.data.chats[m.chat] || {};
-    if (m.messageStubType === "CALL") {
-        let warning = process.env.ANTICALL_WARNING || "Calling me is not allowed! You will be blocked.";
-        let callerId = m.sender;
+// Optional whitelist
+var whitelist = [
+  // '2547xxxxxxx@s.whatsapp.net' // Add safe numbers here if needed
+];
 
-        // Send warning message
-        await conn.sendMessage(m.chat, { text: `@${callerId.split("@")[0]}, ${warning}`, mentions: [callerId] });
+var handler = async (m, { conn }) => {
+  if (!anticallEnabled) return;
 
-        // Block the caller
-        await conn.updateBlockStatus(callerId, "block");
-        console.log(`Blocked ${callerId} for calling.`);
-    }
+  if (m.messageStubType !== 28) return;
+
+  const callerId = m.key.participant || m.key.remoteJid;
+  if (!callerId || callerId.endsWith('@g.us')) return;
+
+  if (whitelist.includes(callerId)) {
+    console.log(`[✅ Whitelisted] ${callerId} called the bot (allowed).`);
+    return;
+  }
+
+  // Send warning message
+  const warnText = `🚫 *Anti-Call Notice*\n\nYou tried to call this silva md bot.\nPlease do not call — such actions result in a block.`;
+  await conn.sendMessage(callerId, { text: warnText });
+
+  // Block if enabled
+  if (autoBlockEnabled) {
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    await conn.updateBlockStatus(callerId, 'block');
+    console.log(`[❌ Blocked] ${callerId} tried calling the bot.`);
+  }
 };
 
-handler.help = ["anticall"];
-handler.tags = ["security"];
-handler.command = ["anticall"];
+handler.customPrefix = /.*/;
+handler.command = new RegExp;
 handler.anticall = true;
 
-export default handler;
+module.exports = handler;
