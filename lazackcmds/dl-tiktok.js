@@ -1,92 +1,124 @@
 import fetch from 'node-fetch';
 
-let handler = async (message, { conn, args }) => {
+let handler = async (m, { conn, args }) => {
   const link = args[0];
 
   if (!link || !link.includes("tiktok.com")) {
-    return message.reply("Please provide a valid TikTok link!");
+    return m.reply("🚫 *Please provide a valid TikTok link!*");
   }
 
-  message.reply("*Fetching TikTok video, please wait...*");
+  const waitMsg = await m.reply("⏳ *Fetching your TikTok video...*");
 
   try {
-    const response = await fetch("https://api.tiklydown.eu.org/api/download?url=" + encodeURIComponent(link));
-    const data = await response.json();
+    const res = await fetch("https://api.tiklydown.eu.org/api/download?url=" + encodeURIComponent(link));
+    const data = await res.json();
 
-    if (data.video && data.video.noWatermark) {
-      const videoLink = data.video.noWatermark;
-      const audioLink = data.audio;
+    if (data?.video?.noWatermark) {
+      const videoUrl = data.video.noWatermark;
+      const audioUrl = data.audio;
       const caption = `
-*🟣 SILVA MD TIKTOK DOWNLOADER*
+🎵 *TIKTOK MEDIA DOWNLOADER*
+┌───⭓
+│👤 *Creator:* _${data.author.name || "Unknown"}_ (@${data.author.unique_id || "N/A"})
+│❤️ *Likes:* ${data.stats.likeCount || 0}
+│💬 *Comments:* ${data.stats.commentCount || 0}
+│🔁 *Shares:* ${data.stats.shareCount || 0}
+│▶️ *Plays:* ${data.stats.playCount || 0}
+│💾 *Saves:* ${data.stats.saveCount || 0}
+└────────────⭓
 
-*🎥 Video by*: _${data.author.name || "Unknown"}_ (@${data.author.unique_id || "N/A"})
-❤️ Likes: ${data.stats.likeCount || 0}
-💬 Comments: ${data.stats.commentCount || 0}
-🔁 Shares: ${data.stats.shareCount || 0}
-▶️ Plays: ${data.stats.playCount || 0}
-💾 Saves: ${data.stats.saveCount || 0}
+🧠 _Powered by: Silva MD Bot_
 
-⏤͟͟͞͞ Downloader By Silva MD Bot
+💬 *Reply with:*
+1️⃣ - Standard Video  
+2️⃣ - High Quality Video  
+3️⃣ - Audio Only
+`.trim();
 
-Reply with:
-1️⃣ for Standard Video
-2️⃣ for High Quality Video
-3️⃣ for Audio
-`;
+      // Delete the wait message
+      await conn.sendMessage(m.chat, { delete: waitMsg.key });
 
-      const videoMsg = await conn.sendMessage(message.chat, {
-        video: { url: videoLink },
-        caption
-      }, { quoted: message });
+      // Send video with newsletter style
+      const videoMsg = await conn.sendMessage(m.chat, {
+        video: { url: videoUrl },
+        caption,
+        contextInfo: {
+          mentionedJid: [m.sender],
+          forwardingScore: 999,
+          isForwarded: true,
+          forwardedNewsletterMessageInfo: {
+            newsletterJid: '120363200367779016@newsletter',
+            newsletterName: 'SILVA MD BOT 💖',
+            serverMessageId: 143
+          }
+        }
+      }, { quoted: m });
 
       const msgID = videoMsg.key.id;
 
+      // Handle reply options
       conn.ev.on("messages.upsert", async event => {
-        const incomingMsg = event.messages[0];
-        if (!incomingMsg.message) return;
+        const incoming = event.messages[0];
+        if (!incoming.message) return;
 
-        const userText = incomingMsg.message.conversation || incomingMsg.message.extendedTextMessage?.text;
-        const fromJid = incomingMsg.key.remoteJid;
-        const isReplyToBot = incomingMsg.message.extendedTextMessage?.contextInfo?.stanzaId === msgID;
+        const userText = incoming.message.conversation || incoming.message.extendedTextMessage?.text;
+        const fromJid = incoming.key.remoteJid;
+        const isReplyToBot = incoming.message.extendedTextMessage?.contextInfo?.stanzaId === msgID;
 
         if (isReplyToBot) {
-          // React with ⬇️ emoji
           await conn.sendMessage(fromJid, {
-            react: {
-              text: '⬇️',
-              key: incomingMsg.key
-            }
+            react: { text: '⬇️', key: incoming.key }
           });
 
           if (userText === '1') {
             await conn.sendMessage(fromJid, {
-              video: { url: videoLink },
-              caption: "Here is the video in Standard Quality."
+              video: { url: videoUrl },
+              caption: "🎬 *Standard Quality Video*",
+              contextInfo: forwardedInfo(m)
             });
           } else if (userText === '2') {
             await conn.sendMessage(fromJid, {
-              video: { url: videoLink },
-              caption: "Here is the video in High Quality."
+              video: { url: videoUrl },
+              caption: "📽️ *High Quality Video*",
+              contextInfo: forwardedInfo(m)
             });
           } else if (userText === '3') {
             await conn.sendMessage(fromJid, {
-              audio: { url: audioLink },
+              audio: { url: audioUrl },
               mimetype: 'audio/mp4',
               ptt: false,
-              fileName: "tiktok_audio.mp3"
+              fileName: "tiktok_audio.mp3",
+              contextInfo: forwardedInfo(m)
             });
           }
         }
       });
 
     } else {
-      message.reply("❌ Could not fetch video. Try again later.");
+      await conn.sendMessage(m.chat, { delete: waitMsg.key });
+      m.reply("❌ *Failed to retrieve TikTok video. Please try again later.*");
     }
-  } catch (error) {
-    console.error(error);
-    message.reply("❌ Failed to download video.");
+
+  } catch (err) {
+    console.error(err);
+    await conn.sendMessage(m.chat, { delete: waitMsg.key });
+    m.reply("❌ *An error occurred while downloading the video.*");
   }
 };
+
+// Helper for clean contextInfo reuse
+function forwardedInfo(m) {
+  return {
+    mentionedJid: [m.sender],
+    forwardingScore: 999,
+    isForwarded: true,
+    forwardedNewsletterMessageInfo: {
+      newsletterJid: '120363200367779016@newsletter',
+      newsletterName: 'SILVA MD BOT 💖',
+      serverMessageId: 143
+    }
+  };
+}
 
 handler.help = ["tiktok"];
 handler.tags = ["downloader"];
