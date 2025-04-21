@@ -1,88 +1,47 @@
-import fetch from 'node-fetch';
+import fs from 'fs'
+import { join } from 'path'
+import { exec } from 'child_process'
 
-let handler = async (m, { text, conn, usedPrefix, command }) => {
-  try {
-    // Get the input text, either from the message itself or a quoted reply
-    if (!text && !(m.quoted && m.quoted.text)) {
-      throw 'Please provide a number.';
-    }
-    if (!text && m.quoted && m.quoted.text) {
-      text = m.quoted.text;
-    }
+let handler = async (m, { conn, args, __dirname, usedPrefix, command }) => {
+	try {
+		let q = m.quoted ? m.quoted : m
+		let mime = (q.msg || q).mimetype || q.mediaType || ''
+		if (/audio/.test(mime)) {
+           conn.reply(m.chat, 'Please Wait...', m)
+            
+			let set = /bass/.test(command) ? '-af equalizer=f=94:width_type=o:width=2:g=30'
+				: /blown/.test(command) ? '-af acrusher=.1:1:64:0:log'
+				: /deep/.test(command) ? '-af atempo=4/4,asetrate=44500*2/3'
+				: /earrape/.test(command) ? '-af volume=12'
+				: /fast/.test(command) ? '-filter:a "atempo=1.63,asetrate=44100"'
+				: /fat/.test(command) ? '-filter:a "atempo=1.6,asetrate=22100"'
+				: /nightcore/.test(command) ? '-filter:a atempo=1.06,asetrate=44100*1.25'
+				: /reverse/.test(command) ? '-filter_complex "areverse"'
+				: /robot/.test(command) ? '-filter_complex "afftfilt=real=\'hypot(re,im)*sin(0)\':imag=\'hypot(re,im)*cos(0)\':win_size=512:overlap=0.75"'
+				: /slow/.test(command) ? '-filter:a "atempo=0.7,asetrate=44100"'
+				: /tupai|squirrel|chipmunk/.test(command) ? '-filter:a "atempo=0.5,asetrate=65100"'
+				: '-filter:v "minterpolate=\'mi_mode=mci:mc_mode=aobmc:vsbmc=1:fps=120\'"' // filter smooth
+			let dir = join(__dirname, '../tmp/')
+			let filename = dir + getRandom('.mp3')
+			let media = dir + getRandom('.mp3')
+			fs.writeFileSync(media, await q.download(), function (err) { if (err) throw err })
+			exec(`ffmpeg -i ${media} ${set} ${filename}`, async (err, stderr, stdout) => {
+				await fs.unlinkSync(media)
+				if (err) throw err
+				let buff = await fs.readFileSync(filename)
+				await conn.sendFile(m.chat, buff, '', '', m, true)
+			})
+		} else throw `Reply / tag audio!`
+	} catch (e) {
+		throw e
+	}
+}
 
-    // React with a "waiting" emoji and set typing indicator
-    m.react('⏳');
-    conn.sendPresenceUpdate('composing', m.chat);
+handler.help = ['bass','blown','deep','earrape','fast','fat','nightcore','reverse','robot','slow','smooth']
+handler.tags = ['tools', 'audio']
+handler.command = /^(bass|blown|deep|earrape|fas?t|nightcore|reverse|robot|slow|smooth|tupai|squirrel|chipmunk)$/i
 
-    // Encode the input number for the URL
-    const encodedNumber = encodeURIComponent(text);
-    
-    // First API endpoint
-    const apiUrl1 = `https://creds-session.onrender.com/pair?number=${encodedNumber}`;
+export default handler
 
-    // Try the first API
-    let response = await fetch(apiUrl1);
-    let data = await response.json();
-
-    // Check if the response is valid
-    let result = data?.code; // Adjusted to check for "code" instead of "response.response"
-
-    if (result) {
-      // Send the result if found
-      await conn.sendButton(
-        m.chat,
-        result,
-        'Author',
-        'https://files.catbox.moe/8324jm.jpg',
-        [['Script', `.sc`]],
-        null,
-        [['Follow Me', `https://github.com/SilvaTechB`]],
-        m
-      );
-      m.react('✅'); // React with "done" emoji
-      return;
-    }
-
-    throw new Error('No valid code from the first API');
-  } catch (error1) {
-    console.error('Error from the first API:', error1);
-
-    // Second API endpoint (backup if first API fails)
-    try {
-      const prompt = encodeURIComponent(text);
-      const apiUrl2 = `https://ultimetron.guruapi.tech/gpt3?prompt=${prompt}`;
-      
-      let response = await fetch(apiUrl2);
-      let data = await response.json();
-      let result = data?.completion;
-
-      if (result) {
-        // Send the result from the second API if found
-        await conn.sendButton(
-          m.chat,
-          result,
-          'Author',
-          'https://files.catbox.moe/8324jm.jpg',
-          [['Silva Power', `.repo`]],
-          null,
-          [['Follow Me', `https://github.com/SilvaTechB`]],
-          m
-        );
-        m.react('✅'); // React with "done" emoji
-        return;
-      }
-      
-      throw new Error('No valid response from the second API');
-    } catch (error2) {
-      console.error('Error from the second API:', error2);
-      throw '*ERROR*';
-    }
-  }
-};
-
-// Command handler details
-handler.help = ['pair'];
-handler.tags = ['AI'];
-handler.command = ['code', 'rent', 'qr', 'number'];
-
-export default handler;
+const getRandom = (ext) => {
+return `${Math.floor(Math.random() * 100000)}${ext}`}
