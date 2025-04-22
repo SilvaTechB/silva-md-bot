@@ -2,45 +2,58 @@ import { download } from 'aptoide-scraper'
 
 let handler = async (m, { oreo, usedPrefix: prefix, command, text }) => {
   try {
-    if (command === 'modapk') {
-      if (!text) throw `*[❗] Please provide the APK Name you want to download.*`
+    if (!text) throw `📦 *Please provide the name of the APK you want to download.*\n\nExample:\n${prefix + command} Spotify Premium`
 
-      await oreo.reply(m.chat, global.wait, m)
-      let data = await download(text)
+    await oreo.reply(m.chat, global.wait, m)
 
-      if (data.size.replace(' MB', '') > 200) {
-        return await oreo.sendMessage(
-          m.chat,
-          { text: '*[⛔] The file is too large.*' },
-          { quoted: m }
-        )
-      }
+    let data = await download(text)
+    let sizeMB = parseFloat(data.size.replace(' MB', '').replace(',', '.'))
 
-      if (data.size.includes('GB')) {
-        return await oreo.sendMessage(
-          m.chat,
-          { text: '*[⛔] The file is too large.*' },
-          { quoted: m }
-        )
-      }
-
-      await oreo.sendMessage(
+    if (data.size.includes('GB') || sizeMB > 200) {
+      return await oreo.sendMessage(
         m.chat,
         {
-          document: { url: data.dllink },
-          mimetype: 'application/vnd.android.package-archive',
-          fileName: data.name + '.apk',
-          caption: null,
+          text: `⛔ *File too large to send.*\n\n🗃️ *Size:* ${data.size}`,
+          contextInfo: {
+            forwardingScore: 999,
+            isForwarded: true,
+            forwardedNewsletterMessageInfo: {
+              newsletterJid: '120363026198979636@newsletter',
+              serverMessageId: '',
+              newsletterName: 'Silva MD Bot Official'
+            }
+          }
         },
         { quoted: m }
       )
     }
-  } catch {
-    throw `*[❗] An error occurred. Make sure to provide a valid link.*`
+
+    await oreo.sendMessage(
+      m.chat,
+      {
+        document: { url: data.dllink },
+        mimetype: 'application/vnd.android.package-archive',
+        fileName: `${data.name}.apk`,
+        caption: `✅ *APK:* ${data.name}\n📦 *Size:* ${data.size}\n\nEnjoy your modded app!`,
+        contextInfo: {
+          forwardingScore: 999,
+          isForwarded: true,
+          forwardedNewsletterMessageInfo: {
+            newsletterJid: '120363026198979636@newsletter',
+            serverMessageId: '',
+            newsletterName: 'Silva MD Bot Official'
+          }
+        }
+      },
+      { quoted: m }
+    )
+  } catch (err) {
+    console.error(err)
+    throw `❗ *An error occurred.*\nPlease check your search term or try a different APK name.`
   }
 }
 
-handler.help = ['modapk']
+handler.help = ['modapk <name>']
 handler.tags = ['downloader']
 handler.command = /^modapk$/i
 export default handler
