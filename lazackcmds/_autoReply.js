@@ -17,18 +17,18 @@ export async function all(m) {
         mentions: [m.sender],
         contextInfo: {
           forwardingScore: 999,
-          isForwarded: true,
-          forwardedNewsletterMessageInfo: {
-            newsletterJid: '120363026198979636@newsletter',
-            serverMessageId: '143',
-            newsletterName: 'Silva MD Bot Official'
+      isForwarded: true,
+      forwardedNewsletterMessageInfo: {
+        newsletterJid: '120363200367779016@newsletter',
+        newsletterName: '◢◤ Silva Md Bot ◢◤',
+        serverMessageId: 143
           }
         }
       },
       { quoted: m }
     )
 
-    await m.react('😡')
+    await m.react('☠️')
   }
 
   return true
