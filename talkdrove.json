@@ -56,6 +56,21 @@
       "required": true,
       "value": "true"
        },
+  "WELCOME_MSG": {
+      "description": "make it true or false if you want bot to Send welcome message when someone joins a group",
+      "required": false,
+      "value": "true"
+      },
+    "GOODBYE_MSG": {
+      "description": "make it true or false if you want bot to Send goodbye message when someone leaves a group",
+      "required": false,
+      "value": "true"
+      },
+    "ANTILINK": {
+      "description": "make it true or false if you want bot to delete group links sent in groups. of you are admin",
+      "required": false,
+      "value": "true"
+      },
     "AUTO_STATUS_LIKE_EMOJI": {
       "description": "customize to any emoji you need 💚",
       "required": false,
