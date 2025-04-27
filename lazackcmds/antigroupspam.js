@@ -22,8 +22,10 @@ handler.all = async (m, { conn }) => {
     spamData[id][user].lastTime = now
 
     if (spamData[id][user].count >= 5) {
+      spamData[id][user].count = 0
+
       await conn.sendMessage(m.chat, {
-        text: `🚨 *Anti-Spam Alert!*\n@${user.split('@')[0]} is spamming the group! Please slow down.`,
+        text: `🚨 *Anti-Spam Alert!*\n\n@${user.split('@')[0]} please slow down! You are spamming.`,
         mentions: [user],
         contextInfo: {
           forwardingScore: 999,
@@ -36,10 +38,13 @@ handler.all = async (m, { conn }) => {
         }
       })
 
-      spamData[id][user].count = 0 // Reset after warning
+      // Optionally send a cool animated sticker alert
+      await conn.sendMessage(m.chat, { 
+        sticker: { url: "https://i.ibb.co/3rQhv6d/alert-sticker.webp" } // animated sticker url
+      }, { quoted: m })
     }
   } catch (e) {
-    console.error(e) // <== just log the error
+    console.error('AntiSpam Error:', e)
   }
 }
 
