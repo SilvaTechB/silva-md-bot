@@ -9,13 +9,8 @@ let handler = async (m, { conn }) => {
     let onlineUsers = [];
 
     for (let user of participants) {
-      try {
-        const presence = await conn.presenceSubscribe(user);
-        if (presence?.lastSeen && (Date.now() - presence.lastSeen < 5 * 60 * 1000)) { // 5 minutes active
-          onlineUsers.push(user);
-        }
-      } catch (e) {
-        // Ignore errors silently
+      if ((conn.chats[m.chat]?.presences?.[user]?.lastKnownPresence || '').toLowerCase() === 'available') {
+        onlineUsers.push(user);
       }
     }
 
@@ -33,15 +28,15 @@ let handler = async (m, { conn }) => {
         forwardingScore: 999,
         isForwarded: true,
         forwardedNewsletterMessageInfo: {
-          newsletterJid: '120363200367779016@newsletter', // your newsletter JID
-          newsletterName: '◢◤ Silva Md Bot ◢◤', // your bot's newsletter name
-          serverMessageId: 143 // can be any random number
+          newsletterJid: '120363200367779016@newsletter',
+          newsletterName: '◢◤ Silva Md Bot ◢◤',
+          serverMessageId: 143
         }
       }
     });
   } catch (e) {
     console.error(e);
-    m.reply('❌ Failed to fetch online users.');
+    m.reply('❌ Error fetching online users.');
   }
 };
 
