@@ -1,7 +1,8 @@
 let spamData = {}
 
-let handler = async (m, { conn }) => {
-  if (!m.isGroup) return // Only act in groups
+let handler = {}
+handler.all = async (m, { conn }) => {
+  if (!m.isGroup) return // Only in groups
   if (m.isBaileys) return // Ignore bot system messages
   
   let id = m.chat
@@ -12,7 +13,7 @@ let handler = async (m, { conn }) => {
 
   let now = Date.now()
 
-  // If the last message was sent more than 7 seconds ago, reset the counter
+  // Reset counter if last message was long ago
   if (now - spamData[id][user].lastTime > 7000) {
     spamData[id][user].count = 0
   }
@@ -20,7 +21,7 @@ let handler = async (m, { conn }) => {
   spamData[id][user].count++
   spamData[id][user].lastTime = now
 
-  // If user sends 5 messages in less than 7 seconds
+  // Trigger when user sends 5+ fast messages
   if (spamData[id][user].count >= 5) {
     await conn.sendMessage(m.chat, {
       text: `🚨 *Anti-Spam Alert!*\n@${user.split('@')[0]} is spamming the group! Please slow down.`,
