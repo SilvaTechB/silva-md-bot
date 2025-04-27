@@ -1,57 +1,60 @@
 let spamData = {};
 
-let handler = async (m, { conn, participants }) => {
+let handler = async (m, { conn, isBotAdmin }) => {
   try {
     if (!m.isGroup) return;
     if (m.isBaileys) return;
 
-    const id = m.chat;
-    const user = m.sender;
-    const now = Date.now();
+    let id = m.chat;
+    let user = m.sender;
+    let now = Date.now();
 
-    // Initialize chat and user data
     spamData[id] = spamData[id] || {};
     spamData[id][user] = spamData[id][user] || { count: 0, lastTime: 0 };
 
-    // Reset count if last message was more than 7 seconds ago
     if (now - spamData[id][user].lastTime > 7000) {
       spamData[id][user].count = 0;
     }
 
-    // Update spam counter
     spamData[id][user].count++;
     spamData[id][user].lastTime = now;
 
-    // Check spam threshold
     if (spamData[id][user].count >= 5) {
-      spamData[id][user].count = 0; // Reset counter after triggering
+      spamData[id][user].count = 0;
 
-      // Send warning message
       await conn.sendMessage(m.chat, {
-        text: `🚨 *Anti-Spam Alert!*\n@${user.split('@')[0]} detected spamming. Muting...`,
-        mentions: [user]
+        text: `🚨 *Anti-Spam Alert!*\n@${user.split('@')[0]} is detected spamming the group!`,
+        mentions: [user],
+        contextInfo: {
+          forwardingScore: 999,
+          isForwarded: true,
+          forwardedNewsletterMessageInfo: {
+            newsletterJid: '120363200367779016@newsletter',
+            newsletterName: '◢◤ Silva MD Bot ◢◤',
+            serverMessageId: 143
+          }
+        }
       });
 
-      // Attempt to mute user
-      try {
-        await conn.groupParticipantsUpdate(m.chat, [user], 'restrict');
-      } catch (muteError) {
-        console.error('Mute error:', muteError);
-        await conn.sendMessage(m.chat, {
-          text: `❌ Failed to mute user. Ensure I'm an admin with proper permissions.`
-        });
-        return;
-      }
-
-      // Send confirmation sticker
+      // Send animated sticker after message
       await conn.sendMessage(m.chat, { 
         sticker: { url: "https://raw.githubusercontent.com/SilvaTechB/silva-md-bot/main/media/STK-20250425-WA0008.webp" }
       }, { quoted: m });
+
+      // Try muting if bot is admin
+      if (isBotAdmin) {
+        try {
+          await conn.groupParticipantsUpdate(m.chat, [user], 'restrict');
+        } catch (err) {
+          console.error('❌ Failed to restrict:', err);
+          await conn.sendMessage(m.chat, { text: `⚠️ Error trying to mute user.` });
+        }
+      } else {
+        await conn.sendMessage(m.chat, { text: `⚠️ I'm not an admin, cannot mute spammers!` });
+      }
     }
-  } catch (error) {
-    console.error('Anti-spam handler error:', error);
-    // Optional: Notify admins about the error
-    // await conn.sendMessage(m.chat, { text: `⚠️ An error occurred in anti-spam system: ${error.message}` });
+  } catch (e) {
+    console.error('Anti-spam error:', e);
   }
 };
 
