@@ -12,7 +12,7 @@ let handler = async (m, { conn }) => {
 
   let now = Date.now()
 
-  // Reset counter if last message was long ago
+  // If the last message was sent more than 7 seconds ago, reset the counter
   if (now - spamData[id][user].lastTime > 7000) {
     spamData[id][user].count = 0
   }
@@ -20,22 +20,8 @@ let handler = async (m, { conn }) => {
   spamData[id][user].count++
   spamData[id][user].lastTime = now
 
+  // If user sends 5 messages in less than 7 seconds
   if (spamData[id][user].count >= 5) {
-    // 🚨 Send animated sticker alert first
-    await conn.sendMessage(m.chat, {
-      sticker: { url: "https://bg3.wiki/wiki/File:Sticker_Emoji_Gale_Plead.webp" }, // Cool alert sticker
-      contextInfo: {
-        forwardingScore: 999,
-        isForwarded: true,
-        forwardedNewsletterMessageInfo: {
-          newsletterJid: '120363200367779016@newsletter',
-          newsletterName: '◢◤ Silva MD Bot ◢◤',
-          serverMessageId: 143
-        }
-      }
-    })
-
-    // 🚨 Then send the anti-spam alert text
     await conn.sendMessage(m.chat, {
       text: `🚨 *Anti-Spam Alert!*\n@${user.split('@')[0]} is spamming the group! Please slow down.`,
       mentions: [user],
