@@ -1,44 +1,16 @@
-const delay = time => new Promise(res => setTimeout(res, time))
+conn.ev.on("call", async (calls) => {
+  const rejectSetting = process.env.REJECTSCALLS;
+  const callMsg = process.env.CALLMSG || "📵 *ANTICALL IS ACTIVATED!*\n\n🚫 Don't disturb me by calling again and again.";
 
-export async function before(m) {
-  let bot = global.db.data.settings[this.user.jid] || {}
+  for (let call of calls) {
+    if (call.status !== 'offer') continue;
 
-  // Check if the anticall feature is enabled via env
-  if (process.env.ANTICALL !== "true") return
+    // Reject the call
+    await conn.rejectCall(call.id, call.from);
 
-  if (m.isBaileys) return
-  if (!bot.antiCall) return
-
-  const messageType = {
-    40: '📞 You missed a voice call, and the call has been missed.',
-    41: '📹 You missed a video call, and the call has been missed.',
-    45: '📞 You missed a group voice call, and the call has been missed.',
-    46: '📹 You missed a group video call, and the call has been missed.',
-  }[m.messageStubType]
-
-  if (messageType) {
-    await this.sendMessage(m.chat, {
-      text: `You are banned + blocked for calling the bot`,
-      mentions: [m.sender],
-    })
-
-    await delay(1000)
-
-    global.db.data.users[m.sender].banned = true
-    global.db.data.users[m.sender].warning = 1
-
-    await this.updateBlockStatus(m.sender, 'block')
-
-    if (m.isGroup) {
-      await this.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
+    // Send warning message if REJECTSCALLS is set to 'truemsg'
+    if (rejectSetting === "truemsg") {
+      await conn.sendMessage(call.from, { text: callMsg });
     }
-  } else {
-    console.log({
-      messageStubType: m.messageStubType,
-      messageStubParameters: m.messageStubParameters,
-      type: m.messageStubType,
-    })
   }
-}
-
-export const disabled = false
+});
