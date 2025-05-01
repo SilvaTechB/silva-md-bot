@@ -15,7 +15,8 @@ let handler = async (m, { conn, text, botname }) => {
     let link = video.url;
     let apis = [
       `https://apis.davidcyriltech.my.id/youtube/mp3?url=${link}`,
-      `https://api.ryzendesu.vip/api/downloader/ytmp3?url=${link}`
+      `https://api.ryzendesu.vip/api/downloader/ytmp3?url=${link}`,
+      `https://api.akuari.my.id/downloader/youtubeaudio?link=${link}`
     ];
 
     for (const api of apis) {
