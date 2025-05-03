@@ -1,60 +1,97 @@
-let spamData = {};
+const { WAConnection } = require('@whiskeysockets/baileys');
 
-let handler = async (m, { conn }) => {
-  try {
-    // Ensure it's a group and not a system message
-    if (!m.isGroup) return;
-    if (m.isBaileys) return;
+// Data structure to track user messages
+const userMessages = new Map();
+const SPAM_LIMIT = 5; // Maximum messages allowed
+const TIME_LIMIT = 30 * 1000; // Time limit in milliseconds (30 seconds)
 
-    const id = m.chat; // Group ID
-    const user = m.sender; // User ID of sender
+// Initialize WhatsApp connection
+const conn = new WAConnection();
+
+conn.on('open', () => {
+    console.log('Bot is online!');
+});
+
+// Function to track messages
+function trackMessage(groupId, userId) {
     const now = Date.now();
 
-    // Initialize spam data structure for the group and user
-    spamData[id] = spamData[id] || {};
-    spamData[id][user] = spamData[id][user] || { count: 0, lastTime: 0 };
+    // Initialize group data if not already present
+    if (!userMessages.has(groupId)) {
+        userMessages.set(groupId, new Map());
+    }
+    const groupData = userMessages.get(groupId);
 
-    // Reset spam count if last message was sent > 7 seconds ago
-    if (now - spamData[id][user].lastTime > 7000) {
-      spamData[id][user].count = 0;
+    // Initialize user data if not already present
+    if (!groupData.has(userId)) {
+        groupData.set(userId, []);
+    }
+    const messages = groupData.get(userId);
+
+    // Add the current timestamp to the user's message history
+    messages.push(now);
+
+    // Remove timestamps older than TIME_LIMIT
+    const recentMessages = messages.filter(timestamp => now - timestamp <= TIME_LIMIT);
+    groupData.set(userId, recentMessages);
+
+    // Check if the user has exceeded the spam limit
+    if (recentMessages.length >= SPAM_LIMIT) {
+        return true; // User is spamming
     }
 
-    // Increment spam count and update the last message time
-    spamData[id][user].count++;
-    spamData[id][user].lastTime = now;
+    return false; // User is not spamming
+}
 
-    // If spam count exceeds threshold, take action
-    if (spamData[id][user].count >= 5) {
-      spamData[id][user].count = 0; // Reset spam count after action
+// Function to handle incoming messages
+conn.on('chat-update', async (chat) => {
+    if (!chat.hasNewMessage) return;
+    const message = chat.messages.all()[0];
 
-      // Notify group about spammer
-      await conn.reply(
-        m.chat,
-        `🚨 *Anti-Spam Alert!*\n@${user.split('@')[0]} is spamming!`,
-        m,
-        { mentions: [user] }
-      );
+    // Check if the message is in a group
+    if (message.key.remoteJid.endsWith('@g.us')) {
+        const groupId = message.key.remoteJid;
+        const userId = message.key.participant || message.key.remoteJid;
+        const text = message.message.conversation || '';
 
-      // Attempt to restrict the user
-      try {
-        await conn.groupParticipantsUpdate(m.chat, [user], 'restrict');
-      } catch (err) {
-        console.error('❌ Failed to restrict user:', err.message);
-        await conn.reply(
-          m.chat,
-          `❌ Failed to restrict user. Make sure I am an admin!`,
-          m
-        );
-      }
+        // Track the message and check for spam
+        const isSpamming = trackMessage(groupId, userId);
+
+        if (isSpamming) {
+            // Send a warning message to the group
+            const warningMessage = `⚠️ @${userId.split('@')[0]}, please avoid spamming the group!`;
+            await conn.sendMessage(groupId, warningMessage, {
+                quoted: message,
+                contextInfo: {
+                    mentionedJid: [userId]
+                }
+            });
+        }
     }
-  } catch (error) {
-    // Log error for debugging
-    console.error(`❌ Anti-Spam Error: ${error.message}`);
-  }
-};
+});
 
-// Ensure the handler is called for all messages
-handler.all = handler;
+// Periodic cleanup to remove old data and save memory
+setInterval(() => {
+    const now = Date.now();
 
-// Export the handler (default export)
-export default handler;
+    userMessages.forEach((groupData, groupId) => {
+        groupData.forEach((timestamps, userId) => {
+            const recentMessages = timestamps.filter(timestamp => now - timestamp <= TIME_LIMIT);
+            if (recentMessages.length === 0) {
+                groupData.delete(userId); // Remove user if no recent messages
+            } else {
+                groupData.set(userId, recentMessages);
+            }
+        });
+
+        // Remove group if no users are left
+        if (groupData.size === 0) {
+            userMessages.delete(groupId);
+        }
+    });
+}, 60 * 1000); // Run cleanup every 60 seconds
+
+// Connect to WhatsApp
+(async () => {
+    await conn.connect();
+})();
