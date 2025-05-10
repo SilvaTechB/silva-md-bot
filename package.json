@@ -1,7 +1,7 @@
 {
     "name": "SILVA MD",
-    "version": "3.0.0",
-    "description": "Advanced WhatsApp",
+    "version": "4.0.1",
+    "description": "Silva MD Bot is a powerful, multi-functional WhatsApp bot designed for moderation, automation, media tools, and smart AI features — all in one seamless experience. Built for performance, secured for trust. 🚀",
     "main": "silva.js",
     "type": "module",
     "directories": {
@@ -22,8 +22,8 @@
         "whatsapp",
         "js-whatsapp",
         "whatsapp",
-        "guru-bot",
-        "GURU-bot-md",
+        "silva-bot",
+        "silva-bot-md",
         "multi-device",
         "MD",
         "baileys-md"
