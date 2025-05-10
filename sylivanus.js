@@ -8,6 +8,8 @@ import path, { join } from 'path'
 import { platform } from 'process'
 import { fileURLToPath, pathToFileURL } from 'url'
 import * as ws from 'ws'
+import { readdirSync } from 'fs'
+import chalk from 'chalk'
 import processTxtAndSaveCredentials from './lib/makesession.js'
 import clearTmp from './lib/tempclear.js'
 global.__filename = function filename(pathURL = import.meta.url, rmPrefix = platform !== 'win32') {
@@ -383,13 +385,33 @@ async function connectionUpdate(update) {
   }
 
   if (connection === 'open') {
-    const { jid, name } = conn.user
-    const msg = `💖𝑺𝑰𝑳𝑽𝑨 𝑴𝑫 𝑩𝑶𝑻💖 \n\nGreetings ${name}, ✅ Congrats you have successfully deployed *Silva MD Bot* \n\n if your bot sent a message to 254743706010 it is running perfect\n if not relink using silva tech session gen\n ⚙️ *Prefix:*\n 🏢 *Organization:* *Silva Tech Inc.* \n 🗓️ *CREATED:* *Sep 2024* \n\n 🌟 *Follow our WhatsApp Channel for updates:* \n https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v \n\n 🔄 *New features coming soon. Stay tuned!* \n\n Developer Sylivanus Momanyi\nfounder of Silva Tech Inc`
+  const { jid, name } = conn.user
+  const pluginCount = readdirSync('./SilvaXlab').filter(file => file.endsWith('.js')).length
+  const prefix = global.prefix || global.opts?.prefix || '.' // fallback to '.'
 
-    await conn.sendMessage(jid, { text: msg, mentions: [jid] }, { quoted: null })
+  const msg = `╭━━ 💖 *Silva MD Bot Activated* 💖 ━━╮
+┃ 👋 Hello ${name}, your bot is now *Live*!
+┃ 
+┃ ✅ Status: *Connected & Running*
+┃ 🧩 Plugins Installed: *${pluginCount}*
+┃ ⚙️ Prefix: *${prefix}*
+┃ 🏢 Organization: *Silva Tech Inc.*
+┃ 🗓️ Created: *September 2024*
+┃ 
+┃ 📩 Test message auto-sent to *254743706010*
+┃ 🔁 Not received? Use *Silva Tech Session Gen* to relink.
+┃ 
+┃ 📣 Stay Updated:
+┃ https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v
+┃ 
+┃ 👨‍💻 Developer: Sylivanus Momanyi
+┃ 💼 Founder: *Silva Tech Inc.*
+╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`
 
-    conn.logger.info(chalk.yellow('\nSilva is on 𝖶𝖮𝖱𝖪'))
-  }
+  await conn.sendMessage(jid, { text: msg, mentions: [jid] }, { quoted: null })
+
+  conn.logger.info(chalk.green('\n✅ Silva MD Bot is fully connected and working!'))
+}
 
   if (connection === 'close') {
     conn.logger.error(chalk.yellow(`\nConnection closed... Get a new session`))
