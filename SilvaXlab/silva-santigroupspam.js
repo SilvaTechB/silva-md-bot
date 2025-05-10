@@ -7,14 +7,22 @@ const warnedUsers = {};
 export async function before(m, { conn }) {
   if (!m.isGroup || !m.sender || m.fromMe) return;
 
-  // Ignore presence updates or non-message events
+  // Ignore if there's no actual message content
   if (!m.message || Object.keys(m.message).length === 0) return;
 
-  // Skip if message is only a presence (like typing or recording)
-  const ignoredTypes = ['senderKeyDistributionMessage', 'protocolMessage', 'messageContextInfo'];
+  // List of ignored message types (add reactionMessage here)
+  const ignoredTypes = [
+    'senderKeyDistributionMessage',
+    'protocolMessage',
+    'messageContextInfo',
+    'reactionMessage' // 👈 Ignores reactions
+  ];
+
+  // Detect if this is a real user message (not system or reaction)
   const actualContent = Object.keys(m.message).find(key => !ignoredTypes.includes(key));
   if (!actualContent) return;
 
+  // Proceed with spam tracking
   const chatId = m.chat;
   const senderId = m.sender;
   const key = `${chatId}-${senderId}`;
@@ -47,7 +55,7 @@ export async function before(m, { conn }) {
       }, { quoted: m });
 
       warnedUsers[key] = now;
-      messageTracker[key] = []; // Optional reset
+      messageTracker[key] = []; // Reset after warning
     }
   }
 }
