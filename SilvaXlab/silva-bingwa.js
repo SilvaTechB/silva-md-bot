@@ -7,15 +7,47 @@ export async function all(m) {
       m.text.startsWith('Sokoni') ||
       m.text.startsWith('bingwa') ||
       m.text.startsWith('Data')) &&
-    !m.isBaileys &&
-    !m.isGroup
-    ) {
-    this.sendButton(m.chat, `*WELCOME TO BINGWA SOKONI*      
-    HELLO @${m.sender.split('@')[0]} 
-    THIS IS BINGWA SOKONI 😇\n\n *select your offer*\n\n> POWERED BY SAFARICOM✅\n> SELECT YOU CHOICE FOR TODAY📞\n> THANK YOU FOR BEING PART OF US📚\n\n\n> click the buttons to see more
-  `.trim(), igfg, null, [['Data 💀', '.data'],['Sms 😍', '.sms'],['Minutes 📚', '.minutes'],['Data & Minutes 📞', '.datamin'],['Data & Sms📞', '.datasms'],['All in one ✅', '.all'],['Home 🏠', 'Bingwa']] , m, { mentions: [m.sender] })
-    m.react('🤫')
+    !m.isBaileys
+  ) {
+    this.sendButton(
+      m.chat,
+      `*WELCOME TO BINGWA SOKONI*      
+HELLO @${m.sender.split('@')[0]} 
+THIS IS BINGWA SOKONI 😇
+
+*select your offer*
+
+> POWERED BY SAFARICOM✅
+> SELECT YOUR CHOICE FOR TODAY📞
+> THANK YOU FOR BEING PART OF US📚
+
+> click the buttons to see more`,
+      igfg,
+      null,
+      [
+        ['Data 💀', '.data'],
+        ['Sms 😍', '.sms'],
+        ['Minutes 📚', '.minutes'],
+        ['Data & Minutes 📞', '.datamin'],
+        ['Data & Sms📞', '.datasms'],
+        ['All in one ✅', '.all'],
+        ['Home 🏠', 'Bingwa']
+      ],
+      m,
+      { mentions: [m.sender] }
+    );
+    m.react('🤫');
   }
 
-  return !0
+  // Button command reply
+  const cmd = m.text?.toLowerCase().trim();
+  if (
+    [".data", ".sms", ".minutes", ".datamin", ".datasms", ".all"].includes(cmd)
+  ) {
+    await m.reply(
+      `*Safaricom M-Pesa is currently under development.*\n\nKindly try the *Silva Virtual WiFi Hotspot* — brought to you by *Starlink Internet*!`
+    );
+  }
+
+  return !0;
 }
