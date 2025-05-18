@@ -1,15 +1,19 @@
-// Silva Tech Inc. – Mood Assistant Feature 
+// Silva Tech Inc. – Mood Assistant with Location
 // Contact: +254700143167 | silvatech.inc
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-    const text = m.text || ''
-    const isMoodCommand = command === 'mood'
+    const isMoodCommand = command === 'mood';
+    const mood = args[0]?.toLowerCase();
 
-    // Mood Assistant Main Menu Trigger
-    if (text === '#moodassistant') {
+    // Mood Assistant Menu
+    if (m.text === '#moodassistant') {
         await conn.sendMessage(m.chat, {
-            text: `🧘 *Silva Mood Assistant*\n\nHow are you feeling right now?\nChoose a mood to receive the perfect response.`,
-            footer: "Silva Tech Inc. | Powered by your emotions",
+            location: {
+                degreesLatitude: -1.2921,
+                degreesLongitude: 36.8219
+            },
+            caption: `🧘 *Silva Mood Assistant*\n\nHow are you feeling right now?\nChoose your current mood to get supportive vibes.\n\n*You may also send your location for personalized tips!*`,
+            footer: `Silva Mood Tracker™ – Powered by Silva Tech Inc.`,
             buttons: [
                 { buttonId: '.mood happy', buttonText: { displayText: '😊 Happy' }, type: 1 },
                 { buttonId: '.mood sad', buttonText: { displayText: '😢 Sad' }, type: 1 },
@@ -17,46 +21,42 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
                 { buttonId: '.mood tired', buttonText: { displayText: '😴 Tired' }, type: 1 },
                 { buttonId: '#mainmenu', buttonText: { displayText: '🔙 Main Menu' }, type: 1 }
             ],
-            headerType: 1
+            headerType: 6,
+            viewOnce: true
         }, { quoted: m });
-
         return;
     }
 
-    // Mood Subcommands Handler
+    // Handle mood response
     if (isMoodCommand) {
-        const mood = args[0]?.toLowerCase();
+        let locationNote = '';
+        if (m.message?.locationMessage) {
+            const lat = m.message.locationMessage.degreesLatitude;
+            const lon = m.message.locationMessage.degreesLongitude;
+            locationNote = `\n\n📍 *Location Detected:*\nLat: ${lat.toFixed(2)} | Lon: ${lon.toFixed(2)}\nSilva says: Your vibe + your environment = better care.`;
+        }
+
         let response = '';
         switch (mood) {
             case 'happy':
-                response = `😊 *You’re glowing today!*  
-“_Happiness is not a goal... it's a by-product of a life well lived._”`;
+                response = `😊 *You're glowing today!*\n\n“_Happiness is not a goal... it's a by-product of a life well lived._”\nKeep smiling, superstar!${locationNote}`;
                 break;
-
             case 'sad':
-                response = `😢 *It’s okay to be sad.*  
-“_Tears come from the heart and not from the brain._”  
-🫂 Virtual hugs for you.`;
+                response = `😢 *It’s okay to feel down.*\n\n“_Tears come from the heart and not from the brain._”\nSending hugs your way.${locationNote}`;
                 break;
-
             case 'angry':
-                response = `😡 *Take a deep breath.*  
-“_Anger is one letter short of danger._”  
-Silva suggests: 5-4-3-2-1 technique – try it!`;
+                response = `😡 *Take a deep breath.*\n\n“_Anger is one letter short of danger._”\nTry the 5-4-3-2-1 technique to recenter.${locationNote}`;
                 break;
-
             case 'tired':
-                response = `😴 *You need rest.*  
-“_Rest is not idleness... sometimes it’s healing._”  
-Silva recommends a break or short walk.`;
+                response = `😴 *You deserve rest.*\n\n“_Rest is not idleness... sometimes it’s healing._”\nStretch. Breathe. Recharge.${locationNote}`;
                 break;
-
             default:
-                response = `❓ Unknown mood: \`${mood || ''}\`\n\nTry:\n• \`${usedPrefix}mood happy\`\n• \`${usedPrefix}mood sad\`\n• \`${usedPrefix}mood angry\`\n• \`${usedPrefix}mood tired\``;
-                break;
+                response = `❓ *Unknown mood:*\n\`${mood || ''}\`\n\nTry:\n• \`${usedPrefix}mood happy\`\n• \`${usedPrefix}mood sad\`\n• \`${usedPrefix}mood angry\`\n• \`${usedPrefix}mood tired\``;
         }
 
-        await conn.sendMessage(m.chat, { text: response }, { quoted: m });
+        await conn.sendMessage(m.chat, {
+            text: response
+        }, { quoted: m });
     }
 };
 
