@@ -1,263 +1,107 @@
 //import db from '../lib/database.js'
 
 let handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, isROwner }) => {
-  let isEnable = /true|enable|(turn)?on|1/i.test(command)
-  let chat = global.db.data.chats[m.chat]
-  let user = global.db.data.users[m.sender]
-  let bot = global.db.data.settings[conn.user.jid] || {}
-  let type = (args[0] || '').toLowerCase()
-  let isAll = false,
-    isUser = false
-  switch (type) {
-    case 'welcome':
-      if (!m.isGroup) {
-        if (!isOwner) {
-          global.dfail('group', m, conn)
-          throw false
-        }
-      } else if (!isAdmin) {
-        global.dfail('admin', m, conn)
-        throw false
-      }
-      chat.welcome = isEnable
-      break
-    case 'jarvis':
-    case 'autotalk':
-      if (m.isGroup) {
-        if (!(isAdmin || isOwner)) {
-          global.dfail('admin', m, conn)
-          throw false
-        }
-      }
-      chat.jarvis = isEnable
-      break
-    case 'pmblocker':
-      isAll = true
-      if (!isROwner) {
-        global.dfail('rowner', m, conn)
-        throw false
-      }
-      bot.pmblocker = isEnable
-      break
-    case 'autobio':
-      isAll = true
-      if (!isROwner) {
-        global.dfail('rowner', m, conn)
-        throw false
-      }
-      bot.autoBio = isEnable
-      break
-    case 'detect':
-    case 'detector':
-      if (!m.isGroup) {
-        if (!isOwner) {
-          global.dfail('group', m, conn)
-          throw false
-        }
-      } else if (!isAdmin) {
-        global.dfail('admin', m, conn)
-        throw false
-      }
-      chat.detect = isEnable
-      break
-    case 'autosticker':
-      if (m.isGroup) {
-        if (!(isAdmin || isOwner)) {
-          global.dfail('admin', m, conn)
-          throw false
-        }
-      }
-      chat.autosticker = isEnable
-      break
-    case 'antispam':
-      if (m.isGroup) {
-        if (!(isAdmin || isOwner)) {
-          global.dfail('admin', m, conn)
-          throw false
-        }
-      }
-      chat.antiSpam = isEnable
-      break
-    case 'antidelete':
-    case 'delete':
-      if (m.isGroup) {
-        if (!(isAdmin || isOwner)) {
-          global.dfail('admin', m, conn)
-          throw false
-        }
-      }
-      chat.delete = !isEnable
-      break
-    case 'antitoxic':
-    case 'antibadword':
-      if (m.isGroup) {
-        if (!(isAdmin || isOwner)) {
-          global.dfail('admin', m, conn)
-          throw false
-        }
-      }
-      chat.antiToxic = isEnable
-      break
+  const chat = global.db.data.chats[m.chat];
+  const user = global.db.data.users[m.sender];
+  const bot = global.db.data.settings[conn.user.jid] || {};
+  
+  let type = (args[0] || '').toLowerCase();
+  let isEnable = /true|enable|on|1/i.test(command);
+  let isAll = false, isUser = false;
 
-    case 'document':
-    case 'documento':
-      if (m.isGroup) {
-        if (!(isAdmin || isOwner)) return dfail('admin', m, conn)
-      }
-      chat.useDocument = isEnable
-      break
-    case 'autostatus':
-      isAll = true
-      if (!isROwner) {
-        global.dfail('rowner', m, conn)
-        throw false
-      }
-      chat.viewStory = isEnable
-      break
+  const features = {
+    welcome: { scope: 'group', emoji: '👋', desc: 'Send welcome messages' },
+    jarvis: { scope: 'group', emoji: '🤖', desc: 'Auto respond AI (Jarvis)' },
+    autotalk: { scope: 'group', emoji: '🗣️', desc: 'AI Auto Chat mode' },
+    pmblocker: { scope: 'all', emoji: '🚫', desc: 'Block DMs automatically' },
+    autobio: { scope: 'all', emoji: '✍️', desc: 'Auto update bot bio' },
+    detect: { scope: 'group', emoji: '🕵️', desc: 'Detect new joins/leaves' },
+    autosticker: { scope: 'group', emoji: '🎭', desc: 'Auto sticker from image' },
+    antispam: { scope: 'group', emoji: '📵', desc: 'Block spam messages' },
+    delete: { scope: 'group', emoji: '❌', desc: 'Prevent deleted msg loss' },
+    antitoxic: { scope: 'group', emoji: '🚯', desc: 'Block toxic words' },
+    document: { scope: 'group', emoji: '📄', desc: 'Send media as doc' },
+    autostatus: { scope: 'all', emoji: '📰', desc: 'View story auto' },
+    antilink: { scope: 'group', emoji: '🔗', desc: 'Block group links' },
+    nsfw: { scope: 'group', emoji: '🔞', desc: 'NSFW access' },
+    autolevelup: { scope: 'user', emoji: '📈', desc: 'Auto level up' },
+    chatbot: { scope: 'group', emoji: '💬', desc: 'Enable chatbot' },
+    restrict: { scope: 'all', emoji: '⚠️', desc: 'Restrict commands' },
+    autotype: { scope: 'all', emoji: '🟢', desc: 'Always online mode' },
+    anticall: { scope: 'all', emoji: '📵', desc: 'Block incoming calls' },
+    onlypv: { scope: 'all', emoji: '🧍‍♂️', desc: 'Bot only works in DM' },
+    gponly: { scope: 'all', emoji: '👥', desc: 'Bot only in groups' },
+    self: { scope: 'all', emoji: '🛠️', desc: 'Self mode only' }
+  };
 
-    case 'antilink':
-    case 'antilinkwa':
-    case 'antilinkwha':
-      if (m.isGroup) {
-        if (!(isAdmin || isOwner)) {
-          global.dfail('admin', m, conn)
-          throw false
-        }
-      }
-      chat.antiLink = isEnable
-      break
-
-    case 'nsfw':
-    case '+18':
-      if (m.isGroup) {
-        if (!(isAdmin || isOwner)) {
-          global.dfail('admin', m, conn)
-          throw false
-        }
-      }
-      chat.nsfw = isEnable
-      break
-
-    case 'autolevelup':
-      isUser = true
-      user.autolevelup = isEnable
-      break
-
-    case 'chatbot':
-      if (m.isGroup) {
-        if (!(isAdmin || isOwner)) {
-          global.dfail('admin', m, conn)
-          throw false
-        }
-      }
-      chat.chatbot = isEnable
-      break
-
-    case 'restrict':
-    case 'restringir':
-      isAll = true
-      if (!isOwner) {
-        global.dfail('owner', m, conn)
-        throw false
-      }
-      bot.restrict = isEnable
-      break
-    case 'autotype':
-    case 'alwaysonline':
-      isAll = true
-      if (!isOwner) {
-        global.dfail('owner', m, conn)
-        throw false
-      }
-      chat.autotype = isEnable
-      break
-
-    case 'anticall':
-    case 'nocall':
-      isAll = true
-      if (!isOwner) {
-        global.dfail('owner', m, conn)
-        throw false
-      }
-      bot.antiCall = isEnable
-      break
-    case 'onlypv':
-    case 'onlydm':
-    case 'onlymd':
-    case 'solopv':
-      isAll = true
-      if (!isROwner) {
-        global.dfail('rowner', m, conn)
-        throw false
-      }
-      global.opts['pconly'] = isEnable
-      break
-
-    case 'gponly':
-    case 'onlygp':
-    case 'grouponly':
-    case 'sologp':
-    case 'sologrupo':
-      isAll = true
-      if (!isROwner) {
-        global.dfail('rowner', m, conn)
-        throw false
-      }
-      global.opts['gconly'] = isEnable
-      break
-
-      case 'self':
-      isAll = true
-      if (!isROwner) {
-        global.dfail('rowner', m, conn)
-        throw false
-      }
-      global.opts['self'] = isEnable
-      break
-
-      
-    default:
-      if (!/[01]/.test(command))
-        return m.reply(`
-≡ List of options
-𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓
-◈──『 *ADMIN*』───⳹
-⛊ welcome
-⛊ antilink
-⛊ nsfw
-⛊ autosticker
-⛊ detect
-⛊ jarvis
-⛊ antispam
-⛊ antitoxic
-╰──────────⳹ 
-𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓 
-◈──『 *USERS*』───⳹
-⛊ autolevelup
-⛊ chatbot 
-╰──────────⳹
-◈──『 *OWNER*』───⳹
-⛊ onlydm
-⛊ grouponly
-⛊ autotype
-⛊ autobio
-╰──────────⳹
-𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓
-*📌 Example :*
-*${usedPrefix}on* welcome
-*${usedPrefix}off* welcome
-`)
-      throw false
+  if (!features[type]) {
+    let sections = Object.entries(features).map(([key, val]) => `${val.emoji} *${key}* – _${val.desc}_`).join('\n');
+    return conn.sendMessage(m.chat, {
+      text: `*⚙️ Feature Toggle List:*\n\n${sections}\n\n📌 Use: *${usedPrefix}on welcome* or *${usedPrefix}off nsfw*`,
+      footer: 'Silva MD Config Panel',
+      buttons: Object.keys(features).slice(0, 5).map(k => ({
+        buttonId: `${usedPrefix}on ${k}`,
+        buttonText: { displayText: `ON ${features[k].emoji} ${k}` },
+        type: 1
+      })),
+      headerType: 1
+    }, { quoted: m });
   }
 
-  m.reply(
-    `
-✅ *${type}* Now *${isEnable ? 'Active' : 'Deactive'}* ${isAll ? 'for this bot' : isUser ? '' : 'for this bot'}
-`.trim()
-  )
-}
-handler.help = ['en', 'dis'].map(v => v + 'able <option>')
-handler.tags = ['config']
-handler.command = /^((en|dis)able|(turn)?o(n|ff)|[01])$/i
+  let access = features[type].scope;
+  if (access === 'group' && !m.isGroup) return m.reply('❌ Group-only command!');
+  if (access === 'group' && !(isAdmin || isOwner)) return global.dfail('admin', m, conn);
+  if (access === 'user') isUser = true;
+  if (access === 'all' && !isROwner) return global.dfail('rowner', m, conn);
 
-export default handler
+  switch (type) {
+    case 'welcome': chat.welcome = isEnable; break;
+    case 'jarvis':
+    case 'autotalk': chat.jarvis = isEnable; break;
+    case 'pmblocker': bot.pmblocker = isEnable; isAll = true; break;
+    case 'autobio': bot.autoBio = isEnable; isAll = true; break;
+    case 'detect': chat.detect = isEnable; break;
+    case 'autosticker': chat.autosticker = isEnable; break;
+    case 'antispam': chat.antiSpam = isEnable; break;
+    case 'delete': chat.delete = !isEnable; break;
+    case 'antitoxic': chat.antiToxic = isEnable; break;
+    case 'document': chat.useDocument = isEnable; break;
+    case 'autostatus': chat.viewStory = isEnable; isAll = true; break;
+    case 'antilink': chat.antiLink = isEnable; break;
+    case 'nsfw': chat.nsfw = isEnable; break;
+    case 'autolevelup': user.autolevelup = isEnable; break;
+    case 'chatbot': chat.chatbot = isEnable; break;
+    case 'restrict': bot.restrict = isEnable; isAll = true; break;
+    case 'autotype': chat.autotype = isEnable; isAll = true; break;
+    case 'anticall': bot.antiCall = isEnable; isAll = true; break;
+    case 'onlypv': global.opts['pconly'] = isEnable; isAll = true; break;
+    case 'gponly': global.opts['gconly'] = isEnable; isAll = true; break;
+    case 'self': global.opts['self'] = isEnable; isAll = true; break;
+  }
+
+  return conn.sendMessage(m.chat, {
+    location: { degreesLatitude: 0, degreesLongitude: 0 },
+    caption: `*${features[type].emoji} ${type.toUpperCase()}* is now *${isEnable ? 'ENABLED' : 'DISABLED'}* ${isAll ? 'for the bot' : isUser ? 'for your profile' : 'in this group'}`,
+    footer: 'Silva MD Bot Config',
+    buttons: [
+      {
+        buttonId: `${usedPrefix}on ${type}`,
+        buttonText: { displayText: `✅ ON ${features[type].emoji}` },
+        type: 1
+      },
+      {
+        buttonId: `${usedPrefix}off ${type}`,
+        buttonText: { displayText: `❌ OFF ${features[type].emoji}` },
+        type: 1
+      }
+    ],
+    headerType: 6,
+    viewOnce: true
+  }, { quoted: m });
+};
+
+handler.help = ['enable', 'disable'].map(v => v + ' <feature>');
+handler.tags = ['config'];
+handler.command = /^((en|dis)able|(turn)?o(n|ff)|[01])$/i;
+
+export default handler;
