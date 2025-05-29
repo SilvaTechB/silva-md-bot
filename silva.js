@@ -7,26 +7,51 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { EventEmitter } from 'events'
 
-// Increase default max listeners to avoid warning
+// Increase max listeners (optional, to suppress warning)
 EventEmitter.defaultMaxListeners = 50
 
-// Display ASCII banners
-figlet('SILVA MD', {
-  font: 'Ghost',
-  horizontalLayout: 'default',
-  verticalLayout: 'default',
-}, (err, data) => {
-  if (err) return console.error(chalk.red('Figlet error:', err))
-  console.log(chalk.yellow(data))
-})
+// Log stack trace when fs.watchFile is called
+const originalWatchFile = fs.watchFile
+fs.watchFile = function (filename, options, listener) {
+  if (typeof options === 'function') {
+    listener = options
+    options = undefined
+  }
+  const stack = new Error().stack.split('\n').slice(2).join('\n')
+  console.log(chalk.red(`\n⚠️ Adding fs.watchFile on: ${filename}\nStack:\n${stack}\n`))
+  return originalWatchFile.call(this, filename, options, listener)
+}
 
-figlet('Silva Bot', {
-  horizontalLayout: 'default',
-  verticalLayout: 'default',
-}, (err, data) => {
-  if (err) return console.error(chalk.red('Figlet error:', err))
-  console.log(chalk.magenta(data))
-})
+figlet(
+  'SILVA MD',
+  {
+    font: 'Ghost',
+    horizontalLayout: 'default',
+    verticalLayout: 'default',
+  },
+  (err, data) => {
+    if (err) {
+      console.error(chalk.red('Figlet error:', err))
+      return
+    }
+    console.log(chalk.yellow(data))
+  }
+)
+
+figlet(
+  'Silva Bot',
+  {
+    horizontalLayout: 'default',
+    verticalLayout: 'default',
+  },
+  (err, data) => {
+    if (err) {
+      console.error(chalk.red('Figlet error:', err))
+      return
+    }
+    console.log(chalk.magenta(data))
+  }
+)
 
 const app = express()
 const port = process.env.PORT || 5000
@@ -35,11 +60,16 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 app.use(express.static(path.join(__dirname, 'jusorts')))
-app.get('/', (req, res) => res.redirect('/silva.html'))
-app.listen(port, () => console.log(chalk.green(`Port ${port} is open`)))
+
+app.get('/', (req, res) => {
+  res.redirect('/silva.html')
+})
+
+app.listen(port, () => {
+  console.log(chalk.green(`Port ${port} is open`))
+})
 
 let isRunning = false
-fs.watchers = new Map()
 
 async function start(file) {
   if (isRunning) return
@@ -47,12 +77,13 @@ async function start(file) {
 
   const currentFilePath = new URL(import.meta.url).pathname
   const args = [path.join(path.dirname(currentFilePath), file), ...process.argv.slice(2)]
+
   const p = spawn(process.argv[0], args, {
-    stdio: ['inherit', 'inherit', 'inherit', 'ipc']
+    stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
   })
 
   p.on('message', data => {
-    console.log(chalk.cyan(`✔️ RECEIVED ${data}`))
+    console.log(chalk.cyan(`✔️ RECEIVED: ${data}`))
     switch (data) {
       case 'reset':
         p.kill()
@@ -68,19 +99,12 @@ async function start(file) {
   p.on('exit', code => {
     isRunning = false
     console.error(chalk.red(`❌ Exited with code: ${code}`))
-
     if (code === 0) return
 
-    // Clean and safe watch for file changes
-    if (!fs.watchers.has(args[0])) {
-      const watcher = () => {
-        fs.unwatchFile(args[0], watcher)
-        fs.watchers.delete(args[0])
-        start('sylivanus.js')
-      }
-      fs.watchFile(args[0], watcher)
-      fs.watchers.set(args[0], watcher)
-    }
+    fs.watchFile(args[0], () => {
+      fs.unwatchFile(args[0])
+      start('sylivanus.js')
+    })
   })
 
   p.on('error', err => {
@@ -93,7 +117,10 @@ async function start(file) {
   const pluginsFolder = path.join(path.dirname(currentFilePath), 'SilvaXlab')
 
   fs.readdir(pluginsFolder, async (err, files) => {
-    if (err) return console.error(chalk.red(`Error reading SilvaXlab folder: ${err}`))
+    if (err) {
+      console.error(chalk.red(`Error reading SilvaXlab folder: ${err}`))
+      return
+    }
     console.log(chalk.yellow(`Installed ${files.length} plugins`))
 
     try {
@@ -108,23 +135,12 @@ async function start(file) {
 
 start('sylivanus.js')
 
-// Graceful error handling
-process.on('unhandledRejection', () => {
-  console.error(chalk.red(`Unhandled promise rejection. Bot will restart...`))
+process.on('unhandledRejection', err => {
+  console.error(chalk.red(`Unhandled Rejection: ${err}`))
   start('sylivanus.js')
 })
 
 process.on('exit', code => {
   console.error(chalk.red(`Exited with code: ${code}`))
-  console.error(chalk.red(`Bot will restart...`))
-
-  // Clean up all file watchers
-  if (fs.watchers) {
-    for (const [file, watcher] of fs.watchers.entries()) {
-      fs.unwatchFile(file, watcher)
-    }
-    fs.watchers.clear()
-  }
-
   start('sylivanus.js')
 })
