@@ -53,6 +53,7 @@ const {
   delay,
   jidNormalizedUser,
   PHONENUMBER_MCC,
+  Browsers
 } = await import('@whiskeysockets/baileys')
 
 // Session initialization
@@ -144,12 +145,15 @@ async function main() {
 
   const msgRetryCounterCache = new NodeCache()
 
-  // Connection options
+  // Connection options - FIXED VERSION CONFIG
   const connectionOptions = {
-    version: [2, 3000, 1015901307],
+    version: {
+      legacy: [2, 2413, 1], // Explicit legacy version
+      isLatest: false
+    },
     logger: Pino({ level: 'fatal' }),
     printQRInTerminal: !pairingCode,
-    browser: ['Silva MD', 'Chrome', 'Linux'],
+    browser: Browsers.ubuntu('Chrome'), // Proper browser definition
     auth: {
       creds: null,
       keys: null
@@ -161,7 +165,9 @@ async function main() {
       return store?.loadMessage(jid, key.id)?.message || ''
     },
     msgRetryCounterCache,
-    syncFullHistory: false
+    syncFullHistory: false,
+    connectTimeoutMs: 30000, // Connection timeout
+    keepAliveIntervalMs: 15000 // Keepalive ping
   }
 
   // Auth state setup
@@ -170,6 +176,12 @@ async function main() {
   connectionOptions.auth = {
     creds: state.creds,
     keys: makeCacheableSignalKeyStore(state.keys, Pino({ level: 'fatal' }))
+  }
+
+  // Validate credentials before connection - CRITICAL FIX
+  if (!state.creds || !state.creds.me) {
+    console.error('❌ Invalid credentials: Session not initialized properly');
+    process.exit(1);
   }
 
   // Create connection
@@ -282,7 +294,7 @@ async function main() {
     if (connection === 'open') {
       const { jid, name } = conn.user
       const msg = [
-        '💖 𝑺𝑰𝑳𝑽𝑨 𝑴𝑫 𝑩𝑶𝑵𝑬 💖',
+        '💖 𝑺𝑰𝑳𝑽𝑨 𝑴𝑫 💖',
         `Greetings ${name},`,
         '✅ Successfully deployed *Silva MD Bot*',
         '⚙️ *Prefix:* ' + (process.env.PREFIX || '*/i!#$%+£¢€¥^°=¶∆×÷π√✓©®:;?&.\\-.@'),
