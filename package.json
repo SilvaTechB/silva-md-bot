@@ -10,7 +10,7 @@
         "plugins": "plugins"
     },
     "engines": {
-        "node": ">=20.0.0"
+        "node": ">=18.x"
     },
     "scripts": {
         "start": "node silva.js",
