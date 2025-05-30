@@ -103,7 +103,7 @@ async function gandu() {
       process.exit(1)
     } else {
       console.log(`${endi}`)
-      console.log(chalk.bgBlack(chalk.redBright('Starting Lazack Device')))
+      console.log(chalk.bgBlack(chalk.redBright('Starting silva md bot')))
     }
   } catch (error) {
     console.error('Error:', error)
@@ -277,7 +277,7 @@ if (pairingCode && !conn.authState.creds.registered) {
 
     if (!Object.keys(PHONENUMBER_MCC).some(v => phoneNumber.startsWith(v))) {
       console.log(
-        chalk.bgBlack(chalk.redBright("Start with your country's WhatsApp code, Example : 62xxx"))
+        chalk.bgBlack(chalk.redBright("Start with your country's WhatsApp code, Example : 254xxx"))
       )
       process.exit(0)
     }
@@ -289,7 +289,7 @@ if (pairingCode && !conn.authState.creds.registered) {
 
     if (!Object.keys(PHONENUMBER_MCC).some(v => phoneNumber.startsWith(v))) {
       console.log(
-        chalk.bgBlack(chalk.redBright("Start with your country's WhatsApp code, Example : 62xxx"))
+        chalk.bgBlack(chalk.redBright("Start with your country's WhatsApp code, Example : 254xxx"))
       )
 
       phoneNumber = await question(
@@ -309,7 +309,7 @@ if (pairingCode && !conn.authState.creds.registered) {
   }, 3000)
 }
 
-conn.logger.info('\nWaiting For Login\n')
+conn.logger.info('\nWaiting For Login please redeploy if it doesnt work\n')
 
 if (!opts['test']) {
   if (global.db) {
@@ -384,11 +384,11 @@ async function connectionUpdate(update) {
 
   if (connection === 'open') {
     const { jid, name } = conn.user
-    const msg = `╭═══〘 𝑺𝑰𝑳𝑽𝑨 𝑩𝑶𝑻 〙═══⊷❍\n┃✰│ꜱɪʟᴠᴀ ᴍᴅ ʙᴏᴛ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴄᴏɴɴᴇᴄᴛᴇᴅ ᴛᴏ ᴛʜɪꜱ ᴅᴇᴠɪᴄᴇ\n┃✰│ᴘʀᴇꜰɪx: *ᴀʟʟ*\n┃✰│\n┃✰│ᴄʀᴇᴀᴛᴏʀ: *ꜱɪʟᴠᴀ*\n┃✰│ᴏʀɢᴀɴɪᴢᴀᴛɪᴏɴ: *ꜱɪʟᴠᴀ ᴛᴇᴄʜ ʜᴀʀᴢᴀʀᴅ ɪɴᴄ*\n┃✰│ᴜᴘᴅᴀᴛᴇᴅ: *ꜱᴇᴘᴛᴇᴍʙᴇʀ 2024*\n┃✰│https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v\n┃✰│\n┃✰│══〘 𝑺𝑰𝑳𝑽𝑨 𝑩𝑶𝑻 〙═══⊷❍`
+    const msg = `💖𝑺𝑰𝑳𝑽𝑨 𝑴𝑫 𝑩𝑶𝑻💖 \n\nGreetings ${name}, ✅ Congrats you have successfully deployed *Silva MD Bot* \n\n if your bot sent a message to 254743706010 it is running perfect\n if not relink using silva tech session gen\n ⚙️ *Prefix:*\n 🏢 *Organization:* *Silva Tech Inc.* \n 🗓️ *CREATED:* *Sep 2024* \n\n 🌟 *Follow our WhatsApp Channel for updates:* \n https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v \n\n 🔄 *New features coming soon. Stay tuned!* \n\n Developer Sylivanus Momanyi\nfounder of Silva Tech Inc`
 
     await conn.sendMessage(jid, { text: msg, mentions: [jid] }, { quoted: null })
 
-    conn.logger.info(chalk.yellow('\n 𝖶𝖮𝖱𝖪'))
+    conn.logger.info(chalk.yellow('\nSilva is on 𝖶𝖮𝖱𝖪'))
   }
 
   if (connection === 'close') {
@@ -429,18 +429,19 @@ global.reloadHandler = async function (restatConn) {
     conn.ev.off('creds.update', conn.credsUpdate)
   }
 
-  conn.welcome = ` Hello @user!\n\n🎉 *WELCOME* to the group @group!\n\n📜 Please read the *DESCRIPTION* @desc.`
-  conn.bye = `👋GOODBYE @user \n\nSee you later!`
-  conn.spromote = `*@user* has been promoted to an admin!`
-  conn.sdemote = `*@user* is no longer an admin.`
-  conn.sDesc = `The group description has been updated to:\n@desc`
-  conn.sSubject = `The group title has been changed to:\n@group`
-  conn.sIcon = `The group icon has been updated!`
-  conn.sRevoke = ` The group link has been changed to:\n@revoke`
-  conn.sAnnounceOn = `The group is now *CLOSED*!\nOnly admins can send messages.`
-  conn.sAnnounceOff = `The group is now *OPEN*!\nAll participants can send messages.`
-  conn.sRestrictOn = `Edit Group Info has been restricted to admins only!`
-  conn.sRestrictOff = `Edit Group Info is now available to all participants!`
+  conn.welcome = `👋 Hey @user, 🎉 *Welcome to* _@group_! 🔍 Check the group description: @desc 💬 Let’s keep the vibes positive! 🚀`
+  conn.bye = `😢 *@user has left the building!* 👋 Farewell and best wishes!`
+  conn.spromote = `🆙 *Promotion Alert!* 👑 @user is now an *Admin*! Let's gooo! 🎊`
+  conn.sdemote = `🔽 *Demotion Notice!* @user is no longer an admin.`
+  conn.sDesc = `📝 *Group Description Updated!* 🔍 New Description: @desc`
+  conn.sSubject = `🖋️ *Group Name Changed!* 🔔 New Title: _@group_`
+  conn.sIcon = `🖼️ *Group Icon Updated!* Check out the fresh new look! 🔥`
+  conn.sRevoke = `🔗 *Group Link Reset!* Here’s the new invite link: @revoke`
+  conn.sAnnounceOn = `🔒 *Group Closed!* Only admins can now send messages.`
+  conn.sAnnounceOff = `🔓 *Group Open!* Everyone can now chat freely. 🎉`
+  conn.sRestrictOn = `🚫 *Edit Permissions Locked!* Only admins can edit group info now.`
+  conn.sRestrictOff = `✅ *Edit Permissions Opened!* All members can now update group info.`
+  conn.sDelete = `🗑️ *Message Deleted!* This message has been removed.`
 
   conn.handler = handler.handler.bind(global.conn)
   conn.pollUpdate = handler.pollUpdate.bind(global.conn)
@@ -475,7 +476,7 @@ global.reloadHandler = async function (restatConn) {
   return true
 }
 
-const pluginFolder = global.__dirname(join(__dirname, './lazackcmds/index'))
+const pluginFolder = global.__dirname(join(__dirname, './SilvaXlab/index'))
 const pluginFilter = filename => /\.js$/.test(filename)
 global.plugins = {}
 async function filesInit() {
@@ -582,3 +583,9 @@ async function saafsafai() {
 setInterval(saafsafai, 10 * 60 * 1000)
 
 _quickTest().catch(console.error)
+
+//..
+//silva tech inc product
+
+
+// code crafted by silva
