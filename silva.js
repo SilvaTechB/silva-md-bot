@@ -13,7 +13,10 @@ import { promises as fsp } from 'fs';
 
 // Clear temporary files on startup
 async function clearTmp() {
-  const tmpDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'tmp');
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  const tmpDir = path.join(__dirname, 'tmp');
+  
   try {
     const files = await fsp.readdir(tmpDir);
     for (const file of files) {
@@ -87,11 +90,13 @@ async function start(file) {
   // Clean temporary files before starting
   await clearTmp();
 
-  const currentFilePath = new URL(import.meta.url).pathname;
-  const botPath = path.join(path.dirname(currentFilePath), file);
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  const botPath = path.join(__dirname, file);
   const args = [botPath, ...process.argv.slice(2)];
   
   // Start the bot process
+  console.log(chalk.blue(`🚀 Starting bot: ${botPath}`));
   const p = spawn(process.argv[0], args, {
     stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
   });
@@ -107,8 +112,8 @@ async function start(file) {
     }
     
     // For process stdio
-    p.stdout.setMaxListeners(15);
-    p.stderr.setMaxListeners(15);
+    if (p.stdout) p.stdout.setMaxListeners(15);
+    if (p.stderr) p.stderr.setMaxListeners(15);
   } catch (e) {
     console.error(chalk.yellow('⚠️ Listener adjustment failed:', e.message));
   }
@@ -135,33 +140,38 @@ async function start(file) {
     // Clean up previous watcher if exists
     if (fileWatcher) {
       fileWatcher.close();
+      fileWatcher = null;
     }
 
     // Create new file watcher with increased limit
-    fileWatcher = watch(botPath, (eventType) => {
-      if (eventType === 'change') {
-        console.log(chalk.yellow('🔄 File change detected. Restarting...'));
-        fileWatcher.close();
-        start(file);
-      }
-    });
+    try {
+      fileWatcher = watch(botPath, (eventType) => {
+        if (eventType === 'change') {
+          console.log(chalk.yellow('🔄 File change detected. Restarting...'));
+          if (fileWatcher) fileWatcher.close();
+          start(file);
+        }
+      });
 
-    // Set max listeners specifically for this watcher
-    fileWatcher.setMaxListeners(15);
-    console.log(chalk.yellow('👀 Watching for file changes...'));
+      // Set max listeners specifically for this watcher
+      fileWatcher.setMaxListeners(15);
+      console.log(chalk.yellow('👀 Watching for file changes...'));
+    } catch (watchErr) {
+      console.error(chalk.red(`❌ File watch error: ${watchErr.message}`));
+    }
   });
 
   p.on('error', (err) => {
     console.error(chalk.red(`❌ Process error: ${err}`));
-    p.kill();
+    if (p.exitCode === null) p.kill();
     isRunning = false;
     setTimeout(() => {
       start(file);
     }, 5000);
   });
 
-  // List installed plugins
-  const pluginsFolder = path.join(path.dirname(currentFilePath)), 'SilvaXlab');
+  // List installed plugins - FIXED SYNTAX ERROR HERE
+  const pluginsFolder = path.join(__dirname, 'SilvaXlab');
   
   try {
     const files = await fsp.readdir(pluginsFolder);
