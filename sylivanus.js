@@ -8,6 +8,10 @@ import path, { join } from 'path'
 import { platform } from 'process'
 import { fileURLToPath, pathToFileURL } from 'url'
 import * as ws from 'ws'
+import { EventEmitter } from 'events'
+
+// Suppress MaxListenersExceededWarning
+EventEmitter.defaultMaxListeners = Infinity
 import processTxtAndSaveCredentials from './lib/makesession.js'
 import clearTmp from './lib/tempclear.js'
 global.__filename = function filename(pathURL = import.meta.url, rmPrefix = platform !== 'win32') {
