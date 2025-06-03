@@ -1,11 +1,19 @@
-FROM quay.io/gurusensei/gurubhay:latest
+FROM node:20-buster
 
-RUN git clone https://github.com/SilvaTechB/silva-md-bot /root/sylivanus
+RUN apt-get update && \
+  apt-get install -y \
+  ffmpeg \
+  imagemagick \
+  webp && \
+  apt-get upgrade -y && \
+  rm -rf /var/lib/apt/lists/*
 
-WORKDIR /root/sylivanus/
+COPY package.json .
 
-RUN npm install --platform=linuxmusl
+RUN npm install && npm install qrcode-terminal
+
+COPY . .
 
 EXPOSE 5000
 
-CMD ["npm", "start"]
+CMD ["node", "start"]
