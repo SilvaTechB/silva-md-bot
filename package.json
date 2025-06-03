@@ -13,7 +13,7 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "start": "node silva.js --deep-monitoring --attach --name silva-md-bot",
+    "start": "node silva.js",
     "test": "node silvamd.js"
   },
   "keywords": [
