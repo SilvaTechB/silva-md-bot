@@ -13,7 +13,7 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "start": "node --trace-warnings silva.js",
+    "start": "pm2 start silva.js --deep-monitoring --attach --name silva-md-bot",
     "test": "node silvamd.js"
   },
   "keywords": [
@@ -27,7 +27,7 @@
   ],
   "homepage": "https://github.com/SilvaTechB/silva-md-bot",
   "author": {
-    "name": "GURU",
+    "name": "SilvaTechB",
     "email": "sylivanus.silva@gmail.com",
     "url": "https://github.com/SilvaTechB"
   },
