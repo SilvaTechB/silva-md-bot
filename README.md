@@ -11,7 +11,7 @@
 ```
 
 ## ⏳ Timeline
-```
+```mermaid
 gantt
     title Maintenance Schedule
     dateFormat  2025-07-20
