@@ -1,47 +1,38 @@
 # 🚧 UNDER MAINTENANCE 🚧
 
-> We're currently performing scheduled maintenance to improve your experience
+> Major upgrade in progress - Expect version 5.0 with enhanced AI capabilities
 
 **Status**: `Active Maintenance`  
-**Estimated Completion**: 3 months  
-**Last Updated**: <!--ISO_DATE-->2025-10-20T14:30:00Z<!--/ISO_DATE-->
-
-## 📊 Progress
+**Estimated Completion**: 2025-11-20  
+**Progress**: 
 ```diff
-+ Completed [██████████████████░░░░] 65%
-- Pending  [░░░░░░░░░░░░░░░░░░░░░░] 35%
++ Completed [██████████░░░░░░░░░░░░] 40%
+- Pending  [░░░░░░░░░░░░░░░░░░░░░░] 60%
 ```
 
-## ⏳ What to Expect
-- Improved system stability
-- New feature implementations
-- Performance enhancements
-- Security updates
-
-## 📬 Contact
-For urgent inquiries:  
-📧 [email us](mailto:sylivanusmomanyi@gmail.com)  
-🐦 [@ProjectSupport](https://twitter.com/silva_african)
-
----
-
+## ⏳ Timeline
 ```mermaid
 gantt
     title Maintenance Schedule
-    dateFormat  YYYY-MM-DDTHH:mm
-    axisFormat  %H:%M
+    dateFormat  YYYY-MM-DD
+    axisFormat %b %d
     
-    section Backend
-    Database Optimization       :active,  db1, 2025-10-20T14:00, 1h
-    API Upgrades               :         api1, after db1, 45m
+    section Core
+    Architecture Refactor     :active,  core, 2025-07-20, 30d
+    AI Integration            :         ai, after core, 45d
     
-    section Frontend
-    UI Improvements            :active,  ui1, 2025-10-20T14:30, 1h
-    Mobile Responsiveness      :         mob1, after ui1, 30m
+    section Interface
+    UI Redesign               :active,  ui, 2025-08-01, 60d
+    Mobile Overhaul           :         mobile, after ui, 30d
 ```
 
-> ℹ️ Check back here for updates. Refresh this page to see latest status.
+## 📬 Contact
+For urgent inquiries:  
+📧 [sylivanusmomanyi@gmail.com](mailto:sylivanusmomanyi@gmail.com)  
+🐦 [@silva_african](https://twitter.com/silva_african)
 
+> ⚠️ Deployment options temporarily disabled during maintenance  
+> ℹ️ Last updated: 2025-07-20T14:30:00Z
 
 
 > ### UNDER MAINTENANCE 
