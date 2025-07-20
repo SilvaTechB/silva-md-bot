@@ -11,10 +11,10 @@
 ```
 
 ## ⏳ Timeline
-```mermaid
+
 gantt
     title Maintenance Schedule
-    dateFormat  YYYY-MM-DD
+    dateFormat  2025-07-20
     axisFormat %b %d
     
     section Core
@@ -24,7 +24,7 @@ gantt
     section Interface
     UI Redesign               :active,  ui, 2025-08-01, 60d
     Mobile Overhaul           :         mobile, after ui, 30d
-```
+
 
 ## 📬 Contact
 For urgent inquiries:  
