@@ -11,7 +11,7 @@
 ```
 
 ## ⏳ Timeline
-
+```
 gantt
     title Maintenance Schedule
     dateFormat  2025-07-20
@@ -24,12 +24,13 @@ gantt
     section Interface
     UI Redesign               :active,  ui, 2025-08-01, 60d
     Mobile Overhaul           :         mobile, after ui, 30d
-
+```
 
 ## 📬 Contact
 For urgent inquiries:  
 📧 [email us](mailto:sylivanusmomanyi@gmail.com)  
 🐦 [X us](https://twitter.com/silva_african)
+
 💝 [Chat with us](https://wa.me/254755257907)
 
 > ⚠️ Deployment options temporarily disabled during maintenance  
