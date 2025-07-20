@@ -3,7 +3,7 @@
 > We're currently performing scheduled maintenance to improve your experience
 
 **Status**: `Active Maintenance`  
-**Estimated Completion**: 2 hours  
+**Estimated Completion**: 3 months  
 **Last Updated**: <!--ISO_DATE-->2025-10-20T14:30:00Z<!--/ISO_DATE-->
 
 ## 📊 Progress
