@@ -20,7 +20,7 @@
 
 ## 📬 Contact
 For urgent inquiries:  
-📧 [email us](mailto: sylivanusmomanyi@gmail.com)  
+📧 [email us](mailto:sylivanusmomanyi@gmail.com)  
 🐦 [@ProjectSupport](https://twitter.com/silva_african)
 
 ---
@@ -41,7 +41,9 @@ gantt
 ```
 
 > ℹ️ Check back here for updates. Refresh this page to see latest status.
-```
+
+
+
 > ### UNDER MAINTENANCE 
 
 ### VERSION 4.0.1
