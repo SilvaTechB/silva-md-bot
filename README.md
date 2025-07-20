@@ -1,3 +1,47 @@
+# 🚧 UNDER MAINTENANCE 🚧
+
+> We're currently performing scheduled maintenance to improve your experience
+
+**Status**: `Active Maintenance`  
+**Estimated Completion**: 2 hours  
+**Last Updated**: <!--ISO_DATE-->2025-10-20T14:30:00Z<!--/ISO_DATE-->
+
+## 📊 Progress
+```diff
++ Completed [██████████████████░░░░] 65%
+- Pending  [░░░░░░░░░░░░░░░░░░░░░░] 35%
+```
+
+## ⏳ What to Expect
+- Improved system stability
+- New feature implementations
+- Performance enhancements
+- Security updates
+
+## 📬 Contact
+For urgent inquiries:  
+📧 [email us](mailto: sylivanusmomanyi@gmail.com)  
+🐦 [@ProjectSupport](https://twitter.com/silva_african)
+
+---
+
+```mermaid
+gantt
+    title Maintenance Schedule
+    dateFormat  YYYY-MM-DDTHH:mm
+    axisFormat  %H:%M
+    
+    section Backend
+    Database Optimization       :active,  db1, 2025-10-20T14:00, 1h
+    API Upgrades               :         api1, after db1, 45m
+    
+    section Frontend
+    UI Improvements            :active,  ui1, 2025-10-20T14:30, 1h
+    Mobile Responsiveness      :         mob1, after ui1, 30m
+```
+
+> ℹ️ Check back here for updates. Refresh this page to see latest status.
+```
 > ### UNDER MAINTENANCE 
 
 ### VERSION 4.0.1
