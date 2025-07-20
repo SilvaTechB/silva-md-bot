@@ -28,8 +28,9 @@ gantt
 
 ## 📬 Contact
 For urgent inquiries:  
-📧 [sylivanusmomanyi@gmail.com](mailto:sylivanusmomanyi@gmail.com)  
-🐦 [@silva_african](https://twitter.com/silva_african)
+📧 [email us](mailto:sylivanusmomanyi@gmail.com)  
+🐦 [X us](https://twitter.com/silva_african)
+💝 [Chat with us](https://wa.me/254755257907)
 
 > ⚠️ Deployment options temporarily disabled during maintenance  
 > ℹ️ Last updated: 2025-07-20T14:30:00Z
