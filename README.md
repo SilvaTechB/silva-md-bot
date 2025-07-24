@@ -14,7 +14,7 @@
 ```mermaid
 gantt
     title Maintenance Schedule
-    dateFormat  2025-07-20
+    dateFormat  YYYY-MM-DD
     axisFormat %b %d
     
     section Core
