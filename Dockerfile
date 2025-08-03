@@ -1,16 +1,16 @@
-FROM node:20-alpine
+FROM node:18
 
-# Set work directory
+# Create app directory
 WORKDIR /app
 
-# Install dependencies
-COPY package*.json ./
+# Copy package.json and install dependencies
+COPY package.json package-lock.json* ./
 RUN npm install --production
 
-# Copy bot files
+# Copy the rest of the app
 COPY . .
 
-# Expose port for express server
+# Expose the port
 EXPOSE 9090
 
 # Start the bot
