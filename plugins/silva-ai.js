@@ -23,8 +23,8 @@ module.exports = {
             for (const url of apis) {
                 try {
                     const res = await axios.get(url, { timeout: 15000 });
-                    if (res.data) {
-                        response = res.data.result || res.data.answer || JSON.stringify(res.data);
+                    if (res.data?.message) {  // ✅ Get only message field
+                        response = res.data.message;
                         break;
                     }
                 } catch (err) {
