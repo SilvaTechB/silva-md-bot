@@ -171,7 +171,7 @@ async function connectToWhatsApp() {
         // ✅ Core Commands
         if (command === 'ping') {
             return sock.sendMessage(sender, {
-                text: '🏓 *Pong!* Silva MD is live!',
+                text: '🏓 *Pong!* ${latency} ms Silva MD is live!',
                 contextInfo: globalContextInfo
             }, { quoted: m });
         }
