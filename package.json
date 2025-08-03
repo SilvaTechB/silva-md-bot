@@ -1,8 +1,11 @@
 {
   "name": "silva-md-bot",
-  "version": "1.0.0",
+  "version": "5.0.0",
   "description": "Silva MD Bot using Baileys",
   "main": "silva.js",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "start": "node silva.js"
   },
