@@ -1,214 +1,159 @@
 {
-  "name": "silva-md-bot-BETA",
-  "description": "Javascript WhatsApp bot made by silva-md",
-  "logo": "https://i.imgur.com/RvEKtPJ.jpeg",
-  "keywords": ["silva-md", "whatsapp", "bot", "javascript", "nodejs"],
+  "name": "silva-md",
+  "description": "Javascript WhatsApp bot made by Silva.",
+  "keywords": ["silva-md", "whatsapp", "baileys", "bot"],
   "success_url": "/",
-
-    "stack": "container",
+  "stack": "container",
   "env": {
     "SESSION_ID": {
       "description": "Put the session-id here.",
       "required": true,
       "value": ""
-    },  
-    
-    "STICKER_NAME": {
-      "description": "type your sticker pack name.",
+    },
+    "ALIVE_IMG": {
+      "description": "Paste your image URL here.",
       "required": false,
-      "value": "silva md bot"
-    }, 
-      
+      "value": "https://i.ibb.co/BVt9McxS/photo-2025-06-15-12-14-29-7516148628621099032.jpg"
+    },
+    "LIVE_MSG": {
+      "description": "Paste your alive message here.",
+      "required": false,
+      "value": "> SILVA MD IS ACTIVE AND RUNNING ⚡"
+    },
+    "ANTIDELETE_PRIVATE": {
+      "description": "Restore deleted messages in private chat.",
+      "required": true,
+      "value": "true"
+    },
+    "ANTIDELETE_GROUP": {
+      "description": "Restore deleted messages in groups.",
+      "required": true,
+      "value": "true"
+    },
     "PREFIX": {
-      "description": "paste your bot prefix note! Don't apply null prefix.",
+      "description": "Bot command prefix.",
       "required": false,
       "value": "."
     },
-    
     "MODE": {
-      "description": "select your bot work type public-private-inbox-group.",
+      "description": "Bot mode: public, private, group, inbox.",
       "required": false,
       "value": "public"
-      
     },
-    
-    
-    "ALWAYS_ONLINE": {
-      "description": "Make it true if want always online.",
-      "required": false,
-      "value": "false"  
-    },    
-  
-    "AUTO_VOICE": {
-      "description": "Make it true if want automatic voice reply .",
-      "required": false,
-      "value": "false"
-    }, 
-
-    "AUTO_REPLY": {
-      "description": "Make it true if you want automatic reply.",
-      "required": false,
-      "value": "false"
-    }, 
-
-    "AUTO_STICKER": {
-      "description": "Make it true if you want automatic sticker.",
-      "required": false,
-      "value": "false"
-    }, 
-
-
-    "AUTO_STATUS_SEEN": {
-      "description": "Make it true for automatic status seen.",
-      "required": true,
-      "value": "true"
-    }, 
-
     "AUTO_STATUS_REACT": {
-      "description": "make it true for automatic status reaction or like.",
+      "description": "Enable auto status reactions.",
+      "required": false,
+      "value": "true"
+    },
+    "ALWAYS_ONLINE": {
+      "description": "Keep bot always online.",
+      "required": false,
+      "value": "false"
+    },
+    "AUTO_VOICE": {
+      "description": "Enable automatic voice replies.",
+      "required": false,
+      "value": "false"
+    },
+    "AUTO_REPLY": {
+      "description": "Enable automatic text replies.",
+      "required": false,
+      "value": "false"
+    },
+    "AUTO_STICKER": {
+      "description": "Enable automatic stickers.",
+      "required": false,
+      "value": "false"
+    },
+    "AUTO_STATUS_SEEN": {
+      "description": "Enable auto status seen.",
       "required": true,
       "value": "true"
-    }, 
-
+    },
     "AUTO_STATUS_REPLY": {
-      "description": "Make it true for auto reply msg on status seen.",
+      "description": "Enable auto status reply.",
       "required": true,
       "value": "false"
-    }, 
-
-    "AUTO_STATUS_MSG": {
-      "description": "Type custom message on status reply",
+    },
+    "AUTO_STATUS__MSG": {
+      "description": "Message for auto status reply.",
       "required": true,
-      "value": "*SEEN YOUR STATUS BY silva md bot 🖤*"
-   
-     }, 
-    
+      "value": "*👀 Seen by Silva MD ✅*"
+    },
     "OWNER_NAME": {
-      "description": "Type Bot Owner Name.",
+      "description": "Bot owner name.",
       "required": false,
-      "value": "silva md bot"
-}, 
-
+      "value": "Silva MD"
+    },
     "OWNER_NUMBER": {
-      "description": "put the owner number for bot.",
+      "description": "Owner WhatsApp number.",
       "required": false,
       "value": "254700143167"
-
-    }, 
-
+    },
     "BOT_NAME": {
-      "description": "Type here the bot name.",
+      "description": "Bot display name.",
       "required": false,
-      "value": "silva md bot"
-
-      }, 
-
+      "value": "✦ Silva ✦ MD ✦"
+    },
     "ANTI_LINK": {
-      "description": "Make it true if you want bot auto remove group link.",
+      "description": "Enable anti-link feature in groups.",
       "required": true,
       "value": "true"
-      
     },
-
-     "ANTI_LINK_KICK": {
-      "description": "Make it true if you want bot auto remove group link.",
-      "required": true,
-      "value": "false"
-      
-    },
-    
     "ANTI_BAD": {
-      "description": "Make it true if you want bot auto delete bad words.",
+      "description": "Enable anti-bad words feature.",
       "required": false,
       "value": "false"
     },
-
-   "MENTION_REPLY": {
-      "description": "make it true if want mention reply if someone menetion you.",
+    "DESCRIPTION": {
+      "description": "Caption for menu and bot branding.",
       "required": false,
-      "value": "false"
+      "value": "*© ✦ Silva ✦ MD ✦*"
     },
-    
-    "MENU_IMAGE_URL": {
-      "description": "add url for mention reply and menu if want.",
-      "required": false,
-      "value": "https://i.imgur.com/RvEKtPJ.jpeg"
-    },
-    
-     "DESCRIPTION": {
-      "description": "add caption for menu and other",
-      "required": false,
-      "value": "*© ᴘᴏᴡᴇʀᴇᴅ ʙʏ silva*"
-    },
-
-      "DELETE_LINKS": {
-      "description": "remove links from group automatically without removing member",
-      "required": false,
-      "value": "false"
-    },
-    
-    "AUTO_RECORDING": {
-      "description": "Make it true if you want auto recoding.",
-      "required": false,
-      "value": "false"
-    },
-
-    "AUTO_TYPING": {
-      "description": "Make it true if you want auto typing.",
-      "required": false,
-      "value": "false"
-    },
-
-    "AUTO_REACT": {
-      "description": "Make it true if you want react on every message.",
-      "required": false,
-      "value": "false"
-    },
-    
-    "CUSTOM_REACT": {
-      "description": "Make it true if you want custom reactions.",
-      "required": false,
-      "value": "false"
-      
-    }, 
-    
-    "CUSTOM_REACT_EMOJIS": {
-      "description": "put here custom react react emojis.",
-      "required": false,
-      "value": "💝,💖,💗,❤️‍🩹,❤️,🧡,💛,💚,💙,💜,🤎,🖤,🤍"
-    }, 
-    
-    "ANTI_DEL_PATH": {
-      "description": "change it to -same- if you want to resend deleted message in same chat",
-      "required": false,
-      "value": "log"
-    }, 
-
-    "ADMIN_EVENTS": {
-      "description": "make it true if want know who promote or demote a member .",
-      "required": false,
-      "value": "false"
-    },
-
-    "WELCOME": {
-      "description": "make it true if want goodbye and welcome message in groups.",
+    "DELETE_LINKS": {
+      "description": "Remove links from group without removing member.",
       "required": false,
       "value": "true"
     },
-
+    "AUTO_RECORDING": {
+      "description": "Enable auto recording simulation.",
+      "required": false,
+      "value": "false"
+    },
+    "AUTO_TYPING": {
+      "description": "Enable auto typing simulation.",
+      "required": false,
+      "value": "true"
+    },
+    "AUTO_REACT": {
+      "description": "Enable auto reactions for all messages.",
+      "required": false,
+      "value": "false"
+    },
+    "OWNER_REACT": {
+      "description": "React only to owner messages.",
+      "required": false,
+      "value": "false"
+    },
+    "CUSTOM_REACT": {
+      "description": "Enable custom reactions.",
+      "required": false,
+      "value": "false"
+    },
+    "CUSTOM_REACT_EMOJIS": {
+      "description": "Custom emojis for reactions.",
+      "required": false,
+      "value": "💝,💖,💗,❤️‍🔥,❤️‍🩹,❤️,🩷,🧡,💛,💚,💙,🩵,💜,🤎,🖤,🩶,🤍"
+    },
     "READ_MESSAGE": {
-      "description": "Make it true if you want bot read your all sms just now.",
+      "description": "Enable automatic message read receipts.",
       "required": false,
       "value": "false"
     }
-
-},
-
-     "buildpacks": [
-        {
-            "url": "https://github.com/heroku/heroku-buildpack-nodejs.git"
-        }
-     ],
-  "stack": "heroku-24"
+  },
+  "buildpacks": [
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-nodejs.git"
+    }
+  ]
 }
-  
