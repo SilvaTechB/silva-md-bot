@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Silva MD Bot using Baileys",
   "main": "silva.js",
-  "type": "module",
   "scripts": {
     "start": "node silva.js"
   },
