@@ -1,11 +1,8 @@
-// plugins/ai.js
-const axios = require('axios');
-
 module.exports = {
     name: 'ai',
     commands: ['ai', 'gpt', 'chatgpt'],
     description: 'Ask AI a question using GPT-powered APIs',
-    async execute(sock, m, args, contextInfo) {
+    async handler(sock, m, args, contextInfo) {  // ✅ Changed execute → handler
         const query = args.join(' ');
         if (!query) {
             return sock.sendMessage(m.key.remoteJid, {
@@ -28,7 +25,7 @@ module.exports = {
                 } else {
                     response = res.data;
                 }
-                break; // Stop after first success
+                break; // ✅ Stop after first success
             } catch (err) {
                 console.error(`❌ API failed: ${url}`, err.message);
             }
