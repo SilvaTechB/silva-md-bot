@@ -124,35 +124,118 @@ async function connectToWhatsApp() {
     sock.ev.on('creds.update', saveCreds);
 
     // ✅ Anti-Delete
-    sock.ev.on('message-revoke.everyone', async msg => {
-        try {
-            const from = msg.key.remoteJid;
-            if ((from.endsWith('@g.us') && config.ANTIDELETE_GROUP === 'true') ||
-                (!from.endsWith('@g.us') && config.ANTIDELETE_PRIVATE === 'true')) {
-                await sock.sendMessage(from, {
-                    text: '⚠️ *Anti-Delete:* Someone deleted a message!',
-                    contextInfo: globalContextInfo
+    // ✅ Anti-Delete Full Implementation (Send to Owner)
+sock.ev.on('message-revoke.everyone', async (msg) => {
+    try {
+        const from = msg.key.remoteJid;
+        const deletedKey = msg.key;
+        const participant = msg.participant || msg.key.participant || msg.key.remoteJid;
+
+        if ((from.endsWith('@g.us') && config.ANTIDELETE_GROUP === 'true') ||
+            (!from.endsWith('@g.us') && config.ANTIDELETE_PRIVATE === 'true')) {
+
+            const deletedMessage = await sock.loadMessage(deletedKey);
+            if (!deletedMessage) return;
+
+            const ownerJid = `${config.OWNER_NUMBER}@s.whatsapp.net`;
+            const senderName = participant.split('@')[0];
+            let caption = `⚠️ *Anti-Delete Alert!*\n\n👤 *Sender:* @${senderName}\n💬 *Restored Message:*\n\n*Chat:* ${from.endsWith('@g.us') ? 'Group' : 'Private'}`;
+
+            let messageOptions = {
+                contextInfo: {
+                    mentionedJid: [participant],
+                    ...globalContextInfo,
+                    externalAdReply: {
+                        title: "Silva MD Anti-Delete",
+                        body: "Message restored privately",
+                        thumbnailUrl: "https://files.catbox.moe/5uli5p.jpeg",
+                        sourceUrl: "https://github.com/SilvaTechB/silva-md-bot",
+                        mediaType: 1,
+                        renderLargerThumbnail: true
+                    }
+                }
+            };
+
+            if (deletedMessage.message?.conversation) {
+                await sock.sendMessage(ownerJid, {
+                    text: `${caption}\n\n${deletedMessage.message.conversation}`,
+                    ...messageOptions
+                });
+            } else if (deletedMessage.message?.extendedTextMessage) {
+                await sock.sendMessage(ownerJid, {
+                    text: `${caption}\n\n${deletedMessage.message.extendedTextMessage.text}`,
+                    ...messageOptions
+                });
+            } else if (deletedMessage.message?.imageMessage) {
+                const buffer = await sock.downloadMediaMessage(deletedMessage);
+                await sock.sendMessage(ownerJid, {
+                    image: buffer,
+                    caption: `${caption}\n\n${deletedMessage.message.imageMessage.caption || ''}`,
+                    ...messageOptions
+                });
+            } else if (deletedMessage.message?.videoMessage) {
+                const buffer = await sock.downloadMediaMessage(deletedMessage);
+                await sock.sendMessage(ownerJid, {
+                    video: buffer,
+                    caption: `${caption}\n\n${deletedMessage.message.videoMessage.caption || ''}`,
+                    ...messageOptions
+                });
+            } else if (deletedMessage.message?.documentMessage) {
+                const buffer = await sock.downloadMediaMessage(deletedMessage);
+                await sock.sendMessage(ownerJid, {
+                    document: buffer,
+                    mimetype: deletedMessage.message.documentMessage.mimetype,
+                    fileName: deletedMessage.message.documentMessage.fileName || 'Restored-File',
+                    caption,
+                    ...messageOptions
+                });
+            } else {
+                await sock.sendMessage(ownerJid, {
+                    text: `${caption}\n\n[Unsupported Message Type]`,
+                    ...messageOptions
                 });
             }
-        } catch (err) {
-            console.error('❌ Anti-Delete Error:', err);
         }
-    });
+    } catch (err) {
+        console.error('❌ Anti-Delete Full Error:', err);
+    }
+});
 
     // ✅ Auto Status Seen & Reply
-    sock.ev.on('status.update', async ({ status }) => {
+    // ✅ Auto Status Seen + React + Reply
+sock.ev.on('status.update', async ({ status }) => {
+    try {
         for (const s of status) {
+            if (!s.id || !s.jid) continue;
+
+            // ✅ Mark status as seen
             if (config.AUTO_STATUS_SEEN === 'true') {
                 await sock.readMessages([{ remoteJid: s.jid, id: s.id }]);
             }
+
+            // ✅ React to status with custom emoji
+            if (config.AUTO_STATUS_REACT && config.AUTO_STATUS_REACT.trim() !== '') {
+                await sock.sendMessage(s.jid, {
+                    react: {
+                        text: config.AUTO_STATUS_REACT, // Example: "🔥"
+                        key: { remoteJid: s.jid, id: s.id }
+                    }
+                });
+            }
+
+            // ✅ Reply to status (optional)
             if (config.AUTO_STATUS_REPLY === 'true') {
                 await sock.sendMessage(s.jid, {
-                    text: config.AUTO_STATUS__MSG,
+                    text: config.AUTO_STATUS_MSG,
                     contextInfo: globalContextInfo
                 });
             }
         }
-    });
+    } catch (err) {
+        console.error('❌ Auto Status Error:', err);
+    }
+});
+
 
     // ✅ Handle Commands
     sock.ev.on('messages.upsert', async ({ messages }) => {
