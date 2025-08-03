@@ -78,7 +78,7 @@ async function sendWelcomeMessage(sock) {
         `⚡ Powered by Silva Tech Inc\nGitHub: https://github.com/SilvaTechB/silva-md-bot`;
 
     await sock.sendMessage(sock.user.id, {
-        video: { url: 'https://files.catbox.moe/2xxr9h.mp4' },
+        image: { url: 'https://files.catbox.moe/5uli5p.jpeg' },
         caption: welcomeMsg,
         contextInfo: {
             ...globalContextInfo,
