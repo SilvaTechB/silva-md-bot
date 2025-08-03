@@ -1,13 +1,4 @@
-if (typeof File === 'undefined') {
-  global.File = class File extends Blob {
-    constructor(chunks, filename, options = {}) {
-      super(chunks, options);
-      this.name = filename;
-      this.lastModified = options.lastModified || Date.now();
-    }
-  };
-}
-
+// silva md new version 
 // ✅ Silva MD Bot Main File
 const baileys = require('@whiskeysockets/baileys');
 const { makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, Browsers, DisconnectReason } = baileys;
