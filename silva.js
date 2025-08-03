@@ -185,18 +185,31 @@ async function connectToWhatsApp() {
         }
 
         if (command === 'menu') {
-            const cmds = ['ping', 'alive', 'menu'];
-            for (const [_, plugin] of plugins) {
-                if (Array.isArray(plugin.commands)) cmds.push(...plugin.commands);
+    const cmds = ['ping', 'alive', 'menu'];
+    for (const [_, plugin] of plugins) {
+        if (Array.isArray(plugin.commands)) cmds.push(...plugin.commands);
+    }
+
+    const menuText = `*✦ Silva MD ✦ Command Menu*\n\n` +
+        cmds.map(c => `• ${prefix}${c}`).join('\n') +
+        `\n\n⚡ Total Commands: ${cmds.length}\n\n✨ Powered by Silva Tech Inc`;
+
+    return sock.sendMessage(sender, {
+        image: { url: 'https://files.catbox.moe/5uli5p.jpeg' }, // ✅ Added image here
+        caption: menuText,
+        contextInfo: {
+            ...globalContextInfo,
+            externalAdReply: {
+                title: "Silva MD Menu",
+                body: "Explore all available commands",
+                thumbnailUrl: "https://files.catbox.moe/5uli5p.jpeg",
+                sourceUrl: "https://github.com/SilvaTechB/silva-md-bot",
+                mediaType: 1,
+                renderLargerThumbnail: true
             }
-            const menuText = `*✦ Silva MD ✦ Command Menu*\n\n` +
-                cmds.map(c => `• ${prefix}${c}`).join('\n') +
-                `\n\n⚡ Total Commands: ${cmds.length}`;
-            return sock.sendMessage(sender, {
-                text: menuText,
-                contextInfo: globalContextInfo
-            }, { quoted: m });
         }
+    }, { quoted: m });
+}
 
         // ✅ Plugin Commands
         for (const plugin of plugins.values()) {
