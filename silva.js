@@ -1,12 +1,20 @@
+// ✅ Silva MD Bot Main File
+const baileys = require('@whiskeysockets/baileys');
+const { makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, Browsers, DisconnectReason } = baileys;
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 const express = require('express');
-const { Boom } = require('@hapi/boom');
-const pino = require('pino');
-const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require('@whiskeysockets/baileys');
-const config = require('./config');
+const P = require('pino');
+const { File } = require('megajs');
+const config = require('./config.js');
 
-// Global forwarding info
+const prefix = config.PREFIX || '.';
+const tempDir = path.join(os.tmpdir(), 'silva-cache');
+const port = process.env.PORT || 25680;
+const pluginsDir = path.join(__dirname, 'plugins');
+
+// ✅ Global Context Info (Forwarded Look)
 const globalContextInfo = {
     forwardingScore: 999,
     isForwarded: true,
@@ -14,117 +22,196 @@ const globalContextInfo = {
         newsletterJid: '120363200367779016@newsletter',
         newsletterName: 'SILVA TECH',
         serverMessageId: 144
-    },
-    externalAdReply: {
-        title: 'Silva MD Bot',
-        body: 'Powered by Silva Tech Inc',
-        thumbnailUrl: 'https://files.catbox.moe/5uli5p.jpeg',
-        sourceUrl: 'https://github.com/SilvaTechB/silva-md-bot',
-        mediaType: 1,
-        renderLargerThumbnail: true
     }
 };
 
-const prefix = config.PREFIX || '.';
-let commands = []; // To store all commands from plugins
+// ✅ Ensure Temp Directory Exists
+if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
+setInterval(() => {
+    fs.readdirSync(tempDir).forEach(file => fs.unlinkSync(path.join(tempDir, file)));
+}, 5 * 60 * 1000);
 
-// Start Express for Heroku
-const app = express();
-const PORT = process.env.PORT || 9090;
-app.get('/', (req, res) => res.send('✅ Silva MD Bot is Running!'));
-app.listen(PORT, () => console.log(`🌐 Server running on port ${PORT}`));
-
-// Main connection function
-async function connectToWhatsApp() {
-    const { state, saveCreds } = await useMultiFileAuthState('./session');
-    const sock = makeWASocket({
-        logger: pino({ level: 'silent' }),
-        printQRInTerminal: false,
-        auth: state
-    });
-
-    sock.ev.on('creds.update', saveCreds);
-
-    sock.ev.on('connection.update', async (update) => {
-        const { connection, lastDisconnect } = update;
-        if (connection === 'close') {
-            const shouldReconnect = (lastDisconnect.error?.output?.statusCode !== DisconnectReason.loggedOut);
-            console.log('Connection closed. Reconnecting...', shouldReconnect);
-            if (shouldReconnect) connectToWhatsApp();
-        } else if (connection === 'open') {
-            console.log('✅ Connected to WhatsApp');
-            const pluginCount = await loadPlugins(sock);
-            await sendWelcomeMessage(sock, pluginCount);
-        }
-    });
-
-    sock.ev.on('messages.upsert', async ({ messages }) => {
-        const m = messages[0];
-        if (!m.message || m.key.fromMe) return;
-
-        const text = m.message.conversation || m.message.extendedTextMessage?.text;
-        if (!text || !text.startsWith(prefix)) return;
-
-        const args = text.slice(prefix.length).trim().split(/ +/);
-        const command = args.shift().toLowerCase();
-
-        // Find matching command
-        const cmd = commands.find(c => c.name === command || (c.alias && c.alias.includes(command)));
-        if (cmd) {
-            try {
-                await cmd.execute(sock, m, args, { config, globalContextInfo });
-            } catch (err) {
-                console.error(`❌ Error executing command ${command}:`, err);
-            }
-        }
-    });
-}
-
-// Plugin Loader
-async function loadPlugins(sock) {
-    console.log('🔌 Loading plugins...');
-    const pluginDir = path.join(__dirname, 'plugins');
-    if (!fs.existsSync(pluginDir)) fs.mkdirSync(pluginDir);
-
-    const files = fs.readdirSync(pluginDir).filter(file => file.endsWith('.js'));
-    let count = 0;
-
+// ✅ Load Plugins
+let plugins = new Map();
+function loadPlugins() {
+    if (!fs.existsSync(pluginsDir)) fs.mkdirSync(pluginsDir);
+    const files = fs.readdirSync(pluginsDir).filter(file => file.endsWith('.js'));
+    plugins.clear();
     for (const file of files) {
-        try {
-            const modulePath = path.join(pluginDir, file);
-            const module = require(modulePath); // ✅ Using require for plugins
-            if (typeof module.default === 'function') {
-                const pluginCommands = module.default(sock, globalContextInfo);
-                if (Array.isArray(pluginCommands)) {
-                    commands.push(...pluginCommands);
-                }
-                console.log(`  ✅ Loaded: ${file}`);
-                count++;
-            } else {
-                console.warn(`⚠️ Plugin ${file} has no default export function.`);
-            }
-        } catch (err) {
-            console.error(`❌ Failed to load ${file}:`, err);
-        }
+        const plugin = require(path.join(pluginsDir, file));
+        plugins.set(file.replace('.js', ''), plugin);
     }
+}
+loadPlugins();
 
-    return count;
+// ✅ Setup Session from Mega.nz
+async function setupSession() {
+    const sessionPath = path.join(__dirname, 'sessions', 'creds.json');
+    if (!fs.existsSync(sessionPath)) {
+        if (!config.SESSION_ID || !config.SESSION_ID.startsWith('Silva~')) {
+            throw new Error('Invalid or missing SESSION_ID. Must start with Silva~');
+        }
+        console.log('⬇ Downloading session from Mega.nz...');
+        const megaCode = config.SESSION_ID.replace('Silva~', '');
+        const file = File.fromURL(`https://mega.nz/file/${megaCode}`);
+        await new Promise((resolve, reject) => {
+            file.download((err, data) => {
+                if (err) return reject(err);
+                fs.mkdirSync(path.join(__dirname, 'sessions'), { recursive: true });
+                fs.writeFileSync(sessionPath, data);
+                console.log('✅ Session downloaded and saved.');
+                resolve();
+            });
+        });
+    }
 }
 
-// Welcome message
-async function sendWelcomeMessage(sock, pluginCount) {
-    const welcomeMsg = `*✅ Silva MD Bot is Active!*\n\n` +
-        `📌 Prefix: ${prefix}\n` +
-        `🔌 Plugins Loaded: ${pluginCount}\n` +
-        `📂 Repo: https://github.com/SilvaTechB/silva-md-bot`;
+// ✅ Welcome Message
+async function sendWelcomeMessage(sock) {
+    const welcomeMsg = `*Hello ✦ Silva MD ✦ User!*\n\n` +
+        `✅ Silva MD Bot is now active!\n\n` +
+        `*Prefix:* ${prefix}\n` +
+        `*Mode:* ${config.MODE}\n` +
+        `*Plugins Loaded:* ${plugins.size}\n\n` +
+        `⚡ Powered by Silva Tech Inc\nGitHub: https://github.com/SilvaTechB/silva-md-bot`;
 
     await sock.sendMessage(sock.user.id, {
         video: { url: 'https://files.catbox.moe/2xxr9h.mp4' },
         caption: welcomeMsg,
-        contextInfo: globalContextInfo,
-        gifPlayback: true
+        contextInfo: {
+            ...globalContextInfo,
+            externalAdReply: {
+                title: "✦ Silva MD ✦ Official",
+                body: "Your Silva MD Bot is live!",
+                thumbnailUrl: "https://files.catbox.moe/5uli5p.jpeg",
+                sourceUrl: "https://github.com/SilvaTechB/silva-md-bot",
+                mediaType: 1,
+                renderLargerThumbnail: true
+            }
+        }
     });
 }
 
-// Start the bot
-connectToWhatsApp();
+// ✅ Connect to WhatsApp
+async function connectToWhatsApp() {
+    await setupSession();
+    const { state, saveCreds } = await useMultiFileAuthState(path.join(__dirname, 'sessions'));
+    const { version } = await fetchLatestBaileysVersion();
+
+    const sock = makeWASocket({
+        logger: P({ level: config.DEBUG ? 'debug' : 'silent' }),
+        printQRInTerminal: false,
+        browser: Browsers.macOS('Safari'),
+        auth: state,
+        version
+    });
+
+    sock.ev.on('connection.update', async update => {
+        const { connection, lastDisconnect } = update;
+        if (connection === 'close') {
+            if (lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut) {
+                console.log('Reconnecting...');
+                await connectToWhatsApp();
+            }
+        } else if (connection === 'open') {
+            console.log('✅ Connected to WhatsApp');
+            await sendWelcomeMessage(sock);
+        }
+    });
+
+    sock.ev.on('creds.update', saveCreds);
+
+    // ✅ Anti-Delete
+    sock.ev.on('message-revoke.everyone', async msg => {
+        try {
+            const from = msg.key.remoteJid;
+            if ((from.endsWith('@g.us') && config.ANTIDELETE_GROUP === 'true') ||
+                (!from.endsWith('@g.us') && config.ANTIDELETE_PRIVATE === 'true')) {
+                await sock.sendMessage(from, {
+                    text: '⚠️ *Anti-Delete:* Someone deleted a message!',
+                    contextInfo: globalContextInfo
+                });
+            }
+        } catch (err) {
+            console.error('❌ Anti-Delete Error:', err);
+        }
+    });
+
+    // ✅ Auto Status Seen & Reply
+    sock.ev.on('status.update', async ({ status }) => {
+        for (const s of status) {
+            if (config.AUTO_STATUS_SEEN === 'true') {
+                await sock.readMessages([{ remoteJid: s.jid, id: s.id }]);
+            }
+            if (config.AUTO_STATUS_REPLY === 'true') {
+                await sock.sendMessage(s.jid, {
+                    text: config.AUTO_STATUS__MSG,
+                    contextInfo: globalContextInfo
+                });
+            }
+        }
+    });
+
+    // ✅ Handle Commands
+    sock.ev.on('messages.upsert', async ({ messages }) => {
+        const m = messages[0];
+        if (!m.message) return;
+
+        const sender = m.key.remoteJid;
+        const content = m.message?.conversation || m.message?.extendedTextMessage?.text || '';
+        if (!content.startsWith(prefix)) return;
+
+        if (config.READ_MESSAGE === 'true') await sock.readMessages([m.key]);
+
+        const [cmd, ...args] = content.slice(prefix.length).trim().split(/\s+/);
+        const command = cmd.toLowerCase();
+
+        if (command === 'ping') {
+            await sock.sendMessage(sender, {
+                text: '🏓 *Pong!* Silva MD is live!',
+                contextInfo: globalContextInfo
+            }, { quoted: m });
+        }
+
+        if (command === 'alive') {
+            await sock.sendMessage(sender, {
+                image: { url: config.ALIVE_IMG },
+                caption: config.LIVE_MSG,
+                contextInfo: globalContextInfo
+            }, { quoted: m });
+        }
+
+        if (command === 'menu') {
+            const cmds = ['ping', 'alive', 'menu'];
+            for (const [_, plugin] of plugins) {
+                if (Array.isArray(plugin.commands)) cmds.push(...plugin.commands);
+            }
+
+            const menuText = `*✦ Silva MD ✦ Command Menu*\n\n` +
+                cmds.map(c => `• ${prefix}${c}`).join('\n') +
+                `\n\n⚡ Total Commands: ${cmds.length}`;
+
+            await sock.sendMessage(sender, {
+                text: menuText,
+                contextInfo: globalContextInfo
+            }, { quoted: m });
+        }
+    });
+
+    return sock;
+}
+
+// ✅ Express Web API
+const app = express();
+app.get('/', (req, res) => res.send('✅ Silva MD Bot is Running!'));
+app.listen(port, () => console.log(`🌐 Server running on port ${port}`));
+
+// ✅ Boot Bot
+(async () => {
+    try {
+        await connectToWhatsApp();
+    } catch (e) {
+        console.error('❌ Bot Init Failed:', e);
+        process.exit(1);
+    }
+})();
