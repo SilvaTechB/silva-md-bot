@@ -3,7 +3,7 @@
   "description": "Javascript WhatsApp bot made by Silva.",
   "keywords": ["silva-md", "whatsapp", "baileys", "bot"],
   "success_url": "/",
-  "stack": "container",
+  "stack": "heroku-24",
   "env": {
     "SESSION_ID": {
       "description": "Put the session-id here.",
@@ -157,3 +157,4 @@
     }
   ]
 }
+
