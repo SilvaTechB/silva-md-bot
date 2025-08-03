@@ -9,7 +9,7 @@ const formatTime = (seconds) => {
 
 module.exports = {
     commands: ['uptime', 'runtime'],
-    handler: async ({ sock, m, sender, contextInfo = {}, config }) => {
+    handler: async ({ sock, m, sender, contextInfo = {} }) => {
         try {
             const uptime = formatTime(process.uptime());
             const cpu = os.cpus()[0]?.model || 'Unknown CPU';
@@ -35,7 +35,7 @@ module.exports = {
 `.trim();
 
             await sock.sendMessage(sender, {
-                image: { url: config.ALIVE_IMG || 'https://files.catbox.moe/5uli5p.jpeg' },
+                image: { url: 'https://files.catbox.moe/5uli5p.jpeg' }, // ✅ Fixed image
                 caption,
                 contextInfo
             }, { quoted: m });
