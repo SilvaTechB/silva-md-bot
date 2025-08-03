@@ -9,14 +9,16 @@ const formatTime = (seconds) => {
 
 module.exports = {
     commands: ['uptime', 'runtime'],
-    handler: async ({ sock, m, sender, contextInfo, config }) => {
+    handler: async ({ sock, m, sender, contextInfo = {}, config }) => {
         try {
             const uptime = formatTime(process.uptime());
-            const cpu = os.cpus()[0].model;
-            const platform = os.platform().toUpperCase();
+            const cpu = os.cpus()[0]?.model || 'Unknown CPU';
+            const platform = os.platform()?.toUpperCase() || 'Unknown';
             const totalMem = (os.totalmem() / 1024 / 1024 / 1024).toFixed(2);
             const freeMem = (os.freemem() / 1024 / 1024 / 1024).toFixed(2);
-            const latency = new Date().getTime() - m.messageTimestamp * 1000;
+            const latency = m.messageTimestamp
+                ? new Date().getTime() - m.messageTimestamp * 1000
+                : 0;
 
             const caption = `
 ┏━━━━━━━━━━━━━━━┓
@@ -34,13 +36,13 @@ module.exports = {
 
             await sock.sendMessage(sender, {
                 image: { url: config.ALIVE_IMG || 'https://files.catbox.moe/5uli5p.jpeg' },
-                caption: caption,
+                caption,
                 contextInfo
             }, { quoted: m });
         } catch (error) {
-            console.error('❌ Uptime Plugin Error:', error);
+            console.error('❌ Uptime Plugin Error:', error.message);
             await sock.sendMessage(sender, {
-                text: '⚠️ Failed to fetch runtime details.',
+                text: '⚠️ Failed to fetch runtime details. Please check logs.',
                 contextInfo
             }, { quoted: m });
         }
