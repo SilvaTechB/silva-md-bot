@@ -1,61 +1,95 @@
 const axios = require('axios');
+const ytSearch = require('yt-search');
 
 module.exports = {
-    commands: ['ytmp3', 'song', 'music'],
+    commands: ['music', 'song', 'ytmp3', 'play'],
     handler: async ({ sock, m, sender, args, contextInfo }) => {
-        if (!args[0]) {
+        if (!args.length) {
             return sock.sendMessage(sender, {
-                text: '❌ Usage: .ytmp3 <YouTube URL>',
+                text: '❌ Usage: .music <song name>',
                 contextInfo
             }, { quoted: m });
         }
 
-        const link = args[0];
-        const apis = [
-            `https://apis.davidcyriltech.my.id/youtube/mp3?url=${link}`,
-            `https://api.ryzendesu.vip/api/downloader/ytmp3?url=${link}`
-        ];
-
-        let audioUrl = null;
-        let title = 'Unknown';
-        let thumb = null;
-
-        for (let api of apis) {
-            try {
-                const res = await axios.get(api, { timeout: 10000 });
-                if (res.data && (res.data.result || res.data.data)) {
-                    const data = res.data.result || res.data.data;
-                    audioUrl = data.audio || data.download_url || data.url;
-                    title = data.title || 'YouTube Audio';
-                    thumb = data.thumbnail || data.thumb || null;
-                    break;
-                }
-            } catch (err) {
-                console.log(`API failed: ${api}`);
-            }
-        }
-
-        if (!audioUrl) {
-            return sock.sendMessage(sender, {
-                text: '❌ Failed to fetch the audio. Try another link.',
-                contextInfo
-            }, { quoted: m });
-        }
-
-        const caption = `🎵 *Title:* ${title}\n🔗 *URL:* ${link}\n\n✅ Powered by Silva MD`;
-
+        const query = args.join(' ');
         await sock.sendMessage(sender, {
-            audio: { url: audioUrl },
-            mimetype: 'audio/mpeg',
-            ptt: false,
-            contextInfo,
-            caption
+            text: `🔍 Searching for *${query}*...`,
+            contextInfo
         }, { quoted: m });
 
-        if (thumb) {
+        try {
+            // ✅ Search YouTube
+            const search = await ytSearch(query);
+            const video = search.videos?.[0];
+            if (!video) {
+                return sock.sendMessage(sender, {
+                    text: '❌ No song found. Try another name.',
+                    contextInfo
+                }, { quoted: m });
+            }
+
+            const link = video.url;
+            const title = video.title;
+            const thumbnail = video.thumbnail;
+
             await sock.sendMessage(sender, {
-                image: { url: thumb },
-                caption: `✅ Downloaded Successfully!\n${title}`,
+                image: { url: thumbnail },
+                caption: `🎧 *Found:* ${title}\n\nDownloading...`,
+                contextInfo
+            }, { quoted: m });
+
+            // ✅ APIs
+            const apis = [
+                `https://apis.davidcyriltech.my.id/youtube/mp3?url=${link}`,
+                `https://api.ryzendesu.vip/api/downloader/ytmp3?url=${link}`
+            ];
+
+            let audioUrl = null;
+
+            for (const api of apis) {
+                try {
+                    const { data } = await axios.get(api, { timeout: 10000 });
+                    if (data.result || data.data) {
+                        audioUrl = data.result?.downloadUrl || data.result?.audio || data.url;
+                        break;
+                    }
+                } catch (e) {
+                    console.log(`API failed: ${api}`);
+                }
+            }
+
+            if (!audioUrl) {
+                return sock.sendMessage(sender, {
+                    text: '❌ Failed to fetch audio. Try later.',
+                    contextInfo
+                }, { quoted: m });
+            }
+
+            // ✅ Send Audio (Stream)
+            await sock.sendMessage(sender, {
+                audio: { url: audioUrl },
+                mimetype: 'audio/mpeg',
+                ptt: false,
+                contextInfo
+            }, { quoted: m });
+
+            // ✅ Send as Document
+            await sock.sendMessage(sender, {
+                document: { url: audioUrl },
+                mimetype: 'audio/mp3',
+                fileName: `${title.replace(/[^\w\s]/gi, '')}.mp3`,
+                contextInfo
+            }, { quoted: m });
+
+            await sock.sendMessage(sender, {
+                text: '✅ Song delivered successfully! 🎵',
+                contextInfo
+            }, { quoted: m });
+
+        } catch (err) {
+            console.error('❌ Music Plugin Error:', err.message);
+            await sock.sendMessage(sender, {
+                text: `🚫 Error: ${err.message}`,
                 contextInfo
             }, { quoted: m });
         }
