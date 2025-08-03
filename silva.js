@@ -14,7 +14,7 @@ const tempDir = path.join(os.tmpdir(), 'silva-cache');
 const port = process.env.PORT || 25680;
 const pluginsDir = path.join(__dirname, 'plugins');
 
-// ✅ Global Context Info (Forwarded Look)
+// ✅ Global Context Info
 const globalContextInfo = {
     forwardingScore: 999,
     isForwarded: true,
@@ -38,9 +38,11 @@ function loadPlugins() {
     const files = fs.readdirSync(pluginsDir).filter(file => file.endsWith('.js'));
     plugins.clear();
     for (const file of files) {
+        delete require.cache[require.resolve(path.join(pluginsDir, file))];
         const plugin = require(path.join(pluginsDir, file));
         plugins.set(file.replace('.js', ''), plugin);
     }
+    console.log(`✅ Loaded ${plugins.size} plugins`);
 }
 loadPlugins();
 
@@ -166,15 +168,16 @@ async function connectToWhatsApp() {
         const [cmd, ...args] = content.slice(prefix.length).trim().split(/\s+/);
         const command = cmd.toLowerCase();
 
+        // ✅ Core Commands
         if (command === 'ping') {
-            await sock.sendMessage(sender, {
+            return sock.sendMessage(sender, {
                 text: '🏓 *Pong!* Silva MD is live!',
                 contextInfo: globalContextInfo
             }, { quoted: m });
         }
 
         if (command === 'alive') {
-            await sock.sendMessage(sender, {
+            return sock.sendMessage(sender, {
                 image: { url: config.ALIVE_IMG },
                 caption: config.LIVE_MSG,
                 contextInfo: globalContextInfo
@@ -186,15 +189,25 @@ async function connectToWhatsApp() {
             for (const [_, plugin] of plugins) {
                 if (Array.isArray(plugin.commands)) cmds.push(...plugin.commands);
             }
-
             const menuText = `*✦ Silva MD ✦ Command Menu*\n\n` +
                 cmds.map(c => `• ${prefix}${c}`).join('\n') +
                 `\n\n⚡ Total Commands: ${cmds.length}`;
-
-            await sock.sendMessage(sender, {
+            return sock.sendMessage(sender, {
                 text: menuText,
                 contextInfo: globalContextInfo
             }, { quoted: m });
+        }
+
+        // ✅ Plugin Commands
+        for (const plugin of plugins.values()) {
+            if (plugin.commands && plugin.commands.includes(command)) {
+                try {
+                    await plugin.handler({ sock, m, sender, args, contextInfo: globalContextInfo });
+                } catch (err) {
+                    console.error(`❌ Error in plugin ${plugin.commands}:`, err);
+                }
+                return;
+            }
         }
     });
 
