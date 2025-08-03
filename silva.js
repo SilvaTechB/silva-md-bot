@@ -6,6 +6,17 @@ const P = require('pino');
 const { File } = require('megajs');
 const config = require('./config.js');
 
+const globalContextInfo = {
+    forwardingScore: 999,
+    isForwarded: true,
+    forwardedNewsletterMessageInfo: {
+        newsletterJid: '120363200367779016@newsletter',
+        newsletterName: 'SILVA TECH',
+        serverMessageId: 144
+    }
+};
+
+
 const {
     makeWASocket,
     useMultiFileAuthState,
@@ -162,11 +173,32 @@ async function startBot() {
 }
 
 // ✅ Alive Confirmation
-async function sendAlive(sock) {
-    await sock.sendMessage(config.OWNER_NUMBER + '@s.whatsapp.net', {
-        text: `✅ *${config.BOT_NAME}* is online!\nPrefix: ${config.PREFIX}`
+async function sendWelcomeMessage(sock) {
+    const welcomeMsg = `*Hello ✦ Silva MD ✦ User!*\n\n` +
+        `✅ Silva MD Bot is now active!\n\n` +
+        `*Prefix:* ${config.PREFIX}\n` +
+        `*Bot Name:* ${config.BOT_NAME}\n` +
+        `*Mode:* ${config.MODE}\n\n` +
+        `⚡ Powered by Silva Tech Inc\n` +
+        `GitHub: https://github.com/SilvaTechB/silva-md-bot`;
+
+    await sock.sendMessage(sock.user.id, {
+        video: { url: 'https://files.catbox.moe/2xxr9h.mp4' }, // Your animated intro
+        caption: welcomeMsg,
+        contextInfo: {
+            ...globalContextInfo,
+            externalAdReply: {
+                title: "✦ Silva MD ✦ Official",
+                body: "Your Silva MD Bot is live!",
+                thumbnailUrl: "https://files.catbox.moe/5uli5p.jpeg", // ✅ Custom Icon
+                sourceUrl: "https://github.com/SilvaTechB/silva-md-bot", // ✅ Clickable link
+                mediaType: 1,
+                renderLargerThumbnail: true
+            }
+        }
     });
 }
+
 
 // ✅ Express Server
 const app = express();
@@ -184,3 +216,4 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
         process.exit(1);
     }
 })();
+
