@@ -170,11 +170,25 @@ async function connectToWhatsApp() {
 
         // ✅ Core Commands
         if (command === 'ping') {
-            return sock.sendMessage(sender, {
-                text: '🏓 *Pong!* ${latency} ms Silva MD is live!',
-                contextInfo: globalContextInfo
-            }, { quoted: m });
+    const latency = m.messageTimestamp
+        ? new Date().getTime() - m.messageTimestamp * 1000
+        : 0;
+
+    return sock.sendMessage(sender, {
+        text: `🏓 *Pong!* ${latency} ms Silva MD is live!`,
+        contextInfo: {
+            ...globalContextInfo,
+            externalAdReply: {
+                title: "Silva MD speed",
+                body: "Explore the speed",
+                thumbnailUrl: "https://files.catbox.moe/5uli5p.jpeg",
+                sourceUrl: "https://github.com/SilvaTechB/silva-md-bot",
+                mediaType: 1,
+                renderLargerThumbnail: true
+            }
         }
+    }, { quoted: m });
+}
 
         if (command === 'alive') {
             return sock.sendMessage(sender, {
