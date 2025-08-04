@@ -23,7 +23,7 @@ module.exports = {
     ANTI_BAD: convertToBool(process.env.ANTI_BAD, "false"),
     AUTO_STATUS_SEEN: convertToBool(process.env.AUTO_STATUS_SEEN, "true"),
     AUTO_STATUS_REPLY: convertToBool(process.env.AUTO_STATUS_REPLY, "true"),
-    AUTO_STATUS__MSG: process.env.AUTO_STATUS__MSG || "*👀 Seen by Silva MD ✅*",
+    AUTO_STATUS_MSG: process.env.AUTO_STATUS_MSG || "*👀 Seen by Silva MD ✅*",
     MODE: process.env.MODE || "public",
     ANTI_LINK: convertToBool(process.env.ANTI_LINK, "true"),
     AUTO_VOICE: convertToBool(process.env.AUTO_VOICE, "false"),
@@ -34,10 +34,16 @@ module.exports = {
     ALWAYS_ONLINE: convertToBool(process.env.ALWAYS_ONLINE, "true"),
     PUBLIC_MODE: convertToBool(process.env.PUBLIC_MODE, "true"),
     AUTO_TYPING: convertToBool(process.env.AUTO_TYPING, "true"),
- // ✅ New Group Settings
+    AUTO_RECORDING: convertToBool(process.env.AUTO_RECORDING, "false"),
+    
+    // Group Settings
     ALLOW_GROUPS: convertToBool(process.env.ALLOW_GROUPS, "true"),
     GROUP_REQUIRE_MENTION: convertToBool(process.env.GROUP_REQUIRE_MENTION, "false"),
-    ANTI_DEL_PATH: process.env.ANTI_DEL_PATH || "log",
-    AUTO_RECORDING: convertToBool(process.env.AUTO_RECORDING, "false")
+    
+    // Anti-Delete Settings
+    ANTIDELETE_GROUP: convertToBool(process.env.ANTIDELETE_GROUP, "true"),
+    ANTIDELETE_PRIVATE: convertToBool(process.env.ANTIDELETE_PRIVATE, "true"),
+    
+    // Debug Settings
+    DEBUG: convertToBool(process.env.DEBUG, "false")
 };
-
