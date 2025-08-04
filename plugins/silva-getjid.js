@@ -1,6 +1,8 @@
+const jidThumbnail = 'https://files.catbox.moe/5uli5p.jpeg';
+
 module.exports = {
     commands: ['getjid', 'jid'],
-    handler: async ({ sock, m, sender, contextInfo = {} }) => {
+    handler: async ({ sock, m, sender }) => {
         try {
             const chatJid = m.key.remoteJid;
             let chatType = 'Unknown';
@@ -21,14 +23,14 @@ module.exports = {
 🔹 *Chat JID:* \`${chatJid}\`
 🔹 *Type:* ${chatType}
 
-✅ Copy and use the JID as needed.
+✅ Use buttons below for more options.
 ✨ _Powered by Silva Tech Inc_
 `.trim();
 
             await sock.sendMessage(sender, {
-                image: { url: 'https://files.catbox.moe/5uli5p.jpeg' },
+                image: { url: jidThumbnail },
                 caption,
-                footer: 'Choose an option below:',
+                footer: 'Choose an option:',
                 buttons: [
                     {
                         buttonId: `jid_action:fetch_all_groups`,
@@ -47,14 +49,24 @@ module.exports = {
                     }
                 ],
                 headerType: 4,
-                contextInfo
+                contextInfo: {
+                    externalAdReply: {
+                        title: 'Silva MD JID Tool',
+                        body: 'Fetch and manage WhatsApp JIDs easily!',
+                        mediaUrl: 'https://silvatech.africa', // your site or GitHub
+                        mediaType: 1,
+                        sourceUrl: 'https://silvatech.africa',
+                        thumbnailUrl: jidThumbnail,
+                        renderLargerThumbnail: true,
+                        showAdAttribution: true
+                    }
+                }
             }, { quoted: m });
 
         } catch (error) {
             console.error('❌ GetJID Plugin Error:', error.message);
             await sock.sendMessage(sender, {
-                text: '⚠️ Failed to fetch JID. Please try again later.',
-                contextInfo
+                text: '⚠️ Failed to fetch JID. Please try again later.'
             }, { quoted: m });
         }
     },
@@ -71,28 +83,59 @@ module.exports = {
             if (action === 'fetch_all_groups') {
                 const groups = await sock.groupFetchAllParticipating();
                 const groupList = Object.values(groups)
-                    .map(g => `• ${g.subject} → ${g.id}`)
-                    .join('\n');
+                    .map(g => `• ${g.subject}\n   JID: ${g.id}`)
+                    .join('\n\n');
 
                 await sock.sendMessage(sender, {
-                    text: `📋 *All Group JIDs*\n\n${groupList || 'No groups found.'}`
+                    text: `📋 *All Group JIDs*\n\n${groupList || 'No groups found.'}`,
+                    contextInfo: {
+                        externalAdReply: {
+                            title: 'Group JID List',
+                            body: 'Fetched by Silva MD',
+                            mediaUrl: 'https://silvatech.africa',
+                            mediaType: 1,
+                            sourceUrl: 'https://silvatech.africa',
+                            thumbnailUrl: jidThumbnail,
+                            renderLargerThumbnail: false
+                        }
+                    }
                 }, { quoted: m });
 
             } else if (action === 'fetch_all_channels') {
-                // Channels (Newsletters) require filtering chats
-                const chats = await sock.chats;
-                const channels = Object.values(chats)
+                const chats = Object.values(sock.chats);
+                const channels = chats
                     .filter(c => c.id.endsWith('@newsletter'))
-                    .map(c => `• ${c.name || 'Unnamed'} → ${c.id}`)
-                    .join('\n');
+                    .map(c => `• ${c.name || 'Unnamed'}\n   JID: ${c.id}`)
+                    .join('\n\n');
 
                 await sock.sendMessage(sender, {
-                    text: `📢 *All Channel JIDs*\n\n${channels || 'No channels found.'}`
+                    text: `📢 *All Channel JIDs*\n\n${channels || 'No channels found.'}`,
+                    contextInfo: {
+                        externalAdReply: {
+                            title: 'Channel JID List',
+                            body: 'Fetched by Silva MD',
+                            mediaUrl: 'https://silvatech.africa',
+                            mediaType: 1,
+                            sourceUrl: 'https://silvatech.africa',
+                            thumbnailUrl: jidThumbnail,
+                            renderLargerThumbnail: false
+                        }
+                    }
                 }, { quoted: m });
 
             } else if (action === 'copy_jid') {
                 await sock.sendMessage(sender, {
-                    text: `📌 *Chat JID:*\n\`${data}\``
+                    text: `📌 *Chat JID:*\n\`${data}\``,
+                    contextInfo: {
+                        externalAdReply: {
+                            title: 'Copied JID',
+                            body: 'You can now paste this JID wherever needed',
+                            mediaUrl: 'https://silvatech.africa',
+                            mediaType: 1,
+                            sourceUrl: 'https://silvatech.africa',
+                            thumbnailUrl: jidThumbnail
+                        }
+                    }
                 }, { quoted: m });
             }
 
