@@ -1,6 +1,6 @@
 // ✅ Silva MD Bot Main File
 const baileys = require('@whiskeysockets/baileys');
-const { makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, Browsers, DisconnectReason } = baileys;
+const { makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, Browsers, DisconnectReason, isJidGroup, isJidBroadcast } = baileys;
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
@@ -100,12 +100,28 @@ async function connectToWhatsApp() {
     const { state, saveCreds } = await useMultiFileAuthState(path.join(__dirname, 'sessions'));
     const { version } = await fetchLatestBaileysVersion();
 
+    // ✅ Enhanced encryption settings
+    const cryptoOptions = {
+        maxSharedKeys: 1000,
+        sessionThreshold: 0,
+        cache: {
+            TRANSACTION: false,
+            PRE_KEYS: false
+        }
+    };
+
     const sock = makeWASocket({
         logger: P({ level: config.DEBUG ? 'debug' : 'silent' }),
         printQRInTerminal: false,
         browser: Browsers.macOS('Safari'),
         auth: state,
-        version
+        version,
+        markOnlineOnConnect: true,
+        syncFullHistory: false,
+        generateHighQualityLinkPreview: false,
+        getMessage: async () => undefined,
+        shouldIgnoreJid: jid => isJidBroadcast(jid),
+        ...cryptoOptions
     });
 
     // ✅ Apply SafeSend Override
@@ -247,10 +263,21 @@ async function connectToWhatsApp() {
         if (!m.message) return;
 
         const sender = m.key.remoteJid;
-        const isGroup = sender.endsWith('@g.us');
+        const isGroup = isJidGroup(sender);
         
         // ✅ Skip if groups are disabled
         if (isGroup && config.ALLOW_GROUPS === 'false') return;
+        
+        // ✅ Get group metadata for proper session handling
+        let groupMetadata = null;
+        if (isGroup) {
+            try {
+                groupMetadata = await sock.groupMetadata(sender);
+            } catch (e) {
+                console.error('❌ Failed to fetch group metadata:', e);
+                return;
+            }
+        }
         
         // ✅ Extract content and mentions
         const messageType = Object.keys(m.message)[0];
@@ -324,6 +351,27 @@ async function connectToWhatsApp() {
             }, { quoted: m });
         }
 
+        // ✅ Session reset command
+        if (command === 'resetsession') {
+            const ownerJid = `${config.OWNER_NUMBER}@s.whatsapp.net`;
+            if (sender !== ownerJid) {
+                return sock.sendMessage(sender, { text: '❌ This command is only for the owner!' }, { quoted: m });
+            }
+
+            if (isGroup) {
+                await sock.sendMessage(sender, {
+                    protocolMessage: {
+                        senderKeyDistributionMessage: {
+                            groupId: sender
+                        }
+                    }
+                });
+                return sock.sendMessage(sender, { text: '✅ Group session reset initiated!' }, { quoted: m });
+            }
+
+            return sock.sendMessage(sender, { text: '✅ Session reset!' }, { quoted: m });
+        }
+
         if (command === 'alive') {
             return sock.sendMessage(sender, {
                 image: { url: config.ALIVE_IMG },
@@ -333,7 +381,7 @@ async function connectToWhatsApp() {
         }
 
         if (command === 'menu') {
-            const cmds = ['ping', 'alive', 'menu'];
+            const cmds = ['ping', 'alive', 'menu', 'resetsession'];
             for (const [_, plugin] of plugins) {
                 if (Array.isArray(plugin.commands)) cmds.push(...plugin.commands);
             }
@@ -363,7 +411,7 @@ async function connectToWhatsApp() {
         for (const plugin of plugins.values()) {
             if (plugin.commands && plugin.commands.includes(command)) {
                 try {
-                    await plugin.handler({ sock, m, sender, args, contextInfo: globalContextInfo });
+                    await plugin.handler({ sock, m, sender, args, contextInfo: globalContextInfo, isGroup, groupMetadata });
                 } catch (err) {
                     console.error(`❌ Error in plugin ${plugin.commands}:`, err);
                 }
