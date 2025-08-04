@@ -6,6 +6,7 @@ const path = require('path');
 const { randomBytes } = require('crypto');
 const { promisify } = require('util');
 const stream = require('stream');
+const pipeline = promisify(stream.pipeline);
 
 module.exports = {
     name: 'music',
@@ -14,6 +15,37 @@ module.exports = {
         // Helper function to sanitize filenames
         const sanitizeFilename = (name) => {
             return name.replace(/[^\w\s.-]/gi, '_').substring(0, 100);
+        };
+
+        // Helper to extract URL from API responses
+        const extractMp3Url = (apiResponse) => {
+            try {
+                // Case 1: Direct URL string
+                if (typeof apiResponse.url === 'string') return apiResponse.url;
+                
+                // Case 2: Nested result object
+                if (apiResponse.result) {
+                    // String result
+                    if (typeof apiResponse.result === 'string') return apiResponse.result;
+                    
+                    // Object result with url property
+                    if (apiResponse.result.url) return apiResponse.result.url;
+                    
+                    // Object result with download link
+                    if (apiResponse.result.mp3 || apiResponse.result.audio) {
+                        return apiResponse.result.mp3 || apiResponse.result.audio;
+                    }
+                }
+                
+                // Case 3: Alternative structures
+                if (apiResponse.data?.url) return apiResponse.data.url;
+                if (apiResponse.link) return apiResponse.link;
+                if (apiResponse.download) return apiResponse.download;
+                
+                return null;
+            } catch (e) {
+                return null;
+            }
         };
 
         try {
@@ -51,25 +83,33 @@ module.exports = {
 
             // Define API endpoints
             const apis = [
-                `https://apis.davidcyriltech.my.id/youtube/mp3?url=${videoUrl}`,
-                `https://api.ryzendesu.vip/api/downloader/ytmp3?url=${videoUrl}`,
-                `https://api.akuari.my.id/downloader/youtubeaudio?link=${videoUrl}`
+                `https://apis.davidcyriltech.my.id/youtube/mp3?url=${encodeURIComponent(videoUrl)}`,
+                `https://api.ryzendesu.vip/api/downloader/ytmp3?url=${encodeURIComponent(videoUrl)}`,
+                `https://api.akuari.my.id/downloader/youtubeaudio?link=${encodeURIComponent(videoUrl)}`
             ];
 
-            let mp3Url;
-            let apiResponse;
+            let mp3Url = null;
+            let successfulApi = null;
 
-            // Try APIs in sequence
-            for (const api of apis) {
+            // Try APIs in sequence with better logging
+            for (const [index, api] of apis.entries()) {
                 try {
-                    const response = await axios.get(api);
-                    if (response.data && (response.data.url || response.data.result)) {
-                        apiResponse = response.data;
-                        mp3Url = response.data.url || response.data.result;
+                    console.log(`Trying API ${index + 1}: ${api}`);
+                    const response = await axios.get(api, { timeout: 10000 });
+                    
+                    // Extract URL from response
+                    const extractedUrl = extractMp3Url(response.data);
+                    
+                    if (extractedUrl && typeof extractedUrl === 'string' && extractedUrl.startsWith('http')) {
+                        mp3Url = extractedUrl;
+                        successfulApi = api;
+                        console.log(`✅ Success with API ${index + 1}: ${mp3Url}`);
                         break;
+                    } else {
+                        console.log(`⚠️ API ${index + 1} returned invalid URL:`, JSON.stringify(response.data, null, 2));
                     }
                 } catch (e) {
-                    console.log(`API failed: ${api}`);
+                    console.log(`❌ API ${index + 1} failed: ${e.message}`);
                 }
             }
 
@@ -80,11 +120,6 @@ module.exports = {
                 }, { quoted: m });
             }
 
-            // Handle special API response formats
-            if (apiResponse && apiResponse.result && typeof apiResponse.result === 'object') {
-                mp3Url = apiResponse.result.url || mp3Url;
-            }
-
             // Generate temp filename
             const tempDir = path.join(__dirname, '../temp');
             if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
@@ -93,19 +128,19 @@ module.exports = {
             const filePath = path.join(tempDir, filename);
 
             // Download MP3 with proper error handling
-            const writer = fs.createWriteStream(filePath);
             try {
+                console.log(`Starting download from: ${mp3Url}`);
                 const response = await axios({
                     url: mp3Url,
                     method: 'GET',
                     responseType: 'stream',
-                    timeout: 60000 // 60 seconds timeout
+                    timeout: 60000
                 });
 
-                const pipeline = promisify(stream.pipeline);
-                await pipeline(response.data, writer);
+                await pipeline(response.data, fs.createWriteStream(filePath));
+                console.log(`✅ Download complete: ${filePath}`);
             } catch (downloadError) {
-                console.error('Download failed:', downloadError);
+                console.error('❌ Download failed:', downloadError);
                 if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
                 return sock.sendMessage(sender, {
                     text: '❌ Download failed. The server might be down or the file is too large.',
@@ -125,7 +160,7 @@ module.exports = {
                     ...contextInfo,
                     externalAdReply: {
                         title: title,
-                        body: `🎵 Music Downloader (${fileSizeMB}MB)`,
+                        body: `🎵 Music Downloader (${fileSizeMB}MB) | Source: ${new URL(successfulApi).hostname}`,
                         thumbnailUrl: thumbnail,
                         sourceUrl: videoUrl,
                         mediaType: 1,
@@ -157,7 +192,7 @@ module.exports = {
             fs.unlinkSync(filePath);
 
         } catch (error) {
-            console.error('Music plugin error:', error);
+            console.error('❌ Music plugin error:', error);
             sock.sendMessage(sender, {
                 text: '❌ Failed to download music. Please try another song.',
                 contextInfo: contextInfo
