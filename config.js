@@ -19,12 +19,12 @@ module.exports = {
     ALIVE_IMG: process.env.ALIVE_IMG || "https://i.ibb.co/BVt9McxS/photo-2025-06-15-12-14-29-7516148628621099032.jpg",
     LIVE_MSG: process.env.LIVE_MSG || "> SILVA MD IS ACTIVE ⚡",
     READ_MESSAGE: convertToBool(process.env.READ_MESSAGE, "false"),
-    AUTO_REACT: convertToBool(process.env.AUTO_REACT, "false"),
+    AUTO_REACT: convertToBool(process.env.AUTO_REACT, "true"), // Auto-react in channels
     ANTI_BAD: convertToBool(process.env.ANTI_BAD, "false"),
     AUTO_STATUS_SEEN: convertToBool(process.env.AUTO_STATUS_SEEN, "true"),
     AUTO_STATUS_REPLY: convertToBool(process.env.AUTO_STATUS_REPLY, "true"),
     AUTO_STATUS_MSG: process.env.AUTO_STATUS_MSG || "*👀 Seen by Silva MD ✅*",
-    MODE: process.env.MODE || "public", // public, private, or group-only
+    MODE: process.env.MODE || "both", // both, public, or private
     ANTI_LINK: convertToBool(process.env.ANTI_LINK, "true"),
     AUTO_VOICE: convertToBool(process.env.AUTO_VOICE, "false"),
     AUTO_STICKER: convertToBool(process.env.AUTO_STICKER, "false"),
