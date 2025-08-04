@@ -4,11 +4,18 @@ const yts = require('yt-search');
 const fs = require('fs');
 const path = require('path');
 const { randomBytes } = require('crypto');
+const { promisify } = require('util');
+const stream = require('stream');
 
 module.exports = {
     name: 'music',
     commands: ['song', 'music', 'play'],
     handler: async ({ sock, m, sender, args, contextInfo }) => {
+        // Helper function to sanitize filenames
+        const sanitizeFilename = (name) => {
+            return name.replace(/[^\w\s.-]/gi, '_').substring(0, 100);
+        };
+
         try {
             // Combine arguments to form search query
             const query = args.join(' ');
@@ -80,34 +87,64 @@ module.exports = {
 
             // Generate temp filename
             const tempDir = path.join(__dirname, '../temp');
-            if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir);
-            const filename = `music-${randomBytes(4).toString('hex')}.mp3`;
+            if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
+            
+            const filename = sanitizeFilename(title) + '.mp3';
             const filePath = path.join(tempDir, filename);
 
-            // Download MP3
+            // Download MP3 with proper error handling
             const writer = fs.createWriteStream(filePath);
-            const response = await axios({
-                url: mp3Url,
-                method: 'GET',
-                responseType: 'stream'
-            });
+            try {
+                const response = await axios({
+                    url: mp3Url,
+                    method: 'GET',
+                    responseType: 'stream',
+                    timeout: 60000 // 60 seconds timeout
+                });
 
-            response.data.pipe(writer);
+                const pipeline = promisify(stream.pipeline);
+                await pipeline(response.data, writer);
+            } catch (downloadError) {
+                console.error('Download failed:', downloadError);
+                if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+                return sock.sendMessage(sender, {
+                    text: '❌ Download failed. The server might be down or the file is too large.',
+                    contextInfo: contextInfo
+                }, { quoted: m });
+            }
 
-            await new Promise((resolve, reject) => {
-                writer.on('finish', resolve);
-                writer.on('error', reject);
-            });
+            // Read file into buffer
+            const fileBuffer = fs.readFileSync(filePath);
+            const fileSizeMB = (fileBuffer.length / (1024 * 1024)).toFixed(2);
 
             // Send audio file
             await sock.sendMessage(sender, {
-                audio: fs.readFileSync(filePath),
+                audio: fileBuffer,
                 mimetype: 'audio/mpeg',
                 contextInfo: {
                     ...contextInfo,
                     externalAdReply: {
                         title: title,
-                        body: "🎵 Music Downloader",
+                        body: `🎵 Music Downloader (${fileSizeMB}MB)`,
+                        thumbnailUrl: thumbnail,
+                        sourceUrl: videoUrl,
+                        mediaType: 1,
+                        renderLargerThumbnail: true
+                    }
+                }
+            }, { quoted: m });
+
+            // Send as document
+            await sock.sendMessage(sender, {
+                document: fileBuffer,
+                fileName: filename,
+                mimetype: 'audio/mpeg',
+                caption: `📁 *${title}*`,
+                contextInfo: {
+                    ...contextInfo,
+                    externalAdReply: {
+                        title: "📥 Document Version",
+                        body: "Downloadable MP3 file",
                         thumbnailUrl: thumbnail,
                         sourceUrl: videoUrl,
                         mediaType: 1,
