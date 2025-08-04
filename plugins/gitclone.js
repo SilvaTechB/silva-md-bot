@@ -1,11 +1,15 @@
-const fetch = require('node-fetch');
+// plugins/gitclone.js
+const getFetch = async () => {
+    const module = await import('node-fetch');
+    return module.default;
+};
 
 module.exports = {
     name: 'gitclone',
     commands: ['gitclone'],
     handler: async ({ sock, m, sender, args }) => {
         const regex = /(?:https|git)(?::\/\/|@)github\.com[\/:]([^\/:]+)\/(.+)/i;
-        const usedPrefix = '.'; // Replace with your actual prefix if different
+        const usedPrefix = '.'; // Your bot's prefix
 
         try {
             if (!args[0]) {
@@ -31,6 +35,9 @@ module.exports = {
                 contextInfo: { forwardingScore: 999, isForwarded: true }
             }, { quoted: m });
 
+            // Dynamically import node-fetch
+            const fetch = await getFetch();
+            
             const response = await fetch(url, { method: 'HEAD' });
             const contentDisposition = response.headers.get('content-disposition');
             const filename = contentDisposition.match(/attachment; filename=(.*)/)[1];
