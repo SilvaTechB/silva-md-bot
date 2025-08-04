@@ -1,3 +1,7 @@
+// ✅ FIX: Add global File polyfill for Node.js v18
+const { File: BufferFile } = require('node:buffer');
+global.File = BufferFile;
+
 // ✅ Silva MD Bot Main File - Newsletter Enhanced
 const baileys = require('@whiskeysockets/baileys');
 const { makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, Browsers, DisconnectReason, isJidGroup, isJidBroadcast, isJidStatusBroadcast, areJidsSameUser } = baileys;
@@ -6,7 +10,6 @@ const path = require('path');
 const os = require('os');
 const express = require('express');
 const P = require('pino');
-const { File } = require('megajs');
 const config = require('./config.js');
 
 const prefix = config.PREFIX || '.';
@@ -78,10 +81,17 @@ async function setupSession() {
         }
         logMessage('INFO', '⬇ Downloading session from Mega.nz...');
         const megaCode = config.SESSION_ID.replace('Silva~', '');
-        const file = File.fromURL(`https://mega.nz/file/${megaCode}`);
+        
+        // ✅ Fixed MegaJS usage
+        const mega = require('megajs');
+        const file = mega.File.fromURL(`https://mega.nz/file/${megaCode}`);
+        
         await new Promise((resolve, reject) => {
             file.download((err, data) => {
-                if (err) return reject(err);
+                if (err) {
+                    logMessage('ERROR', `❌ Mega download failed: ${err.message}`);
+                    return reject(err);
+                }
                 fs.mkdirSync(path.join(__dirname, 'sessions'), { recursive: true });
                 fs.writeFileSync(sessionPath, data);
                 logMessage('SUCCESS', '✅ Session downloaded and saved.');
