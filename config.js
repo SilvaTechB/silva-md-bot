@@ -34,6 +34,10 @@ module.exports = {
     ALWAYS_ONLINE: convertToBool(process.env.ALWAYS_ONLINE, "true"),
     PUBLIC_MODE: convertToBool(process.env.PUBLIC_MODE, "true"),
     AUTO_TYPING: convertToBool(process.env.AUTO_TYPING, "true"),
+ // ✅ New Group Settings
+    ALLOW_GROUPS: convertToBool(process.env.ALLOW_GROUPS, "true"),
+    GROUP_REQUIRE_MENTION: convertToBool(process.env.GROUP_REQUIRE_MENTION, "false"),
     ANTI_DEL_PATH: process.env.ANTI_DEL_PATH || "log",
     AUTO_RECORDING: convertToBool(process.env.AUTO_RECORDING, "false")
 };
+
