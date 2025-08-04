@@ -1,4 +1,4 @@
-// ✅ Silva MD Bot Main File - Fixed Group Functionality
+// ✅ Silva MD Bot Main File - Simplified Group Handling
 const baileys = require('@whiskeysockets/baileys');
 const { makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, Browsers, DisconnectReason, isJidGroup } = baileys;
 const fs = require('fs');
@@ -13,6 +13,29 @@ const prefix = config.PREFIX || '.';
 const tempDir = path.join(os.tmpdir(), 'silva-cache');
 const port = process.env.PORT || 25680;
 const pluginsDir = path.join(__dirname, 'plugins');
+
+// ✅ Message Logger Setup
+const logDir = path.join(__dirname, 'logs');
+if (!fs.existsSync(logDir)) fs.mkdirSync(logDir);
+
+function getLogFileName() {
+    const date = new Date();
+    return `messages-${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}.log`;
+}
+
+function logMessage(type, message) {
+    if (!config.DEBUG && type === 'DEBUG') return;
+    
+    const timestamp = new Date().toISOString();
+    const logEntry = `[${timestamp}] [${type}] ${message}\n`;
+    
+    // Log to console
+    console.log(logEntry.trim());
+    
+    // Log to file
+    const logFile = path.join(logDir, getLogFileName());
+    fs.appendFileSync(logFile, logEntry);
+}
 
 // ✅ Global Context Info
 const globalContextInfo = {
@@ -42,7 +65,7 @@ function loadPlugins() {
         const plugin = require(path.join(pluginsDir, file));
         plugins.set(file.replace('.js', ''), plugin);
     }
-    console.log(`✅ Loaded ${plugins.size} plugins`);
+    logMessage('INFO', `✅ Loaded ${plugins.size} plugins`);
 }
 loadPlugins();
 
@@ -53,7 +76,7 @@ async function setupSession() {
         if (!config.SESSION_ID || !config.SESSION_ID.startsWith('Silva~')) {
             throw new Error('Invalid or missing SESSION_ID. Must start with Silva~');
         }
-        console.log('⬇ Downloading session from Mega.nz...');
+        logMessage('INFO', '⬇ Downloading session from Mega.nz...');
         const megaCode = config.SESSION_ID.replace('Silva~', '');
         const file = File.fromURL(`https://mega.nz/file/${megaCode}`);
         await new Promise((resolve, reject) => {
@@ -61,7 +84,7 @@ async function setupSession() {
                 if (err) return reject(err);
                 fs.mkdirSync(path.join(__dirname, 'sessions'), { recursive: true });
                 fs.writeFileSync(sessionPath, data);
-                console.log('✅ Session downloaded and saved.');
+                logMessage('SUCCESS', '✅ Session downloaded and saved.');
                 resolve();
             });
         });
@@ -71,8 +94,8 @@ async function setupSession() {
 // ✅ Generate Config Table
 function generateConfigTable() {
     const configs = [
+        { name: 'MODE', value: config.MODE },
         { name: 'ALLOW_GROUPS', value: config.ALLOW_GROUPS },
-        { name: 'GROUP_REQUIRE_MENTION', value: config.GROUP_REQUIRE_MENTION },
         { name: 'ANTIDELETE_GROUP', value: config.ANTIDELETE_GROUP },
         { name: 'ANTIDELETE_PRIVATE', value: config.ANTIDELETE_PRIVATE },
         { name: 'AUTO_STATUS_SEEN', value: config.AUTO_STATUS_SEEN },
@@ -82,7 +105,6 @@ function generateConfigTable() {
         { name: 'AUTO_REACT', value: config.AUTO_REACT },
         { name: 'ANTI_BAD', value: config.ANTI_BAD },
         { name: 'ANTI_LINK', value: config.ANTI_LINK },
-        { name: 'PUBLIC_MODE', value: config.PUBLIC_MODE },
         { name: 'ALWAYS_ONLINE', value: config.ALWAYS_ONLINE },
         { name: 'AUTO_TYPING', value: config.AUTO_TYPING },
         { name: 'HEART_REACT', value: config.HEART_REACT },
@@ -172,12 +194,13 @@ async function connectToWhatsApp() {
     sock.ev.on('connection.update', async update => {
         const { connection, lastDisconnect } = update;
         if (connection === 'close') {
+            logMessage('WARN', `Connection closed: ${lastDisconnect?.error?.output?.statusCode || 'Unknown'}`);
             if (lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut) {
-                console.log('Reconnecting...');
+                logMessage('INFO', 'Reconnecting...');
                 setTimeout(() => connectToWhatsApp(), 2000);
             }
         } else if (connection === 'open') {
-            console.log('✅ Connected to WhatsApp');
+            logMessage('SUCCESS', '✅ Connected to WhatsApp');
             await sendWelcomeMessage(sock);
         }
     });
@@ -193,13 +216,18 @@ async function connectToWhatsApp() {
                     const from = key.remoteJid;
                     const isGroup = isJidGroup(from);
                     
+                    logMessage('EVENT', `Anti-Delete triggered in ${isGroup ? 'group' : 'private'}: ${from}`);
+                    
                     // Check if anti-delete is enabled for this chat type
                     if ((isGroup && config.ANTIDELETE_GROUP) || 
                         (!isGroup && config.ANTIDELETE_PRIVATE)) {
                         
                         // Load the deleted message
                         const deletedMessage = await sock.loadMessage(key);
-                        if (!deletedMessage) return;
+                        if (!deletedMessage) {
+                            logMessage('WARN', 'Could not load deleted message');
+                            return;
+                        }
                         
                         const ownerJid = `${config.OWNER_NUMBER}@s.whatsapp.net`;
                         const sender = update.participant || key.participant || key.remoteJid;
@@ -224,6 +252,24 @@ async function connectToWhatsApp() {
                                 }
                             }
                         };
+                        
+                        // Log message content
+                        let msgContent = '';
+                        if (deletedMessage.message?.conversation) {
+                            msgContent = deletedMessage.message.conversation;
+                        } else if (deletedMessage.message?.extendedTextMessage) {
+                            msgContent = deletedMessage.message.extendedTextMessage.text;
+                        } else if (deletedMessage.message?.imageMessage) {
+                            msgContent = '[Image] ' + (deletedMessage.message.imageMessage.caption || '');
+                        } else if (deletedMessage.message?.videoMessage) {
+                            msgContent = '[Video] ' + (deletedMessage.message.videoMessage.caption || '');
+                        } else if (deletedMessage.message?.documentMessage) {
+                            msgContent = '[Document] ' + (deletedMessage.message.documentMessage.fileName || '');
+                        } else {
+                            msgContent = '[Unsupported Type]';
+                        }
+                        
+                        logMessage('INFO', `Restoring message: ${msgContent.substring(0, 100)}`);
                         
                         // Handle different message types
                         if (deletedMessage.message?.conversation) {
@@ -265,9 +311,11 @@ async function connectToWhatsApp() {
                                 ...messageOptions
                             });
                         }
+                        
+                        logMessage('SUCCESS', 'Anti-Delete message sent to owner');
                     }
                 } catch (err) {
-                    console.error('❌ Anti-Delete Error:', err);
+                    logMessage('ERROR', `Anti-Delete Error: ${err.message}`);
                 }
             }
         }
@@ -278,14 +326,16 @@ async function connectToWhatsApp() {
         try {
             for (const s of status) {
                 if (!s.id || !s.jid) continue;
+                
+                logMessage('EVENT', `Status update from ${s.jid}: ${s.id}`);
 
                 // ✅ Mark status as seen
                 if (config.AUTO_STATUS_SEEN) {
                     try {
                         await sock.readMessages([{ remoteJid: s.jid, id: s.id }]);
-                        console.log(`✅ Status seen: ${s.id}`);
+                        logMessage('INFO', `Status seen: ${s.id}`);
                     } catch (e) {
-                        console.log('❌ Status seen failed:', e);
+                        logMessage('WARN', `Status seen failed: ${e.message}`);
                     }
                 }
 
@@ -301,9 +351,9 @@ async function connectToWhatsApp() {
                                 key: { remoteJid: s.jid, id: s.id }
                             }
                         });
-                        console.log(`✅ Status reacted: ${randomEmoji}`);
+                        logMessage('INFO', `Status reacted: ${randomEmoji}`);
                     } catch (e) {
-                        console.log('❌ Status react failed:', e);
+                        logMessage('WARN', `Status react failed: ${e.message}`);
                     }
                 }
 
@@ -314,18 +364,18 @@ async function connectToWhatsApp() {
                             text: config.AUTO_STATUS_MSG,
                             contextInfo: globalContextInfo
                         });
-                        console.log(`✅ Status replied: ${s.id}`);
+                        logMessage('INFO', `Status replied: ${s.id}`);
                     } catch (e) {
-                        console.log('❌ Status reply failed:', e);
+                        logMessage('WARN', `Status reply failed: ${e.message}`);
                     }
                 }
             }
         } catch (err) {
-            console.error('❌ Auto Status Error:', err);
+            logMessage('ERROR', `Auto Status Error: ${err.message}`);
         }
     });
 
-    // ✅ Handle Commands (Fixed Group Support)
+    // ✅ Handle Commands with Simplified Group Handling
     sock.ev.on('messages.upsert', async ({ messages, type }) => {
         if (type !== 'notify') return;
         
@@ -335,23 +385,23 @@ async function connectToWhatsApp() {
         const sender = m.key.remoteJid;
         const isGroup = isJidGroup(sender);
         
-        // Debug log
-        console.log(`📩 New message from ${isGroup ? 'group' : 'private'}: ${sender}`);
+        // Log incoming message
+        logMessage('MESSAGE', `New ${isGroup ? 'group' : 'private'} message from ${sender}`);
         
-        // ✅ Always allow groups unless explicitly disabled
-        if (isGroup && config.ALLOW_GROUPS === false) {
-            console.log('ℹ️ Group message ignored (ALLOW_GROUPS=false)');
+        // ✅ Mode-based restrictions
+        if (config.MODE.toLowerCase() === 'private' && isGroup) {
+            logMessage('INFO', 'Group message ignored (MODE=private)');
             return;
         }
         
-        // ✅ Extract content and mentions
+        if (config.MODE.toLowerCase() === 'public' && !isGroup) {
+            logMessage('INFO', 'Private message ignored (MODE=public)');
+            return;
+        }
+        
+        // ✅ Extract content
         const messageType = Object.keys(m.message)[0];
         let content = '';
-        let mentionedJids = [];
-        
-        if (m.message[messageType]?.contextInfo) {
-            mentionedJids = m.message[messageType].contextInfo.mentionedJid || [];
-        }
         
         if (messageType === 'conversation') {
             content = m.message.conversation;
@@ -367,41 +417,22 @@ async function connectToWhatsApp() {
             return;
         }
         
-        // ✅ Check if bot is mentioned
-        const botBareJid = sock.user.id.split(':')[0] + '@s.whatsapp.net';
-        const isMentioned = mentionedJids.includes(botBareJid);
-        
-        // Debug log
-        console.log(`ℹ️ Content: ${content.substring(0, 50)}... | Mentioned: ${isMentioned}`);
-        
-        // ✅ Group mention handling
-        if (isGroup && config.GROUP_REQUIRE_MENTION && !isMentioned) {
-            console.log('ℹ️ Group message ignored (no mention)');
-            return;
-        }
+        // Log message content
+        logMessage('DEBUG', `Message content: ${content.substring(0, 100)}`);
         
         // ✅ Check if message starts with prefix
         const hasPrefix = content.startsWith(prefix);
-        if (!hasPrefix && !isMentioned) {
-            console.log('ℹ️ Message ignored (no prefix/mention)');
+        if (!hasPrefix) {
+            logMessage('INFO', 'Message ignored (no prefix)');
             return;
         }
         
         // ✅ Extract command text
-        let commandText = hasPrefix 
-            ? content.slice(prefix.length).trim()
-            : content.trim();
-        
-        // ✅ Remove bot mention from command if present
-        if (isMentioned) {
-            const mentionRegex = new RegExp(`@${sock.user.id.split(':')[0]}`, 'i');
-            commandText = commandText.replace(mentionRegex, '').trim();
-        }
-        
+        let commandText = content.slice(prefix.length).trim();
         const [cmd, ...args] = commandText.split(/\s+/);
         const command = cmd.toLowerCase();
 
-        console.log(`⚡ Command detected: ${command} | Args: ${args.join(' ')}`);
+        logMessage('COMMAND', `Command detected: ${command} | Args: ${args.join(' ')}`);
 
         if (config.READ_MESSAGE) await sock.readMessages([m.key]);
 
@@ -486,10 +517,11 @@ async function connectToWhatsApp() {
         for (const plugin of plugins.values()) {
             if (plugin.commands && plugin.commands.includes(command)) {
                 try {
+                    logMessage('PLUGIN', `Executing plugin: ${plugin.commands}`);
                     await plugin.handler({ sock, m, sender, args, contextInfo: globalContextInfo });
-                    console.log(`✅ Plugin executed: ${plugin.commands}`);
+                    logMessage('SUCCESS', `Plugin executed: ${plugin.commands}`);
                 } catch (err) {
-                    console.error(`❌ Error in plugin ${plugin.commands}:`, err);
+                    logMessage('ERROR', `Plugin error: ${plugin.commands} - ${err.message}`);
                     sock.sendMessage(sender, { 
                         text: `❌ Plugin error: ${err.message || 'Unknown error'}` 
                     }, { quoted: m });
@@ -498,7 +530,7 @@ async function connectToWhatsApp() {
             }
         }
         
-        console.log(`⚠️ Command not found: ${command}`);
+        logMessage('WARN', `Command not found: ${command}`);
     });
 
     return sock;
@@ -507,25 +539,26 @@ async function connectToWhatsApp() {
 // ✅ Express Web API
 const app = express();
 app.get('/', (req, res) => res.send(`✅ ${config.BOT_NAME} is Running!`));
-app.listen(port, () => console.log(`🌐 Server running on port ${port}`));
+app.listen(port, () => logMessage('INFO', `🌐 Silva 💖🥰 Server running on port ${port}`));
 
 // ✅ Error handling to prevent crashes
 process.on('uncaughtException', (err) => {
-    console.error('⚠️ Uncaught Exception:', err);
+    logMessage('CRITICAL', `Uncaught Exception: ${err.stack}`);
     // Auto-restart on critical error
     setTimeout(() => connectToWhatsApp(), 5000);
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-    console.error('⚠️ Unhandled Rejection at:', promise, 'reason:', reason);
+    logMessage('CRITICAL', `Unhandled Rejection: ${reason} at ${promise}`);
 });
 
 // ✅ Boot Bot
 (async () => {
     try {
+        logMessage('INFO', 'Booting Silva MD Bot...');
         await connectToWhatsApp();
     } catch (e) {
-        console.error('❌ Bot Init Failed:', e);
+        logMessage('CRITICAL', `Bot Init Failed: ${e.stack}`);
         // Auto-restart on failure
         setTimeout(() => connectToWhatsApp(), 5000);
     }
