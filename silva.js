@@ -1,4 +1,4 @@
-// ✅ Silva MD Bot Main File - Optimized & Fixed
+// ✅ Silva MD Bot Main File - Fixed Group Functionality
 const baileys = require('@whiskeysockets/baileys');
 const { makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, Browsers, DisconnectReason, isJidGroup } = baileys;
 const fs = require('fs');
@@ -68,23 +68,62 @@ async function setupSession() {
     }
 }
 
-// ✅ Welcome Message
+// ✅ Generate Config Table
+function generateConfigTable() {
+    const configs = [
+        { name: 'ALLOW_GROUPS', value: config.ALLOW_GROUPS },
+        { name: 'GROUP_REQUIRE_MENTION', value: config.GROUP_REQUIRE_MENTION },
+        { name: 'ANTIDELETE_GROUP', value: config.ANTIDELETE_GROUP },
+        { name: 'ANTIDELETE_PRIVATE', value: config.ANTIDELETE_PRIVATE },
+        { name: 'AUTO_STATUS_SEEN', value: config.AUTO_STATUS_SEEN },
+        { name: 'AUTO_STATUS_REACT', value: config.AUTO_STATUS_REACT },
+        { name: 'AUTO_STATUS_REPLY', value: config.AUTO_STATUS_REPLY },
+        { name: 'READ_MESSAGE', value: config.READ_MESSAGE },
+        { name: 'AUTO_REACT', value: config.AUTO_REACT },
+        { name: 'ANTI_BAD', value: config.ANTI_BAD },
+        { name: 'ANTI_LINK', value: config.ANTI_LINK },
+        { name: 'PUBLIC_MODE', value: config.PUBLIC_MODE },
+        { name: 'ALWAYS_ONLINE', value: config.ALWAYS_ONLINE },
+        { name: 'AUTO_TYPING', value: config.AUTO_TYPING },
+        { name: 'HEART_REACT', value: config.HEART_REACT },
+        { name: 'OWNER_REACT', value: config.OWNER_REACT }
+    ];
+
+    let table = '╔══════════════════════════╦═══════════╗\n';
+    table += '║        Config Name       ║   Value   ║\n';
+    table += '╠══════════════════════════╬═══════════╣\n';
+
+    for (const config of configs) {
+        const paddedName = config.name.padEnd(24, ' ');
+        const paddedValue = String(config.value).padEnd(9, ' ');
+        table += `║ ${paddedName} ║ ${paddedValue} ║\n`;
+    }
+
+    table += '╚══════════════════════════╩═══════════╝';
+    return table;
+}
+
+// ✅ Welcome Message with Config Status
 async function sendWelcomeMessage(sock) {
-    const welcomeMsg = `*Hello ✦ Silva MD ✦ User!*\n\n` +
+    const configTable = generateConfigTable();
+    
+    const welcomeMsg = `*Hello ✦ ${config.BOT_NAME} ✦ User!*\n\n` +
         `✅ Silva MD Bot is now active!\n\n` +
         `*Prefix:* ${prefix}\n` +
         `*Mode:* ${config.MODE}\n` +
         `*Plugins Loaded:* ${plugins.size}\n\n` +
+        `*⚙️ Configuration Status:*\n\`\`\`${configTable}\`\`\`\n\n` +
+        `*Description:* ${config.DESCRIPTION}\n\n` +
         `⚡ Powered by Silva Tech Inc\nGitHub: https://github.com/SilvaTechB/silva-md-bot`;
 
     await sock.sendMessage(sock.user.id, {
-        image: { url: 'https://files.catbox.moe/5uli5p.jpeg' },
+        image: { url: config.ALIVE_IMG },
         caption: welcomeMsg,
         contextInfo: {
             ...globalContextInfo,
             externalAdReply: {
-                title: "✦ Silva MD ✦ Official",
-                body: "Your Silva MD Bot is live!",
+                title: `✦ ${config.BOT_NAME} ✦ Official`,
+                body: "Your bot is live with enhanced features!",
                 thumbnailUrl: "https://files.catbox.moe/5uli5p.jpeg",
                 sourceUrl: "https://github.com/SilvaTechB/silva-md-bot",
                 mediaType: 1,
@@ -244,8 +283,9 @@ async function connectToWhatsApp() {
                 if (config.AUTO_STATUS_SEEN) {
                     try {
                         await sock.readMessages([{ remoteJid: s.jid, id: s.id }]);
+                        console.log(`✅ Status seen: ${s.id}`);
                     } catch (e) {
-                        console.log('✅ Status seen');
+                        console.log('❌ Status seen failed:', e);
                     }
                 }
 
@@ -261,8 +301,9 @@ async function connectToWhatsApp() {
                                 key: { remoteJid: s.jid, id: s.id }
                             }
                         });
+                        console.log(`✅ Status reacted: ${randomEmoji}`);
                     } catch (e) {
-                        console.log('✅ Status reacted');
+                        console.log('❌ Status react failed:', e);
                     }
                 }
 
@@ -273,8 +314,9 @@ async function connectToWhatsApp() {
                             text: config.AUTO_STATUS_MSG,
                             contextInfo: globalContextInfo
                         });
+                        console.log(`✅ Status replied: ${s.id}`);
                     } catch (e) {
-                        console.log('✅ Status replied');
+                        console.log('❌ Status reply failed:', e);
                     }
                 }
             }
@@ -283,7 +325,7 @@ async function connectToWhatsApp() {
         }
     });
 
-    // ✅ Handle Commands (Optimized Group Support)
+    // ✅ Handle Commands (Fixed Group Support)
     sock.ev.on('messages.upsert', async ({ messages, type }) => {
         if (type !== 'notify') return;
         
@@ -293,24 +335,13 @@ async function connectToWhatsApp() {
         const sender = m.key.remoteJid;
         const isGroup = isJidGroup(sender);
         
-        // ✅ Always allow groups unless explicitly disabled
-        if (isGroup && config.ALLOW_GROUPS === false) return;
+        // Debug log
+        console.log(`📩 New message from ${isGroup ? 'group' : 'private'}: ${sender}`);
         
-        // ✅ Auto-react to messages
-        if (config.AUTO_REACT && !isGroup) {
-            try {
-                const emojis = config.CUSTOM_REACT_EMOJIS.split(',');
-                const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)].trim();
-                
-                await sock.sendMessage(sender, {
-                    react: {
-                        text: randomEmoji,
-                        key: m.key
-                    }
-                });
-            } catch (e) {
-                console.log('✅ Message reacted');
-            }
+        // ✅ Always allow groups unless explicitly disabled
+        if (isGroup && config.ALLOW_GROUPS === false) {
+            console.log('ℹ️ Group message ignored (ALLOW_GROUPS=false)');
+            return;
         }
         
         // ✅ Extract content and mentions
@@ -340,12 +371,21 @@ async function connectToWhatsApp() {
         const botBareJid = sock.user.id.split(':')[0] + '@s.whatsapp.net';
         const isMentioned = mentionedJids.includes(botBareJid);
         
+        // Debug log
+        console.log(`ℹ️ Content: ${content.substring(0, 50)}... | Mentioned: ${isMentioned}`);
+        
         // ✅ Group mention handling
-        if (isGroup && config.GROUP_REQUIRE_MENTION && !isMentioned) return;
+        if (isGroup && config.GROUP_REQUIRE_MENTION && !isMentioned) {
+            console.log('ℹ️ Group message ignored (no mention)');
+            return;
+        }
         
         // ✅ Check if message starts with prefix
         const hasPrefix = content.startsWith(prefix);
-        if (!hasPrefix && !isMentioned) return;
+        if (!hasPrefix && !isMentioned) {
+            console.log('ℹ️ Message ignored (no prefix/mention)');
+            return;
+        }
         
         // ✅ Extract command text
         let commandText = hasPrefix 
@@ -361,6 +401,8 @@ async function connectToWhatsApp() {
         const [cmd, ...args] = commandText.split(/\s+/);
         const command = cmd.toLowerCase();
 
+        console.log(`⚡ Command detected: ${command} | Args: ${args.join(' ')}`);
+
         if (config.READ_MESSAGE) await sock.readMessages([m.key]);
 
         // ✅ Core Commands
@@ -370,11 +412,11 @@ async function connectToWhatsApp() {
                 : 0;
 
             return sock.sendMessage(sender, {
-                text: `🏓 *Pong!* ${latency} ms Silva MD is live!`,
+                text: `🏓 *Pong!* ${latency} ms ${config.BOT_NAME} is live!`,
                 contextInfo: {
                     ...globalContextInfo,
                     externalAdReply: {
-                        title: "Silva MD speed",
+                        title: `${config.BOT_NAME} speed`,
                         body: "Explore the speed",
                         thumbnailUrl: "https://files.catbox.moe/5uli5p.jpeg",
                         sourceUrl: "https://github.com/SilvaTechB/silva-md-bot",
@@ -445,6 +487,7 @@ async function connectToWhatsApp() {
             if (plugin.commands && plugin.commands.includes(command)) {
                 try {
                     await plugin.handler({ sock, m, sender, args, contextInfo: globalContextInfo });
+                    console.log(`✅ Plugin executed: ${plugin.commands}`);
                 } catch (err) {
                     console.error(`❌ Error in plugin ${plugin.commands}:`, err);
                     sock.sendMessage(sender, { 
@@ -454,6 +497,8 @@ async function connectToWhatsApp() {
                 return;
             }
         }
+        
+        console.log(`⚠️ Command not found: ${command}`);
     });
 
     return sock;
@@ -467,6 +512,8 @@ app.listen(port, () => console.log(`🌐 Server running on port ${port}`));
 // ✅ Error handling to prevent crashes
 process.on('uncaughtException', (err) => {
     console.error('⚠️ Uncaught Exception:', err);
+    // Auto-restart on critical error
+    setTimeout(() => connectToWhatsApp(), 5000);
 });
 
 process.on('unhandledRejection', (reason, promise) => {
