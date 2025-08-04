@@ -1,6 +1,6 @@
-// ✅ Silva MD Bot Main File - Modern & Enhanced
+// ✅ Silva MD Bot Main File - Newsletter Enhanced
 const baileys = require('@whiskeysockets/baileys');
-const { makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, Browsers, DisconnectReason, isJidGroup } = baileys;
+const { makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, Browsers, DisconnectReason, isJidGroup, isJidBroadcast, isJidStatusBroadcast, areJidsSameUser } = baileys;
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
@@ -8,7 +8,6 @@ const express = require('express');
 const P = require('pino');
 const { File } = require('megajs');
 const config = require('./config.js');
-const axios = require('axios');
 
 const prefix = config.PREFIX || '.';
 const tempDir = path.join(os.tmpdir(), 'silva-cache');
@@ -101,7 +100,7 @@ function generateConfigTable() {
         { name: 'AUTO_STATUS_SEEN', value: config.AUTO_STATUS_SEEN },
         { name: 'AUTO_STATUS_REACT', value: config.AUTO_STATUS_REACT },
         { name: 'AUTO_STATUS_REPLY', value: config.AUTO_STATUS_REPLY },
-        { name: 'AUTO_REACT', value: config.AUTO_REACT },
+        { name: 'AUTO_REACT_NEWSLETTER', value: config.AUTO_REACT_NEWSLETTER },
         { name: 'ANTI_LINK', value: config.ANTI_LINK },
         { name: 'ALWAYS_ONLINE', value: config.ALWAYS_ONLINE }
     ];
@@ -130,12 +129,18 @@ function generateFancyBio() {
         day: 'numeric' 
     });
     
+    const timeStr = now.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+    });
+    
     const bios = [
-        `✦ ${config.BOT_NAME} ✦ Active ✦ ${dateStr} ✦`,
-        `⚡ ${config.BOT_NAME} Online ✦ ${dateStr} ✦`,
-        `💫 Silva MD Operational ✦ ${dateStr} ✦`,
-        `🚀 ${config.BOT_NAME} Running ✦ ${dateStr} ✦`,
-        `🌟 Silva MD Live ✦ ${dateStr} ✦`
+        `✨ ${config.BOT_NAME} ✦ Online ✦ ${dateStr} ✦`,
+        `⚡ Silva MD Active ✦ ${timeStr} ✦ ${dateStr} ✦`,
+        `💫 ${config.BOT_NAME} Operational ✦ ${dateStr} ✦`,
+        `🚀 Silva MD Live ✦ ${dateStr} ✦ ${timeStr} ✦`,
+        `🌟 ${config.BOT_NAME} Running ✦ ${dateStr} ✦`
     ];
     
     return bios[Math.floor(Math.random() * bios.length)];
@@ -416,13 +421,14 @@ async function connectToWhatsApp() {
 
         const sender = m.key.remoteJid;
         const isGroup = isJidGroup(sender);
-        const isBroadcast = sender.endsWith('@broadcast');
+        const isNewsletter = sender.endsWith('@newsletter');
+        const isBroadcast = isJidBroadcast(sender) || isJidStatusBroadcast(sender);
         
         // Log incoming message
-        logMessage('MESSAGE', `New ${isGroup ? 'group' : isBroadcast ? 'broadcast' : 'private'} message from ${sender}`);
+        logMessage('MESSAGE', `New ${isNewsletter ? 'newsletter' : isGroup ? 'group' : isBroadcast ? 'broadcast' : 'private'} message from ${sender}`);
         
-        // ✅ Auto-react to broadcast messages
-        if (isBroadcast && config.AUTO_REACT) {
+        // ✅ Auto-react to newsletter messages
+        if (isNewsletter && config.AUTO_REACT_NEWSLETTER) {
             try {
                 await sock.sendMessage(sender, {
                     react: {
@@ -430,9 +436,9 @@ async function connectToWhatsApp() {
                         key: m.key
                     }
                 });
-                logMessage('INFO', `Reacted to broadcast message`);
+                logMessage('INFO', `Reacted to newsletter message`);
             } catch (e) {
-                logMessage('ERROR', `Broadcast react failed: ${e.message}`);
+                logMessage('ERROR', `Newsletter react failed: ${e.message}`);
             }
         }
         
