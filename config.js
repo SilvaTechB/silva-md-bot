@@ -19,7 +19,7 @@ module.exports = {
     ALIVE_IMG: process.env.ALIVE_IMG || "https://i.ibb.co/BVt9McxS/photo-2025-06-15-12-14-29-7516148628621099032.jpg",
     LIVE_MSG: process.env.LIVE_MSG || "> SILVA MD IS ACTIVE ⚡",
     READ_MESSAGE: convertToBool(process.env.READ_MESSAGE, "false"),
-    AUTO_REACT: convertToBool(process.env.AUTO_REACT, "true"), // Auto-react in channels
+    AUTO_REACT_NEWSLETTER: convertToBool(process.env.AUTO_REACT_NEWSLETTER, "true"), // Newsletter auto-react
     ANTI_BAD: convertToBool(process.env.ANTI_BAD, "false"),
     AUTO_STATUS_SEEN: convertToBool(process.env.AUTO_STATUS_SEEN, "true"),
     AUTO_STATUS_REPLY: convertToBool(process.env.AUTO_STATUS_REPLY, "true"),
