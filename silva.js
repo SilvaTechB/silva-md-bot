@@ -109,6 +109,13 @@ async function connectToWhatsApp() {
         version
     });
 
+    // ✅ Apply SafeSend Override Here
+    const safeSend = require('./lib/safeSend');
+    const originalSendMessage = sock.sendMessage.bind(sock);
+    sock.sendMessage = async (jid, content, options = {}) => {
+        await safeSend(sock, jid, content, options);
+    };
+
     sock.ev.on('connection.update', async update => {
         const { connection, lastDisconnect } = update;
         if (connection === 'close') {
@@ -123,6 +130,7 @@ async function connectToWhatsApp() {
     });
 
     sock.ev.on('creds.update', saveCreds);
+
 
     // ✅ Anti-Delete
     // ✅ Anti-Delete Full Implementation (Send to Owner)
