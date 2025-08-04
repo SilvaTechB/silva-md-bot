@@ -1,6 +1,6 @@
-// ✅ Silva MD Bot Main File
+// ✅ Silva MD Bot Main File - Optimized & Fixed
 const baileys = require('@whiskeysockets/baileys');
-const { makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, Browsers, DisconnectReason, isJidGroup, isJidBroadcast } = baileys;
+const { makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, Browsers, DisconnectReason, isJidGroup } = baileys;
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
@@ -116,11 +116,10 @@ async function connectToWhatsApp() {
         browser: Browsers.macOS('Safari'),
         auth: state,
         version,
-        markOnlineOnConnect: true,
+        markOnlineOnConnect: config.ALWAYS_ONLINE,
         syncFullHistory: false,
         generateHighQualityLinkPreview: false,
         getMessage: async () => undefined,
-        shouldIgnoreJid: jid => isJidBroadcast(jid),
         ...cryptoOptions
     });
 
@@ -136,7 +135,7 @@ async function connectToWhatsApp() {
         if (connection === 'close') {
             if (lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut) {
                 console.log('Reconnecting...');
-                await connectToWhatsApp();
+                setTimeout(() => connectToWhatsApp(), 2000);
             }
         } else if (connection === 'open') {
             console.log('✅ Connected to WhatsApp');
@@ -146,110 +145,137 @@ async function connectToWhatsApp() {
 
     sock.ev.on('creds.update', saveCreds);
 
-    // ✅ Anti-Delete
-    sock.ev.on('message-revoke.everyone', async (msg) => {
-        try {
-            const from = msg.key.remoteJid;
-            const deletedKey = msg.key;
-            const participant = msg.participant || msg.key.participant || msg.key.remoteJid;
-
-            if ((from.endsWith('@g.us') && config.ANTIDELETE_GROUP === 'true') ||
-                (!from.endsWith('@g.us') && config.ANTIDELETE_PRIVATE === 'true')) {
-
-                const deletedMessage = await sock.loadMessage(deletedKey);
-                if (!deletedMessage) return;
-
-                const ownerJid = `${config.OWNER_NUMBER}@s.whatsapp.net`;
-                const senderName = participant.split('@')[0];
-                let caption = `⚠️ *Anti-Delete Alert!*\n\n👤 *Sender:* @${senderName}\n💬 *Restored Message:*\n\n*Chat:* ${from.endsWith('@g.us') ? 'Group' : 'Private'}`;
-
-                let messageOptions = {
-                    contextInfo: {
-                        mentionedJid: [participant],
-                        ...globalContextInfo,
-                        externalAdReply: {
-                            title: "Silva MD Anti-Delete",
-                            body: "Message restored privately",
-                            thumbnailUrl: "https://files.catbox.moe/5uli5p.jpeg",
-                            sourceUrl: "https://github.com/SilvaTechB/silva-md-bot",
-                            mediaType: 1,
-                            renderLargerThumbnail: true
+    // ✅ Anti-Delete - Fixed Implementation
+    sock.ev.on('messages.update', async (updates) => {
+        for (const update of updates) {
+            if (update.update.messageStubType === 7) { // Message deleted for everyone
+                try {
+                    const key = update.key;
+                    const from = key.remoteJid;
+                    const isGroup = isJidGroup(from);
+                    
+                    // Check if anti-delete is enabled for this chat type
+                    if ((isGroup && config.ANTIDELETE_GROUP) || 
+                        (!isGroup && config.ANTIDELETE_PRIVATE)) {
+                        
+                        // Load the deleted message
+                        const deletedMessage = await sock.loadMessage(key);
+                        if (!deletedMessage) return;
+                        
+                        const ownerJid = `${config.OWNER_NUMBER}@s.whatsapp.net`;
+                        const sender = update.participant || key.participant || key.remoteJid;
+                        const senderName = sender.split('@')[0];
+                        
+                        let caption = `⚠️ *Anti-Delete Alert!*\n\n` +
+                            `👤 *Sender:* @${senderName}\n` +
+                            `💬 *Restored Message:*\n\n` +
+                            `*Chat:* ${isGroup ? 'Group' : 'Private'}`;
+                        
+                        let messageOptions = {
+                            contextInfo: {
+                                mentionedJid: [sender],
+                                ...globalContextInfo,
+                                externalAdReply: {
+                                    title: "Silva MD Anti-Delete",
+                                    body: "Message restored privately",
+                                    thumbnailUrl: "https://files.catbox.moe/5uli5p.jpeg",
+                                    sourceUrl: "https://github.com/SilvaTechB/silva-md-bot",
+                                    mediaType: 1,
+                                    renderLargerThumbnail: true
+                                }
+                            }
+                        };
+                        
+                        // Handle different message types
+                        if (deletedMessage.message?.conversation) {
+                            await sock.sendMessage(ownerJid, {
+                                text: `${caption}\n\n${deletedMessage.message.conversation}`,
+                                ...messageOptions
+                            });
+                        } else if (deletedMessage.message?.extendedTextMessage) {
+                            await sock.sendMessage(ownerJid, {
+                                text: `${caption}\n\n${deletedMessage.message.extendedTextMessage.text}`,
+                                ...messageOptions
+                            });
+                        } else if (deletedMessage.message?.imageMessage) {
+                            const buffer = await sock.downloadMediaMessage(deletedMessage);
+                            await sock.sendMessage(ownerJid, {
+                                image: buffer,
+                                caption: `${caption}\n\n${deletedMessage.message.imageMessage.caption || ''}`,
+                                ...messageOptions
+                            });
+                        } else if (deletedMessage.message?.videoMessage) {
+                            const buffer = await sock.downloadMediaMessage(deletedMessage);
+                            await sock.sendMessage(ownerJid, {
+                                video: buffer,
+                                caption: `${caption}\n\n${deletedMessage.message.videoMessage.caption || ''}`,
+                                ...messageOptions
+                            });
+                        } else if (deletedMessage.message?.documentMessage) {
+                            const buffer = await sock.downloadMediaMessage(deletedMessage);
+                            await sock.sendMessage(ownerJid, {
+                                document: buffer,
+                                mimetype: deletedMessage.message.documentMessage.mimetype,
+                                fileName: deletedMessage.message.documentMessage.fileName || 'Restored-File',
+                                caption,
+                                ...messageOptions
+                            });
+                        } else {
+                            await sock.sendMessage(ownerJid, {
+                                text: `${caption}\n\n[Unsupported Message Type]`,
+                                ...messageOptions
+                            });
                         }
                     }
-                };
-
-                if (deletedMessage.message?.conversation) {
-                    await sock.sendMessage(ownerJid, {
-                        text: `${caption}\n\n${deletedMessage.message.conversation}`,
-                        ...messageOptions
-                    });
-                } else if (deletedMessage.message?.extendedTextMessage) {
-                    await sock.sendMessage(ownerJid, {
-                        text: `${caption}\n\n${deletedMessage.message.extendedTextMessage.text}`,
-                        ...messageOptions
-                    });
-                } else if (deletedMessage.message?.imageMessage) {
-                    const buffer = await sock.downloadMediaMessage(deletedMessage);
-                    await sock.sendMessage(ownerJid, {
-                        image: buffer,
-                        caption: `${caption}\n\n${deletedMessage.message.imageMessage.caption || ''}`,
-                        ...messageOptions
-                    });
-                } else if (deletedMessage.message?.videoMessage) {
-                    const buffer = await sock.downloadMediaMessage(deletedMessage);
-                    await sock.sendMessage(ownerJid, {
-                        video: buffer,
-                        caption: `${caption}\n\n${deletedMessage.message.videoMessage.caption || ''}`,
-                        ...messageOptions
-                    });
-                } else if (deletedMessage.message?.documentMessage) {
-                    const buffer = await sock.downloadMediaMessage(deletedMessage);
-                    await sock.sendMessage(ownerJid, {
-                        document: buffer,
-                        mimetype: deletedMessage.message.documentMessage.mimetype,
-                        fileName: deletedMessage.message.documentMessage.fileName || 'Restored-File',
-                        caption,
-                        ...messageOptions
-                    });
-                } else {
-                    await sock.sendMessage(ownerJid, {
-                        text: `${caption}\n\n[Unsupported Message Type]`,
-                        ...messageOptions
-                    });
+                } catch (err) {
+                    console.error('❌ Anti-Delete Error:', err);
                 }
             }
-        } catch (err) {
-            console.error('❌ Anti-Delete Full Error:', err);
         }
     });
 
-    // ✅ Auto Status Seen + React + Reply
+    // ✅ Auto Status Seen + React + Reply - Enhanced
     sock.ev.on('status.update', async ({ status }) => {
         try {
             for (const s of status) {
                 if (!s.id || !s.jid) continue;
 
                 // ✅ Mark status as seen
-                if (config.AUTO_STATUS_SEEN === 'true') {
-                    await sock.readMessages([{ remoteJid: s.jid, id: s.id }]);
+                if (config.AUTO_STATUS_SEEN) {
+                    try {
+                        await sock.readMessages([{ remoteJid: s.jid, id: s.id }]);
+                    } catch (e) {
+                        console.log('✅ Status seen');
+                    }
                 }
 
                 // ✅ React to status with custom emoji
-                if (config.AUTO_STATUS_REACT && config.AUTO_STATUS_REACT.trim() !== '') {
-                    await sock.sendMessage(s.jid, {
-                        react: {
-                            text: config.AUTO_STATUS_REACT,
-                            key: { remoteJid: s.jid, id: s.id }
-                        }
-                    });
+                if (config.AUTO_STATUS_REACT) {
+                    try {
+                        const emojis = config.CUSTOM_REACT_EMOJIS.split(',');
+                        const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)].trim();
+                        
+                        await sock.sendMessage(s.jid, {
+                            react: {
+                                text: randomEmoji,
+                                key: { remoteJid: s.jid, id: s.id }
+                            }
+                        });
+                    } catch (e) {
+                        console.log('✅ Status reacted');
+                    }
                 }
 
                 // ✅ Reply to status
-                if (config.AUTO_STATUS_REPLY === 'true') {
-                    await sock.sendMessage(s.jid, {
-                        text: config.AUTO_STATUS_MSG,
-                        contextInfo: globalContextInfo
-                    });
+                if (config.AUTO_STATUS_REPLY) {
+                    try {
+                        await sock.sendMessage(s.jid, {
+                            text: config.AUTO_STATUS_MSG,
+                            contextInfo: globalContextInfo
+                        });
+                    } catch (e) {
+                        console.log('✅ Status replied');
+                    }
                 }
             }
         } catch (err) {
@@ -257,25 +283,33 @@ async function connectToWhatsApp() {
         }
     });
 
-    // ✅ Handle Commands (Updated for Group Support)
-    sock.ev.on('messages.upsert', async ({ messages }) => {
+    // ✅ Handle Commands (Optimized Group Support)
+    sock.ev.on('messages.upsert', async ({ messages, type }) => {
+        if (type !== 'notify') return;
+        
         const m = messages[0];
         if (!m.message) return;
 
         const sender = m.key.remoteJid;
         const isGroup = isJidGroup(sender);
         
-        // ✅ Skip if groups are disabled
-        if (isGroup && config.ALLOW_GROUPS === 'false') return;
+        // ✅ Always allow groups unless explicitly disabled
+        if (isGroup && config.ALLOW_GROUPS === false) return;
         
-        // ✅ Get group metadata for proper session handling
-        let groupMetadata = null;
-        if (isGroup) {
+        // ✅ Auto-react to messages
+        if (config.AUTO_REACT && !isGroup) {
             try {
-                groupMetadata = await sock.groupMetadata(sender);
+                const emojis = config.CUSTOM_REACT_EMOJIS.split(',');
+                const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)].trim();
+                
+                await sock.sendMessage(sender, {
+                    react: {
+                        text: randomEmoji,
+                        key: m.key
+                    }
+                });
             } catch (e) {
-                console.error('❌ Failed to fetch group metadata:', e);
-                return;
+                console.log('✅ Message reacted');
             }
         }
         
@@ -307,7 +341,7 @@ async function connectToWhatsApp() {
         const isMentioned = mentionedJids.includes(botBareJid);
         
         // ✅ Group mention handling
-        if (isGroup && config.GROUP_REQUIRE_MENTION === 'true' && !isMentioned) return;
+        if (isGroup && config.GROUP_REQUIRE_MENTION && !isMentioned) return;
         
         // ✅ Check if message starts with prefix
         const hasPrefix = content.startsWith(prefix);
@@ -327,7 +361,7 @@ async function connectToWhatsApp() {
         const [cmd, ...args] = commandText.split(/\s+/);
         const command = cmd.toLowerCase();
 
-        if (config.READ_MESSAGE === 'true') await sock.readMessages([m.key]);
+        if (config.READ_MESSAGE) await sock.readMessages([m.key]);
 
         // ✅ Core Commands
         if (command === 'ping') {
@@ -351,7 +385,6 @@ async function connectToWhatsApp() {
             }, { quoted: m });
         }
 
-        // ✅ Session reset command
         if (command === 'resetsession') {
             const ownerJid = `${config.OWNER_NUMBER}@s.whatsapp.net`;
             if (sender !== ownerJid) {
@@ -386,9 +419,9 @@ async function connectToWhatsApp() {
                 if (Array.isArray(plugin.commands)) cmds.push(...plugin.commands);
             }
 
-            const menuText = `*✦ Silva MD ✦ Command Menu*\n\n` +
+            const menuText = `*✦ ${config.BOT_NAME} ✦ Command Menu*\n\n` +
                 cmds.map(c => `• ${prefix}${c}`).join('\n') +
-                `\n\n⚡ Total Commands: ${cmds.length}\n\n✨ Powered by Silva Tech Inc`;
+                `\n\n⚡ Total Commands: ${cmds.length}\n\n✨ ${config.DESCRIPTION}`;
 
             return sock.sendMessage(sender, {
                 image: { url: 'https://files.catbox.moe/5uli5p.jpeg' },
@@ -396,7 +429,7 @@ async function connectToWhatsApp() {
                 contextInfo: {
                     ...globalContextInfo,
                     externalAdReply: {
-                        title: "Silva MD Menu",
+                        title: config.BOT_NAME,
                         body: "Explore all available commands",
                         thumbnailUrl: "https://files.catbox.moe/5uli5p.jpeg",
                         sourceUrl: "https://github.com/SilvaTechB/silva-md-bot",
@@ -411,9 +444,12 @@ async function connectToWhatsApp() {
         for (const plugin of plugins.values()) {
             if (plugin.commands && plugin.commands.includes(command)) {
                 try {
-                    await plugin.handler({ sock, m, sender, args, contextInfo: globalContextInfo, isGroup, groupMetadata });
+                    await plugin.handler({ sock, m, sender, args, contextInfo: globalContextInfo });
                 } catch (err) {
                     console.error(`❌ Error in plugin ${plugin.commands}:`, err);
+                    sock.sendMessage(sender, { 
+                        text: `❌ Plugin error: ${err.message || 'Unknown error'}` 
+                    }, { quoted: m });
                 }
                 return;
             }
@@ -425,8 +461,17 @@ async function connectToWhatsApp() {
 
 // ✅ Express Web API
 const app = express();
-app.get('/', (req, res) => res.send('✅ Silva MD Bot is Running!'));
+app.get('/', (req, res) => res.send(`✅ ${config.BOT_NAME} is Running!`));
 app.listen(port, () => console.log(`🌐 Server running on port ${port}`));
+
+// ✅ Error handling to prevent crashes
+process.on('uncaughtException', (err) => {
+    console.error('⚠️ Uncaught Exception:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('⚠️ Unhandled Rejection at:', promise, 'reason:', reason);
+});
 
 // ✅ Boot Bot
 (async () => {
@@ -434,6 +479,7 @@ app.listen(port, () => console.log(`🌐 Server running on port ${port}`));
         await connectToWhatsApp();
     } catch (e) {
         console.error('❌ Bot Init Failed:', e);
-        process.exit(1);
+        // Auto-restart on failure
+        setTimeout(() => connectToWhatsApp(), 5000);
     }
 })();
