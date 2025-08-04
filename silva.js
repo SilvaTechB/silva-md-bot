@@ -1,4 +1,3 @@
-// silva md new version 
 // ✅ Silva MD Bot Main File
 const baileys = require('@whiskeysockets/baileys');
 const { makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, Browsers, DisconnectReason } = baileys;
@@ -109,14 +108,12 @@ async function connectToWhatsApp() {
         version
     });
 
-    // ✅ Apply SafeSend Override Here
+    // ✅ Apply SafeSend Override
     const safeSend = require('./lib/safeSend');
-const originalSendMessage = sock.sendMessage.bind(sock);
-sock.sendMessage = async (jid, content, options = {}) => {
-    await safeSend(sock, originalSendMessage, jid, content, options);
-};
-
-
+    const originalSendMessage = sock.sendMessage.bind(sock);
+    sock.sendMessage = async (jid, content, options = {}) => {
+        await safeSend(sock, originalSendMessage, jid, content, options);
+    };
 
     sock.ev.on('connection.update', async update => {
         const { connection, lastDisconnect } = update;
@@ -133,156 +130,199 @@ sock.sendMessage = async (jid, content, options = {}) => {
 
     sock.ev.on('creds.update', saveCreds);
 
-
     // ✅ Anti-Delete
-    // ✅ Anti-Delete Full Implementation (Send to Owner)
-sock.ev.on('message-revoke.everyone', async (msg) => {
-    try {
-        const from = msg.key.remoteJid;
-        const deletedKey = msg.key;
-        const participant = msg.participant || msg.key.participant || msg.key.remoteJid;
+    sock.ev.on('message-revoke.everyone', async (msg) => {
+        try {
+            const from = msg.key.remoteJid;
+            const deletedKey = msg.key;
+            const participant = msg.participant || msg.key.participant || msg.key.remoteJid;
 
-        if ((from.endsWith('@g.us') && config.ANTIDELETE_GROUP === 'true') ||
-            (!from.endsWith('@g.us') && config.ANTIDELETE_PRIVATE === 'true')) {
+            if ((from.endsWith('@g.us') && config.ANTIDELETE_GROUP === 'true') ||
+                (!from.endsWith('@g.us') && config.ANTIDELETE_PRIVATE === 'true')) {
 
-            const deletedMessage = await sock.loadMessage(deletedKey);
-            if (!deletedMessage) return;
+                const deletedMessage = await sock.loadMessage(deletedKey);
+                if (!deletedMessage) return;
 
-            const ownerJid = `${config.OWNER_NUMBER}@s.whatsapp.net`;
-            const senderName = participant.split('@')[0];
-            let caption = `⚠️ *Anti-Delete Alert!*\n\n👤 *Sender:* @${senderName}\n💬 *Restored Message:*\n\n*Chat:* ${from.endsWith('@g.us') ? 'Group' : 'Private'}`;
+                const ownerJid = `${config.OWNER_NUMBER}@s.whatsapp.net`;
+                const senderName = participant.split('@')[0];
+                let caption = `⚠️ *Anti-Delete Alert!*\n\n👤 *Sender:* @${senderName}\n💬 *Restored Message:*\n\n*Chat:* ${from.endsWith('@g.us') ? 'Group' : 'Private'}`;
 
-            let messageOptions = {
+                let messageOptions = {
+                    contextInfo: {
+                        mentionedJid: [participant],
+                        ...globalContextInfo,
+                        externalAdReply: {
+                            title: "Silva MD Anti-Delete",
+                            body: "Message restored privately",
+                            thumbnailUrl: "https://files.catbox.moe/5uli5p.jpeg",
+                            sourceUrl: "https://github.com/SilvaTechB/silva-md-bot",
+                            mediaType: 1,
+                            renderLargerThumbnail: true
+                        }
+                    }
+                };
+
+                if (deletedMessage.message?.conversation) {
+                    await sock.sendMessage(ownerJid, {
+                        text: `${caption}\n\n${deletedMessage.message.conversation}`,
+                        ...messageOptions
+                    });
+                } else if (deletedMessage.message?.extendedTextMessage) {
+                    await sock.sendMessage(ownerJid, {
+                        text: `${caption}\n\n${deletedMessage.message.extendedTextMessage.text}`,
+                        ...messageOptions
+                    });
+                } else if (deletedMessage.message?.imageMessage) {
+                    const buffer = await sock.downloadMediaMessage(deletedMessage);
+                    await sock.sendMessage(ownerJid, {
+                        image: buffer,
+                        caption: `${caption}\n\n${deletedMessage.message.imageMessage.caption || ''}`,
+                        ...messageOptions
+                    });
+                } else if (deletedMessage.message?.videoMessage) {
+                    const buffer = await sock.downloadMediaMessage(deletedMessage);
+                    await sock.sendMessage(ownerJid, {
+                        video: buffer,
+                        caption: `${caption}\n\n${deletedMessage.message.videoMessage.caption || ''}`,
+                        ...messageOptions
+                    });
+                } else if (deletedMessage.message?.documentMessage) {
+                    const buffer = await sock.downloadMediaMessage(deletedMessage);
+                    await sock.sendMessage(ownerJid, {
+                        document: buffer,
+                        mimetype: deletedMessage.message.documentMessage.mimetype,
+                        fileName: deletedMessage.message.documentMessage.fileName || 'Restored-File',
+                        caption,
+                        ...messageOptions
+                    });
+                } else {
+                    await sock.sendMessage(ownerJid, {
+                        text: `${caption}\n\n[Unsupported Message Type]`,
+                        ...messageOptions
+                    });
+                }
+            }
+        } catch (err) {
+            console.error('❌ Anti-Delete Full Error:', err);
+        }
+    });
+
+    // ✅ Auto Status Seen + React + Reply
+    sock.ev.on('status.update', async ({ status }) => {
+        try {
+            for (const s of status) {
+                if (!s.id || !s.jid) continue;
+
+                // ✅ Mark status as seen
+                if (config.AUTO_STATUS_SEEN === 'true') {
+                    await sock.readMessages([{ remoteJid: s.jid, id: s.id }]);
+                }
+
+                // ✅ React to status with custom emoji
+                if (config.AUTO_STATUS_REACT && config.AUTO_STATUS_REACT.trim() !== '') {
+                    await sock.sendMessage(s.jid, {
+                        react: {
+                            text: config.AUTO_STATUS_REACT,
+                            key: { remoteJid: s.jid, id: s.id }
+                        }
+                    });
+                }
+
+                // ✅ Reply to status
+                if (config.AUTO_STATUS_REPLY === 'true') {
+                    await sock.sendMessage(s.jid, {
+                        text: config.AUTO_STATUS_MSG,
+                        contextInfo: globalContextInfo
+                    });
+                }
+            }
+        } catch (err) {
+            console.error('❌ Auto Status Error:', err);
+        }
+    });
+
+    // ✅ Handle Commands (Updated for Group Support)
+    sock.ev.on('messages.upsert', async ({ messages }) => {
+        const m = messages[0];
+        if (!m.message) return;
+
+        const sender = m.key.remoteJid;
+        const isGroup = sender.endsWith('@g.us');
+        
+        // ✅ Skip if groups are disabled
+        if (isGroup && config.ALLOW_GROUPS === 'false') return;
+        
+        // ✅ Extract content and mentions
+        const messageType = Object.keys(m.message)[0];
+        let content = '';
+        let mentionedJids = [];
+        
+        if (m.message[messageType]?.contextInfo) {
+            mentionedJids = m.message[messageType].contextInfo.mentionedJid || [];
+        }
+        
+        if (messageType === 'conversation') {
+            content = m.message.conversation;
+        } else if (messageType === 'extendedTextMessage') {
+            content = m.message.extendedTextMessage.text || '';
+        } else if (messageType === 'imageMessage') {
+            content = m.message.imageMessage.caption || '';
+        } else if (messageType === 'videoMessage') {
+            content = m.message.videoMessage.caption || '';
+        } else if (messageType === 'documentMessage') {
+            content = m.message.documentMessage.caption || '';
+        } else {
+            return;
+        }
+        
+        // ✅ Check if bot is mentioned
+        const botBareJid = sock.user.id.split(':')[0] + '@s.whatsapp.net';
+        const isMentioned = mentionedJids.includes(botBareJid);
+        
+        // ✅ Group mention handling
+        if (isGroup && config.GROUP_REQUIRE_MENTION === 'true' && !isMentioned) return;
+        
+        // ✅ Check if message starts with prefix
+        const hasPrefix = content.startsWith(prefix);
+        if (!hasPrefix && !isMentioned) return;
+        
+        // ✅ Extract command text
+        let commandText = hasPrefix 
+            ? content.slice(prefix.length).trim()
+            : content.trim();
+        
+        // ✅ Remove bot mention from command if present
+        if (isMentioned) {
+            const mentionRegex = new RegExp(`@${sock.user.id.split(':')[0]}`, 'i');
+            commandText = commandText.replace(mentionRegex, '').trim();
+        }
+        
+        const [cmd, ...args] = commandText.split(/\s+/);
+        const command = cmd.toLowerCase();
+
+        if (config.READ_MESSAGE === 'true') await sock.readMessages([m.key]);
+
+        // ✅ Core Commands
+        if (command === 'ping') {
+            const latency = m.messageTimestamp
+                ? new Date().getTime() - m.messageTimestamp * 1000
+                : 0;
+
+            return sock.sendMessage(sender, {
+                text: `🏓 *Pong!* ${latency} ms Silva MD is live!`,
                 contextInfo: {
-                    mentionedJid: [participant],
                     ...globalContextInfo,
                     externalAdReply: {
-                        title: "Silva MD Anti-Delete",
-                        body: "Message restored privately",
+                        title: "Silva MD speed",
+                        body: "Explore the speed",
                         thumbnailUrl: "https://files.catbox.moe/5uli5p.jpeg",
                         sourceUrl: "https://github.com/SilvaTechB/silva-md-bot",
                         mediaType: 1,
                         renderLargerThumbnail: true
                     }
                 }
-            };
-
-            if (deletedMessage.message?.conversation) {
-                await sock.sendMessage(ownerJid, {
-                    text: `${caption}\n\n${deletedMessage.message.conversation}`,
-                    ...messageOptions
-                });
-            } else if (deletedMessage.message?.extendedTextMessage) {
-                await sock.sendMessage(ownerJid, {
-                    text: `${caption}\n\n${deletedMessage.message.extendedTextMessage.text}`,
-                    ...messageOptions
-                });
-            } else if (deletedMessage.message?.imageMessage) {
-                const buffer = await sock.downloadMediaMessage(deletedMessage);
-                await sock.sendMessage(ownerJid, {
-                    image: buffer,
-                    caption: `${caption}\n\n${deletedMessage.message.imageMessage.caption || ''}`,
-                    ...messageOptions
-                });
-            } else if (deletedMessage.message?.videoMessage) {
-                const buffer = await sock.downloadMediaMessage(deletedMessage);
-                await sock.sendMessage(ownerJid, {
-                    video: buffer,
-                    caption: `${caption}\n\n${deletedMessage.message.videoMessage.caption || ''}`,
-                    ...messageOptions
-                });
-            } else if (deletedMessage.message?.documentMessage) {
-                const buffer = await sock.downloadMediaMessage(deletedMessage);
-                await sock.sendMessage(ownerJid, {
-                    document: buffer,
-                    mimetype: deletedMessage.message.documentMessage.mimetype,
-                    fileName: deletedMessage.message.documentMessage.fileName || 'Restored-File',
-                    caption,
-                    ...messageOptions
-                });
-            } else {
-                await sock.sendMessage(ownerJid, {
-                    text: `${caption}\n\n[Unsupported Message Type]`,
-                    ...messageOptions
-                });
-            }
+            }, { quoted: m });
         }
-    } catch (err) {
-        console.error('❌ Anti-Delete Full Error:', err);
-    }
-});
-
-    // ✅ Auto Status Seen & Reply
-    // ✅ Auto Status Seen + React + Reply
-sock.ev.on('status.update', async ({ status }) => {
-    try {
-        for (const s of status) {
-            if (!s.id || !s.jid) continue;
-
-            // ✅ Mark status as seen
-            if (config.AUTO_STATUS_SEEN === 'true') {
-                await sock.readMessages([{ remoteJid: s.jid, id: s.id }]);
-            }
-
-            // ✅ React to status with custom emoji
-            if (config.AUTO_STATUS_REACT && config.AUTO_STATUS_REACT.trim() !== '') {
-                await sock.sendMessage(s.jid, {
-                    react: {
-                        text: config.AUTO_STATUS_REACT, // Example: "🔥"
-                        key: { remoteJid: s.jid, id: s.id }
-                    }
-                });
-            }
-
-            // ✅ Reply to status (optional)
-            if (config.AUTO_STATUS_REPLY === 'true') {
-                await sock.sendMessage(s.jid, {
-                    text: config.AUTO_STATUS_MSG,
-                    contextInfo: globalContextInfo
-                });
-            }
-        }
-    } catch (err) {
-        console.error('❌ Auto Status Error:', err);
-    }
-});
-
-
-    // ✅ Handle Commands
-    sock.ev.on('messages.upsert', async ({ messages }) => {
-        const m = messages[0];
-        if (!m.message) return;
-
-        const sender = m.key.remoteJid;
-        const content = m.message?.conversation || m.message?.extendedTextMessage?.text || '';
-        if (!content.startsWith(prefix)) return;
-
-        if (config.READ_MESSAGE === 'true') await sock.readMessages([m.key]);
-
-        const [cmd, ...args] = content.slice(prefix.length).trim().split(/\s+/);
-        const command = cmd.toLowerCase();
-
-        // ✅ Core Commands
-        if (command === 'ping') {
-    const latency = m.messageTimestamp
-        ? new Date().getTime() - m.messageTimestamp * 1000
-        : 0;
-
-    return sock.sendMessage(sender, {
-        text: `🏓 *Pong!* ${latency} ms Silva MD is live!`,
-        contextInfo: {
-            ...globalContextInfo,
-            externalAdReply: {
-                title: "Silva MD speed",
-                body: "Explore the speed",
-                thumbnailUrl: "https://files.catbox.moe/5uli5p.jpeg",
-                sourceUrl: "https://github.com/SilvaTechB/silva-md-bot",
-                mediaType: 1,
-                renderLargerThumbnail: true
-            }
-        }
-    }, { quoted: m });
-}
 
         if (command === 'alive') {
             return sock.sendMessage(sender, {
@@ -293,31 +333,31 @@ sock.ev.on('status.update', async ({ status }) => {
         }
 
         if (command === 'menu') {
-    const cmds = ['ping', 'alive', 'menu'];
-    for (const [_, plugin] of plugins) {
-        if (Array.isArray(plugin.commands)) cmds.push(...plugin.commands);
-    }
-
-    const menuText = `*✦ Silva MD ✦ Command Menu*\n\n` +
-        cmds.map(c => `• ${prefix}${c}`).join('\n') +
-        `\n\n⚡ Total Commands: ${cmds.length}\n\n✨ Powered by Silva Tech Inc`;
-
-    return sock.sendMessage(sender, {
-        image: { url: 'https://files.catbox.moe/5uli5p.jpeg' }, // ✅ Added image here
-        caption: menuText,
-        contextInfo: {
-            ...globalContextInfo,
-            externalAdReply: {
-                title: "Silva MD Menu",
-                body: "Explore all available commands",
-                thumbnailUrl: "https://files.catbox.moe/5uli5p.jpeg",
-                sourceUrl: "https://github.com/SilvaTechB/silva-md-bot",
-                mediaType: 1,
-                renderLargerThumbnail: true
+            const cmds = ['ping', 'alive', 'menu'];
+            for (const [_, plugin] of plugins) {
+                if (Array.isArray(plugin.commands)) cmds.push(...plugin.commands);
             }
+
+            const menuText = `*✦ Silva MD ✦ Command Menu*\n\n` +
+                cmds.map(c => `• ${prefix}${c}`).join('\n') +
+                `\n\n⚡ Total Commands: ${cmds.length}\n\n✨ Powered by Silva Tech Inc`;
+
+            return sock.sendMessage(sender, {
+                image: { url: 'https://files.catbox.moe/5uli5p.jpeg' },
+                caption: menuText,
+                contextInfo: {
+                    ...globalContextInfo,
+                    externalAdReply: {
+                        title: "Silva MD Menu",
+                        body: "Explore all available commands",
+                        thumbnailUrl: "https://files.catbox.moe/5uli5p.jpeg",
+                        sourceUrl: "https://github.com/SilvaTechB/silva-md-bot",
+                        mediaType: 1,
+                        renderLargerThumbnail: true
+                    }
+                }
+            }, { quoted: m });
         }
-    }, { quoted: m });
-}
 
         // ✅ Plugin Commands
         for (const plugin of plugins.values()) {
