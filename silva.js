@@ -111,10 +111,15 @@ async function connectToWhatsApp() {
 
     // ✅ Apply SafeSend Override Here
     const safeSend = require('./lib/safeSend');
-    const originalSendMessage = sock.sendMessage.bind(sock);
-    sock.sendMessage = async (jid, content, options = {}) => {
-        await safeSend(sock, jid, content, options);
-    };
+
+// Save the original sendMessage function
+const originalSendMessage = sock.sendMessage.bind(sock);
+
+// Override sock.sendMessage with safeSend wrapper
+sock.sendMessage = async (jid, content, options = {}) => {
+    await safeSend(sock, originalSendMessage, jid, content, options);
+};
+
 
     sock.ev.on('connection.update', async update => {
         const { connection, lastDisconnect } = update;
