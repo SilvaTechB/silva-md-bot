@@ -31,17 +31,17 @@ module.exports = {
                 footer: 'Choose an option below:',
                 buttons: [
                     {
-                        buttonId: 'fetch_all_groups',
+                        buttonId: `jid_action:fetch_all_groups`,
                         buttonText: { displayText: '📋 All Group JIDs' },
                         type: 1
                     },
                     {
-                        buttonId: 'fetch_all_channels',
+                        buttonId: `jid_action:fetch_all_channels`,
                         buttonText: { displayText: '📢 All Channel JIDs' },
                         type: 1
                     },
                     {
-                        buttonId: 'copy_jid',
+                        buttonId: `jid_action:copy_jid:${chatJid}`,
                         buttonText: { displayText: '📌 Copy JID' },
                         type: 1
                     }
@@ -55,6 +55,51 @@ module.exports = {
             await sock.sendMessage(sender, {
                 text: '⚠️ Failed to fetch JID. Please try again later.',
                 contextInfo
+            }, { quoted: m });
+        }
+    },
+
+    /**
+     * Button Response Handler
+     */
+    onButton: async ({ sock, buttonId, sender, m }) => {
+        try {
+            if (!buttonId.startsWith('jid_action')) return;
+
+            const [, action, data] = buttonId.split(':');
+
+            if (action === 'fetch_all_groups') {
+                const groups = await sock.groupFetchAllParticipating();
+                const groupList = Object.values(groups)
+                    .map(g => `• ${g.subject} → ${g.id}`)
+                    .join('\n');
+
+                await sock.sendMessage(sender, {
+                    text: `📋 *All Group JIDs*\n\n${groupList || 'No groups found.'}`
+                }, { quoted: m });
+
+            } else if (action === 'fetch_all_channels') {
+                // Channels (Newsletters) require filtering chats
+                const chats = await sock.chats;
+                const channels = Object.values(chats)
+                    .filter(c => c.id.endsWith('@newsletter'))
+                    .map(c => `• ${c.name || 'Unnamed'} → ${c.id}`)
+                    .join('\n');
+
+                await sock.sendMessage(sender, {
+                    text: `📢 *All Channel JIDs*\n\n${channels || 'No channels found.'}`
+                }, { quoted: m });
+
+            } else if (action === 'copy_jid') {
+                await sock.sendMessage(sender, {
+                    text: `📌 *Chat JID:*\n\`${data}\``
+                }, { quoted: m });
+            }
+
+        } catch (error) {
+            console.error('❌ Button Handling Error:', error.message);
+            await sock.sendMessage(sender, {
+                text: '⚠️ Failed to process button action.'
             }, { quoted: m });
         }
     }
