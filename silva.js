@@ -122,14 +122,14 @@ function generateConfigTable() {
 // ✅ Fancy Bio Generator
 function generateFancyBio() {
     const now = new Date();
-    const dateStr = now.toLocaleDateString('en-US', { 
+    const dateStr = now.toLocaleDateString('en-KE', { 
         weekday: 'long', 
         year: 'numeric', 
         month: 'long', 
         day: 'numeric' 
     });
     
-    const timeStr = now.toLocaleTimeString('en-US', {
+    const timeStr = now.toLocaleTimeString('en-KE', {
         hour: '2-digit',
         minute: '2-digit',
         hour12: true
