@@ -1,4 +1,4 @@
-// ✅ Silva MD Bot Main File - Simplified Group Handling
+// ✅ Silva MD Bot Main File - Modern & Enhanced
 const baileys = require('@whiskeysockets/baileys');
 const { makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, Browsers, DisconnectReason, isJidGroup } = baileys;
 const fs = require('fs');
@@ -8,6 +8,7 @@ const express = require('express');
 const P = require('pino');
 const { File } = require('megajs');
 const config = require('./config.js');
+const axios = require('axios');
 
 const prefix = config.PREFIX || '.';
 const tempDir = path.join(os.tmpdir(), 'silva-cache');
@@ -95,20 +96,14 @@ async function setupSession() {
 function generateConfigTable() {
     const configs = [
         { name: 'MODE', value: config.MODE },
-        { name: 'ALLOW_GROUPS', value: config.ALLOW_GROUPS },
         { name: 'ANTIDELETE_GROUP', value: config.ANTIDELETE_GROUP },
         { name: 'ANTIDELETE_PRIVATE', value: config.ANTIDELETE_PRIVATE },
         { name: 'AUTO_STATUS_SEEN', value: config.AUTO_STATUS_SEEN },
         { name: 'AUTO_STATUS_REACT', value: config.AUTO_STATUS_REACT },
         { name: 'AUTO_STATUS_REPLY', value: config.AUTO_STATUS_REPLY },
-        { name: 'READ_MESSAGE', value: config.READ_MESSAGE },
         { name: 'AUTO_REACT', value: config.AUTO_REACT },
-        { name: 'ANTI_BAD', value: config.ANTI_BAD },
         { name: 'ANTI_LINK', value: config.ANTI_LINK },
-        { name: 'ALWAYS_ONLINE', value: config.ALWAYS_ONLINE },
-        { name: 'AUTO_TYPING', value: config.AUTO_TYPING },
-        { name: 'HEART_REACT', value: config.HEART_REACT },
-        { name: 'OWNER_REACT', value: config.OWNER_REACT }
+        { name: 'ALWAYS_ONLINE', value: config.ALWAYS_ONLINE }
     ];
 
     let table = '╔══════════════════════════╦═══════════╗\n';
@@ -123,6 +118,27 @@ function generateConfigTable() {
 
     table += '╚══════════════════════════╩═══════════╝';
     return table;
+}
+
+// ✅ Fancy Bio Generator
+function generateFancyBio() {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('en-US', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+    });
+    
+    const bios = [
+        `✦ ${config.BOT_NAME} ✦ Active ✦ ${dateStr} ✦`,
+        `⚡ ${config.BOT_NAME} Online ✦ ${dateStr} ✦`,
+        `💫 Silva MD Operational ✦ ${dateStr} ✦`,
+        `🚀 ${config.BOT_NAME} Running ✦ ${dateStr} ✦`,
+        `🌟 Silva MD Live ✦ ${dateStr} ✦`
+    ];
+    
+    return bios[Math.floor(Math.random() * bios.length)];
 }
 
 // ✅ Welcome Message with Config Status
@@ -153,6 +169,17 @@ async function sendWelcomeMessage(sock) {
             }
         }
     });
+}
+
+// ✅ Update Profile Status
+async function updateProfileStatus(sock) {
+    try {
+        const bio = generateFancyBio();
+        await sock.updateProfileStatus(bio);
+        logMessage('SUCCESS', `✅ Bio updated: ${bio}`);
+    } catch (err) {
+        logMessage('ERROR', `❌ Failed to update bio: ${err.message}`);
+    }
 }
 
 // ✅ Connect to WhatsApp
@@ -201,6 +228,11 @@ async function connectToWhatsApp() {
             }
         } else if (connection === 'open') {
             logMessage('SUCCESS', '✅ Connected to WhatsApp');
+            
+            // ✅ Update profile status with fancy bio
+            await updateProfileStatus(sock);
+            
+            // ✅ Send welcome message
             await sendWelcomeMessage(sock);
         }
     });
@@ -375,7 +407,7 @@ async function connectToWhatsApp() {
         }
     });
 
-    // ✅ Handle Commands with Simplified Group Handling
+    // ✅ Handle Commands with Enhanced Session Handling
     sock.ev.on('messages.upsert', async ({ messages, type }) => {
         if (type !== 'notify') return;
         
@@ -384,19 +416,24 @@ async function connectToWhatsApp() {
 
         const sender = m.key.remoteJid;
         const isGroup = isJidGroup(sender);
+        const isBroadcast = sender.endsWith('@broadcast');
         
         // Log incoming message
-        logMessage('MESSAGE', `New ${isGroup ? 'group' : 'private'} message from ${sender}`);
+        logMessage('MESSAGE', `New ${isGroup ? 'group' : isBroadcast ? 'broadcast' : 'private'} message from ${sender}`);
         
-        // ✅ Mode-based restrictions
-        if (config.MODE.toLowerCase() === 'private' && isGroup) {
-            logMessage('INFO', 'Group message ignored (MODE=private)');
-            return;
-        }
-        
-        if (config.MODE.toLowerCase() === 'public' && !isGroup) {
-            logMessage('INFO', 'Private message ignored (MODE=public)');
-            return;
+        // ✅ Auto-react to broadcast messages
+        if (isBroadcast && config.AUTO_REACT) {
+            try {
+                await sock.sendMessage(sender, {
+                    react: {
+                        text: '🤖', // Robot emoji
+                        key: m.key
+                    }
+                });
+                logMessage('INFO', `Reacted to broadcast message`);
+            } catch (e) {
+                logMessage('ERROR', `Broadcast react failed: ${e.message}`);
+            }
         }
         
         // ✅ Extract content
@@ -539,7 +576,7 @@ async function connectToWhatsApp() {
 // ✅ Express Web API
 const app = express();
 app.get('/', (req, res) => res.send(`✅ ${config.BOT_NAME} is Running!`));
-app.listen(port, () => logMessage('INFO', `🌐 Silva 💖🥰 Server running on port ${port}`));
+app.listen(port, () => logMessage('INFO', `🌐 Server running on port ${port}`));
 
 // ✅ Error handling to prevent crashes
 process.on('uncaughtException', (err) => {
