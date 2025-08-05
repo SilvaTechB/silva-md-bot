@@ -2,7 +2,7 @@
 const { File: BufferFile } = require('node:buffer');
 global.File = BufferFile;
 
-// ✅ Silva MD Bot Main File - Newsletter Enhanced
+// ✅ Silva MD Bot Main File - Group Functionality Enhanced
 const baileys = require('@whiskeysockets/baileys');
 const { makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, Browsers, DisconnectReason, isJidGroup, isJidBroadcast, isJidStatusBroadcast, areJidsSameUser } = baileys;
 const fs = require('fs');
@@ -112,7 +112,8 @@ function generateConfigTable() {
         { name: 'AUTO_STATUS_REPLY', value: config.AUTO_STATUS_REPLY },
         { name: 'AUTO_REACT_NEWSLETTER', value: config.AUTO_REACT_NEWSLETTER },
         { name: 'ANTI_LINK', value: config.ANTI_LINK },
-        { name: 'ALWAYS_ONLINE', value: config.ALWAYS_ONLINE }
+        { name: 'ALWAYS_ONLINE', value: config.ALWAYS_ONLINE },
+        { name: 'GROUP_COMMANDS', value: config.GROUP_COMMANDS }
     ];
 
     let table = '╔══════════════════════════╦═══════════╗\n';
@@ -197,6 +198,25 @@ async function updateProfileStatus(sock) {
     }
 }
 
+// ✅ Enhanced Group Message Handling
+function isBotMentioned(message, botJid) {
+    if (!message || !botJid) return false;
+    
+    // Check for mentions in extended text messages
+    if (message.extendedTextMessage) {
+        const mentionedJids = message.extendedTextMessage.contextInfo?.mentionedJid || [];
+        return mentionedJids.includes(botJid);
+    }
+    
+    // Check for mentions in conversation messages
+    if (message.conversation) {
+        const botNumber = botJid.split('@')[0];
+        return message.conversation.includes(`@${botNumber}`);
+    }
+    
+    return false;
+}
+
 // ✅ Connect to WhatsApp
 async function connectToWhatsApp() {
     await setupSession();
@@ -226,12 +246,8 @@ async function connectToWhatsApp() {
         ...cryptoOptions
     });
 
-    // ✅ Apply SafeSend Override
-    const safeSend = require('./lib/safeSend');
-    const originalSendMessage = sock.sendMessage.bind(sock);
-    sock.sendMessage = async (jid, content, options = {}) => {
-        await safeSend(sock, originalSendMessage, jid, content, options);
-    };
+    // Remove safeSend override
+    // ✅ Group messages will be handled natively
 
     sock.ev.on('connection.update', async update => {
         const { connection, lastDisconnect } = update;
@@ -243,6 +259,9 @@ async function connectToWhatsApp() {
             }
         } else if (connection === 'open') {
             logMessage('SUCCESS', '✅ Connected to WhatsApp');
+            
+            // Store bot JID for mention detection
+            global.botJid = sock.user.id;
             
             // ✅ Update profile status with fancy bio
             await updateProfileStatus(sock);
@@ -422,7 +441,7 @@ async function connectToWhatsApp() {
         }
     });
 
-    // ✅ Handle Commands with Enhanced Session Handling
+    // ✅ Handle Commands with Enhanced Group Support
     sock.ev.on('messages.upsert', async ({ messages, type }) => {
         if (type !== 'notify') return;
         
@@ -452,14 +471,25 @@ async function connectToWhatsApp() {
             }
         }
         
+        // Skip processing if group commands are disabled
+        if (isGroup && !config.GROUP_COMMANDS) {
+            logMessage('DEBUG', 'Group commands disabled, skipping message');
+            return;
+        }
+        
         // ✅ Extract content
         const messageType = Object.keys(m.message)[0];
         let content = '';
+        let isMentioned = false;
         
         if (messageType === 'conversation') {
             content = m.message.conversation;
         } else if (messageType === 'extendedTextMessage') {
             content = m.message.extendedTextMessage.text || '';
+            // Check if bot is mentioned in group
+            if (isGroup && global.botJid) {
+                isMentioned = isBotMentioned(m.message, global.botJid);
+            }
         } else if (messageType === 'imageMessage') {
             content = m.message.imageMessage.caption || '';
         } else if (messageType === 'videoMessage') {
@@ -473,15 +503,33 @@ async function connectToWhatsApp() {
         // Log message content
         logMessage('DEBUG', `Message content: ${content.substring(0, 100)}`);
         
-        // ✅ Check if message starts with prefix
-        const hasPrefix = content.startsWith(prefix);
-        if (!hasPrefix) {
-            logMessage('INFO', 'Message ignored (no prefix)');
+        // ✅ Check if message is for the bot (prefix or mention in group)
+        let isForBot = false;
+        
+        if (isGroup) {
+            // In groups, accept either prefix or mention
+            isForBot = content.startsWith(prefix) || isMentioned;
+        } else {
+            // In private chats, only prefix is needed
+            isForBot = content.startsWith(prefix);
+        }
+        
+        if (!isForBot) {
+            logMessage('INFO', 'Message not for bot, ignoring');
             return;
         }
         
+        // If mentioned, remove mention from content
+        if (isMentioned) {
+            const botNumber = global.botJid.split('@')[0];
+            content = content.replace(new RegExp(`@${botNumber}\\s*`, 'i'), '').trim();
+        }
+        
         // ✅ Extract command text
-        let commandText = content.slice(prefix.length).trim();
+        let commandText = content.startsWith(prefix) 
+            ? content.slice(prefix.length).trim() 
+            : content.trim();
+            
         const [cmd, ...args] = commandText.split(/\s+/);
         const command = cmd.toLowerCase();
 
@@ -571,7 +619,7 @@ async function connectToWhatsApp() {
             if (plugin.commands && plugin.commands.includes(command)) {
                 try {
                     logMessage('PLUGIN', `Executing plugin: ${plugin.commands}`);
-                    await plugin.handler({ sock, m, sender, args, contextInfo: globalContextInfo });
+                    await plugin.handler({ sock, m, sender, args, contextInfo: globalContextInfo, isGroup });
                     logMessage('SUCCESS', `Plugin executed: ${plugin.commands}`);
                 } catch (err) {
                     logMessage('ERROR', `Plugin error: ${plugin.commands} - ${err.message}`);
