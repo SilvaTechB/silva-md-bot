@@ -1,8 +1,10 @@
-// plugins/test.js
 module.exports = {
     name: 'test',
     commands: ['test', 'botdemo', 'features'],
     handler: async ({ sock, m, sender, contextInfo, isGroup }) => {
+        // Define prefix first
+        const prefix = global.config?.PREFIX || '!';
+        
         try {
             // 1. First try sending as interactive buttons
             try {
