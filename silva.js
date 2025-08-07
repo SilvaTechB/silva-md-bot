@@ -442,201 +442,146 @@ async function connectToWhatsApp() {
     });
 
     // ✅ Handle Commands with Enhanced Group Support
-    sock.ev.on('messages.upsert', async ({ messages, type }) => {
-        if (type !== 'notify') return;
-        
-        const m = messages[0];
-        if (!m.message) return;
+sock.ev.on('messages.upsert', async ({ messages, type }) => {
+    if (type !== 'notify') return;
+    
+    const m = messages[0];
+    if (!m.message) return;
 
-        const sender = m.key.remoteJid;
-        const isGroup = isJidGroup(sender);
-        const isNewsletter = sender.endsWith('@newsletter');
-        const isBroadcast = isJidBroadcast(sender) || isJidStatusBroadcast(sender);
+    const sender = m.key.remoteJid;
+    const isGroup = isJidGroup(sender);
+    
+    // Extract content
+    const messageType = Object.keys(m.message)[0];
+    let content = '';
+    
+    if (messageType === 'conversation') {
+        content = m.message.conversation;
+    } else if (messageType === 'extendedTextMessage') {
+        content = m.message.extendedTextMessage.text || '';
+    } else if (messageType === 'imageMessage') {
+        content = m.message.imageMessage.caption || '';
+    } else if (messageType === 'videoMessage') {
+        content = m.message.videoMessage.caption || '';
+    } else if (messageType === 'documentMessage') {
+        content = m.message.documentMessage.caption || '';
+    } else {
+        return;
+    }
+    
+    // Check if message is for the bot (prefix)
+    let isForBot = content.startsWith(prefix);
+    
+    if (!isForBot) return;
+    
+    // Extract command text
+    let commandText = content.startsWith(prefix) 
+        ? content.slice(prefix.length).trim() 
+        : content.trim();
         
-        // Log incoming message
-        logMessage('MESSAGE', `New ${isNewsletter ? 'newsletter' : isGroup ? 'group' : isBroadcast ? 'broadcast' : 'private'} message from ${sender}`);
-        
-        // ✅ Auto-react to newsletter messages
-        if (isNewsletter && config.AUTO_REACT_NEWSLETTER) {
-            try {
-                await sock.sendMessage(sender, {
-                    react: {
-                        text: '🤖', // Robot emoji
-                        key: m.key
-                    }
-                });
-                logMessage('INFO', `Reacted to newsletter message`);
-            } catch (e) {
-                logMessage('ERROR', `Newsletter react failed: ${e.message}`);
+    const [cmd, ...args] = commandText.split(/\s+/);
+    const command = cmd.toLowerCase();
+
+    logMessage('COMMAND', `Command detected: ${command} | Args: ${args.join(' ')}`);
+
+    if (config.READ_MESSAGE) await sock.readMessages([m.key]);
+
+    // ✅ Core Commands
+    if (command === 'ping') {
+        const latency = m.messageTimestamp
+            ? new Date().getTime() - m.messageTimestamp * 1000
+            : 0;
+
+        return sock.sendMessage(sender, {
+            text: `🏓 *Pong!* ${latency} ms ${config.BOT_NAME} is live!`,
+            contextInfo: {
+                ...globalContextInfo,
+                externalAdReply: {
+                    title: `${config.BOT_NAME} speed`,
+                    body: "Explore the speed",
+                    thumbnailUrl: "https://files.catbox.moe/5uli5p.jpeg",
+                    sourceUrl: "https://github.com/SilvaTechB/silva-md-bot",
+                    mediaType: 1,
+                    renderLargerThumbnail: true
+                }
             }
+        }, { quoted: m });
+    }
+
+    if (command === 'resetsession') {
+        const ownerJid = `${config.OWNER_NUMBER}@s.whatsapp.net`;
+        if (sender !== ownerJid) {
+            return sock.sendMessage(sender, { text: '❌ This command is only for the owner!' }, { quoted: m });
         }
-        
-        // Skip processing if group commands are disabled
-        if (isGroup && !config.GROUP_COMMANDS) {
-            logMessage('DEBUG', 'Group commands disabled, skipping message');
-            return;
-        }
-        
-        // ✅ Extract content
-        const messageType = Object.keys(m.message)[0];
-        let content = '';
-        let isMentioned = false;
-        
-        if (messageType === 'conversation') {
-            content = m.message.conversation;
-        } else if (messageType === 'extendedTextMessage') {
-            content = m.message.extendedTextMessage.text || '';
-            // Check if bot is mentioned in group
-            if (isGroup && global.botJid) {
-                isMentioned = isBotMentioned(m.message, global.botJid);
-            }
-        } else if (messageType === 'imageMessage') {
-            content = m.message.imageMessage.caption || '';
-        } else if (messageType === 'videoMessage') {
-            content = m.message.videoMessage.caption || '';
-        } else if (messageType === 'documentMessage') {
-            content = m.message.documentMessage.caption || '';
-        } else {
-            return;
-        }
-        
-        // Log message content
-        logMessage('DEBUG', `Message content: ${content.substring(0, 100)}`);
-        
-        // ✅ Check if message is for the bot (prefix or mention in group)
-        let isForBot = false;
-        
+
         if (isGroup) {
-            // In groups, accept either prefix or mention
-            isForBot = content.startsWith(prefix) || isMentioned;
-        } else {
-            // In private chats, only prefix is needed
-            isForBot = content.startsWith(prefix);
+            await sock.sendMessage(sender, {
+                protocolMessage: {
+                    senderKeyDistributionMessage: {
+                        groupId: sender
+                    }
+                }
+            });
+            return sock.sendMessage(sender, { text: '✅ Group session reset initiated!' }, { quoted: m });
         }
-        
-        if (!isForBot) {
-            logMessage('INFO', 'Message not for bot, ignoring');
+
+        return sock.sendMessage(sender, { text: '✅ Session reset!' }, { quoted: m });
+    }
+
+    if (command === 'alive') {
+        return sock.sendMessage(sender, {
+            image: { url: config.ALIVE_IMG },
+            caption: config.LIVE_MSG,
+            contextInfo: globalContextInfo
+        }, { quoted: m });
+    }
+
+    if (command === 'menu') {
+        const cmds = ['ping', 'alive', 'menu', 'resetsession'];
+        for (const [_, plugin] of plugins) {
+            if (Array.isArray(plugin.commands)) cmds.push(...plugin.commands);
+        }
+
+        const menuText = `*✦ ${config.BOT_NAME} ✦ Command Menu*\n\n` +
+            cmds.map(c => `• ${prefix}${c}`).join('\n') +
+            `\n\n⚡ Total Commands: ${cmds.length}\n\n✨ ${config.DESCRIPTION}`;
+
+        return sock.sendMessage(sender, {
+            image: { url: 'https://files.catbox.moe/5uli5p.jpeg' },
+            caption: menuText,
+            contextInfo: {
+                ...globalContextInfo,
+                externalAdReply: {
+                    title: config.BOT_NAME,
+                    body: "Explore all available commands",
+                    thumbnailUrl: "https://files.catbox.moe/5uli5p.jpeg",
+                    sourceUrl: "https://github.com/SilvaTechB/silva-md-bot",
+                    mediaType: 1,
+                    renderLargerThumbnail: true
+                }
+            }
+        }, { quoted: m });
+    }
+
+    // ✅ Plugin Commands
+    for (const plugin of plugins.values()) {
+        if (plugin.commands && plugin.commands.includes(command)) {
+            try {
+                logMessage('PLUGIN', `Executing plugin: ${plugin.commands}`);
+                await plugin.handler({ sock, m, sender, args, contextInfo: globalContextInfo, isGroup });
+                logMessage('SUCCESS', `Plugin executed: ${plugin.commands}`);
+            } catch (err) {
+                logMessage('ERROR', `Plugin error: ${plugin.commands} - ${err.message}`);
+                sock.sendMessage(sender, { 
+                    text: `❌ Plugin error: ${err.message || 'Unknown error'}` 
+                }, { quoted: m });
+            }
             return;
         }
-        
-        // If mentioned, remove mention from content
-        if (isMentioned) {
-            const botNumber = global.botJid.split('@')[0];
-            content = content.replace(new RegExp(`@${botNumber}\\s*`, 'i'), '').trim();
-        }
-        
-        // ✅ Extract command text
-        let commandText = content.startsWith(prefix) 
-            ? content.slice(prefix.length).trim() 
-            : content.trim();
-            
-        const [cmd, ...args] = commandText.split(/\s+/);
-        const command = cmd.toLowerCase();
-
-        logMessage('COMMAND', `Command detected: ${command} | Args: ${args.join(' ')}`);
-
-        if (config.READ_MESSAGE) await sock.readMessages([m.key]);
-
-        // ✅ Core Commands
-        if (command === 'ping') {
-            const latency = m.messageTimestamp
-                ? new Date().getTime() - m.messageTimestamp * 1000
-                : 0;
-
-            return sock.sendMessage(sender, {
-                text: `🏓 *Pong!* ${latency} ms ${config.BOT_NAME} is live!`,
-                contextInfo: {
-                    ...globalContextInfo,
-                    externalAdReply: {
-                        title: `${config.BOT_NAME} speed`,
-                        body: "Explore the speed",
-                        thumbnailUrl: "https://files.catbox.moe/5uli5p.jpeg",
-                        sourceUrl: "https://github.com/SilvaTechB/silva-md-bot",
-                        mediaType: 1,
-                        renderLargerThumbnail: true
-                    }
-                }
-            }, { quoted: m });
-        }
-
-        if (command === 'resetsession') {
-            const ownerJid = `${config.OWNER_NUMBER}@s.whatsapp.net`;
-            if (sender !== ownerJid) {
-                return sock.sendMessage(sender, { text: '❌ This command is only for the owner!' }, { quoted: m });
-            }
-
-            if (isGroup) {
-                await sock.sendMessage(sender, {
-                    protocolMessage: {
-                        senderKeyDistributionMessage: {
-                            groupId: sender
-                        }
-                    }
-                });
-                return sock.sendMessage(sender, { text: '✅ Group session reset initiated!' }, { quoted: m });
-            }
-
-            return sock.sendMessage(sender, { text: '✅ Session reset!' }, { quoted: m });
-        }
-
-        if (command === 'alive') {
-            return sock.sendMessage(sender, {
-                image: { url: config.ALIVE_IMG },
-                caption: config.LIVE_MSG,
-                contextInfo: globalContextInfo
-            }, { quoted: m });
-        }
-
-        if (command === 'menu') {
-            const cmds = ['ping', 'alive', 'menu', 'resetsession'];
-            for (const [_, plugin] of plugins) {
-                if (Array.isArray(plugin.commands)) cmds.push(...plugin.commands);
-            }
-
-            const menuText = `*✦ ${config.BOT_NAME} ✦ Command Menu*\n\n` +
-                cmds.map(c => `• ${prefix}${c}`).join('\n') +
-                `\n\n⚡ Total Commands: ${cmds.length}\n\n✨ ${config.DESCRIPTION}`;
-
-            return sock.sendMessage(sender, {
-                image: { url: 'https://files.catbox.moe/5uli5p.jpeg' },
-                caption: menuText,
-                contextInfo: {
-                    ...globalContextInfo,
-                    externalAdReply: {
-                        title: config.BOT_NAME,
-                        body: "Explore all available commands",
-                        thumbnailUrl: "https://files.catbox.moe/5uli5p.jpeg",
-                        sourceUrl: "https://github.com/SilvaTechB/silva-md-bot",
-                        mediaType: 1,
-                        renderLargerThumbnail: true
-                    }
-                }
-            }, { quoted: m });
-        }
-
-        // ✅ Plugin Commands
-        for (const plugin of plugins.values()) {
-            if (plugin.commands && plugin.commands.includes(command)) {
-                try {
-                    logMessage('PLUGIN', `Executing plugin: ${plugin.commands}`);
-                    await plugin.handler({ sock, m, sender, args, contextInfo: globalContextInfo, isGroup });
-                    logMessage('SUCCESS', `Plugin executed: ${plugin.commands}`);
-                } catch (err) {
-                    logMessage('ERROR', `Plugin error: ${plugin.commands} - ${err.message}`);
-                    sock.sendMessage(sender, { 
-                        text: `❌ Plugin error: ${err.message || 'Unknown error'}` 
-                    }, { quoted: m });
-                }
-                return;
-            }
-        }
-        
-        logMessage('WARN', `Command not found: ${command}`);
-    });
-
-    return sock;
-}
-
+    }
+    
+    logMessage('WARN', `Command not found: ${command}`);
+});
 // ✅ Express Web API
 const app = express();
 app.get('/', (req, res) => res.send(`✅ ${config.BOT_NAME} is Running!`));
