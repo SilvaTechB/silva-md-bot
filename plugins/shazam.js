@@ -1,6 +1,7 @@
 // plugins/shazam.js
 const fs = require('fs');
 const acrcloud = require('acrcloud');
+const { getBuffer } = require('../lib/utils'); // Ensure this exists
 
 const acr = new acrcloud({
   host: 'identify-eu-west-1.acrcloud.com',
@@ -16,71 +17,106 @@ module.exports = {
     handler: async ({ sock, m, sender, quoted }) => {
         try {
             const q = quoted || m;
-            const mime = (q.msg || q).mimetype || '';
+            const type = m.mtype || (q.msg ? q.msg.mimetype : '');
             
-            if (!/audio|video/.test(mime)) {
-                throw '⚠️ Please reply to an audio or video message containing music';
-            }
-
-            // Download media
-            const media = await sock.downloadMediaMessage(q);
-            const ext = mime.split('/')[1];
-            const filePath = `./tmp/${sender}.${ext}`;
-            
-            fs.writeFileSync(filePath, media);
-            
-            // Identify music
-            const res = await acr.identify(fs.readFileSync(filePath));
-            const { code, msg } = res.status;
-            
-            if (code !== 0) {
-                fs.unlinkSync(filePath);
-                throw `❌ Identification failed: ${msg}`;
-            }
-
-            const { title, artists, album, genres, release_date } = res.metadata.music[0];
-            
-            // Format response
-            const resultText = `
-🎵 *MUSIC IDENTIFICATION RESULT* 🎵
-
-• 📌 *Title*: ${title || 'Not found'}
-• 👨‍🎤 *Artist(s)*: ${artists?.map(v => v.name).join(', ') || 'Not found'}
-• 💿 *Album*: ${album?.name || 'Not found'}
-• 🎼 *Genre(s)*: ${genres?.map(v => v.name).join(', ') || 'Not found'}
-• 📅 *Release Date*: ${release_date || 'Not found'}
-
-🔍 Powered by Silva MD Music Recognition
-            `.trim();
-
-            // Clean up and send result
-            fs.unlinkSync(filePath);
-            await sock.sendMessage(
-                sender,
-                { 
-                    text: resultText,
-                    contextInfo: {
-                        externalAdReply: {
-                            title: "🎶 Music Found!",
-                            body: "Silva MD Music Recognition",
-                            thumbnailUrl: "https://files.catbox.moe/5uli5p.jpeg",
-                            mediaType: 1
+            // Enhanced media type detection
+            if (!type || !/(audio|video)/i.test(type)) {
+                return await sock.sendMessage(
+                    sender,
+                    { 
+                        text: '🎵 *How to use music recognition*:\n\n1. Send or reply to a voice note\n2. Send or reply to an audio file\n3. Send or reply to a video with music\n\n⚠️ Note: Works best with clear music (10-30 seconds)',
+                        contextInfo: {
+                            externalAdReply: {
+                                title: "Silva MD Music Recognition",
+                                body: "Proper usage instructions",
+                                thumbnailUrl: "https://files.catbox.moe/5uli5p.jpeg",
+                                mediaType: 1
+                            }
                         }
-                    }
-                },
-                { quoted: m }
-            );
+                    },
+                    { quoted: m }
+                );
+            }
+
+            // Download media using your BufferFile setup
+            let mediaBuffer;
+            try {
+                const mediaData = await sock.downloadMediaMessage(q);
+                mediaBuffer = Buffer.from(mediaData);
+                if (!mediaBuffer || mediaBuffer.length < 1024) {
+                    throw new Error('Audio too small or corrupted');
+                }
+            } catch (downloadError) {
+                throw new Error('Failed to process audio: ' + downloadError.message);
+            }
+
+            // Temporary file handling with your File class
+            const tempFileName = `./tmp/music-${Date.now()}.${type.split('/')[1] || 'mp3'}`;
+            
+            try {
+                // Write using your File class
+                const tempFile = new global.File([mediaBuffer], tempFileName);
+                fs.writeFileSync(tempFileName, tempFile);
+
+                // Identify music with timeout
+                const res = await Promise.race([
+                    acr.identify(fs.readFileSync(tempFileName)),
+                    new Promise((_, reject) => 
+                        setTimeout(() => reject(new Error('Recognition timeout')), 15000)
+                ]);
+
+                if (!res.metadata?.music?.length) {
+                    throw new Error('No music recognized');
+                }
+
+                const { title, artists, album, genres, release_date } = res.metadata.music[0];
+                
+                // Format results
+                const resultText = `
+🎶 *Music Recognition Result*:
+
+• 🎵 *Title*: ${title || 'Unknown'}
+• 🎤 *Artist*: ${artists?.map(v => v.name).join(', ') || 'Unknown'}
+• 💿 *Album*: ${album?.name || 'Unknown'}
+• 🎼 *Genre*: ${genres?.map(v => v.name).join(', ') || 'Unknown'}
+• 📅 *Released*: ${release_date || 'Unknown'}
+
+🔍 Powered by Silva MD
+                `.trim();
+
+                await sock.sendMessage(
+                    sender,
+                    { 
+                        text: resultText,
+                        contextInfo: {
+                            externalAdReply: {
+                                title: title || "Music Found",
+                                body: artists?.map(v => v.name).join(', ') || "Unknown Artist",
+                                thumbnailUrl: "https://files.catbox.moe/5uli5p.jpeg",
+                                mediaType: 1
+                            }
+                        }
+                    },
+                    { quoted: m }
+                );
+
+            } finally {
+                // Cleanup temp file
+                if (fs.existsSync(tempFileName)) {
+                    fs.unlinkSync(tempFileName);
+                }
+            }
 
         } catch (error) {
             console.error('Music Recognition Error:', error);
             await sock.sendMessage(
                 sender,
                 { 
-                    text: `❌ Error: ${error.message || error}\n\nPlease try again with a clear audio clip.`,
+                    text: `❌ *Recognition Failed*\n\nReason: ${error.message}\n\nTips:\n• Use clear audio without background noise\n• Try 10-30 second clips\n• Supported formats: MP3, OGG, M4A`,
                     contextInfo: {
                         externalAdReply: {
-                            title: "Music Recognition Failed",
-                            body: "Try with better audio quality",
+                            title: "Recognition Error",
+                            body: "Try again with better audio",
                             thumbnailUrl: "https://files.catbox.moe/5uli5p.jpeg",
                             mediaType: 1
                         }
