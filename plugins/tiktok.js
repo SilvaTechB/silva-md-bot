@@ -1,5 +1,5 @@
 // plugins/tiktok.js
-const fetch = require('node-fetch');
+const axios = require('axios');
 
 module.exports = {
     name: 'tiktok',
@@ -45,11 +45,11 @@ module.exports = {
 
         try {
             const apiUrl = `https://api.tiklydown.eu.org/api/download?url=${encodeURIComponent(url)}`;
-            const response = await fetch(apiUrl);
-            const data = await response.json();
+            const response = await axios.get(apiUrl);
+            const data = response.data;
 
             if (!data?.video?.noWatermark) {
-                throw new Error('No video found');
+                throw new Error('No video found from API');
             }
 
             const videoUrl = data.video.noWatermark;
@@ -69,7 +69,7 @@ module.exports = {
 1. Send Video
 2. Audio Only
 
-💡 Reply with your choice
+💡 Reply with your choice (1 or 2)
             `.trim();
 
             // Send initial video
@@ -109,11 +109,11 @@ module.exports = {
                         sender,
                         {
                             video: { url: videoUrl },
-                            caption: '🎬 *TikTok Video*',
+                            caption: '🎬 *TikTok Video* (No Watermark)',
                             contextInfo: {
                                 externalAdReply: {
-                                    title: "TikTok Video",
-                                    body: "No watermark",
+                                    title: "Video Downloaded",
+                                    body: "Silva MD TikTok Downloader",
                                     thumbnailUrl: "https://files.catbox.moe/5uli5p.jpeg",
                                     mediaType: 1
                                 }
@@ -128,12 +128,12 @@ module.exports = {
                         {
                             audio: { url: audioUrl },
                             mimetype: 'audio/mp4',
-                            fileName: 'tiktok_audio.mp3',
-                            caption: '🎵 *Audio Only*',
+                            fileName: `${author}_tiktok_audio.mp3`,
+                            caption: '🎵 *TikTok Audio*',
                             contextInfo: {
                                 externalAdReply: {
-                                    title: "TikTok Audio",
-                                    body: "Extracted from video",
+                                    title: "Audio Extracted",
+                                    body: "From TikTok video",
                                     thumbnailUrl: "https://files.catbox.moe/5uli5p.jpeg",
                                     mediaType: 1
                                 }
@@ -156,15 +156,15 @@ module.exports = {
             }, 60000);
 
         } catch (error) {
-            console.error('Error:', error);
+            console.error('TikTok Download Error:', error);
             await sock.sendMessage(
                 sender,
                 { 
-                    text: '❌ *Download failed*\n' + (error.message || 'Unknown error'),
+                    text: `❌ *Download failed*\nReason: ${error.message || 'Unknown error'}\n\nTry again or use a different link`,
                     contextInfo: {
                         externalAdReply: {
-                            title: "Error",
-                            body: "Try again later",
+                            title: "Download Error",
+                            body: "TikTok download failed",
                             thumbnailUrl: "https://files.catbox.moe/5uli5p.jpeg",
                             mediaType: 1
                         }
