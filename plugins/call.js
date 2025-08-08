@@ -1,4 +1,6 @@
 const { generateWAMessageFromContent } = require('@whiskeysockets/baileys');
+const os = require('os');
+const process = require('process');
 
 module.exports = {
     name: 'support',
@@ -73,7 +75,7 @@ module.exports = {
             };
 
             // Send as interactive message
-            await sock.sendMessage(
+            const sentMsg = await sock.sendMessage(
                 sender,
                 {
                     text: message.text,
@@ -95,6 +97,94 @@ module.exports = {
                 },
                 { quoted: m }
             );
+
+            // Handle button selections
+            sock.ev.on('messages.upsert', async ({ messages }) => {
+                const response = messages[0];
+                if (!response.message || response.key.remoteJid !== sender) return;
+
+                const selected = response.message?.buttonsResponseMessage?.selectedButtonId || 
+                               response.message?.listResponseMessage?.singleSelectReply?.selectedRowId;
+
+                if (selected === '#call' || selected === '#contact') {
+                    // Send vCard for voice call
+                    await sock.sendMessage(
+                        sender,
+                        {
+                            contacts: {
+                                displayName: "Silva Support",
+                                contacts: [{
+                                    displayName: "Silva Tech Support",
+                                    vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Silva Tech Support\nTEL;type=CELL;type=VOICE;waid=254700143167:+254 700 143167\nEND:VCARD`
+                                }]
+                            }
+                        },
+                        { quoted: m }
+                    );
+                } 
+                else if (selected === '#chat') {
+                    // Send social media links
+                    await sock.sendMessage(
+                        sender,
+                        {
+                            text: `📱 *Social Media Links*\n\n` +
+                                  `• Facebook: https://facebook.com/silva.tech.inc\n` +
+                                  `• Instagram: https://instagram.com/silva.tech.inc\n` +
+                                  `• TikTok: https://tiktok.com/silva.tech.inc\n` +
+                                  `• X (Twitter): https://x.com/silva_african`,
+                            contextInfo: contextInfo
+                        },
+                        { quoted: m }
+                    );
+                }
+                else if (selected === '#status') {
+                    // Show system status
+                    const uptime = process.uptime();
+                    const hours = Math.floor(uptime / 3600);
+                    const minutes = Math.floor((uptime % 3600) / 60);
+                    const seconds = Math.floor(uptime % 60);
+                    
+                    await sock.sendMessage(
+                        sender,
+                        {
+                            text: `🖥️ *System Status*\n\n` +
+                                  `• Uptime: ${hours}h ${minutes}m ${seconds}s\n` +
+                                  `• Platform: ${os.platform()} ${os.arch()}\n` +
+                                  `• Memory: ${(os.freemem() / 1024 / 1024).toFixed(2)}MB free of ${(os.totalmem() / 1024 / 1024).toFixed(2)}MB\n` +
+                                  `• CPU: ${os.cpus()[0].model}`,
+                            contextInfo: contextInfo
+                        },
+                        { quoted: m }
+                    );
+                }
+                else if (selected === '#help') {
+                    // Send troubleshooting contacts
+                    await sock.sendMessage(
+                        sender,
+                        {
+                            contacts: {
+                                displayName: "Troubleshooting Contacts",
+                                contacts: [
+                                    {
+                                        displayName: "Tech Support 1",
+                                        vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Tech Support 1\nTEL;type=CELL;type=VOICE;waid=254755257907:+254 755 257907\nEND:VCARD`
+                                    },
+                                    {
+                                        displayName: "Tech Support 2",
+                                        vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Tech Support 2\nTEL;type=CELL;type=VOICE;waid=254755257907:+254 755 257907\nEND:VCARD`
+                                    }
+                                ]
+                            }
+                        },
+                        { quoted: m }
+                    );
+                }
+            });
+
+            // Remove listener after 5 minutes
+            setTimeout(() => {
+                sock.ev.off('messages.upsert', this.listener);
+            }, 300000);
 
         } catch (error) {
             console.error('Support Panel Error:', error);
