@@ -8,11 +8,16 @@ module.exports = {
             const who = m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : 
                        m.fromMe ? sock.user.id : sender;
             const name = await sock.getName(who);
-            const totalf = Object.values(plugins).filter(v => v.help && v.tags).length;
             
-            let txt = `*乂  B O T  -  F E A T U R E*\n\n`;
-            txt += `	◦  *Total* : ${totalf}\n`;
-            txt += `*⚡ Powered by Silva MD*`;
+            // Get all registered commands from plugins
+            const totalf = Object.values(plugins)
+                .filter(plugin => plugin.commands && Array.isArray(plugin.commands))
+                .reduce((acc, plugin) => acc + plugin.commands.length, 0);
+            
+            let txt = `*✧ BOT FEATURES ✧*\n\n`;
+            txt += `◦  *Total Commands* : ${totalf}\n`;
+            txt += `◦  *Requested By* : ${name}\n\n`;
+            txt += `⚡ Powered by Silva MD`;
             
             await sock.sendMessage(m.chat, {
                 text: txt,
@@ -21,7 +26,7 @@ module.exports = {
                     mentionedJid: [sender],
                     externalAdReply: {
                         title: "Bot Features",
-                        body: `Total ${totalf} features available`,
+                        body: `${totalf} commands available`,
                         thumbnailUrl: "https://files.catbox.moe/5uli5p.jpeg",
                         sourceUrl: "https://github.com/SilvaTechB/silva-md-bot",
                         mediaType: 1,
@@ -32,9 +37,9 @@ module.exports = {
             }, { quoted: m });
 
         } catch (error) {
-            console.error('❌ Feature Plugin Error:', error);
-            await sock.sendMessage(sender, {
-                text: '❌ Failed to fetch feature count. Please try again later.',
+            console.error('Feature Count Error:', error);
+            await sock.sendMessage(m.chat, {
+                text: '⚠️ Failed to count features. The bot might be updating commands.',
                 contextInfo: contextInfo
             }, { quoted: m });
         }
