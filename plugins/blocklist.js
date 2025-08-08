@@ -21,8 +21,12 @@ module.exports = {
 
             // Format the list
             let txt = `🚫 *Blocked Numbers List*\n\n• Total Blocked: ${blocklist.length}\n\n┌───⊷\n`;
+            const mentions = [];
+            
             for (const number of blocklist) {
-                txt += `▢ @${number.split('@')[0]}\n`;
+                const num = number.split('@')[0];
+                txt += `▢ @${num}\n`;
+                mentions.push(num + '@s.whatsapp.net');
             }
             txt += '└───────────';
 
@@ -31,7 +35,7 @@ module.exports = {
                 sender,
                 { 
                     text: txt,
-                    mentions: sock.parseMention(txt),
+                    mentions: mentions,
                     contextInfo: {
                         ...contextInfo,
                         externalAdReply: {
