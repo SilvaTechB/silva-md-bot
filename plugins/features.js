@@ -5,20 +5,28 @@ module.exports = {
     commands: ['feature', 'totalfeature'],
     handler: async ({ sock, m, sender, contextInfo, plugins }) => {
         try {
-            const who = m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : 
-                       m.fromMe ? sock.user.id : sender;
-            const name = await sock.getName(who);
-            
-            // Get all registered commands from plugins
-            const totalf = Object.values(plugins)
-                .filter(plugin => plugin.commands && Array.isArray(plugin.commands))
-                .reduce((acc, plugin) => acc + plugin.commands.length, 0);
-            
-            let txt = `*✧ BOT FEATURES ✧*\n\n`;
-            txt += `◦  *Total Commands* : ${totalf}\n`;
-            txt += `◦  *Requested By* : ${name}\n\n`;
-            txt += `⚡ Powered by Silva MD`;
-            
+            // Safely get user information
+            const who = m.mentionedJid?.[0] || sender;
+            let name;
+            try {
+                name = await sock.getName(who);
+            } catch {
+                name = 'User';
+            }
+
+            // Safely count commands
+            let totalf = 0;
+            if (plugins && typeof plugins === 'object') {
+                totalf = Object.values(plugins)
+                    .filter(plugin => plugin?.commands?.length)
+                    .reduce((acc, plugin) => acc + plugin.commands.length, 0);
+            }
+
+            const txt = `*✧ BOT FEATURES ✧*\n\n`
+                      + `◦  *Total Commands* : ${totalf}\n`
+                      + `◦  *Requested By* : ${name}\n\n`
+                      + `⚡ Powered by Silva MD`;
+
             await sock.sendMessage(m.chat, {
                 text: txt,
                 contextInfo: {
@@ -39,7 +47,7 @@ module.exports = {
         } catch (error) {
             console.error('Feature Count Error:', error);
             await sock.sendMessage(m.chat, {
-                text: '⚠️ Failed to count features. The bot might be updating commands.',
+                text: '⚠️ Failed to count features. Please try again later.',
                 contextInfo: contextInfo
             }, { quoted: m });
         }
