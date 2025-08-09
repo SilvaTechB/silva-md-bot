@@ -1,744 +1,899 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Silva MD Bot - Modern Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <style>
-        :root {
-            --primary: #6366f1;
-            --primary-light: #818cf8;
-            --secondary: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --dark: #0f172a;
-            --darker: #020617;
-            --light: #f8fafc;
-            --gray: #94a3b8;
-            --gray-dark: #475569;
-            --glass: rgba(255, 255, 255, 0.08);
-            --glass-border: rgba(255, 255, 255, 0.1);
-        }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Silva MD — Bot Dashboard</title>
 
-        [data-theme="light"] {
-            --primary: #4f46e5;
-            --primary-light: #6366f1;
-            --dark: #f8fafc;
-            --darker: #e2e8f0;
-            --light: #0f172a;
-            --glass: rgba(15, 23, 42, 0.05);
-            --glass-border: rgba(15, 23, 42, 0.1);
-        }
+  <!-- External libraries (allowed) -->
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.4.0/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
-        }
+  <!-- Inter font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
-        body {
-            background-color: var(--darker);
-            color: var(--light);
-            line-height: 1.6;
-            min-height: 100vh;
-            transition: background 0.3s ease;
-        }
+  <style>
+    /* ========= Base / Typography ========= */
+    :root{
+      --primary: #6366f1;    /* Indigo */
+      --secondary: #10b981;  /* Emerald */
+      --accent: #f59e0b;     /* Amber */
+      --error: #ef4444;
+      --glass-light: rgba(255,255,255,0.06);
+      --glass-strong: rgba(255,255,255,0.08);
+      --card-radius: 14px;
+      --transition: 280ms cubic-bezier(.2,.9,.2,1);
+      --max-width: 1200px;
+    }
+    /* Dark & Light theme values */
+    :root[data-theme="dark"]{
+      --bg: #0f1724; /* slate-900 like */
+      --surface: rgba(255,255,255,0.03);
+      --text: #e6eef8;
+      --muted: #94a3b8;
+      --card-bg: rgba(255,255,255,0.03);
+      --glass-border: rgba(255,255,255,0.06);
+    }
+    :root[data-theme="light"]{
+      --bg: #f8fafc; /* slate-50 */
+      --surface: rgba(0,0,0,0.03);
+      --text: #0b1220;
+      --muted: #4b5563;
+      --card-bg: rgba(255,255,255,0.65);
+      --glass-border: rgba(0,0,0,0.06);
+    }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
+    html,body{
+      height:100%;
+      margin:0;
+      font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg, rgba(99,102,241,0.06), transparent 40%), var(--bg);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
 
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 3rem;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
+    /* Container */
+    .wrap{
+      max-width:var(--max-width);
+      margin:28px auto;
+      padding:20px;
+      display:grid;
+      gap:18px;
+      grid-template-columns: 1fr;
+    }
 
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
+    header.topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:14px;
+      border-radius:14px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      backdrop-filter: blur(10px) saturate(120%);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 6px 20px rgba(2,6,23,0.4);
+      transition: box-shadow var(--transition), transform var(--transition);
+    }
+    header .brand{
+      display:flex;
+      gap:14px;
+      align-items:center;
+    }
+    .logo{
+      width:56px;height:56px; border-radius:12px;
+      display:flex;align-items:center;justify-content:center;
+      background: linear-gradient(135deg,var(--primary), var(--secondary));
+      color:white; font-weight:700; font-size:20px;
+      box-shadow: 0 6px 18px rgba(99,102,241,0.14);
+    }
+    .title{
+      line-height:1;
+    }
+    .title h1{
+      margin:0;
+      font-size:20px;
+      font-weight:700;
+      /* gradient text effect */
+      background: linear-gradient(90deg,var(--primary), #8b5cf6 40%, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .title p{
+      margin:0; font-size:12px; color:var(--muted);
+    }
 
-        .logo {
-            font-size: 2rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--primary), var(--primary-light));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            display: inline-block;
-        }
+    /* Right actions */
+    .actions{ display:flex; align-items:center; gap:12px; }
+    .theme-toggle{
+      border:0; padding:10px 12px; border-radius:10px; cursor:pointer;
+      background:transparent;color:var(--text);
+      display:flex;align-items:center;gap:8px;font-weight:600;
+      transition: background var(--transition), transform var(--transition);
+    }
+    .theme-toggle:hover{ transform: translateY(-2px); }
 
-        .tagline {
-            color: var(--gray);
-            font-size: 1rem;
-            opacity: 0.9;
-        }
+    /* ===== Layout Grid ===== */
+    main.grid{
+      display:grid;
+      gap:16px;
+      grid-template-columns: 1fr 340px;
+    }
+    /* on small devices switch to single column */
+    @media (max-width: 920px){
+      main.grid{ grid-template-columns: 1fr; }
+      .wrap{ padding:12px; }
+    }
 
-        .theme-toggle {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            color: var(--gray);
-            border-radius: 50px;
-            padding: 0.5rem 1rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.3s ease;
-        }
+    /* Cards */
+    .card{
+      background: linear-gradient(180deg, var(--card-bg), rgba(255,255,255,0.02));
+      border-radius: var(--card-radius);
+      padding:14px;
+      border:1px solid var(--glass-border);
+      backdrop-filter: blur(8px) saturate(120%);
+      transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+    }
+    .card:hover{ transform: translateY(-6px); box-shadow: 0 18px 40px rgba(2,6,23,0.35); }
 
-        .theme-toggle:hover {
-            background: var(--primary);
-            color: white;
-        }
+    /* Stats grid */
+    .stats{
+      display:grid;
+      grid-template-columns: repeat(4,1fr);
+      gap:12px;
+    }
+    @media (max-width: 920px){ .stats{ grid-template-columns: repeat(2,1fr); } }
+    @media (max-width: 420px){ .stats{ grid-template-columns: 1fr; } }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 3rem;
-        }
+    .stat{
+      padding:14px; border-radius:12px; display:flex; flex-direction:column; gap:8px;
+      min-height:86px;
+    }
+    .stat .label{ font-size:12px; color:var(--muted); }
+    .stat .value{ font-size:20px; font-weight:700; display:flex; align-items:center; gap:8px; }
+    .indicator{ font-size:12px; padding:6px 8px; border-radius:999px; font-weight:700; }
+    .up{ color:var(--secondary); background: linear-gradient(90deg, rgba(16,185,129,0.08), rgba(16,185,129,0.03)); border:1px solid rgba(16,185,129,0.12); }
+    .down{ color:var(--error); background: linear-gradient(90deg, rgba(239,68,68,0.06), rgba(239,68,68,0.02)); border:1px solid rgba(239,68,68,0.08); }
 
-        .stat-card {
-            background: var(--glass);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 1.5rem;
-            border: 1px solid var(--glass-border);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
+    /* Repo activity */
+    .chart-wrap{ padding:12px; display:flex; flex-direction:column; gap:8px; }
+    .chart-header{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
+    .muted{ color:var(--muted); font-size:13px; }
 
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
-        }
+    /* Developer card */
+    .dev{
+      display:flex; gap:12px; align-items:center;
+    }
+    .dev .avatar{ width:72px; height:72px; border-radius:14px; overflow:hidden; flex-shrink:0; box-shadow:0 8px 20px rgba(2,6,23,0.25); }
+    .dev .info{ flex:1; display:flex; flex-direction:column; gap:6px; }
+    .dev .info h3{ margin:0; font-size:16px; }
+    .dev-stats{ display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
+    .pill{ padding:6px 10px; border-radius:999px; background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border:1px solid var(--glass-border); font-weight:600; font-size:13px; }
 
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-            background: linear-gradient(to bottom, var(--primary), var(--secondary));
-        }
+    /* Plugins list grid */
+    .plugins-grid{ display:grid; gap:12px; grid-template-columns: repeat(auto-fill,minmax(180px,1fr)); }
+    .plugin-card{ padding:12px; border-radius:12px; display:flex; flex-direction:column; gap:8px; min-height:88px; }
+    .plugin-card h4{ margin:0; font-size:14px; word-break:break-word; }
+    .plugin-card p{ margin:0; font-size:12px; color:var(--muted); min-height:32px; }
 
-        .stat-card h3 {
-            font-size: 0.9rem;
-            color: var(--gray);
-            margin-bottom: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+    /* Footer tiny */
+    footer.small{ text-align:center; font-size:12px; color:var(--muted); padding:6px; }
 
-        .stat-card .value {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, var(--primary), var(--primary-light));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
+    /* Loading spinner */
+    .spinner{
+      width:40px;height:40px;border-radius:50%;
+      border:4px solid rgba(255,255,255,0.06); border-top-color:var(--primary);
+      animation:spin 1s linear infinite;
+      display:inline-block;
+    }
+    @keyframes spin{ to{ transform:rotate(360deg); } }
 
-        .stat-card.secondary .value {
-            background: linear-gradient(135deg, var(--secondary), #34d399);
-        }
+    /* GitHub icon */
+    .gh-icon{ width:18px;height:18px; display:inline-block; vertical-align:middle; }
 
-        .stat-card.warning .value {
-            background: linear-gradient(135deg, var(--warning), #fbbf24);
-        }
+    /* small helper */
+    .row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    a.external{ color:var(--primary); text-decoration:none; font-weight:600; }
+    a.external:hover{ text-decoration:underline; }
 
-        .stat-card.danger .value {
-            background: linear-gradient(135deg, var(--danger), #f87171);
-        }
+    /* Accessibility: focus outline */
+    :focus{ outline: 3px solid rgba(99,102,241,0.16); outline-offset:3px; border-radius:8px; }
 
-        .stat-card .change {
-            font-size: 0.8rem;
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-        }
-
-        .change.positive {
-            color: var(--secondary);
-        }
-
-        .change.negative {
-            color: var(--danger);
-        }
-
-        .section {
-            background: var(--glass);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            border: 1px solid var(--glass-border);
-            transition: transform 0.3s ease;
-        }
-
-        .section:hover {
-            transform: translateY(-3px);
-        }
-
-        .section-title {
-            font-size: 1.3rem;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .section-title svg {
-            width: 24px;
-            height: 24px;
-            color: var(--primary);
-        }
-
-        .plugins-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 1rem;
-        }
-
-        .plugin-item {
-            background: rgba(99, 102, 241, 0.1);
-            padding: 1.2rem;
-            border-radius: 12px;
-            border-left: 4px solid var(--primary);
-            transition: transform 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .plugin-item:hover {
-            transform: translateY(-3px);
-            background: rgba(99, 102, 241, 0.2);
-        }
-
-        .plugin-name {
-            font-weight: 600;
-            color: var(--light);
-        }
-
-        .plugin-desc {
-            font-size: 0.8rem;
-            color: var(--gray);
-            opacity: 0.8;
-        }
-
-        .developer-info {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .developer-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid var(--primary);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        .developer-details h3 {
-            font-size: 1.3rem;
-            margin-bottom: 0.3rem;
-            color: var(--light);
-        }
-
-        .developer-details p {
-            color: var(--gray);
-            margin-bottom: 1rem;
-            max-width: 600px;
-        }
-
-        .github-stats {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .github-stat {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: rgba(99, 102, 241, 0.1);
-            padding: 0.5rem 1rem;
-            border-radius: 50px;
-            font-size: 0.9rem;
-            border: 1px solid var(--glass-border);
-        }
-
-        .chart-container {
-            height: 300px;
-            margin-top: 1.5rem;
-            position: relative;
-        }
-
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
-            border-radius: 50%;
-            border-top-color: var(--primary);
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--gray);
-        }
-
-        .repo-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--primary);
-            text-decoration: none;
-            margin-top: 1rem;
-            transition: color 0.3s ease;
-        }
-
-        .repo-link:hover {
-            color: var(--primary-light);
-        }
-
-        @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .developer-info {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .plugins-list {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+  </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="header-left">
+  <div class="wrap" id="app">
+    <!-- Header -->
+    <header class="topbar card" role="banner" aria-label="Silva MD dashboard header">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">SM</div>
+        <div class="title">
+          <h1>Silva MD</h1>
+          <p>Advanced modular WhatsApp bot</p>
+        </div>
+      </div>
+
+      <div class="actions">
+        <div id="statusBadge" class="row muted" aria-live="polite">
+          <!-- live status appended here -->
+          <span id="liveStatusText">Loading…</span>
+        </div>
+
+        <button id="themeToggle" class="theme-toggle" aria-pressed="false" title="Toggle theme">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path id="themeIcon" d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          <span id="themeLabel">Theme</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main two-column area -->
+    <main class="grid" role="main">
+
+      <!-- Left column -->
+      <section class="left-col" aria-labelledby="overviewHeading">
+        <!-- Stats overview -->
+        <div class="card" id="overviewCard" aria-labelledby="overviewHeading">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <h2 id="overviewHeading" style="margin:0;">Overview</h2>
+            <div class="muted">Auto-refresh every 5 minutes</div>
+          </div>
+
+          <div style="height:12px;"></div>
+
+          <div id="statsGrid" class="stats" aria-live="polite">
+            <!-- Individual stat cards -->
+            <div class="stat card" id="stat-plugins" role="status">
+              <div class="label">Total plugins</div>
+              <div class="value"><span id="pluginsCount">—</span></div>
+              <div id="pluginsChange" class="indicator" aria-hidden="true"></div>
+            </div>
+
+            <div class="stat card" id="stat-stars" role="status">
+              <div class="label">GitHub stars</div>
+              <div class="value"><span id="starsCount">—</span></div>
+              <div id="starsChange" class="indicator" aria-hidden="true"></div>
+            </div>
+
+            <div class="stat card" id="stat-forks" role="status">
+              <div class="label">Repository forks</div>
+              <div class="value"><span id="forksCount">—</span></div>
+              <div id="forksChange" class="indicator" aria-hidden="true"></div>
+            </div>
+
+            <div class="stat card" id="stat-issues" role="status">
+              <div class="label">Open issues</div>
+              <div class="value"><span id="issuesCount">—</span></div>
+              <div id="issuesChange" class="indicator" aria-hidden="true"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Activity chart -->
+        <div class="card chart-wrap" id="activityCard" aria-labelledby="activityHeading">
+          <div class="chart-header">
+            <h3 id="activityHeading" style="margin:0;">Repository Activity — Commits (last 12 weeks)</h3>
+            <div class="muted row">
+              <span id="chartLoading" class="muted">Loading chart…</span>
+            </div>
+          </div>
+          <canvas id="commitsChart" width="800" height="320" aria-label="Commits chart" role="img"></canvas>
+          <div class="muted" style="margin-top:8px;">Data source: GitHub API</div>
+        </div>
+
+        <!-- Plugins list -->
+        <div class="card" aria-labelledby="pluginsHeading">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <h3 id="pluginsHeading" style="margin:0;">Plugins</h3>
+            <div class="muted" id="pluginsMeta">—</div>
+          </div>
+
+          <div style="height:10px;"></div>
+
+          <div id="pluginsGrid" class="plugins-grid" aria-live="polite">
+            <!-- plugin cards injected here -->
+            <div id="pluginsLoading" class="card plugin-card" style="display:flex;align-items:center;justify-content:center;">
+              <div class="spinner" role="status" aria-label="Loading plugins"></div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Right column -->
+      <aside class="right-col" aria-labelledby="devHeading" style="display:flex;flex-direction:column;gap:12px;">
+        <!-- Developer card -->
+        <div class="card" id="developerCard" aria-labelledby="devHeading">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <h3 id="devHeading" style="margin:0;">Developer</h3>
+            <a id="githubRepoLink" class="external row" href="https://github.com/SilvaTechB/silva-md-bot" target="_blank" rel="noopener noreferrer">
+              <!-- GitHub SVG -->
+              <svg class="gh-icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd"
+                  d="M8 0C3.58 0 0 3.58 0 8a8 8 0 005.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2 .37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 012-.27 7.6 7.6 0 012 .27c1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.19 0 .21.15.46.55.38A8.001 8.001 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+              </svg>
+              <span style="font-size:13px;">View repo</span>
+            </a>
+          </div>
+
+          <div style="height:10px;"></div>
+
+          <div class="dev" id="devContent">
+            <div class="avatar" id="devAvatar" aria-hidden="true">
+              <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(90deg,var(--primary),var(--secondary));color:white;">
+                <span id="avatarInitials">ST</span>
+              </div>
+            </div>
+            <div class="info">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
                 <div>
-                    <h1 class="logo">Silva MD</h1>
-                    <p class="tagline">Advanced modular WhatsApp bot with plugin system</p>
+                  <h3 id="devName">SilvaTechB</h3>
+                  <div class="muted" id="devBio">Loading bio…</div>
                 </div>
-            </div>
-            <button class="theme-toggle" id="themeToggle">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="5"></circle>
-                    <line x1="12" y1="1" x2="12" y2="3"></line>
-                    <line x1="12" y1="21" x2="12" y2="23"></line>
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                    <line x1="1" y1="12" x2="3" y2="12"></line>
-                    <line x1="21" y1="12" x2="23" y2="12"></line>
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                </svg>
-                <span>Light Mode</span>
-            </button>
-        </header>
-        
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>Total Plugins</h3>
-                <div class="value" id="plugin-count">
-                    <div class="loading-text">
-                        <div class="loading"></div>
-                        <span>Loading...</span>
-                    </div>
-                </div>
-                <div class="change positive">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
-                        <polyline points="16 7 22 7 22 13"></polyline>
-                    </svg>
-                    <span id="plugin-change">0 new</span>
-                </div>
-            </div>
-            
-            <div class="stat-card secondary">
-                <h3>GitHub Stars</h3>
-                <div class="value" id="stars-count">
-                    <div class="loading-text">
-                        <div class="loading"></div>
-                        <span>Loading...</span>
-                    </div>
-                </div>
-                <div class="change positive">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
-                        <polyline points="16 7 22 7 22 13"></polyline>
-                    </svg>
-                    <span id="stars-change">0 new</span>
-                </div>
-            </div>
-            
-            <div class="stat-card warning">
-                <h3>Forks</h3>
-                <div class="value" id="forks-count">
-                    <div class="loading-text">
-                        <div class="loading"></div>
-                        <span>Loading...</span>
-                    </div>
-                </div>
-                <div class="change positive">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
-                        <polyline points="16 7 22 7 22 13"></polyline>
-                    </svg>
-                    <span id="forks-change">0 new</span>
-                </div>
-            </div>
-            
-            <div class="stat-card danger">
-                <h3>Open Issues</h3>
-                <div class="value" id="issues-count">
-                    <div class="loading-text">
-                        <div class="loading"></div>
-                        <span>Loading...</span>
-                    </div>
-                </div>
-                <div class="change negative">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="22 17 13.5 8.5 8.5 13.5 2 7"></polyline>
-                        <polyline points="16 17 22 17 22 11"></polyline>
-                    </svg>
-                    <span id="issues-change">0 new</span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="section">
-            <h2 class="section-title">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    <polyline points="14 2 14 8 20 8"></polyline>
-                    <line x1="16" y1="13" x2="8" y2="13"></line>
-                    <line x1="16" y1="17" x2="8" y2="17"></line>
-                    <polyline points="10 9 9 9 8 9"></polyline>
-                </svg>
-                Repository Activity
-            </h2>
-            <div class="chart-container">
-                <canvas id="activityChart"></canvas>
-            </div>
-            <a href="https://github.com/SilvaTechB/silva-md-bot" target="_blank" class="repo-link">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
-                </svg>
-                View on GitHub
-            </a>
-        </div>
-        
-        <div class="section">
-            <h2 class="section-title">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                </svg>
-                Developer Information
-            </h2>
-            <div class="developer-info">
-                <img src="https://avatars.githubusercontent.com/u/12345678?v=4" alt="Developer" class="developer-avatar" id="dev-avatar">
-                <div class="developer-details">
-                    <h3 id="dev-name">SilvaTechB</h3>
-                    <p id="dev-bio">Loading developer bio...</p>
-                    <div class="github-stats">
-                        <div class="github-stat">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="9" cy="7" r="4"></circle>
-                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                            </svg>
-                            <span>Followers:</span>
-                            <strong id="dev-followers">0</strong>
-                        </div>
-                        <div class="github-stat">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 2h5a2 2 0 0 1 2 2z"></path>
-                            </svg>
-                            <span>Repos:</span>
-                            <strong id="dev-repos">0</strong>
-                        </div>
-                        <div class="github-stat">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                            </svg>
-                            <span>Commits:</span>
-                            <strong id="dev-commits">0</strong>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <a href="https://github.com/SilvaTechB" target="_blank" class="repo-link">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
-                </svg>
-                View GitHub Profile
-            </a>
-        </div>
-        
-        <div class="section">
-            <h2 class="section-title">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    <polyline points="14 2 14 8 20 8"></polyline>
-                    <line x1="16" y1="13" x2="8" y2="13"></line>
-                    <line x1="16" y1="17" x2="8" y2="17"></line>
-                    <polyline points="10 9 9 9 8 9"></polyline>
-                </svg>
-                Available Plugins
-            </h2>
-            <div class="plugins-list" id="plugins-container">
-                <div class="plugin-item">
-                    <div class="loading-text">
-                        <div class="loading"></div>
-                        <span>Loading plugins...</span>
-                    </div>
-                </div>
-            </div>
-            <a href="https://github.com/SilvaTechB/silva-md-bot/tree/main/plugins" target="_blank" class="repo-link">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
-                </svg>
-                View Plugins Directory
-            </a>
-        </div>
-    </div>
+              </div>
 
-    <script>
-        // Theme toggle functionality
-        const themeToggle = document.getElementById('themeToggle');
-        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
-        
-        // Check for saved theme or use preferred color scheme
-        const currentTheme = localStorage.getItem('theme') || 
-                             (prefersDarkScheme.matches ? 'dark' : 'light');
-        
-        if (currentTheme === 'light') {
-            document.body.setAttribute('data-theme', 'light');
-            themeToggle.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                </svg>
-                <span>Dark Mode</span>
-            `;
+              <div class="dev-stats" style="margin-top:8px;">
+                <div class="pill" id="devFollowers">Followers —</div>
+                <div class="pill" id="devPublicRepos">Repos —</div>
+                <div class="pill" id="devTotalCommits">Commits (repo) —</div>
+              </div>
+
+              <div style="margin-top:10px;">
+                <a id="devProfileLink" class="external" href="https://github.com/SilvaTechB" target="_blank" rel="noopener noreferrer">
+                  View GitHub profile
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- small status / controls card -->
+        <div class="card" aria-label="Controls and status">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <div style="font-weight:700">Last update</div>
+              <div class="muted" id="lastUpdated">—</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
+              <button id="manualRefresh" class="pill" title="Refresh now">Refresh now</button>
+              <div class="muted" style="font-size:12px;">Auto refresh: 5 min</div>
+            </div>
+          </div>
+        </div>
+        <!-- Keep your existing HTML above this line -->
+
+<section class="info-sections" style="margin-top: 2rem;">
+  <div style="background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border-radius: 12px; padding: 1rem; margin-bottom: 1rem; font-family: 'Inter', sans-serif; color: var(--text-color);">
+
+    <h2>📦 Installation</h2>
+    <pre style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; overflow-x: auto;">
+git clone https://github.com/SilvaTechB/silva-md-bot.git
+cd silva-md-bot
+npm install
+npm start
+    </pre>
+
+    <h2>🚀 Usage</h2>
+    <pre style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; overflow-x: auto;">
+1. Connect your WhatsApp account when prompted.
+2. Use commands in group or private chats, e.g.:
+   !yt https://youtube.com/watch?v=...
+   !sticker
+3. Manage plugins from the plugins directory.
+    </pre>
+
+    <h2>🛠 Tech Stack</h2>
+    <pre style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; overflow-x: auto;">
+- Node.js 18+
+- Baileys (WhatsApp Web API)
+- Axios (HTTP requests)
+- Chart.js (dashboard stats)
+- Moment.js (date formatting)
+    </pre>
+
+    <h2>🆕 Changelog</h2>
+    <pre style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; overflow-x: auto;">
+v2.4.0 - Added Koyeb deployment option
+v2.3.1 - Improved media download speed
+v2.3.0 - Fixed poll reaction bug
+    </pre>
+
+    <h2>🔒 Security</h2>
+    <pre style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; overflow-x: auto;">
+- Keep your session file private.
+- Do not share bot tokens publicly.
+- Use .env for sensitive keys.
+    </pre>
+
+    <h2>🤝 Contributing</h2>
+    <pre style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; overflow-x: auto;">
+1. Fork this repository.
+2. Create a new branch (feature/your-feature-name).
+3. Commit changes and push.
+4. Submit a pull request.
+    </pre>
+
+    <h2>☁️ Deployment</h2>
+    <pre style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; overflow-x: auto;">
+- Deploy to Heroku
+- Deploy to Koyeb
+- Deploy to Railway
+(See README for deployment buttons & guides)
+    </pre>
+
+  </div>
+</section>
+
+
+        <footer class="small card">
+          Built for Silva Tech — <span id="copyrightYear"></span>
+        </footer>
+      </aside>
+
+    </main>
+  </div>
+
+  <script>
+    /******************************************************************
+     * Silva MD Dashboard (single HTML file)
+     *
+     * - Fetches GitHub repo, user, contents (plugins), commit activity
+     * - Auto-refresh every 5 minutes
+     * - Graceful loading states + error handling
+     * - Dark/light mode detection + toggle
+     *
+     * Notes:
+     * - Only external libs: axios, Chart.js, moment.js (CDN)
+     * - Replace repoOwner/repoName variables if you want to reuse.
+     ******************************************************************/
+    (function(){
+      // --- Configuration ---
+      const repoOwner = 'SilvaTechB';
+      const repoName = 'silva-md-bot';
+      const pluginsPath = 'plugins'; // contents API path
+      const githubBase = 'https://api.github.com';
+      const refreshIntervalMs = 5 * 60 * 1000; // 5 minutes
+      const commitsWeeks = 12;
+
+      // Elements
+      const pluginsCountEl = document.getElementById('pluginsCount');
+      const starsCountEl = document.getElementById('starsCount');
+      const forksCountEl = document.getElementById('forksCount');
+      const issuesCountEl = document.getElementById('issuesCount');
+      const pluginsGrid = document.getElementById('pluginsGrid');
+      const pluginsMeta = document.getElementById('pluginsMeta');
+      const chartLoading = document.getElementById('chartLoading');
+      const chartCanvas = document.getElementById('commitsChart');
+      const lastUpdatedEl = document.getElementById('lastUpdated');
+      const liveStatusText = document.getElementById('liveStatusText');
+      const pluginsLoading = document.getElementById('pluginsLoading');
+
+      // Developer card
+      const devAvatar = document.getElementById('devAvatar');
+      const avatarInitials = document.getElementById('avatarInitials');
+      const devNameEl = document.getElementById('devName');
+      const devBioEl = document.getElementById('devBio');
+      const devFollowersEl = document.getElementById('devFollowers');
+      const devPublicReposEl = document.getElementById('devPublicRepos');
+      const devTotalCommitsEl = document.getElementById('devTotalCommits');
+      const devProfileLink = document.getElementById('devProfileLink');
+
+      // repo link
+      document.getElementById('githubRepoLink').href = `https://github.com/${repoOwner}/${repoName}`;
+      // Plugins directory link inside the plugins card will be using raw repo path
+      const pluginsDirUrl = `https://github.com/${repoOwner}/${repoName}/tree/main/${pluginsPath}`;
+
+      // Chart instance placeholder
+      let commitsChart = null;
+
+      // Keep previous metric values for change indicators
+      let previousMetrics = {
+        plugins: null,
+        stars: null,
+        forks: null,
+        issues: null
+      };
+
+      // Theme handling
+      const root = document.documentElement;
+      function getPreferredTheme(){
+        // Use user preference if set, else system preference
+        const saved = localStorage.getItem('silva-theme');
+        if(saved) return saved;
+        const m = window.matchMedia('(prefers-color-scheme: dark)');
+        return m.matches ? 'dark' : 'light';
+      }
+      function applyTheme(name){
+        root.setAttribute('data-theme', name);
+        document.getElementById('themeToggle').setAttribute('aria-pressed', name === 'dark');
+        document.getElementById('themeLabel').textContent = name === 'dark' ? 'Dark' : 'Light';
+        localStorage.setItem('silva-theme', name);
+      }
+      document.getElementById('themeToggle').addEventListener('click', () => {
+        applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+      });
+      applyTheme(getPreferredTheme());
+
+      // accessibility: copyright year
+      document.getElementById('copyrightYear').textContent = new Date().getFullYear();
+
+      // friendly number formatter
+      function prettyNumber(n){
+        if(n === null || n === undefined) return '—';
+        if(n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+        if(n >= 1000) return (n/1000).toFixed(1) + 'k';
+        return String(n);
+      }
+
+      // indicator display
+      function setIndicator(elId, prev, current){
+        const el = document.getElementById(elId);
+        if(prev === null || prev === undefined){
+          el.style.display = 'none';
+          return;
         }
-        
-        themeToggle.addEventListener('click', function() {
-            let theme;
-            if (document.body.getAttribute('data-theme') {
-                document.body.removeAttribute('data-theme');
-                theme = 'dark';
-                themeToggle.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="5"></circle>
-                        <line x1="12" y1="1" x2="12" y2="3"></line>
-                        <line x1="12" y1="21" x2="12" y2="23"></line>
-                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                        <line x1="1" y1="12" x2="3" y2="12"></line>
-                        <line x1="21" y1="12" x2="23" y2="12"></line>
-                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                    </svg>
-                    <span>Light Mode</span>
-                `;
-            } else {
-                document.body.setAttribute('data-theme', 'light');
-                theme = 'light';
-                themeToggle.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                    </svg>
-                    <span>Dark Mode</span>
-                `;
-            }
-            localStorage.setItem('theme', theme);
+        const diff = current - prev;
+        const pct = prev === 0 ? 100 : Math.round((diff / Math.max(1, Math.abs(prev))) * 100);
+        el.style.display = 'inline-block';
+        el.textContent = diff === 0 ? '—' : `${diff > 0 ? '▲' : '▼'} ${Math.abs(pct)}%`;
+        el.className = 'indicator ' + (diff >= 0 ? 'up' : 'down');
+      }
+
+      // show live status
+      function setLiveStatus(text, isError = false){
+        liveStatusText.textContent = text;
+        liveStatusText.style.color = isError ? 'var(--error)' : 'var(--muted)';
+      }
+
+      // --- GitHub API helpers ---
+      // Optionally set an OAuth token here if you expect to hit rate limits.
+      // const GITHUB_TOKEN = ''; // <--- place token here if needed
+      const axiosInstance = axios.create({
+        baseURL: githubBase,
+        headers: {
+          Accept: 'application/vnd.github.v3+json'
+          // Authorization: GITHUB_TOKEN ? `Bearer ${GITHUB_TOKEN}` : undefined
+        },
+        timeout: 15000
+      });
+
+      // fetch repo details: stars, forks, open_issues_count
+      async function fetchRepoDetails(){
+        const url = `/repos/${repoOwner}/${repoName}`;
+        const resp = await axiosInstance.get(url);
+        return resp.data;
+      }
+
+      // fetch contents of plugins dir
+      async function fetchPluginsList(){
+        const url = `/repos/${repoOwner}/${repoName}/contents/${pluginsPath}`;
+        const resp = await axiosInstance.get(url);
+        // resp.data is an array of file/dir objects
+        return resp.data;
+      }
+
+      // fetch commit activity via stats endpoint (52 weeks)
+      // returns array of weeks with 'total' and 'week' (timestamp seconds)
+      async function fetchCommitActivityStats(){
+        const url = `/repos/${repoOwner}/${repoName}/stats/commit_activity`;
+        const resp = await axiosInstance.get(url);
+        return resp.data;
+      }
+
+      // fallback: fetch commits using commits API (we will page until we have enough weeks or hit limit)
+      // We'll request per_page=100 and up to maxPages to limit API usage
+      async function fetchRecentCommitsFallback(sinceIso, maxPages=4){
+        let commits = [];
+        for(let page=1; page<=maxPages; page++){
+          const url = `/repos/${repoOwner}/${repoName}/commits`;
+          try {
+            const resp = await axiosInstance.get(url, { params: { since: sinceIso, per_page: 100, page }});
+            if(Array.isArray(resp.data) && resp.data.length > 0){
+              commits = commits.concat(resp.data);
+              // if less than requested, no more pages
+              if(resp.data.length < 100) break;
+            } else break;
+          } catch(err){
+            // break and return what we have
+            break;
+          }
+        }
+        return commits;
+      }
+
+      // group commits by week (ISO week start)
+      function groupCommitsByWeek(commits){
+        // produce last 12 week labels and counts
+        const weeks = [];
+        for(let i = commitsWeeks - 1; i >= 0; i--){
+          const start = moment().startOf('isoWeek').subtract(i, 'weeks');
+          weeks.push({ label: start.format('MMM D'), start: start.clone(), count: 0 });
+        }
+        for(const c of commits){
+          const d = c && c.commit && c.commit.author && c.commit.author.date ? moment(c.commit.author.date) : null;
+          if(!d) continue;
+          // find a week bucket
+          for(const wk of weeks){
+            if(d.isSame(wk.start, 'week')) { wk.count++; break; }
+          }
+        }
+        return weeks;
+      }
+
+      // create or update Chart.js line chart
+      function renderCommitsChart(weeks){
+        const labels = weeks.map(w => w.label);
+        const data = weeks.map(w => w.count);
+        const ctx = chartCanvas.getContext('2d');
+
+        if(commitsChart){
+          commitsChart.data.labels = labels;
+          commitsChart.data.datasets[0].data = data;
+          commitsChart.update();
+          return;
+        }
+        commitsChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [{
+              label: 'Commits',
+              data,
+              tension: 0.45, // smooth curve
+              fill: true,
+              backgroundColor: (ctx) => {
+                // gradient fill
+                const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 240);
+                g.addColorStop(0, 'rgba(99,102,241,0.18)');
+                g.addColorStop(1, 'rgba(99,102,241,0.02)');
+                return g;
+              },
+              borderColor: 'rgba(99,102,241,0.95)',
+              pointRadius: 4,
+              pointHoverRadius: 6,
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) => `${ctx.parsed.y} commits`
+                }
+              }
+            },
+            scales: {
+              x: {
+                grid: { display:false },
+                ticks: { color: 'var(--muted)' }
+              },
+              y: {
+                beginAtZero: true,
+                ticks: { stepSize: 1, color: 'var(--muted)' },
+                grid: { color: 'rgba(255,255,255,0.03)' }
+              }
+            },
+            interaction: { intersect: false, mode: 'index' }
+          }
         });
+      }
 
-        // GitHub API Fetching
-        async function fetchGitHubData() {
-            try {
-                // Fetch repository data
-                const repoResponse = await axios.get('https://api.github.com/repos/SilvaTechB/silva-md-bot');
-                const repoData = repoResponse.data;
-                
-                // Fetch developer data
-                const devResponse = await axios.get('https://api.github.com/users/SilvaTechB');
-                const devData = devResponse.data;
-                
-                // Fetch plugins (this is a hack since GitHub API doesn't directly provide directory contents count)
-                const pluginsResponse = await axios.get('https://api.github.com/repos/SilvaTechB/silva-md-bot/contents/plugins');
-                const pluginsData = pluginsResponse.data;
-                
-                // Fetch commit activity
-                const activityResponse = await axios.get('https://api.github.com/repos/SilvaTechB/silva-md-bot/stats/commit_activity');
-                const activityData = activityResponse.data;
-                
-                // Update DOM with fetched data
-                updateDashboard(repoData, devData, pluginsData, activityData);
-                
-            } catch (error) {
-                console.error('Error fetching GitHub data:', error);
-                showErrorState();
+      // fetch developer info (user)
+      async function fetchDeveloper(){
+        const url = `/users/${repoOwner}`;
+        const resp = await axiosInstance.get(url);
+        return resp.data;
+      }
+
+      // Primary dashboard refresh function
+      async function refreshDashboard(isManual=false){
+        setLiveStatus('Updating…');
+
+        // show loading spinners for selective areas
+        chartLoading.style.display = 'inline';
+        pluginsLoading.style.display = 'flex';
+
+        try {
+          // 1) repo details + contents concurrently
+          const [repo, pluginsList] = await Promise.allSettled([
+            fetchRepoDetails(),
+            fetchPluginsList()
+          ]).then(results => results.map(r => r.status === 'fulfilled' ? r.value : null));
+
+          if(!repo){
+            throw new Error('Unable to fetch repository details (rate limit or network).');
+          }
+
+          // update counts with previous comparison
+          setIndicator('pluginsChange', previousMetrics.plugins, Array.isArray(pluginsList) ? pluginsList.length : 0);
+          setIndicator('starsChange', previousMetrics.stars, repo.stargazers_count);
+          setIndicator('forksChange', previousMetrics.forks, repo.forks_count);
+          setIndicator('issuesChange', previousMetrics.issues, repo.open_issues_count);
+
+          // write new metrics and update previous
+          const newMetrics = {
+            plugins: Array.isArray(pluginsList) ? pluginsList.length : 0,
+            stars: repo.stargazers_count,
+            forks: repo.forks_count,
+            issues: repo.open_issues_count
+          };
+
+          pluginsCountEl.textContent = prettyNumber(newMetrics.plugins);
+          starsCountEl.textContent = prettyNumber(newMetrics.stars);
+          forksCountEl.textContent = prettyNumber(newMetrics.forks);
+          issuesCountEl.textContent = prettyNumber(newMetrics.issues);
+
+          // update previousMetrics for next cycle
+          previousMetrics = Object.assign({}, newMetrics);
+
+          // render plugins grid
+          renderPluginsGrid(pluginsList || []);
+
+          // 2) commit activity -> attempt stats endpoint first (fast & aggregated)
+          let weeks = null;
+          try {
+            const stats = await fetchCommitActivityStats();
+            // stats is 52-week array; pick last 12 weeks
+            if(Array.isArray(stats) && stats.length){
+              const lastN = stats.slice(-commitsWeeks);
+              weeks = lastN.map(w => ({ label: moment.unix(w.week).startOf('week').format('MMM D'), start: moment.unix(w.week).startOf('week'), count: w.total }));
             }
+          } catch(e){
+            // stats endpoint might 202 or error; fall back below
+            weeks = null;
+          }
+
+          // fallback: fetch commits by since date and group by week
+          if(!weeks){
+            const since = moment().startOf('isoWeek').subtract(commitsWeeks - 1, 'weeks').toISOString();
+            const commits = await fetchRecentCommitsFallback(since, 4); // up to 4 pages
+            const grouped = groupCommitsByWeek(commits);
+            weeks = grouped;
+          }
+
+          // render chart
+          renderCommitsChart(weeks);
+
+          // 3) Developer info
+          try {
+            const dev = await fetchDeveloper();
+            renderDeveloper(dev, weeks);
+          } catch(err){
+            console.warn('Developer fetch error', err);
+          }
+
+          // update metadata & timestamps
+          pluginsMeta.textContent = `Directory: ${pluginsPath} • ${newMetrics.plugins} items`;
+          const now = moment();
+          lastUpdatedEl.textContent = now.format('YYYY-MM-DD HH:mm:ss');
+          setLiveStatus('Updated ' + now.fromNow(false));
+        } catch (err){
+          console.error(err);
+          setLiveStatus('Error fetching data — see console', true);
+          showTopLevelError(err);
+        } finally {
+          chartLoading.style.display = 'none';
+          if(pluginsLoading) pluginsLoading.style.display = 'none';
         }
-        
-        function updateDashboard(repoData, devData, pluginsData, activityData) {
-            // Update repo stats
-            document.getElementById('plugin-count').innerHTML = pluginsData.length;
-            document.getElementById('stars-count').innerHTML = repoData.stargazers_count;
-            document.getElementById('forks-count').innerHTML = repoData.forks_count;
-            document.getElementById('issues-count').innerHTML = repoData.open_issues_count;
-            
-            // Update changes (placeholder - in a real app you'd track previous values)
-            document.getElementById('plugin-change').textContent = '+2 new';
-            document.getElementById('stars-change').textContent = `+${Math.floor(Math.random() * 5)} new`;
-            document.getElementById('forks-change').textContent = `+${Math.floor(Math.random() * 3)} new`;
-            document.getElementById('issues-change').textContent = `+${Math.floor(Math.random() * 2)} new`;
-            
-            // Update developer info
-            document.getElementById('dev-avatar').src = devData.avatar_url;
-            document.getElementById('dev-name').textContent = devData.name || devData.login;
-            document.getElementById('dev-bio').textContent = devData.bio || 'Developer of Silva MD Bot';
-            document.getElementById('dev-followers').textContent = devData.followers;
-            document.getElementById('dev-repos').textContent = devData.public_repos;
-            
-            // Calculate approximate commits (GitHub API doesn't provide total directly)
-            const totalCommits = activityData.reduce((sum, week) => sum + week.total, 0);
-            document.getElementById('dev-commits').textContent = totalCommits.toLocaleString();
-            
-            // Update plugins list
-            const pluginsContainer = document.getElementById('plugins-container');
-            pluginsContainer.innerHTML = '';
-            
-            pluginsData.forEach(plugin => {
-                if (plugin.type === 'dir') { // Only show directories
-                    const pluginItem = document.createElement('div');
-                    pluginItem.className = 'plugin-item';
-                    pluginItem.innerHTML = `
-                        <div class="plugin-name">${plugin.name}</div>
-                        <div class="plugin-desc">Plugin description</div>
-                    `;
-                    pluginsContainer.appendChild(pluginItem);
-                }
-            });
-            
-            // Create activity chart
-            createActivityChart(activityData);
+      }
+
+      // Render developer data and total commits (sum of weeks)
+      function renderDeveloper(dev, weeks){
+        if(!dev) return;
+        devNameEl.textContent = dev.name || dev.login || repoOwner;
+        devBioEl.textContent = dev.bio || dev.login || '';
+        devFollowersEl.textContent = `Followers ${prettyNumber(dev.followers)}`;
+        devPublicReposEl.textContent = `Repos ${prettyNumber(dev.public_repos)}`;
+        devProfileLink.href = dev.html_url || `https://github.com/${repoOwner}`;
+
+        // avatar
+        if(dev.avatar_url){
+          devAvatar.innerHTML = `<img src="${dev.avatar_url}" alt="${dev.login} avatar" style="width:100%;height:100%;object-fit:cover;">`;
+        } else {
+          avatarInitials.textContent = (dev.login || 'ST').slice(0,2).toUpperCase();
         }
-        
-        function createActivityChart(activityData) {
-            const ctx = document.getElementById('activityChart').getContext('2d');
-            
-            // Prepare data for chart
-            const weeks = activityData.slice(-12).map((week, i) => 
-                `Week ${activityData.length - 12 + i + 1}`);
-            const commits = activityData.slice(-12).map(week => week.total);
-            
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: weeks,
-                    datasets: [{
-                        label: 'Commits',
-                        data: commits,
-                        backgroundColor: 'rgba(99, 102, 241, 0.2)',
-                        borderColor: 'rgba(99, 102, 241, 1)',
-                        borderWidth: 2,
-                        tension: 0.3,
-                        fill: true,
-                        pointBackgroundColor: 'white',
-                        pointBorderColor: 'rgba(99, 102, 241, 1)',
-                        pointRadius: 4,
-                        pointHoverRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                            titleColor: 'white',
-                            bodyColor: 'white',
-                            borderColor: 'rgba(255, 255, 255, 0.1)',
-                            borderWidth: 1,
-                            padding: 12,
-                            usePointStyle: true
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
-                            },
-                            ticks: {
-                                color: 'rgba(255, 255, 255, 0.7)'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
-                            },
-                            ticks: {
-                                color: 'rgba(255, 255, 255, 0.7)'
-                            }
-                        }
-                    }
-                }
-            });
+
+        // total commits from chart weeks sum (repo)
+        if(Array.isArray(weeks)){
+          const total = weeks.reduce((s,w) => s + (w.count||0), 0);
+          devTotalCommitsEl.textContent = `Commits (recent ${commitsWeeks}w) ${prettyNumber(total)}`;
+        } else {
+          devTotalCommitsEl.textContent = 'Commits (repo) —';
         }
-        
-        function showErrorState() {
-            // Handle errors by showing placeholder data
-            document.querySelectorAll('.loading-text').forEach(el => {
-                el.innerHTML = '<span style="color: var(--danger);">Failed to load data</span>';
-            });
+      }
+
+      // Render plugins grid UI
+      function renderPluginsGrid(list){
+        // clear grid
+        pluginsGrid.innerHTML = '';
+        if(!Array.isArray(list) || list.length === 0){
+          pluginsGrid.innerHTML = `<div class="card plugin-card"><p class="muted">No plugins found in <code>${pluginsPath}</code>.</p></div>`;
+          return;
         }
-        
-        // Initialize the dashboard
-        document.addEventListener('DOMContentLoaded', fetchGitHubData);
-        
-        // Refresh data every 5 minutes
-        setInterval(fetchGitHubData, 5 * 60 * 1000);
-    </script>
+        // sort and map
+        const items = list.slice().sort((a,b) => (a.name || '').localeCompare(b.name || ''));
+
+        items.forEach(item => {
+          // plugin name prettify: remove extension and replace dashes/underscores with spaces + Title Case
+          const raw = item.name || '';
+          const nameWithoutExt = raw.replace(/\.[^/.]+$/, '');
+          const pretty = nameWithoutExt.replace(/[-_]/g,' ').replace(/\b\w/g, l => l.toUpperCase());
+          const type = item.type || 'file';
+          const link = item.html_url || `${pluginsDirUrl}/${encodeURIComponent(item.name)}`;
+
+          // description placeholder — optionally could fetch README or frontmatter if plugin has metadata (skipped for now)
+          const desc = type === 'dir' ? 'Plugin module (directory)' : 'Plugin file — brief description placeholder';
+
+          const card = document.createElement('article');
+          card.className = 'card plugin-card';
+          card.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <h4 title="${pretty}">${pretty}</h4>
+              <div style="font-size:12px;color:var(--muted)">${type}</div>
+            </div>
+            <p>${desc}</p>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <a class="external" href="${link}" target="_blank" rel="noopener noreferrer">Open</a>
+              <div class="muted" style="font-size:12px;">${raw}</div>
+            </div>
+          `;
+          pluginsGrid.appendChild(card);
+        });
+      }
+
+      // show a friendly error UI (simple)
+      function showTopLevelError(err){
+        // small overlay inside pluginsGrid & chart
+        pluginsGrid.innerHTML = `<div class="card plugin-card" style="min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+          <div style="font-weight:700;color:var(--error);">Error loading plugins</div>
+          <div class="muted" style="margin-top:8px">${err.message || err}</div>
+        </div>`;
+        // chart: show fallback message
+        if(commitsChart){
+          commitsChart.data.labels = [];
+          commitsChart.data.datasets[0].data = [];
+          commitsChart.update();
+        } else {
+          chartCanvas.getContext('2d').clearRect(0,0,chartCanvas.width, chartCanvas.height);
+          chartLoading.textContent = 'Chart unavailable';
+        }
+      }
+
+      // manual refresh button
+      document.getElementById('manualRefresh').addEventListener('click', () => {
+        refreshDashboard(true);
+      });
+
+      // initial load
+      refreshDashboard();
+
+      // auto-refresh interval
+      setInterval(() => {
+        refreshDashboard();
+      }, refreshIntervalMs);
+
+      // graceful focus styles for keyboard users
+      document.addEventListener('keyup', (e) => {
+        if(e.key === 't' && (e.ctrlKey || e.metaKey)){
+          // ctrl/cmd + t toggles theme (nice little shortcut)
+          document.getElementById('themeToggle').click();
+        }
+      });
+
+      // small UX: set aria-updates
+      setTimeout(() => {
+        // hide spinner text after initial load if it still says loading
+        if(chartLoading && chartLoading.textContent.trim() === 'Loading chart…') chartLoading.textContent = '';
+      }, 4500);
+
+      // last: friendly console note
+      console.log('Silva MD Dashboard loaded — repo:', repoOwner + '/' + repoName);
+    })();
+  </script>
 </body>
 </html>
