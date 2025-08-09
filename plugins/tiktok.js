@@ -44,7 +44,7 @@ module.exports = {
         );
 
         try {
-            const apiUrl = `https://api.tiklydown.eu.org/api/download?url=${encodeURIComponent(url)}`;
+            const apiUrl = `https://apis-keith.vercel.app/download/tiktokdl2?url=${encodeURIComponent(url)}`;
             const response = await axios.get(apiUrl);
             const data = response.data;
 
