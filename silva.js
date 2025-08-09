@@ -639,8 +639,24 @@ async function connectToWhatsApp() {
 
 // ✅ Express Web API
 const app = express();
-app.get('/', (req, res) => res.send(`✅ ${config.BOT_NAME} is Running!`));
-app.listen(port, () => logMessage('INFO', `🌐 Server running on port ${port}`));
+
+// Serve static files from the 'smm' directory
+app.use(express.static(path.join(__dirname, 'smm')));
+
+// Main route - serve the HTML dashboard
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'smm', 'silva.html'));
+});
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.send(`✅ ${config.BOT_NAME} is Running!`);
+});
+
+app.listen(port, () => {
+    logMessage('INFO', `🌐 Server running on port ${port}`);
+    logMessage('INFO', `📊 Dashboard available at http://localhost:${port}`);
+});
 
 // ✅ Error handling to prevent crashes
 process.on('uncaughtException', (err) => {
