@@ -386,35 +386,59 @@ async function connectToWhatsApp() {
         }
     });
 
-     // ===============================
+    // ✅ Auto Status Seen + React + Reply - Enhanced
+    sock.ev.on('status.update', async ({ status }) => {
+        try {
+            for (const s of status) {
+                if (!s.id || !s.jid) continue;
+                
+                logMessage('EVENT', `Status update from ${s.jid}: ${s.id}`);
 
-        // ✅ Auto Status Seen
-        if (m.key && m.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_SEEN === "true") {
-            await sock.readMessages([m.key]);
-        }
-
-        // ✅ Auto Status React
-        if (m.key && m.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_REACT === "true") {
-            const botJid = await sock.decodeJid(sock.user.id);
-            const emojis = [
-                '❤️', '💸', '😇', '🍂', '💥', '💯', '🔥', '💫', '💎', '💗', '🤍', '🖤', '👀', '🙌',
-                '🙆', '🚩', '🥰', '💐', '😎', '🤎', '✅', '🫀', '🧡', '😁', '😄', '🌸', '🕊️', '🌷',
-                '⛅', '🌟', '🗿', '💜', '💙', '🌝', '🖤', '💚'
-            ];
-            const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
-            await sock.sendMessage(
-                m.key.remoteJid,
-                {
-                    react: {
-                        text: randomEmoji,
-                        key: m.key
+                // ✅ Mark status as seen
+                if (config.AUTO_STATUS_SEEN) {
+                    try {
+                        await sock.readMessages([{ remoteJid: s.jid, id: s.id }]);
+                        logMessage('INFO', `Status seen: ${s.id}`);
+                    } catch (e) {
+                        logMessage('WARN', `Status seen failed: ${e.message}`);
                     }
-                },
-                { statusJidList: [m.key.participant, botJid] }
-            );
-        }
+                }
 
-        // ===============================
+                // ✅ React to status with custom emoji
+                if (config.AUTO_STATUS_REACT) {
+                    try {
+                        const emojis = config.CUSTOM_REACT_EMOJIS.split(',');
+                        const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)].trim();
+                        
+                        await sock.sendMessage(s.jid, {
+                            react: {
+                                text: randomEmoji,
+                                key: { remoteJid: s.jid, id: s.id }
+                            }
+                        });
+                        logMessage('INFO', `Status reacted: ${randomEmoji}`);
+                    } catch (e) {
+                        logMessage('WARN', `Status react failed: ${e.message}`);
+                    }
+                }
+
+                // ✅ Reply to status
+                if (config.AUTO_STATUS_REPLY) {
+                    try {
+                        await sock.sendMessage(s.jid, {
+                            text: config.AUTO_STATUS_MSG,
+                            contextInfo: globalContextInfo
+                        });
+                        logMessage('INFO', `Status replied: ${s.id}`);
+                    } catch (e) {
+                        logMessage('WARN', `Status reply failed: ${e.message}`);
+                    }
+                }
+            }
+        } catch (err) {
+            logMessage('ERROR', `Auto Status Error: ${err.message}`);
+        }
+    });
 
     // ✅ Handle Commands with Enhanced Group Support
     sock.ev.on('messages.upsert', async ({ messages, type }) => {
