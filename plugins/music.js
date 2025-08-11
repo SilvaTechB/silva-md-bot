@@ -1,26 +1,30 @@
 const axios = require("axios");
 const ytSearch = require("yt-search");
+const { pipeline } = require("stream");
+const { promisify } = require("util");
+const streamPipeline = promisify(pipeline);
 
 module.exports = {
-    name: 'music',
-    description: 'Play music from YouTube',
+    commands: ['play', 'music'],
+    description: 'Download high-quality music from YouTube',
     group: true,
     private: true,
+    admin: false,
     
     async run(sock, message, args, context) {
-        const { jid, text, safeSend } = context;
+        const { jid, safeSend, text } = context;
         const query = args.join(' ').trim();
-        const sender = message.key.participant || jid;
         const quoted = message;
-
+        
         try {
+            // Validate query
             if (!query) {
                 return await safeSend(sock, jid, {
-                    text: '❌ Please provide a song name. Example: `.play attention`'
+                    text: '❌ Please provide a song name\nExample: `.play Attention - Charlie Puth`'
                 }, { quoted });
             }
 
-            // Send processing message
+            // Processing message
             await safeSend(sock, jid, {
                 text: '🔍 *Searching YouTube...*'
             }, { quoted });
@@ -34,24 +38,31 @@ module.exports = {
             }
 
             const video = search.videos[0];
+            const duration = video.duration.toString();
+            
+            // Send track info
+            await safeSend(sock, jid, {
+                image: { url: video.thumbnail },
+                caption: `🎵 *${video.title}*\n👤 ${video.author.name}\n⏱ ${duration}\n\n_Downloading audio..._`
+            }, { quoted });
+
+            // API endpoints
             const apis = [
+                `https://api.davidcyriltech.my.id/youtube/mp3?url=${video.url}`,
                 `https://api.ryzendesu.vip/api/downloader/ytmp3?url=${video.url}`,
-                `https://apis.davidcyriltech.my.id/youtube/mp3?url=${video.url}`,
                 `https://api.akuari.my.id/downloader/youtubeaudio?link=${video.url}`
             ];
 
             let audioUrl = null;
-            let apiSuccess = false;
-
+            
             // Try APIs in sequence
             for (const [index, api] of apis.entries()) {
                 try {
-                    const { data } = await axios.get(api, { timeout: 10000 });
+                    const { data } = await axios.get(api, { timeout: 15000 });
                     
                     if (data.status === 200 || data.success) {
                         audioUrl = data.result?.downloadUrl || data.url || data.result?.url;
-                        apiSuccess = true;
-                        console.log(`✅ API ${index+1} success: ${api}`);
+                        console.log(`✅ API ${index+1} success: ${audioUrl?.slice(0, 50)}...`);
                         break;
                     }
                 } catch (e) {
@@ -59,42 +70,46 @@ module.exports = {
                 }
             }
 
-            if (!apiSuccess || !audioUrl) {
+            if (!audioUrl) {
                 return await safeSend(sock, jid, {
                     text: '⚠️ All download services are currently unavailable. Please try again later.'
                 }, { quoted });
             }
 
-            // Send track info
-            await safeSend(sock, jid, {
-                image: { url: video.thumbnail },
-                caption: `🎵 *${video.title}*\n👤 ${video.author.name}\n⏱ ${video.duration.timestamp}\n\n_Downloading audio..._`
-            }, { quoted });
-
-            // Send audio
+            // Send audio message
             await safeSend(sock, jid, {
                 audio: { url: audioUrl },
                 mimetype: 'audio/mp4',
-                ptt: false
+                ptt: false,
+                contextInfo: {
+                    externalAdReply: {
+                        title: video.title,
+                        body: `🎧 ${video.author.name}`,
+                        thumbnailUrl: video.thumbnail,
+                        mediaType: 2,
+                        mediaUrl: video.url,
+                        sourceUrl: video.url
+                    }
+                }
             }, { quoted });
 
-            // Send as document
+            // Send as downloadable file
             await safeSend(sock, jid, {
                 document: { url: audioUrl },
-                mimetype: 'audio/mpeg',
                 fileName: `${video.title.replace(/[^\w\s]/gi, '')}.mp3`,
-                caption: '📁 Audio file'
+                mimetype: 'audio/mpeg',
+                caption: '📥 *Downloadable MP3 File*'
             }, { quoted });
 
-            // Success message
+            // Final message
             await safeSend(sock, jid, {
-                text: '✅ *Enjoy your music!* 🎧\n_Powered by Silva MD_'
+                text: `✅ *Success!* Enjoy your music!\n\n_Song: ${video.title}_\n_Artist: ${video.author.name}_\n_Duration: ${duration}_\n\n🎶 Powered by Silva MD`
             }, { quoted });
 
         } catch (error) {
             console.error('Music Plugin Error:', error);
             await safeSend(sock, jid, {
-                text: `❌ Failed to process request:\n${error.message || 'Unknown error'}`
+                text: `❌ Error: ${error.message || 'Failed to process request'}`
             }, { quoted });
         }
     }
