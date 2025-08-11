@@ -9,6 +9,7 @@ const path = require('path');
 const os = require('os');
 const express = require('express');
 const P = require('pino');
+const { handleMessages } = require('./handler');
 const config = require('./config.js');
 const store = makeInMemoryStore({ logger: P({ level: 'silent' }) });
 
@@ -31,25 +32,6 @@ function logMessage(type, message) {
     
     const timestamp = new Date().toISOString();
     const logEntry = `[${timestamp}] [${type}] ${message}\n`;
-// Helper to download any media as Buffer
-async function downloadAsBuffer(mediaMessage, kind) {
-    const stream = await downloadContentFromMessage(mediaMessage, kind);
-    const chunks = [];
-    for await (const chunk of stream) chunks.push(chunk);
-    return Buffer.concat(chunks);
-}
-
-function logMessage(type, message) {
-    if (!config.DEBUG && type === 'DEBUG') return;
-
-    const timestamp = new Date().toISOString();
-    const logEntry = `[${timestamp}] [${type}] ${message}\n`;
-
-    console.log(logEntry.trim());
-
-    const logFile = path.join(logDir, getLogFileName());
-    fs.appendFileSync(logFile, logEntry);
-} 
     // Log to console
     console.log(logEntry.trim());
     
@@ -216,25 +198,6 @@ async function updateProfileStatus(sock) {
     }
 }
 
-// ✅ Enhanced Group Message Handling
-function isBotMentioned(message, botJid) {
-    if (!message || !botJid) return false;
-    
-    // Check for mentions in extended text messages
-    if (message.extendedTextMessage) {
-        const mentionedJids = message.extendedTextMessage.contextInfo?.mentionedJid || [];
-        return mentionedJids.includes(botJid);
-    }
-    
-    // Check for mentions in conversation messages
-    if (message.conversation) {
-        const botNumber = botJid.split('@')[0];
-        return message.conversation.includes(`@${botNumber}`);
-    }
-    
-    return false;
-}
-
 // ✅ Connect to WhatsApp
 async function connectToWhatsApp() {
     await setupSession();
@@ -263,9 +226,14 @@ async function connectToWhatsApp() {
         getMessage: async () => undefined,
         ...cryptoOptions
     });
+// ✅ Listen for incoming messages and pass to handler
+sock.ev.on('messages.upsert', async ({ messages }) => {
+    for (const message of messages) {
+        await handleMessages(sock, message);
+    }
+});
 
-    // Remove safeSend override
-    // ✅ Group messages will be handled natively
+    // Remove safeSend overrid
 
     sock.ev.on('connection.update', async update => {
         const { connection, lastDisconnect } = update;
@@ -511,8 +479,6 @@ sock.ev.on('messages.upsert', async ({ messages }) => {
         logMessage('ERROR', `Status Handler Error: ${err.message}`);
     }
 });
-
-
 
     // ✅ Handle Commands with Enhanced Group Support
     sock.ev.on('messages.upsert', async ({ messages, type }) => {
