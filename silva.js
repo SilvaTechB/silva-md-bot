@@ -272,119 +272,88 @@ async function connectToWhatsApp() {
 
     sock.ev.on('creds.update', saveCreds);
 
-    // ✅ Anti-Delete - Fixed Implementation
-    sock.ev.on('messages.update', async (updates) => {
-        for (const update of updates) {
-            if (update.update.messageStubType === 7) { // Message deleted for everyone
-                try {
-                    const key = update.key;
-                    const from = key.remoteJid;
-                    const isGroup = isJidGroup(from);
-                    
-                    logMessage('EVENT', `Anti-Delete triggered in ${isGroup ? 'group' : 'private'}: ${from}`);
-                    
-                    // Check if anti-delete is enabled for this chat type
-                    if ((isGroup && config.ANTIDELETE_GROUP) || 
-                        (!isGroup && config.ANTIDELETE_PRIVATE)) {
-                        
-                        // Load the deleted message
-                        const deletedMessage = await sock.loadMessage(key);
-                        if (!deletedMessage) {
-                            logMessage('WARN', 'Could not load deleted message');
-                            return;
-                        }
-                        
-                        const ownerJid = `${config.OWNER_NUMBER}@s.whatsapp.net`;
-                        const sender = update.participant || key.participant || key.remoteJid;
-                        const senderName = sender.split('@')[0];
-                        
-                        let caption = `⚠️ *Anti-Delete Alert!*\n\n` +
-                            `👤 *Sender:* @${senderName}\n` +
-                            `💬 *Restored Message:*\n\n` +
-                            `*Chat:* ${isGroup ? 'Group' : 'Private'}`;
-                        
-                        let messageOptions = {
-                            contextInfo: {
-                                mentionedJid: [sender],
-                                ...globalContextInfo,
-                                externalAdReply: {
-                                    title: "Silva MD Anti-Delete",
-                                    body: "Message restored privately",
-                                    thumbnailUrl: "https://files.catbox.moe/5uli5p.jpeg",
-                                    sourceUrl: "https://github.com/SilvaTechB/silva-md-bot",
-                                    mediaType: 1,
-                                    renderLargerThumbnail: true
-                                }
-                            }
-                        };
-                        
-                        // Log message content
-                        let msgContent = '';
-                        if (deletedMessage.message?.conversation) {
-                            msgContent = deletedMessage.message.conversation;
-                        } else if (deletedMessage.message?.extendedTextMessage) {
-                            msgContent = deletedMessage.message.extendedTextMessage.text;
-                        } else if (deletedMessage.message?.imageMessage) {
-                            msgContent = '[Image] ' + (deletedMessage.message.imageMessage.caption || '');
-                        } else if (deletedMessage.message?.videoMessage) {
-                            msgContent = '[Video] ' + (deletedMessage.message.videoMessage.caption || '');
-                        } else if (deletedMessage.message?.documentMessage) {
-                            msgContent = '[Document] ' + (deletedMessage.message.documentMessage.fileName || '');
-                        } else {
-                            msgContent = '[Unsupported Type]';
-                        }
-                        
-                        logMessage('INFO', `Restoring message: ${msgContent.substring(0, 100)}`);
-                        
-                        // Handle different message types
-                        if (deletedMessage.message?.conversation) {
-                            await sock.sendMessage(ownerJid, {
-                                text: `${caption}\n\n${deletedMessage.message.conversation}`,
-                                ...messageOptions
-                            });
-                        } else if (deletedMessage.message?.extendedTextMessage) {
-                            await sock.sendMessage(ownerJid, {
-                                text: `${caption}\n\n${deletedMessage.message.extendedTextMessage.text}`,
-                                ...messageOptions
-                            });
-                        } else if (deletedMessage.message?.imageMessage) {
-                            const buffer = await sock.downloadMediaMessage(deletedMessage);
-                            await sock.sendMessage(ownerJid, {
-                                image: buffer,
-                                caption: `${caption}\n\n${deletedMessage.message.imageMessage.caption || ''}`,
-                                ...messageOptions
-                            });
-                        } else if (deletedMessage.message?.videoMessage) {
-                            const buffer = await sock.downloadMediaMessage(deletedMessage);
-                            await sock.sendMessage(ownerJid, {
-                                video: buffer,
-                                caption: `${caption}\n\n${deletedMessage.message.videoMessage.caption || ''}`,
-                                ...messageOptions
-                            });
-                        } else if (deletedMessage.message?.documentMessage) {
-                            const buffer = await sock.downloadMediaMessage(deletedMessage);
-                            await sock.sendMessage(ownerJid, {
-                                document: buffer,
-                                mimetype: deletedMessage.message.documentMessage.mimetype,
-                                fileName: deletedMessage.message.documentMessage.fileName || 'Restored-File',
-                                caption,
-                                ...messageOptions
-                            });
-                        } else {
-                            await sock.sendMessage(ownerJid, {
-                                text: `${caption}\n\n[Unsupported Message Type]`,
-                                ...messageOptions
-                            });
-                        }
-                        
-                        logMessage('SUCCESS', 'Anti-Delete message sent to owner');
-                    }
-                } catch (err) {
-                    logMessage('ERROR', `Anti-Delete Error: ${err.message}`);
+    // Hook into message deletions
+sock.ev.on('messages.delete', async (item) => {
+    try {
+        for (const { key } of item) {
+            const from = key.remoteJid;
+            const isGroup = isJidGroup(from);
+
+            logMessage('EVENT', `Anti-Delete triggered in ${isGroup ? 'group' : 'private'}: ${from}`);
+
+            if ((isGroup && config.ANTIDELETE_GROUP) || (!isGroup && config.ANTIDELETE_PRIVATE)) {
+                // Retrieve original message from store
+                const deletedMessage = await sock.loadMessage(key);
+                if (!deletedMessage) {
+                    logMessage('WARN', 'Could not load deleted message');
+                    return;
                 }
+
+                const ownerJid = `${config.OWNER_NUMBER}@s.whatsapp.net`;
+                const sender = key.participant || from;
+                const senderName = sender.split('@')[0];
+
+                let caption = `⚠️ *Anti-Delete Alert!*\n\n` +
+                              `👤 *Sender:* @${senderName}\n` +
+                              `💬 *Restored Message:*\n\n` +
+                              `*Chat:* ${isGroup ? 'Group' : 'Private'}`;
+
+                let messageOptions = {
+                    contextInfo: {
+                        mentionedJid: [sender],
+                        ...globalContextInfo
+                    }
+                };
+
+                // Restore based on type
+                if (deletedMessage.message?.conversation) {
+                    await sock.sendMessage(ownerJid, {
+                        text: `${caption}\n\n${deletedMessage.message.conversation}`,
+                        ...messageOptions
+                    });
+                } else if (deletedMessage.message?.extendedTextMessage) {
+                    await sock.sendMessage(ownerJid, {
+                        text: `${caption}\n\n${deletedMessage.message.extendedTextMessage.text}`,
+                        ...messageOptions
+                    });
+                } else if (deletedMessage.message?.imageMessage) {
+                    const buffer = await sock.downloadMediaMessage(deletedMessage);
+                    await sock.sendMessage(ownerJid, {
+                        image: buffer,
+                        caption: `${caption}\n\n${deletedMessage.message.imageMessage.caption || ''}`,
+                        ...messageOptions
+                    });
+                } else if (deletedMessage.message?.videoMessage) {
+                    const buffer = await sock.downloadMediaMessage(deletedMessage);
+                    await sock.sendMessage(ownerJid, {
+                        video: buffer,
+                        caption: `${caption}\n\n${deletedMessage.message.videoMessage.caption || ''}`,
+                        ...messageOptions
+                    });
+                } else if (deletedMessage.message?.documentMessage) {
+                    const buffer = await sock.downloadMediaMessage(deletedMessage);
+                    await sock.sendMessage(ownerJid, {
+                        document: buffer,
+                        mimetype: deletedMessage.message.documentMessage.mimetype,
+                        fileName: deletedMessage.message.documentMessage.fileName || 'Restored-File',
+                        caption,
+                        ...messageOptions
+                    });
+                } else {
+                    await sock.sendMessage(ownerJid, {
+                        text: `${caption}\n\n[Unsupported Message Type]`,
+                        ...messageOptions
+                    });
+                }
+
+                logMessage('SUCCESS', 'Anti-Delete message sent to owner');
             }
         }
-    });
+    } catch (err) {
+        logMessage('ERROR', `Anti-Delete Error: ${err.message}`);
+    }
+});
+
 
   // ✅ Auto Status Seen + React + Reply - Enhanced (Full Updated)
 // ✅ Auto Status Seen + React + Reply - Enhanced (Full Updated)
