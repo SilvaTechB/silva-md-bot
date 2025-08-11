@@ -3,13 +3,14 @@ global.File = BufferFile;
 
 // ✅ Silva Tech Inc Property 2025
 const baileys = require('@whiskeysockets/baileys');
-const { makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, Browsers, DisconnectReason, isJidGroup, isJidBroadcast, isJidStatusBroadcast, areJidsSameUser, downloadContentFromMessage } = baileys;
+const { makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, Browsers, DisconnectReason, isJidGroup, isJidBroadcast, isJidStatusBroadcast, areJidsSameUser, makeInMemoryStore, downloadContentFromMessage } = baileys;
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const express = require('express');
 const P = require('pino');
 const config = require('./config.js');
+const store = makeInMemoryStore({ logger: P({ level: 'silent' }) });
 
 const prefix = config.PREFIX || '.';
 const tempDir = path.join(os.tmpdir(), 'silva-cache');
@@ -30,7 +31,13 @@ function logMessage(type, message) {
     
     const timestamp = new Date().toISOString();
     const logEntry = `[${timestamp}] [${type}] ${message}\n`;
-    
+// ✅ Media download helper — now available anywhere
+async function downloadAsBuffer(mediaMessage, kind) {
+    const stream = await downloadContentFromMessage(mediaMessage, kind);
+    const chunks = [];
+    for await (const chunk of stream) chunks.push(chunk);
+    return Buffer.concat(chunks);
+} 
     // Log to console
     console.log(logEntry.trim());
     
@@ -271,90 +278,55 @@ async function connectToWhatsApp() {
     });
 
     sock.ev.on('creds.update', saveCreds);
-// import the handler
-require('./lib/groupHandler')(sock, config);
 
-    // Hook into message deletions
-sock.ev.on('messages.delete', async (item) => {
-    try {
-        for (const { key } of item) {
-            const from = key.remoteJid;
-            const isGroup = isJidGroup(from);
+    // Anti-delete logic goes here 👇
+    sock.ev.on('messages.delete', async (item) => {
+        try {
+            const keys = Array.isArray(item) ? item.map(i => i.key) : (item?.keys || []);
+            for (const key of keys) {
+                const from = key.remoteJid;
+                const isGroup = from.endsWith('@g.us');
 
-            logMessage('EVENT', `Anti-Delete triggered in ${isGroup ? 'group' : 'private'}: ${from}`);
+                if ((isGroup && !config.ANTIDELETE_GROUP) || (!isGroup && !config.ANTIDELETE_PRIVATE)) continue;
 
-            if ((isGroup && config.ANTIDELETE_GROUP) || (!isGroup && config.ANTIDELETE_PRIVATE)) {
-                // Retrieve original message from store
-                const deletedMessage = await sock.loadMessage(key);
-                if (!deletedMessage) {
-                    logMessage('WARN', 'Could not load deleted message');
-                    return;
+                const deletedMsg = await store.loadMessage(from, key.id);
+                if (!deletedMsg) {
+                    console.log(`WARN: No stored message found for ${key.id}`);
+                    continue;
                 }
 
                 const ownerJid = `${config.OWNER_NUMBER}@s.whatsapp.net`;
                 const sender = key.participant || from;
                 const senderName = sender.split('@')[0];
 
-                let caption = `⚠️ *Anti-Delete Alert!*\n\n` +
-                              `👤 *Sender:* @${senderName}\n` +
-                              `💬 *Restored Message:*\n\n` +
-                              `*Chat:* ${isGroup ? 'Group' : 'Private'}`;
+                const caption = `⚠️ *Anti-Delete Alert!*\n\n👤 *Sender:* @${senderName}\n*Chat:* ${isGroup ? 'Group' : 'Private'}\n\n💬 *Restored Message:*`;
 
-                let messageOptions = {
-                    contextInfo: {
-                        mentionedJid: [sender],
-                        ...globalContextInfo
-                    }
-                };
+                const opts = { contextInfo: { mentionedJid: [sender] } };
+                const msg = deletedMsg.message;
 
-                // Restore based on type
-                if (deletedMessage.message?.conversation) {
-                    await sock.sendMessage(ownerJid, {
-                        text: `${caption}\n\n${deletedMessage.message.conversation}`,
-                        ...messageOptions
-                    });
-                } else if (deletedMessage.message?.extendedTextMessage) {
-                    await sock.sendMessage(ownerJid, {
-                        text: `${caption}\n\n${deletedMessage.message.extendedTextMessage.text}`,
-                        ...messageOptions
-                    });
-                } else if (deletedMessage.message?.imageMessage) {
-                    const buffer = await sock.downloadMediaMessage(deletedMessage);
-                    await sock.sendMessage(ownerJid, {
-                        image: buffer,
-                        caption: `${caption}\n\n${deletedMessage.message.imageMessage.caption || ''}`,
-                        ...messageOptions
-                    });
-                } else if (deletedMessage.message?.videoMessage) {
-                    const buffer = await sock.downloadMediaMessage(deletedMessage);
-                    await sock.sendMessage(ownerJid, {
-                        video: buffer,
-                        caption: `${caption}\n\n${deletedMessage.message.videoMessage.caption || ''}`,
-                        ...messageOptions
-                    });
-                } else if (deletedMessage.message?.documentMessage) {
-                    const buffer = await sock.downloadMediaMessage(deletedMessage);
-                    await sock.sendMessage(ownerJid, {
-                        document: buffer,
-                        mimetype: deletedMessage.message.documentMessage.mimetype,
-                        fileName: deletedMessage.message.documentMessage.fileName || 'Restored-File',
-                        caption,
-                        ...messageOptions
-                    });
+                if (msg.conversation) {
+                    await sock.sendMessage(ownerJid, { text: `${caption}\n\n${msg.conversation}`, ...opts });
+                } else if (msg.extendedTextMessage) {
+                    await sock.sendMessage(ownerJid, { text: `${caption}\n\n${msg.extendedTextMessage.text}`, ...opts });
+                } else if (msg.imageMessage) {
+                    const buffer = await downloadAsBuffer(msg.imageMessage, 'image');
+                    await sock.sendMessage(ownerJid, { image: buffer, caption: `${caption}\n\n${msg.imageMessage.caption || ''}`, ...opts });
+                } else if (msg.videoMessage) {
+                    const buffer = await downloadAsBuffer(msg.videoMessage, 'video');
+                    await sock.sendMessage(ownerJid, { video: buffer, caption: `${caption}\n\n${msg.videoMessage.caption || ''}`, ...opts });
+                } else if (msg.documentMessage) {
+                    const buffer = await downloadAsBuffer(msg.documentMessage, 'document');
+                    await sock.sendMessage(ownerJid, { document: buffer, mimetype: msg.documentMessage.mimetype, fileName: msg.documentMessage.fileName || 'Restored-File', caption, ...opts });
                 } else {
-                    await sock.sendMessage(ownerJid, {
-                        text: `${caption}\n\n[Unsupported Message Type]`,
-                        ...messageOptions
-                    });
+                    await sock.sendMessage(ownerJid, { text: `${caption}\n\n[Unsupported Message Type]`, ...opts });
                 }
 
-                logMessage('SUCCESS', 'Anti-Delete message sent to owner');
+                console.log(`SUCCESS: Restored deleted message from ${senderName}`);
             }
+        } catch (err) {
+            console.error(`ERROR (Anti-Delete): ${err.message}`);
         }
-    } catch (err) {
-        logMessage('ERROR', `Anti-Delete Error: ${err.message}`);
-    }
-});
+    });
 
 // ✅ Auto Status Seen + React + Reply - Enhanced (Full Updated)
 const statusSaverDir = path.join(__dirname, 'status_saver');
