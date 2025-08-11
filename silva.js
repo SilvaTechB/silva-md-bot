@@ -387,6 +387,7 @@ async function connectToWhatsApp() {
     });
 
   // ✅ Auto Status Seen + React + Reply - Enhanced (Full Updated)
+// ✅ Auto Status Seen + React + Reply - Enhanced (Full Updated)
 
 // Directories
 const statusSaverDir = path.join(__dirname, 'status_saver');
@@ -468,28 +469,39 @@ sock.ev.on('messages.upsert', async ({ messages }) => {
                 }
             }
 
-            // ✅ 2. Quick reaction (DM emoji quoting status)
+            // ✅ 2. True status reaction (no DM) — attaches reaction to the story itself
             if (config.AUTO_STATUS_REACT) {
                 try {
-                    const emojis = config.CUSTOM_REACT_EMOJIS.split(',');
+                    const emojis = (config.CUSTOM_REACT_EMOJIS || '❤️,🔥,💯,😍,👏').split(',');
                     const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)].trim();
 
-                    await sock.sendMessage(userJid, {
-                        text: randomEmoji,
-                        contextInfo: {
-                            stanzaId: statusId,
-                            participant: userJid,
-                            quotedMessage: inner
-                        }
-                    });
+                    const selfJid = sock.user.id.includes(':')
+                        ? `${sock.user.id.split(':')[0]}@s.whatsapp.net`
+                        : sock.user.id;
 
-                    logMessage('INFO', `Quick reaction sent to ${userJid}: ${randomEmoji}`);
+                    await sock.sendMessage(
+                        'status@broadcast',
+                        {
+                            react: {
+                                text: randomEmoji,
+                                key: message.key // react on the exact status message
+                            }
+                        },
+                        {
+                            // required for status reactions to be routed correctly
+                            additionalAttributes: {
+                                statusJidList: [userJid, selfJid]
+                            }
+                        }
+                    );
+
+                    logMessage('INFO', `Reacted on status ${statusId} with: ${randomEmoji}`);
                 } catch (e) {
-                    logMessage('WARN', `Quick reaction failed: ${e.message}`);
+                    logMessage('WARN', `Status reaction failed: ${e.message}`);
                 }
             }
 
-            // ✅ 3. Reply to status (quoting it)
+            // ✅ 3. Reply to status (quoting it) — controlled by your config flag
             if (config.AUTO_STATUS_REPLY) {
                 try {
                     await sock.sendMessage(userJid, {
@@ -537,7 +549,7 @@ sock.ev.on('messages.upsert', async ({ messages }) => {
                             break;
                     }
 
-                    // Send confirmation to user
+                    // Optional: DM confirmation to the user (kept as-is, behind your flag)
                     if (config.STATUS_REPLY === 'true') {
                         const replyMsg = config.STATUS_MSG || 'SILVA MD 💖 SUCCESSFULLY VIEWED YOUR STATUS';
                         await sock.sendMessage(userJid, { text: replyMsg });
@@ -553,6 +565,7 @@ sock.ev.on('messages.upsert', async ({ messages }) => {
         logMessage('ERROR', `Status Handler Error: ${err.message}`);
     }
 });
+
 
 
     // ✅ Handle Commands with Enhanced Group Support
