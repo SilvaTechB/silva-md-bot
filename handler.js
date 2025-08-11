@@ -8,9 +8,24 @@ const { isJidGroup } = require('@whiskeysockets/baileys');
 // ✅ Safe message sender — prevents bot crashes on send errors
 async function safeSend(sock, jid, content, options = {}) {
     try {
+        if (!jid || typeof jid !== 'string') {
+            console.warn(`[SafeSend] Invalid JID: ${jid}`);
+            return;
+        }
+
+        if (!sock || typeof sock.sendMessage !== 'function') {
+            console.warn('[SafeSend] Socket not ready or sendMessage missing');
+            return;
+        }
+
         return await sock.sendMessage(jid, content, options);
     } catch (err) {
-        console.error(`[SafeSend] Failed to send message to ${jid}:`, err.message || err);
+        const reason = err?.message || err;
+        if (reason.includes('No sessions')) {
+            console.warn(`[SafeSend] No session available for ${jid}. Bot may not be fully joined or synced.`);
+        } else {
+            console.error(`[SafeSend] Failed to send message to ${jid}:`, reason);
+        }
     }
 }
 
