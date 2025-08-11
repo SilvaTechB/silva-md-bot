@@ -3,6 +3,7 @@ const { safeSend } = require('../utils/safeSend');
 
 module.exports = {
     name: 'hello',
+    commands: ['hello'],
     description: 'Test safeSend with a friendly greeting in groups and privates',
     group: true,
     private: true,
