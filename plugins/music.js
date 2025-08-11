@@ -1,10 +1,12 @@
-const { safeSend } = require('../utils/safeSend');
+
 const axios = require("axios");
 const ytSearch = require("yt-search");
 
 module.exports = {
     name: 'music',
     commands: ['play'],
+    group: true,
+    private: true,
     handler: async ({ sock, m, sender, args, contextInfo }) => {
         try {
             // Extract query from arguments
