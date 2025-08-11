@@ -1,3 +1,4 @@
+const { safeSend } = require('../utils/safeSend');
 const axios = require("axios");
 const ytSearch = require("yt-search");
 
