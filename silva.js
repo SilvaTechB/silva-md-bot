@@ -271,6 +271,8 @@ async function connectToWhatsApp() {
     });
 
     sock.ev.on('creds.update', saveCreds);
+// import the handler
+require('./lib/groupHandler')(sock, config);
 
     // Hook into message deletions
 sock.ev.on('messages.delete', async (item) => {
