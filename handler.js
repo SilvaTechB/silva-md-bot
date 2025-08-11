@@ -1,17 +1,24 @@
 const fs = require('fs');
 const path = require('path');
-const { isJidGroup, jidNormalize } = require('@whiskeysockets/baileys');
+const { isJidGroup } = require('@whiskeysockets/baileys');
 
-// ✅ Fixed group membership check with proper JID normalization
+// ✅ Fixed group membership check with custom JID normalization
 async function isBotInGroup(sock, groupJid) {
     try {
         const metadata = await sock.groupMetadata(groupJid);
-        // Use Baileys' built-in JID normalizer
-        const botBase = jidNormalize(sock.user.id); 
         
-        // Find bot in participants using normalized JIDs
+        // Custom JID normalization function
+        const normalizeJid = (jid) => {
+            if (!jid) return jid;
+            // Remove device suffix and agent identifiers
+            const userPart = jid.split(':')[0];
+            // Ensure proper formatting
+            return userPart.includes('@') ? userPart : userPart + '@s.whatsapp.net';
+        };
+
+        const botBase = normalizeJid(sock.user.id);
         const match = metadata.participants.some(p => 
-            jidNormalize(p.id) === botBase
+            normalizeJid(p.id) === botBase
         );
 
         if (!match) {
