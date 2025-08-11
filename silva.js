@@ -31,12 +31,24 @@ function logMessage(type, message) {
     
     const timestamp = new Date().toISOString();
     const logEntry = `[${timestamp}] [${type}] ${message}\n`;
-// ✅ Media download helper — now available anywhere
+// Helper to download any media as Buffer
 async function downloadAsBuffer(mediaMessage, kind) {
     const stream = await downloadContentFromMessage(mediaMessage, kind);
     const chunks = [];
     for await (const chunk of stream) chunks.push(chunk);
     return Buffer.concat(chunks);
+}
+
+function logMessage(type, message) {
+    if (!config.DEBUG && type === 'DEBUG') return;
+
+    const timestamp = new Date().toISOString();
+    const logEntry = `[${timestamp}] [${type}] ${message}\n`;
+
+    console.log(logEntry.trim());
+
+    const logFile = path.join(logDir, getLogFileName());
+    fs.appendFileSync(logFile, logEntry);
 } 
     // Log to console
     console.log(logEntry.trim());
