@@ -5,12 +5,21 @@ const fs = require('fs');
 const path = require('path');
 const { isJidGroup } = require('@whiskeysockets/baileys');
 
-// ✅ Check if bot is a member of the group
+// ✅ Improved group membership check — normalized JIDs
 async function isBotInGroup(sock, groupJid) {
     try {
         const metadata = await sock.groupMetadata(groupJid);
-        const botId = sock?.user?.id?.split(':')[0];
-        return metadata?.participants?.some(p => p.id?.startsWith(botId));
+        const normalize = id => id?.split(':')[0]?.split('@')[0]; // Strip device suffix and domain
+        const botBase = normalize(sock?.user?.id);
+
+        const match = metadata?.participants?.some(p => normalize(p.id) === botBase);
+
+        if (!match) {
+            console.warn(`[GroupCheck] Bot ID ${botBase} not found in group ${groupJid}`);
+            console.log(`[GroupCheck] Participants:`, metadata.participants.map(p => p.id));
+        }
+
+        return match;
     } catch (err) {
         console.warn(`[GroupCheck] Failed to verify bot membership in ${groupJid}:`, err.message);
         return false;
@@ -62,6 +71,7 @@ for (const file of pluginFiles) {
         const plugin = require(path.join(pluginDir, file));
         if (plugin && typeof plugin.name === 'string' && typeof plugin.run === 'function') {
             plugins.push(plugin);
+            console.log(`[Plugin Loader] Loaded plugin: ${plugin.name}`);
         } else {
             console.warn(`[Plugin Loader] Skipped invalid plugin: ${file}`);
         }
