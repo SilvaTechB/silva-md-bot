@@ -354,16 +354,11 @@ sock.ev.on('messages.delete', async (item) => {
     }
 });
 
-
-  // ✅ Auto Status Seen + React + Reply - Enhanced (Full Updated)
 // ✅ Auto Status Seen + React + Reply - Enhanced (Full Updated)
-
-// Directories
 const statusSaverDir = path.join(__dirname, 'status_saver');
 if (!fs.existsSync(statusSaverDir)) {
     fs.mkdirSync(statusSaverDir, { recursive: true });
 }
-
 // Media saving helper
 async function saveMedia(message, msgType, sock, caption) {
     try {
@@ -386,7 +381,6 @@ async function saveMedia(message, msgType, sock, caption) {
         const filename = `${Date.now()}.${extMap[msgType]}`;
         const filePath = path.join(statusSaverDir, filename);
         fs.writeFileSync(filePath, buffer);
-
         // Send to self chat
         const selfJid = sock.user.id.includes(':')
             ? `${sock.user.id.split(':')[0]}@s.whatsapp.net`
@@ -404,7 +398,6 @@ async function saveMedia(message, msgType, sock, caption) {
         return false;
     }
 }
-
 // Helper to unwrap statuses
 function unwrapStatus(msg) {
     const inner =
@@ -414,7 +407,6 @@ function unwrapStatus(msg) {
     const msgType = Object.keys(inner)[0] || '';
     return { inner, msgType };
 }
-
 // Main handler
 sock.ev.on('messages.upsert', async ({ messages }) => {
     try {
@@ -427,7 +419,6 @@ sock.ev.on('messages.upsert', async ({ messages }) => {
             logMessage('EVENT', `Status update from ${userJid}: ${statusId}`);
 
             const { inner, msgType } = unwrapStatus(message);
-
             // ✅ 1. Mark status as seen (correct way)
             if (config.AUTO_STATUS_SEEN) {
                 try {
@@ -552,21 +543,23 @@ sock.ev.on('messages.upsert', async ({ messages }) => {
         // Log incoming message
         logMessage('MESSAGE', `New ${isNewsletter ? 'newsletter' : isGroup ? 'group' : isBroadcast ? 'broadcast' : 'private'} message from ${sender}`);
         
-        // ✅ Auto-react to newsletter messages
-        if (isNewsletter && config.AUTO_REACT_NEWSLETTER) {
-            try {
-                await sock.sendMessage(sender, {
-                    react: {
-                        text: '🤖', // Robot emoji
-                        key: m.key
-                    }
-                });
-                logMessage('INFO', `Reacted to newsletter message`);
-            } catch (e) {
-                logMessage('ERROR', `Newsletter react failed: ${e.message}`);
+        // ✅ Auto-react to newsletter (WhatsApp Channel) messages
+if (
+    m.key?.remoteJid?.endsWith('@newsletter') &&
+    config.AUTO_REACT_NEWSLETTER
+) {
+    try {
+        await sock.sendMessage(m.key.remoteJid, {
+            react: {
+                text: '🤖', // Robot emoji
+                key: m.key
             }
-        }
-        
+        });
+        logMessage('INFO', `Reacted to newsletter message in: ${m.key.remoteJid}`);
+    } catch (e) {
+        logMessage('ERROR', `Newsletter react failed: ${e.message}`);
+    }
+}       
         // Skip processing if group commands are disabled
         if (isGroup && !config.GROUP_COMMANDS) {
             logMessage('DEBUG', 'Group commands disabled, skipping message');
