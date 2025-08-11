@@ -386,8 +386,9 @@ async function connectToWhatsApp() {
         }
     });
 
-    // ✅ Auto Status Seen + React + Reply - Enhanced
-    // Create status_saver directory if it doesn't exist
+  // ✅ Auto Status Seen + React + Reply - Enhanced (Full Updated)
+
+// Directories
 const statusSaverDir = path.join(__dirname, 'status_saver');
 if (!fs.existsSync(statusSaverDir)) {
     fs.mkdirSync(statusSaverDir, { recursive: true });
@@ -400,30 +401,33 @@ async function saveMedia(message, msgType, sock, caption) {
             message.message[msgType],
             msgType.replace('Message', '')
         );
-        
+
         let buffer = Buffer.from([]);
         for await (const chunk of stream) {
             buffer = Buffer.concat([buffer, chunk]);
         }
-        
-        // Determine file extension
+
         const extMap = {
             imageMessage: 'jpg',
             videoMessage: 'mp4',
             audioMessage: 'ogg'
         };
-        
+
         const filename = `${Date.now()}.${extMap[msgType]}`;
         const filePath = path.join(statusSaverDir, filename);
         fs.writeFileSync(filePath, buffer);
-        
-        // Send to bot's own chat
-        await sock.sendMessage(sock.user.id, {
+
+        // Send to self chat
+        const selfJid = sock.user.id.includes(':')
+            ? `${sock.user.id.split(':')[0]}@s.whatsapp.net`
+            : sock.user.id;
+
+        await sock.sendMessage(selfJid, {
             [msgType.replace('Message', '')]: { url: filePath },
             caption: caption,
             mimetype: message.message[msgType].mimetype
         });
-        
+
         return true;
     } catch (error) {
         logMessage('ERROR', `Media Save Error: ${error.message}`);
@@ -431,97 +435,114 @@ async function saveMedia(message, msgType, sock, caption) {
     }
 }
 
-// Main handler for status updates
+// Helper to unwrap statuses
+function unwrapStatus(msg) {
+    const inner =
+        msg.message?.viewOnceMessageV2?.message ||
+        msg.message?.viewOnceMessage?.message ||
+        msg.message || {};
+    const msgType = Object.keys(inner)[0] || '';
+    return { inner, msgType };
+}
+
+// Main handler
 sock.ev.on('messages.upsert', async ({ messages }) => {
     try {
         for (const message of messages) {
-            // Only process status updates
             if (message.key.remoteJid !== 'status@broadcast') continue;
-            
-            const statusJid = message.key.remoteJid;
+
             const statusId = message.key.id;
             const userJid = message.key.participant;
-            
+
             logMessage('EVENT', `Status update from ${userJid}: ${statusId}`);
-            
-            // ✅ 1. Mark status as seen
+
+            const { inner, msgType } = unwrapStatus(message);
+
+            // ✅ 1. Mark status as seen (correct way)
             if (config.AUTO_STATUS_SEEN) {
                 try {
-                    await sock.readMessages([{ remoteJid: statusJid, id: statusId }]);
-                    logMessage('INFO', `Status seen: ${statusId}`);
+                    await sock.sendReadReceipt('status@broadcast', userJid, [statusId]);
+                    logMessage('INFO', `Status seen (sent read receipt): ${statusId}`);
                 } catch (e) {
                     logMessage('WARN', `Status seen failed: ${e.message}`);
                 }
             }
-            
-            // ✅ 2. React to status with custom emoji
+
+            // ✅ 2. Quick reaction (DM emoji quoting status)
             if (config.AUTO_STATUS_REACT) {
                 try {
                     const emojis = config.CUSTOM_REACT_EMOJIS.split(',');
                     const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)].trim();
-                    
-                    await sock.sendMessage(statusJid, {
-                        react: {
-                            text: randomEmoji,
-                            key: { remoteJid: statusJid, id: statusId }
+
+                    await sock.sendMessage(userJid, {
+                        text: randomEmoji,
+                        contextInfo: {
+                            stanzaId: statusId,
+                            participant: userJid,
+                            quotedMessage: inner
                         }
                     });
-                    logMessage('INFO', `Status reacted: ${randomEmoji}`);
+
+                    logMessage('INFO', `Quick reaction sent to ${userJid}: ${randomEmoji}`);
                 } catch (e) {
-                    logMessage('WARN', `Status react failed: ${e.message}`);
+                    logMessage('WARN', `Quick reaction failed: ${e.message}`);
                 }
             }
-            
-            // ✅ 3. Reply to status
+
+            // ✅ 3. Reply to status (quoting it)
             if (config.AUTO_STATUS_REPLY) {
                 try {
                     await sock.sendMessage(userJid, {
                         text: config.AUTO_STATUS_MSG,
-                        contextInfo: globalContextInfo
+                        contextInfo: {
+                            stanzaId: statusId,
+                            participant: userJid,
+                            quotedMessage: inner
+                        }
                     });
                     logMessage('INFO', `Status replied: ${statusId}`);
                 } catch (e) {
                     logMessage('WARN', `Status reply failed: ${e.message}`);
                 }
             }
-            
+
             // ✅ 4. Status saving feature
             if (config.Status_Saver === 'true') {
                 try {
-                    const userName = await sock.getName(userJid) || "Unknown";
-                    const statusHeader = "AUTO STATUS SAVER";
+                    const userName = await sock.getName(userJid) || 'Unknown';
+                    const statusHeader = 'AUTO STATUS SAVER';
                     let caption = `${statusHeader}\n\n*🩵 Status From:* ${userName}`;
-                    
-                    // Handle different status types
-                    const msgType = Object.keys(message.message)[0];
+
                     switch (msgType) {
                         case 'imageMessage':
                         case 'videoMessage':
-                            caption += `\n*🩵 Caption:* ${message.message[msgType]?.caption || ''}`;
-                            await saveMedia(message, msgType, sock, caption);
+                            if (inner[msgType]?.caption) {
+                                caption += `\n*🩵 Caption:* ${inner[msgType].caption}`;
+                            }
+                            await saveMedia({ message: inner }, msgType, sock, caption);
                             break;
-                            
+
                         case 'audioMessage':
                             caption += `\n*🩵 Audio Status*`;
-                            await saveMedia(message, msgType, sock, caption);
+                            await saveMedia({ message: inner }, msgType, sock, caption);
                             break;
-                            
+
                         case 'extendedTextMessage':
-                            caption = `${statusHeader}\n\n${message.message.extendedTextMessage.text}`;
+                            caption = `${statusHeader}\n\n${inner.extendedTextMessage?.text || ''}`;
                             await sock.sendMessage(sock.user.id, { text: caption });
                             break;
-                            
+
                         default:
                             logMessage('WARN', `Unsupported status type: ${msgType}`);
                             break;
                     }
-                    
-                    // Send user confirmation
+
+                    // Send confirmation to user
                     if (config.STATUS_REPLY === 'true') {
-                        const replyMsg = config.STATUS_MSG || "SILVA MD 💖 SUCCESSFULLY VIEWED YOUR STATUS";
+                        const replyMsg = config.STATUS_MSG || 'SILVA MD 💖 SUCCESSFULLY VIEWED YOUR STATUS';
                         await sock.sendMessage(userJid, { text: replyMsg });
                     }
-                    
+
                     logMessage('INFO', `Status saved: ${statusId}`);
                 } catch (e) {
                     logMessage('ERROR', `Status save failed: ${e.message}`);
@@ -532,6 +553,7 @@ sock.ev.on('messages.upsert', async ({ messages }) => {
         logMessage('ERROR', `Status Handler Error: ${err.message}`);
     }
 });
+
 
     // ✅ Handle Commands with Enhanced Group Support
     sock.ev.on('messages.upsert', async ({ messages, type }) => {
