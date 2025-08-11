@@ -5,6 +5,18 @@ const fs = require('fs');
 const path = require('path');
 const { isJidGroup } = require('@whiskeysockets/baileys');
 
+// ✅ Check if bot is a member of the group
+async function isBotInGroup(sock, groupJid) {
+    try {
+        const metadata = await sock.groupMetadata(groupJid);
+        const botId = sock?.user?.id?.split(':')[0];
+        return metadata?.participants?.some(p => p.id?.includes(botId));
+    } catch (err) {
+        console.warn(`[GroupCheck] Failed to verify bot membership in ${groupJid}:`, err.message);
+        return false;
+    }
+}
+
 // ✅ Safe message sender — prevents bot crashes on send errors
 async function safeSend(sock, jid, content, options = {}) {
     try {
@@ -16,6 +28,15 @@ async function safeSend(sock, jid, content, options = {}) {
         if (!sock || typeof sock.sendMessage !== 'function') {
             console.warn('[SafeSend] Socket not ready or sendMessage missing');
             return;
+        }
+
+        // ✅ Check group membership before sending
+        if (isJidGroup(jid)) {
+            const inGroup = await isBotInGroup(sock, jid);
+            if (!inGroup) {
+                console.warn(`[SafeSend] Bot is not a member of ${jid}. Skipping send.`);
+                return;
+            }
         }
 
         return await sock.sendMessage(jid, content, options);
