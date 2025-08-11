@@ -2,36 +2,38 @@ const fs = require('fs');
 const path = require('path');
 const { isJidGroup } = require('@whiskeysockets/baileys');
 
-// ✅ JID normalization helper
+// ✅ Improved JID normalization
 function normalizeJid(jid) {
     if (!jid) return jid;
-    const [userPart, domainPart] = jid.split('@');
-    const baseUser = userPart?.split(':')[0];
-    return baseUser && domainPart ? `${baseUser}@${domainPart}` : jid;
+    jid = jid.replace(/\:.*?\@/, '@'); // Remove device ID
+    return jid.split('@')[0] + '@s.whatsapp.net'; // Standardize domain
 }
 
-// ✅ Group membership check
+// ✅ Reliable group membership check
 async function isBotInGroup(sock, groupJid) {
     try {
         const metadata = await sock.groupMetadata(groupJid);
-        const botBase = normalizeJid(sock.user.id);
+        const botJid = normalizeJid(sock.user.id);
         
+        // Check if bot is in participants
         const match = metadata.participants.some(p => 
-            normalizeJid(p.id) === botBase
+            normalizeJid(p.id) === botJid
         );
-
+        
         if (!match) {
-            console.warn(`[GroupCheck] Bot ${botBase} not found in group ${groupJid}`);
+            console.warn(`[GroupCheck] Bot ${botJid} not found in group ${groupJid}`);
+            console.warn(`[GroupCheck] Participants:`, 
+                metadata.participants.map(p => p.id).join(', '));
         }
-
+        
         return match;
     } catch (err) {
         console.warn(`[GroupCheck] Error in ${groupJid}:`, err.message);
-        return false;
+        return false; // Assume not in group on error
     }
 }
 
-// ✅ Admin check
+// ✅ Admin check function
 async function isUserAdmin(sock, groupJid, userJid) {
     try {
         const metadata = await sock.groupMetadata(groupJid);
@@ -48,7 +50,7 @@ async function isUserAdmin(sock, groupJid, userJid) {
     }
 }
 
-// ✅ Safe message sender
+// ✅ Safe message sender (without group check)
 async function safeSend(sock, jid, content, options = {}) {
     try {
         if (!jid || typeof jid !== 'string') {
@@ -61,27 +63,20 @@ async function safeSend(sock, jid, content, options = {}) {
             return;
         }
 
-        // Group membership check
-        if (isJidGroup(jid)) {
-            const inGroup = await isBotInGroup(sock, jid);
-            if (!inGroup) {
-                console.warn(`[SafeSend] Bot is not a member of ${jid}. Skipping send.`);
-                return;
-            }
-        }
-
         return await sock.sendMessage(jid, content, options);
     } catch (err) {
         const reason = err?.message || err;
-        if (reason.includes('No sessions')) {
-            console.warn(`[SafeSend] No session available for ${jid}. Bot may not be fully joined or synced.`);
+        if (reason.includes('not in group')) {
+            console.warn(`[SafeSend] Bot not in group ${jid}`);
+        } else if (reason.includes('No sessions')) {
+            console.warn(`[SafeSend] No session for ${jid}`);
         } else {
-            console.error(`[SafeSend] Failed to send message to ${jid}:`, reason);
+            console.error(`[SafeSend] Failed to send to ${jid}:`, reason);
         }
     }
 }
 
-// ✅ Load plugins
+// ✅ Plugin loader with better error handling
 const plugins = [];
 const pluginDir = path.join(__dirname, 'plugins');
 const pluginFiles = fs.existsSync(pluginDir)
@@ -90,21 +85,23 @@ const pluginFiles = fs.existsSync(pluginDir)
 
 for (const file of pluginFiles) {
     try {
-        const plugin = require(path.join(pluginDir, file));
+        const pluginPath = path.join(pluginDir, file);
+        delete require.cache[require.resolve(pluginPath)]; // Clear cache
+        const plugin = require(pluginPath);
         
-        // Backward compatibility for old plugin format
+        // Support both old and new plugin formats
         if (!plugin.commands && plugin.name) {
             plugin.commands = [plugin.name];
         }
         
         if (plugin && Array.isArray(plugin.commands) && typeof plugin.run === 'function') {
             plugins.push(plugin);
-            console.log(`[Plugin Loader] Loaded plugin: ${plugin.commands.join(', ')}`);
+            console.log(`[Plugin Loader] Loaded: ${file} (${plugin.commands.join(', ')})`);
         } else {
             console.warn(`[Plugin Loader] Skipped invalid plugin: ${file}`);
         }
     } catch (err) {
-        console.error(`[Plugin Loader] Error loading ${file}:`, err);
+        console.error(`[Plugin Loader] Error loading ${file}:`, err.stack || err);
     }
 }
 
@@ -129,7 +126,7 @@ async function handleMessages(sock, message) {
             try {
                 groupMetadata = await sock.groupMetadata(jid);
             } catch (err) {
-                console.warn(`[GroupMeta] Failed to fetch metadata for ${jid}:`, err.message);
+                console.warn(`[GroupMeta] Failed for ${jid}:`, err.message);
             }
         }
 
@@ -149,7 +146,7 @@ async function handleMessages(sock, message) {
         const args = isCommand ? text.slice(prefix.length).trim().split(/\s+/) : [];
         const command = args.shift()?.toLowerCase();
 
-        // Context passed to plugins
+        // Context for plugins
         const context = {
             sock,
             message,
@@ -173,11 +170,11 @@ async function handleMessages(sock, message) {
                 if (isGroup && !allowInGroup) continue;
                 if (!isGroup && !allowInPrivate) continue;
                 
-                // Admin check for admin-only commands
+                // Admin check
                 if (plugin.admin && isGroup) {
                     const isAdmin = await isUserAdmin(sock, jid, sender);
                     if (!isAdmin) {
-                        console.log(`[AdminBlock] Non-admin tried to use ${plugin.commands[0]} in ${jid}`);
+                        console.log(`[AdminBlock] Non-admin used ${plugin.commands[0]} in ${jid}`);
                         await safeSend(sock, jid, {
                             text: `⚠️ This command is restricted to group admins only.`
                         }, { quoted: message });
@@ -190,20 +187,20 @@ async function handleMessages(sock, message) {
                     await plugin.run(sock, message, args, context);
                 }
 
-                // Optional non-command trigger
+                // Non-command triggers
                 if (!isCommand && typeof plugin.onMessage === 'function') {
                     await plugin.onMessage(sock, message, text, context);
                 }
             } catch (err) {
-                console.error(`[Plugin Error] ${plugin.commands[0]} failed:`, err.message || err);
+                console.error(`[Plugin Error] ${plugin.commands[0] || 'Unknown'} failed:`, err.stack || err);
                 await safeSend(sock, jid, {
-                    text: `❌ Error in command *${plugin.commands[0]}*. Please try again later.`
+                    text: `❌ Error in command *${plugin.commands[0] || 'unknown'}*`
                 }, { quoted: message });
             }
         }
     } catch (err) {
-        console.error('[Handler] Critical error:', err);
+        console.error('[Handler] Critical error:', err.stack || err);
     }
 }
 
-module.exports = { handleMessages, safeSend };
+module.exports = { handleMessages, safeSend, isBotInGroup };
