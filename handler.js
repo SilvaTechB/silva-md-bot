@@ -1,88 +1,124 @@
 // handler.js
-// Message handler for Silva MD Bot using Baileys MD
-// Supports group and private chats, plugin filtering, and command/non-command triggers
+// Centralized message handler for Silva MD Bot — plugin execution, scope filtering, safe messaging
 
 const fs = require('fs');
 const path = require('path');
 const { isJidGroup } = require('@whiskeysockets/baileys');
-const config = require('./config'); // Load prefix from config.js
 
-// Load all plugins from /plugins folder
+// ✅ Safe message sender — prevents bot crashes on send errors
+async function safeSend(sock, jid, content, options = {}) {
+    try {
+        return await sock.sendMessage(jid, content, options);
+    } catch (err) {
+        console.error(`[SafeSend] Failed to send message to ${jid}:`, err.message || err);
+    }
+}
+
+// ✅ Load plugins from /plugins folder
 const plugins = [];
-const pluginFiles = fs.readdirSync(path.join(__dirname, 'plugins')).filter(file => file.endsWith('.js'));
+const pluginDir = path.join(__dirname, 'plugins');
+const pluginFiles = fs.existsSync(pluginDir)
+    ? fs.readdirSync(pluginDir).filter(file => file.endsWith('.js'))
+    : [];
 
 for (const file of pluginFiles) {
     try {
-        const plugin = require(path.join(__dirname, 'plugins', file));
-        if (plugin && plugin.name && typeof plugin.run === 'function') {
+        const plugin = require(path.join(pluginDir, file));
+        if (plugin && typeof plugin.name === 'string' && typeof plugin.run === 'function') {
             plugins.push(plugin);
         } else {
             console.warn(`[Plugin Loader] Skipped invalid plugin: ${file}`);
         }
     } catch (err) {
-        console.error(`[Plugin Loader] Error loading plugin ${file}:`, err);
+        console.error(`[Plugin Loader] Error loading ${file}:`, err);
     }
 }
 
 /**
  * Main message handler
  * @param {import('@whiskeysockets/baileys').WASocket} sock - Baileys socket instance
- * @param {import('@whiskeysockets/baileys').proto.WebMessageInfo} message - Incoming message object
+ * @param {import('@whiskeysockets/baileys').proto.WebMessageInfo} message - Incoming message
  */
 async function handleMessages(sock, message) {
     try {
         const msg = message.message;
-        const sender = message.key.fromMe ? sock.user.id : message.key.participant || message.key.remoteJid;
-        const chatId = message.key.remoteJid;
+        const jid = message.key.remoteJid;
+        const sender = message.key.participant || jid;
+        const isFromBot = message.key.fromMe || sender === sock?.user?.id;
 
-        // Ignore messages from the bot itself
-        if (message.key.fromMe) return;
+        // ✅ Ignore messages from the bot itself
+        if (isFromBot || !msg) return;
 
-        const isGroup = isJidGroup(chatId);
+        const isGroup = isJidGroup(jid);
         let groupMetadata = null;
 
-        // Fetch group metadata only if needed
+        // ✅ Fetch group metadata only if needed
         if (isGroup) {
             try {
-                groupMetadata = await sock.groupMetadata(chatId);
+                groupMetadata = await sock.groupMetadata(jid);
             } catch (err) {
-                console.warn(`[Group Metadata] Failed to fetch metadata for ${chatId}:`, err);
+                console.warn(`[GroupMeta] Failed to fetch metadata for ${jid}:`, err.message);
             }
         }
 
-        // Extract message content
-        const text = msg?.conversation || msg?.extendedTextMessage?.text || msg?.imageMessage?.caption || '';
+        // ✅ Extract message text
+        const text =
+            msg?.conversation ||
+            msg?.extendedTextMessage?.text ||
+            msg?.imageMessage?.caption ||
+            msg?.videoMessage?.caption ||
+            '';
+
         if (!text) return;
 
-        // Parse command and arguments using prefix from config
-        const prefix = config.PREFIX || '.';
+        // ✅ Parse command and arguments
+        const prefix = require('./config').PREFIX || '.';
         const isCommand = text.startsWith(prefix);
         const args = isCommand ? text.slice(prefix.length).trim().split(/\s+/) : [];
         const command = args.shift()?.toLowerCase();
 
-        // Loop through plugins
+        // ✅ Context passed to plugins
+        const context = {
+            sock,
+            message,
+            sender,
+            jid,
+            isGroup,
+            groupMetadata,
+            args,
+            text,
+            safeSend
+        };
+
+        // ✅ Execute matching plugins
         for (const plugin of plugins) {
             try {
-                // Check plugin scope
-                if (isGroup && !plugin.group) continue;
-                if (!isGroup && !plugin.private) continue;
+                // Scope filtering (default to true if not defined)
+                const allowInGroup = plugin.group ?? true;
+                const allowInPrivate = plugin.private ?? true;
 
-                // If command-based, match plugin name
+                if (isGroup && !allowInGroup) continue;
+                if (!isGroup && !allowInPrivate) continue;
+
+                // Command match
                 if (isCommand && plugin.name === command) {
-                    await plugin.run(sock, message, args, groupMetadata);
+                    await plugin.run(sock, message, args, context);
                 }
 
-                // If non-command, allow plugin to handle it internally
+                // Optional non-command trigger
                 if (!isCommand && typeof plugin.onMessage === 'function') {
-                    await plugin.onMessage(sock, message, text, groupMetadata);
+                    await plugin.onMessage(sock, message, text, context);
                 }
             } catch (err) {
-                console.error(`[Plugin Error] ${plugin.name} failed:`, err);
+                console.error(`[Plugin Error] ${plugin.name} failed:`, err.message || err);
+                await safeSend(sock, jid, {
+                    text: `❌ Error in plugin *${plugin.name}*. Please try again later.`
+                }, { quoted: message });
             }
         }
     } catch (err) {
-        console.error('[Handler Error] Failed to process message:', err);
+        console.error('[Handler Error] Failed to process message:', err.message || err);
     }
 }
 
-module.exports = { handleMessages };
+module.exports = { handleMessages, safeSend };
