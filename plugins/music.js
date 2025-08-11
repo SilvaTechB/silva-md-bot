@@ -1,18 +1,15 @@
 const axios = require("axios");
 const ytSearch = require("yt-search");
-const { pipeline } = require("stream");
-const { promisify } = require("util");
-const streamPipeline = promisify(pipeline);
 
 module.exports = {
     commands: ['play', 'music'],
-    description: 'Download high-quality music from YouTube',
+    description: 'Download music from YouTube',
     group: true,
     private: true,
     admin: false,
     
     async run(sock, message, args, context) {
-        const { jid, safeSend, text } = context;
+        const { jid, safeSend } = context;
         const query = args.join(' ').trim();
         const quoted = message;
         
@@ -80,17 +77,7 @@ module.exports = {
             await safeSend(sock, jid, {
                 audio: { url: audioUrl },
                 mimetype: 'audio/mp4',
-                ptt: false,
-                contextInfo: {
-                    externalAdReply: {
-                        title: video.title,
-                        body: `🎧 ${video.author.name}`,
-                        thumbnailUrl: video.thumbnail,
-                        mediaType: 2,
-                        mediaUrl: video.url,
-                        sourceUrl: video.url
-                    }
-                }
+                ptt: false
             }, { quoted });
 
             // Send as downloadable file
@@ -107,7 +94,7 @@ module.exports = {
             }, { quoted });
 
         } catch (error) {
-            console.error('Music Plugin Error:', error);
+            console.error('Music Plugin Error:', error.stack || error);
             await safeSend(sock, jid, {
                 text: `❌ Error: ${error.message || 'Failed to process request'}`
             }, { quoted });
