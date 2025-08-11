@@ -2,21 +2,20 @@ const fs = require('fs');
 const path = require('path');
 const { isJidGroup } = require('@whiskeysockets/baileys');
 
-// ✅ Fixed group membership check with custom JID normalization
+// ✅ JID normalization helper
+function normalizeJid(jid) {
+    if (!jid) return jid;
+    const [userPart, domainPart] = jid.split('@');
+    const baseUser = userPart?.split(':')[0];
+    return baseUser && domainPart ? `${baseUser}@${domainPart}` : jid;
+}
+
+// ✅ Group membership check
 async function isBotInGroup(sock, groupJid) {
     try {
         const metadata = await sock.groupMetadata(groupJid);
-        
-        // Custom JID normalization function
-        const normalizeJid = (jid) => {
-            if (!jid) return jid;
-            // Remove device suffix and agent identifiers
-            const userPart = jid.split(':')[0];
-            // Ensure proper formatting
-            return userPart.includes('@') ? userPart : userPart + '@s.whatsapp.net';
-        };
-
         const botBase = normalizeJid(sock.user.id);
+        
         const match = metadata.participants.some(p => 
             normalizeJid(p.id) === botBase
         );
@@ -32,7 +31,24 @@ async function isBotInGroup(sock, groupJid) {
     }
 }
 
-// ✅ Safe message sender - prevents bot crashes on send errors
+// ✅ Admin check
+async function isUserAdmin(sock, groupJid, userJid) {
+    try {
+        const metadata = await sock.groupMetadata(groupJid);
+        const normalizedUser = normalizeJid(userJid);
+        
+        const participant = metadata.participants.find(
+            p => normalizeJid(p.id) === normalizedUser
+        );
+        
+        return participant && ['admin', 'superadmin'].includes(participant.admin);
+    } catch (err) {
+        console.warn(`[AdminCheck] Error in ${groupJid}:`, err.message);
+        return false;
+    }
+}
+
+// ✅ Safe message sender
 async function safeSend(sock, jid, content, options = {}) {
     try {
         if (!jid || typeof jid !== 'string') {
@@ -45,7 +61,7 @@ async function safeSend(sock, jid, content, options = {}) {
             return;
         }
 
-        // ✅ Check group membership before sending
+        // Group membership check
         if (isJidGroup(jid)) {
             const inGroup = await isBotInGroup(sock, jid);
             if (!inGroup) {
@@ -65,7 +81,7 @@ async function safeSend(sock, jid, content, options = {}) {
     }
 }
 
-// ✅ Load plugins from /plugins folder
+// ✅ Load plugins
 const plugins = [];
 const pluginDir = path.join(__dirname, 'plugins');
 const pluginFiles = fs.existsSync(pluginDir)
@@ -75,9 +91,15 @@ const pluginFiles = fs.existsSync(pluginDir)
 for (const file of pluginFiles) {
     try {
         const plugin = require(path.join(pluginDir, file));
-        if (plugin && typeof plugin.name === 'string' && typeof plugin.run === 'function') {
+        
+        // Backward compatibility for old plugin format
+        if (!plugin.commands && plugin.name) {
+            plugin.commands = [plugin.name];
+        }
+        
+        if (plugin && Array.isArray(plugin.commands) && typeof plugin.run === 'function') {
             plugins.push(plugin);
-            console.log(`[Plugin Loader] Loaded plugin: ${plugin.name}`);
+            console.log(`[Plugin Loader] Loaded plugin: ${plugin.commands.join(', ')}`);
         } else {
             console.warn(`[Plugin Loader] Skipped invalid plugin: ${file}`);
         }
@@ -88,8 +110,6 @@ for (const file of pluginFiles) {
 
 /**
  * Main message handler
- * @param {import('@whiskeysockets/baileys').WASocket} sock - Baileys socket instance
- * @param {import('@whiskeysockets/baileys').proto.WebMessageInfo} message - Incoming message
  */
 async function handleMessages(sock, message) {
     try {
@@ -98,13 +118,13 @@ async function handleMessages(sock, message) {
         const sender = message.key.participant || jid;
         const isFromBot = message.key.fromMe || sender === sock?.user?.id;
 
-        // ✅ Ignore messages from the bot itself
+        // Ignore messages from the bot itself
         if (isFromBot || !msg) return;
 
         const isGroup = isJidGroup(jid);
         let groupMetadata = null;
 
-        // ✅ Fetch group metadata only if needed
+        // Fetch group metadata if needed
         if (isGroup) {
             try {
                 groupMetadata = await sock.groupMetadata(jid);
@@ -113,7 +133,7 @@ async function handleMessages(sock, message) {
             }
         }
 
-        // ✅ Extract message text
+        // Extract message text
         const text =
             msg?.conversation ||
             msg?.extendedTextMessage?.text ||
@@ -123,13 +143,13 @@ async function handleMessages(sock, message) {
 
         if (!text) return;
 
-        // ✅ Parse command and arguments
+        // Parse command and arguments
         const prefix = require('./config').PREFIX || '.';
         const isCommand = text.startsWith(prefix);
         const args = isCommand ? text.slice(prefix.length).trim().split(/\s+/) : [];
         const command = args.shift()?.toLowerCase();
 
-        // ✅ Context passed to plugins
+        // Context passed to plugins
         const context = {
             sock,
             message,
@@ -142,18 +162,31 @@ async function handleMessages(sock, message) {
             safeSend
         };
 
-        // ✅ Execute matching plugins
+        // Execute matching plugins
         for (const plugin of plugins) {
             try {
-                // Scope filtering (default to true if not defined)
+                // Scope filtering
                 const allowInGroup = plugin.group ?? true;
                 const allowInPrivate = plugin.private ?? true;
 
+                // Skip if not allowed in current context
                 if (isGroup && !allowInGroup) continue;
                 if (!isGroup && !allowInPrivate) continue;
+                
+                // Admin check for admin-only commands
+                if (plugin.admin && isGroup) {
+                    const isAdmin = await isUserAdmin(sock, jid, sender);
+                    if (!isAdmin) {
+                        console.log(`[AdminBlock] Non-admin tried to use ${plugin.commands[0]} in ${jid}`);
+                        await safeSend(sock, jid, {
+                            text: `⚠️ This command is restricted to group admins only.`
+                        }, { quoted: message });
+                        continue;
+                    }
+                }
 
                 // Command match
-                if (isCommand && plugin.name === command) {
+                if (isCommand && plugin.commands.includes(command)) {
                     await plugin.run(sock, message, args, context);
                 }
 
@@ -162,9 +195,9 @@ async function handleMessages(sock, message) {
                     await plugin.onMessage(sock, message, text, context);
                 }
             } catch (err) {
-                console.error(`[Plugin Error] ${plugin.name} failed:`, err.message || err);
+                console.error(`[Plugin Error] ${plugin.commands[0]} failed:`, err.message || err);
                 await safeSend(sock, jid, {
-                    text: `❌ Error in plugin *${plugin.name}*. Please try again later.`
+                    text: `❌ Error in command *${plugin.commands[0]}*. Please try again later.`
                 }, { quoted: message });
             }
         }
