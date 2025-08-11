@@ -10,7 +10,7 @@ async function isBotInGroup(sock, groupJid) {
     try {
         const metadata = await sock.groupMetadata(groupJid);
         const botId = sock?.user?.id?.split(':')[0];
-        return metadata?.participants?.some(p => p.id?.includes(botId));
+        return metadata?.participants?.some(p => p.id?.startsWith(botId));
     } catch (err) {
         console.warn(`[GroupCheck] Failed to verify bot membership in ${groupJid}:`, err.message);
         return false;
