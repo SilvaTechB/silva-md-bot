@@ -308,11 +308,12 @@ sock.ev.on('messages.upsert', async ({ messages }) => {
         }
     });
 
-// ✅ Auto Status Seen + React + Reply - Enhanced (Full Updated)
+// ✅ Auto Status Seen + React + Reply - Fixed Version
 const statusSaverDir = path.join(__dirname, 'status_saver');
 if (!fs.existsSync(statusSaverDir)) {
     fs.mkdirSync(statusSaverDir, { recursive: true });
 }
+
 // Media saving helper
 async function saveMedia(message, msgType, sock, caption) {
     try {
@@ -335,6 +336,7 @@ async function saveMedia(message, msgType, sock, caption) {
         const filename = `${Date.now()}.${extMap[msgType]}`;
         const filePath = path.join(statusSaverDir, filename);
         fs.writeFileSync(filePath, buffer);
+        
         // Send to self chat
         const selfJid = sock.user.id.includes(':')
             ? `${sock.user.id.split(':')[0]}@s.whatsapp.net`
@@ -352,6 +354,7 @@ async function saveMedia(message, msgType, sock, caption) {
         return false;
     }
 }
+
 // Helper to unwrap statuses
 function unwrapStatus(msg) {
     const inner =
@@ -361,7 +364,8 @@ function unwrapStatus(msg) {
     const msgType = Object.keys(inner)[0] || '';
     return { inner, msgType };
 }
-// Main handler
+
+// Main handler - Fixed seen marking and reactions
 sock.ev.on('messages.upsert', async ({ messages }) => {
     try {
         for (const message of messages) {
@@ -373,38 +377,35 @@ sock.ev.on('messages.upsert', async ({ messages }) => {
             logMessage('EVENT', `Status update from ${userJid}: ${statusId}`);
 
             const { inner, msgType } = unwrapStatus(message);
-            // ✅ 1. Mark status as seen (correct way)
+            
+            // ✅ 1. FIXED: Mark status as seen (correct method)
             if (config.AUTO_STATUS_SEEN) {
                 try {
-                    await sock.sendReadReceipt('status@broadcast', userJid, [statusId]);
-                    logMessage('INFO', `Status seen (sent read receipt): ${statusId}`);
+                    // Correct method to mark status as seen
+                    await sock.readMessages([message.key]);
+                    logMessage('INFO', `Status seen (marked as read): ${statusId}`);
                 } catch (e) {
                     logMessage('WARN', `Status seen failed: ${e.message}`);
                 }
             }
 
-            // ✅ 2. True status reaction (no DM) — attaches reaction to the story itself
+            // ✅ 2. FIXED: True status reaction (correct parameters)
             if (config.AUTO_STATUS_REACT) {
                 try {
                     const emojis = (config.CUSTOM_REACT_EMOJIS || '❤️,🔥,💯,😍,👏').split(',');
                     const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)].trim();
 
-                    const selfJid = sock.user.id.includes(':')
-                        ? `${sock.user.id.split(':')[0]}@s.whatsapp.net`
-                        : sock.user.id;
-
+                    // Fixed: Send reaction to user's direct chat with proper key reference
                     await sock.sendMessage(
-                        'status@broadcast',
+                        userJid, // Send to user's direct chat
                         {
                             react: {
                                 text: randomEmoji,
-                                key: message.key // react on the exact status message
-                            }
-                        },
-                        {
-                            // required for status reactions to be routed correctly
-                            additionalAttributes: {
-                                statusJidList: [userJid, selfJid]
+                                key: {
+                                    remoteJid: 'status@broadcast',
+                                    id: statusId,
+                                    participant: userJid
+                                }
                             }
                         }
                     );
@@ -415,7 +416,7 @@ sock.ev.on('messages.upsert', async ({ messages }) => {
                 }
             }
 
-            // ✅ 3. Reply to status (quoting it) — controlled by your config flag
+            // ✅ 3. Reply to status (quoting it) - unchanged
             if (config.AUTO_STATUS_REPLY) {
                 try {
                     await sock.sendMessage(userJid, {
@@ -432,7 +433,7 @@ sock.ev.on('messages.upsert', async ({ messages }) => {
                 }
             }
 
-            // ✅ 4. Status saving feature
+            // ✅ 4. Status saving feature - unchanged
             if (config.Status_Saver === 'true') {
                 try {
                     const userName = await sock.getName(userJid) || 'Unknown';
@@ -463,7 +464,7 @@ sock.ev.on('messages.upsert', async ({ messages }) => {
                             break;
                     }
 
-                    // Optional: DM confirmation to the user (kept as-is, behind your flag)
+                    // Optional: DM confirmation to the user
                     if (config.STATUS_REPLY === 'true') {
                         const replyMsg = config.STATUS_MSG || 'SILVA MD 💖 SUCCESSFULLY VIEWED YOUR STATUS';
                         await sock.sendMessage(userJid, { text: replyMsg });
@@ -479,7 +480,6 @@ sock.ev.on('messages.upsert', async ({ messages }) => {
         logMessage('ERROR', `Status Handler Error: ${err.message}`);
     }
 });
-
     // ✅ Handle Commands with Enhanced Group Support
     sock.ev.on('messages.upsert', async ({ messages, type }) => {
         if (type !== 'notify') return;
