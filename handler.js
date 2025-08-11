@@ -1,32 +1,31 @@
-// handler.js
-// Centralized message handler for Silva MD Bot — plugin execution, scope filtering, safe messaging
-
 const fs = require('fs');
 const path = require('path');
-const { isJidGroup } = require('@whiskeysockets/baileys');
+const { isJidGroup, jidNormalize } = require('@whiskeysockets/baileys');
 
-// ✅ Improved group membership check — normalized JIDs
+// ✅ Fixed group membership check with proper JID normalization
 async function isBotInGroup(sock, groupJid) {
     try {
         const metadata = await sock.groupMetadata(groupJid);
-        const normalize = id => id?.split(':')[0]?.split('@')[0]; // Strip device suffix and domain
-        const botBase = normalize(sock?.user?.id);
-
-        const match = metadata?.participants?.some(p => normalize(p.id) === botBase);
+        // Use Baileys' built-in JID normalizer
+        const botBase = jidNormalize(sock.user.id); 
+        
+        // Find bot in participants using normalized JIDs
+        const match = metadata.participants.some(p => 
+            jidNormalize(p.id) === botBase
+        );
 
         if (!match) {
-            console.warn(`[GroupCheck] Bot ID ${botBase} not found in group ${groupJid}`);
-            console.log(`[GroupCheck] Participants:`, metadata.participants.map(p => p.id));
+            console.warn(`[GroupCheck] Bot ${botBase} not found in group ${groupJid}`);
         }
 
         return match;
     } catch (err) {
-        console.warn(`[GroupCheck] Failed to verify bot membership in ${groupJid}:`, err.message);
+        console.warn(`[GroupCheck] Error in ${groupJid}:`, err.message);
         return false;
     }
 }
 
-// ✅ Safe message sender — prevents bot crashes on send errors
+// ✅ Safe message sender - prevents bot crashes on send errors
 async function safeSend(sock, jid, content, options = {}) {
     try {
         if (!jid || typeof jid !== 'string') {
@@ -163,7 +162,7 @@ async function handleMessages(sock, message) {
             }
         }
     } catch (err) {
-        console.error('[Handler Error] Failed to process message:', err.message || err);
+        console.error('[Handler] Critical error:', err);
     }
 }
 
