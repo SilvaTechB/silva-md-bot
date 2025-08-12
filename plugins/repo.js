@@ -16,13 +16,13 @@ module.exports = {
         const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}`;
         
         try {
-            // Send loading message
-            const loadingMsg = await safeSend(sock, jid, {
+            // Send loading message without quoted reference
+            await safeSend(sock, jid, {
                 text: '🔄 Fetching repository details...'
-            }, { quoted });
+            });
 
-            // Get GitHub data
-            const { data } = await axios.get(apiUrl);
+            // Get GitHub data with timeout
+            const { data } = await axios.get(apiUrl, { timeout: 5000 });
             const { 
                 stargazers_count, 
                 forks_count, 
@@ -38,21 +38,9 @@ module.exports = {
             // Format last updated time
             const lastUpdated = moment(updated_at).fromNow();
             
-            // Create ASCII art
-            const asciiArt = `
-███████╗██╗██╗     ██╗   ██╗ █████╗ 
-██╔════╝██║██║     ██║   ██║██╔══██╗
-███████╗██║██║     ██║   ██║███████║
-╚════██║██║██║     ██║   ██║██╔══██║
-███████║██║███████╗╚██████╔╝██║  ██║
-╚══════╝╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝
-            `;
-            
             // Create repository info
             const repoInfo = `
 *✨ SILVA MD BOT REPOSITORY*
-
-${asciiArt}
 
 📦 *Repository*: [${repoName}](${html_url})
 📝 *Description*: ${description || 'No description provided'}
@@ -68,40 +56,34 @@ ${asciiArt}
 ⚡ *Powered by Silva Tech Inc*
             `;
 
-            // Delete loading message if possible
-            if (loadingMsg) {
-                try {
-                    await sock.sendMessage(jid, {
-                        delete: loadingMsg.key
-                    });
-                } catch (deleteError) {
-                    console.warn('Could not delete loading message:', deleteError.message);
-                }
+            // Send repository information with fallback
+            try {
+                await safeSend(sock, jid, {
+                    image: { 
+                        url: "https://files.catbox.moe/5uli5p.jpeg" 
+                    },
+                    caption: repoInfo,
+                    contextInfo: {
+                        externalAdReply: {
+                            title: "GitHub Repository",
+                            body: "Explore the codebase!",
+                            sourceUrl: html_url,
+                            mediaType: 1
+                        }
+                    }
+                });
+            } catch (imageError) {
+                console.warn('Image send failed, sending text only');
+                await safeSend(sock, jid, { text: repoInfo });
             }
 
-            // Send repository information
-            await safeSend(sock, jid, {
-                image: { 
-                    url: "https://files.catbox.moe/5uli5p.jpeg" 
-                },
-                caption: repoInfo,
-                contextInfo: {
-                    externalAdReply: {
-                        title: "GitHub Repository",
-                        body: "Explore the codebase!",
-                        thumbnailUrl: "https://files.catbox.moe/5uli5p.jpeg",
-                        sourceUrl: html_url,
-                        mediaType: 1,
-                        renderLargerThumbnail: true
-                    }
-                }
-            }, { quoted });
-
         } catch (error) {
-            console.error('Repo Plugin Error:', error.stack || error);
+            console.error('Repo Plugin Error:', error.message || error);
+            
+            // Simple error message without quoted reference
             await safeSend(sock, jid, {
                 text: '❌ Failed to fetch repo details. Please try again later.'
-            }, { quoted });
+            });
         }
     }
 };
