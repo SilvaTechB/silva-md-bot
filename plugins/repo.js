@@ -10,13 +10,14 @@ module.exports = {
     
     async run(sock, message, args, context) {
         const { jid, safeSend } = context;
+        const quoted = message;
         const repoOwner = 'SilvaTechB';
         const repoName = 'silva-md-bot';
         const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}`;
         
         try {
             // Send processing notification
-            await safeSend({
+            const loadingMsg = await safeSend({
                 text: '🔄 Fetching repository details...'
             });
 
