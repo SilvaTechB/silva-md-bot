@@ -10,18 +10,17 @@ module.exports = {
     
     async run(sock, message, args, context) {
         const { jid, safeSend } = context;
-        const quoted = message;
         const repoOwner = 'SilvaTechB';
         const repoName = 'silva-md-bot';
         const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}`;
         
         try {
-            // Send loading message without quoted reference
-            await safeSend(sock, jid, {
+            // Send processing notification
+            await safeSend({
                 text: '🔄 Fetching repository details...'
             });
 
-            // Get GitHub data with timeout
+            // Get GitHub data
             const { data } = await axios.get(apiUrl, { timeout: 5000 });
             const { 
                 stargazers_count, 
@@ -42,7 +41,8 @@ module.exports = {
             const repoInfo = `
 *✨ SILVA MD BOT REPOSITORY*
 
-📦 *Repository*: [${repoName}](${html_url})
+📦 *Repository*: ${repoName}
+🔗 *URL*: ${html_url}
 📝 *Description*: ${description || 'No description provided'}
 
 🌟 *Stars*: ${stargazers_count}
@@ -56,32 +56,16 @@ module.exports = {
 ⚡ *Powered by Silva Tech Inc*
             `;
 
-            // Send repository information with fallback
-            try {
-                await safeSend(sock, jid, {
-                    image: { 
-                        url: "https://files.catbox.moe/5uli5p.jpeg" 
-                    },
-                    caption: repoInfo,
-                    contextInfo: {
-                        externalAdReply: {
-                            title: "GitHub Repository",
-                            body: "Explore the codebase!",
-                            sourceUrl: html_url,
-                            mediaType: 1
-                        }
-                    }
-                });
-            } catch (imageError) {
-                console.warn('Image send failed, sending text only');
-                await safeSend(sock, jid, { text: repoInfo });
-            }
+            // Send repository information
+            await safeSend({
+                text: repoInfo
+            });
 
         } catch (error) {
             console.error('Repo Plugin Error:', error.message || error);
             
-            // Simple error message without quoted reference
-            await safeSend(sock, jid, {
+            // Simplified error message
+            await safeSend({
                 text: '❌ Failed to fetch repo details. Please try again later.'
             });
         }
