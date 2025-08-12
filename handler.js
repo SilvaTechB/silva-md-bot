@@ -2,20 +2,26 @@ const fs = require('fs');
 const path = require('path');
 const { isJidGroup } = require('@whiskeysockets/baileys');
 
-// ✅ Improved JID normalization
+// ✅ Robust JID normalization
 function normalizeJid(jid) {
     if (!jid) return jid;
-    jid = jid.replace(/\:.*?\@/, '@'); // Remove device ID
-    return jid.split('@')[0] + '@s.whatsapp.net'; // Standardize domain
+    // Handle all JID formats:
+    // - Remove device IDs (e.g., :0, :1, :2)
+    // - Standardize domains (c.us → s.whatsapp.net)
+    // - Preserve group JIDs
+    return jid
+        .replace(/(:\d+)?@/, '@')
+        .replace(/@c\.us$/, '@s.whatsapp.net')
+        .replace(/@g\.us$/, '@g.us');
 }
 
-// ✅ Reliable group membership check
+// ✅ Enhanced group membership check
 async function isBotInGroup(sock, groupJid) {
     try {
         const metadata = await sock.groupMetadata(groupJid);
         const botJid = normalizeJid(sock.user.id);
         
-        // Check if bot is in participants
+        // Check participants
         const match = metadata.participants.some(p => 
             normalizeJid(p.id) === botJid
         );
@@ -23,13 +29,35 @@ async function isBotInGroup(sock, groupJid) {
         if (!match) {
             console.warn(`[GroupCheck] Bot ${botJid} not found in group ${groupJid}`);
             console.warn(`[GroupCheck] Participants:`, 
-                metadata.participants.map(p => p.id).join(', '));
+                metadata.participants.map(p => normalizeJid(p.id)).join(', '));
+            
+            // Attempt to get invite code for rejoining
+            try {
+                const inviteCode = await sock.groupInviteCode(groupJid);
+                if (inviteCode) {
+                    console.log(`[GroupCheck] Rejoin link: https://chat.whatsapp.com/${inviteCode}`);
+                }
+            } catch (rejoinErr) {
+                console.warn('[GroupCheck] Failed to get invite link:', rejoinErr.message);
+            }
         }
         
         return match;
     } catch (err) {
         console.warn(`[GroupCheck] Error in ${groupJid}:`, err.message);
-        return false; // Assume not in group on error
+        
+        // Session recovery attempt
+        if (err.message.includes('not in group') || err.message.includes('No sessions')) {
+            try {
+                console.log('[Session] Attempting to resync groups...');
+                await sock.groupFetchAllParticipating();
+                return true; // Assume we're in group after sync
+            } catch (syncErr) {
+                console.warn('[Session] Sync failed:', syncErr.message);
+            }
+        }
+        
+        return false;
     }
 }
 
@@ -50,7 +78,7 @@ async function isUserAdmin(sock, groupJid, userJid) {
     }
 }
 
-// ✅ Safe message sender (without group check)
+// ✅ Smart safeSend with session recovery
 async function safeSend(sock, jid, content, options = {}) {
     try {
         if (!jid || typeof jid !== 'string') {
@@ -63,20 +91,42 @@ async function safeSend(sock, jid, content, options = {}) {
             return;
         }
 
+        // Group session validation
+        if (isJidGroup(jid)) {
+            const inGroup = await isBotInGroup(sock, jid);
+            if (!inGroup) {
+                console.warn(`[SafeSend] Bot not in group ${jid}. Skipping.`);
+                return;
+            }
+        }
+
         return await sock.sendMessage(jid, content, options);
     } catch (err) {
         const reason = err?.message || err;
-        if (reason.includes('not in group')) {
-            console.warn(`[SafeSend] Bot not in group ${jid}`);
-        } else if (reason.includes('No sessions')) {
-            console.warn(`[SafeSend] No session for ${jid}`);
-        } else {
-            console.error(`[SafeSend] Failed to send to ${jid}:`, reason);
+        
+        // Session recovery cases
+        if (reason.includes('No sessions') || reason.includes('not in group')) {
+            console.warn(`[Session] Recovering session for ${jid}`);
+            
+            try {
+                // Resync group info
+                await sock.groupFetchAllParticipating();
+                
+                // Wait briefly before retry
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Retry after sync
+                return await sock.sendMessage(jid, content, options);
+            } catch (recoverErr) {
+                console.error('[Session] Recovery failed:', recoverErr.message);
+            }
         }
+        
+        console.error(`[SafeSend] Failed to send to ${jid}:`, reason);
     }
 }
 
-// ✅ Plugin loader with better error handling
+// ✅ Plugin loader with cache clearing
 const plugins = [];
 const pluginDir = path.join(__dirname, 'plugins');
 const pluginFiles = fs.existsSync(pluginDir)
