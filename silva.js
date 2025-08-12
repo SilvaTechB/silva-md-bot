@@ -259,6 +259,9 @@ sock.ev.on('messages.upsert', async ({ messages }) => {
 
     sock.ev.on('creds.update', saveCreds);
 
+    const { setupConnectionHandlers } = require('./handler');
+setupConnectionHandlers(sock);
+    
     // Anti-delete logic goes here 👇
     sock.ev.on('messages.delete', async (item) => {
         try {
