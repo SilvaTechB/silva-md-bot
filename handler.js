@@ -4,18 +4,28 @@ const { isJidGroup, delay } = require('@whiskeysockets/baileys');
 
 // Global session manager
 const sessionManager = {
-    activeSessions: new Set(),
+    activeSessions: new Map(), // jid -> timestamp
     maxRetries: 3,
     retryDelays: [1000, 3000, 5000], // Exponential backoff
+    sessionTimeout: 300000, // 5 minutes
     
     // ✅ Register a session for JID
     registerSession(jid) {
-        this.activeSessions.add(jid);
+        this.activeSessions.set(jid, Date.now());
     },
     
-    // ✅ Check if session exists
-    hasSession(jid) {
-        return this.activeSessions.has(jid);
+    // ✅ Check if session exists and is valid
+    hasValidSession(jid) {
+        const timestamp = this.activeSessions.get(jid);
+        if (!timestamp) return false;
+        
+        // Check if session expired
+        if (Date.now() - timestamp > this.sessionTimeout) {
+            this.activeSessions.delete(jid);
+            return false;
+        }
+        
+        return true;
     },
     
     // ✅ Session recovery handler
@@ -23,14 +33,19 @@ const sessionManager = {
         console.warn(`[Session] Attempting recovery for ${jid}`);
         
         try {
-            // Refresh connection state
+            // Step 1: Refresh connection state
             await sock.ev.flush();
-            await sock.ws.forceReconnect();
+            await sock.end();
+            await sock.waitForConnectionUpdate(update => update.connection === "close");
             
-            // Request new prekeys
+            // Step 2: Reconnect
+            await sock.connect();
+            await sock.waitForConnectionUpdate(update => update.connection === "open");
+            
+            // Step 3: Request new prekeys
             await sock.requestPairingCode(sock.user.id.split(':')[0]);
             
-            // Re-sync groups
+            // Step 4: Re-sync groups
             await sock.groupFetchAllParticipating();
             
             // Mark session as active
@@ -46,15 +61,23 @@ const sessionManager = {
 // ✅ God-mode safeSend with session management
 async function safeSend(sock, jid, content, options = {}, attempt = 0) {
     // Validate parameters
-    if (!jid || typeof jid !== 'string') return;
-    if (!sock || typeof sock.sendMessage !== 'function') return;
+    if (!jid || typeof jid !== 'string') {
+        console.warn('[SafeSend] Invalid JID:', jid);
+        return;
+    }
+    
+    if (!sock || typeof sock.sendMessage !== 'function') {
+        console.warn('[SafeSend] Invalid socket');
+        return;
+    }
     
     try {
         // Ensure session exists
-        if (!sessionManager.hasSession(jid)) {
+        if (!sessionManager.hasValidSession(jid)) {
+            console.warn(`[Session] No valid session for ${jid}, attempting recovery`);
             const recovered = await sessionManager.recoverSession(sock, jid);
             if (!recovered) {
-                console.warn(`[SafeSend] Session recovery failed for ${jid}`);
+                console.error(`[SafeSend] Session recovery failed for ${jid}`);
                 return;
             }
         }
@@ -94,7 +117,7 @@ async function safeSend(sock, jid, content, options = {}, attempt = 0) {
     }
 }
 
-// ✅ Plugin loader
+// ✅ Plugin loader with backward compatibility
 const plugins = [];
 const pluginDir = path.join(__dirname, 'plugins');
 const pluginFiles = fs.existsSync(pluginDir)
@@ -107,8 +130,15 @@ for (const file of pluginFiles) {
         delete require.cache[require.resolve(pluginPath)];
         const plugin = require(pluginPath);
         
-        // Backward compatibility
-        if (!plugin.commands && plugin.name) plugin.commands = [plugin.name];
+        // Backward compatibility for old plugin formats
+        if (!plugin.commands && plugin.name) {
+            plugin.commands = [plugin.name];
+        }
+        
+        // Support both 'run' and 'handler' functions
+        if (typeof plugin.run !== 'function' && typeof plugin.handler === 'function') {
+            plugin.run = plugin.handler;
+        }
         
         if (plugin?.commands?.length && typeof plugin.run === 'function') {
             plugins.push(plugin);
@@ -118,6 +148,8 @@ for (const file of pluginFiles) {
             plugin.commands.forEach(cmd => {
                 sessionManager.registerSession(cmd);
             });
+        } else {
+            console.warn(`[Plugin] Skipped invalid plugin: ${file}`);
         }
     } catch (err) {
         console.error(`[Plugin] Error loading ${file}:`, err.stack || err);
@@ -126,7 +158,7 @@ for (const file of pluginFiles) {
 
 // ✅ Connection manager for session recovery
 function setupConnectionHandlers(sock) {
-    sock.ev.on('connection.update', (update) => {
+    sock.ev.on('connection.update', async (update) => {
         const { connection, lastDisconnect } = update;
         
         if (connection === 'close') {
@@ -134,16 +166,21 @@ function setupConnectionHandlers(sock) {
             console.log(`[Connection] Closed: ${lastDisconnect.error} | Reconnecting: ${shouldReconnect}`);
             
             if (shouldReconnect) {
-                setTimeout(() => {
-                    console.log('[Connection] Attempting reconnect...');
-                    sock.ev.emit('connection.update', { connection: 'connecting' });
-                    sock.ws.forceReconnect();
+                setTimeout(async () => {
+                    try {
+                        console.log('[Connection] Attempting reconnect...');
+                        sock.ev.emit('connection.update', { connection: 'connecting' });
+                        await sock.end();
+                        await sock.connect();
+                    } catch (reconnectError) {
+                        console.error('[Connection] Reconnect failed:', reconnectError);
+                    }
                 }, 2000);
             }
         } else if (connection === 'open') {
             console.log('[Connection] Opened, restoring sessions...');
             // Restore all known sessions
-            sessionManager.activeSessions.forEach(jid => {
+            sessionManager.activeSessions.forEach((_, jid) => {
                 sessionManager.registerSession(jid);
             });
         }
@@ -191,7 +228,7 @@ async function handleMessages(sock, message) {
         const args = isCommand ? text.slice(prefix.length).trim().split(/\s+/) : [];
         const command = args.shift()?.toLowerCase();
 
-        // Context for plugins
+        // Context for plugins - FIXED CONTEXT INVOCATION
         const context = {
             sock,
             message,
