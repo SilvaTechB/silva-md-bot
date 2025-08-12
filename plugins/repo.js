@@ -2,28 +2,43 @@ const axios = require('axios');
 const moment = require('moment');
 
 module.exports = {
-    name: 'repo',
     commands: ['repo', 'repository', 'github'],
-    handler: async ({ sock, m, sender, contextInfo }) => {
+    description: 'Show SILVA MD BOT repository information',
+    group: true,
+    private: true,
+    admin: false,
+    
+    async run(sock, message, args, context) {
+        const { jid, safeSend } = context;
+        const quoted = message;
+        const repoOwner = 'SilvaTechB';
+        const repoName = 'silva-md-bot';
+        const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}`;
+        
         try {
-            const repoOwner = 'SilvaTechB';
-            const repoName = 'silva-md-bot';
-            const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}`;
-            
-            // Show loading message with animation
-            const loadingMsg = await sock.sendMessage(sender, {
-                text: '🔄 Fetching repository details...',
-                contextInfo: contextInfo
-            }, { quoted: m });
+            // Send loading message
+            const loadingMsg = await safeSend(sock, jid, {
+                text: '🔄 Fetching repository details...'
+            }, { quoted });
 
+            // Get GitHub data
             const { data } = await axios.get(apiUrl);
-            const { stargazers_count, forks_count, updated_at, html_url, 
-                    description, language, open_issues, license, size } = data;
+            const { 
+                stargazers_count, 
+                forks_count, 
+                updated_at, 
+                html_url, 
+                description, 
+                language, 
+                open_issues, 
+                license, 
+                size 
+            } = data;
             
             // Format last updated time
             const lastUpdated = moment(updated_at).fromNow();
             
-            // Create fancy ASCII art
+            // Create ASCII art
             const asciiArt = `
 ███████╗██╗██╗     ██╗   ██╗ █████╗ 
 ██╔════╝██║██║     ██║   ██║██╔══██╗
@@ -53,21 +68,24 @@ ${asciiArt}
 ⚡ *Powered by Silva Tech Inc*
             `;
 
-            // Delete loading message
+            // Delete loading message if possible
             if (loadingMsg) {
-                await sock.sendMessage(sender, {
-                    delete: loadingMsg.key
-                });
+                try {
+                    await sock.sendMessage(jid, {
+                        delete: loadingMsg.key
+                    });
+                } catch (deleteError) {
+                    console.warn('Could not delete loading message:', deleteError.message);
+                }
             }
 
-            // Send repository information with image
-            await sock.sendMessage(sender, {
+            // Send repository information
+            await safeSend(sock, jid, {
                 image: { 
                     url: "https://files.catbox.moe/5uli5p.jpeg" 
                 },
                 caption: repoInfo,
                 contextInfo: {
-                    ...contextInfo,
                     externalAdReply: {
                         title: "GitHub Repository",
                         body: "Explore the codebase!",
@@ -77,14 +95,13 @@ ${asciiArt}
                         renderLargerThumbnail: true
                     }
                 }
-            }, { quoted: m });
+            }, { quoted });
 
         } catch (error) {
-            console.error('❌ Repo Plugin Error:', error);
-            await sock.sendMessage(sender, {
-                text: '❌ Failed to fetch repo details. Please try again later.',
-                contextInfo: contextInfo
-            }, { quoted: m });
+            console.error('Repo Plugin Error:', error.stack || error);
+            await safeSend(sock, jid, {
+                text: '❌ Failed to fetch repo details. Please try again later.'
+            }, { quoted });
         }
     }
 };
