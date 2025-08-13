@@ -264,52 +264,92 @@ setupConnectionHandlers(sock);
     
     // Anti-delete logic goes here 👇
     sock.ev.on('messages.delete', async (item) => {
-        try {
-            const keys = Array.isArray(item) ? item.map(i => i.key) : (item?.keys || []);
-            for (const key of keys) {
-                const from = key.remoteJid;
-                const isGroup = from.endsWith('@g.us');
+    try {
+        console.log('DEBUG: messages.delete event triggered');
 
-                if ((isGroup && !config.ANTIDELETE_GROUP) || (!isGroup && !config.ANTIDELETE_PRIVATE)) continue;
+        const keys = Array.isArray(item) ? item.map(i => i.key) : (item?.keys || []);
+        for (const key of keys) {
+            const from = key.remoteJid;
+            const isGroup = from.endsWith('@g.us');
 
-                const deletedMsg = await store.loadMessage(from, key.id);
-                if (!deletedMsg) {
-                    console.log(`WARN: No stored message found for ${key.id}`);
-                    continue;
-                }
-
-                const ownerJid = `${config.OWNER_NUMBER}@s.whatsapp.net`;
-                const sender = key.participant || from;
-                const senderName = sender.split('@')[0];
-
-                const caption = `⚠️ *Anti-Delete Alert!*\n\n👤 *Sender:* @${senderName}\n*Chat:* ${isGroup ? 'Group' : 'Private'}\n\n💬 *Restored Message:*`;
-
-                const opts = { contextInfo: { mentionedJid: [sender] } };
-                const msg = deletedMsg.message;
-
-                if (msg.conversation) {
-                    await sock.sendMessage(ownerJid, { text: `${caption}\n\n${msg.conversation}`, ...opts });
-                } else if (msg.extendedTextMessage) {
-                    await sock.sendMessage(ownerJid, { text: `${caption}\n\n${msg.extendedTextMessage.text}`, ...opts });
-                } else if (msg.imageMessage) {
-                    const buffer = await downloadAsBuffer(msg.imageMessage, 'image');
-                    await sock.sendMessage(ownerJid, { image: buffer, caption: `${caption}\n\n${msg.imageMessage.caption || ''}`, ...opts });
-                } else if (msg.videoMessage) {
-                    const buffer = await downloadAsBuffer(msg.videoMessage, 'video');
-                    await sock.sendMessage(ownerJid, { video: buffer, caption: `${caption}\n\n${msg.videoMessage.caption || ''}`, ...opts });
-                } else if (msg.documentMessage) {
-                    const buffer = await downloadAsBuffer(msg.documentMessage, 'document');
-                    await sock.sendMessage(ownerJid, { document: buffer, mimetype: msg.documentMessage.mimetype, fileName: msg.documentMessage.fileName || 'Restored-File', caption, ...opts });
-                } else {
-                    await sock.sendMessage(ownerJid, { text: `${caption}\n\n[Unsupported Message Type]`, ...opts });
-                }
-
-                console.log(`SUCCESS: Restored deleted message from ${senderName}`);
+            if ((isGroup && !config.ANTIDELETE_GROUP) || (!isGroup && !config.ANTIDELETE_PRIVATE)) {
+                console.log(`INFO: Anti-delete disabled for ${isGroup ? 'group' : 'private'} chats`);
+                continue;
             }
-        } catch (err) {
-            console.error(`ERROR (Anti-Delete): ${err.message}`);
+
+            console.log(`DEBUG: Attempting to load message ${key.id} from ${from}`);
+            const deletedMsg = await store.loadMessage(from, key.id);
+            if (!deletedMsg) {
+                console.log(`WARN: No stored message found for ${key.id}`);
+                continue;
+            }
+
+            const ownerJid = `${config.OWNER_NUMBER}@s.whatsapp.net`;
+            const sender = key.participant || from;
+            const senderName = sender.split('@')[0];
+            const msg = deletedMsg.message;
+            const msgType = Object.keys(msg)[0];
+
+            console.log(`DEBUG: Restoring message of type: ${msgType}`);
+
+            const caption = `⚠️ *Anti-Delete Alert!*\n\n👤 *Sender:* @${senderName}\n*Chat:* ${isGroup ? 'Group' : 'Private'}\n\n💬 *Restored Message:*`;
+            const opts = { contextInfo: { mentionedJid: [sender] } };
+
+            const targetJid = config.ANTIDELETE_SEND_TO_ORIGINAL ? from : ownerJid;
+
+            switch (msgType) {
+                case 'conversation':
+                    await sock.sendMessage(targetJid, { text: `${caption}\n\n${msg.conversation}`, ...opts });
+                    break;
+
+                case 'extendedTextMessage':
+                    await sock.sendMessage(targetJid, { text: `${caption}\n\n${msg.extendedTextMessage.text}`, ...opts });
+                    break;
+
+                case 'imageMessage': {
+                    const buffer = await downloadAsBuffer(msg.imageMessage, 'image');
+                    await sock.sendMessage(targetJid, {
+                        image: buffer,
+                        caption: `${caption}\n\n${msg.imageMessage.caption || ''}`,
+                        ...opts
+                    });
+                    break;
+                }
+
+                case 'videoMessage': {
+                    const buffer = await downloadAsBuffer(msg.videoMessage, 'video');
+                    await sock.sendMessage(targetJid, {
+                        video: buffer,
+                        caption: `${caption}\n\n${msg.videoMessage.caption || ''}`,
+                        ...opts
+                    });
+                    break;
+                }
+
+                case 'documentMessage': {
+                    const buffer = await downloadAsBuffer(msg.documentMessage, 'document');
+                    await sock.sendMessage(targetJid, {
+                        document: buffer,
+                        mimetype: msg.documentMessage.mimetype,
+                        fileName: msg.documentMessage.fileName || 'Restored-File',
+                        caption,
+                        ...opts
+                    });
+                    break;
+                }
+
+                default:
+                    await sock.sendMessage(targetJid, { text: `${caption}\n\n[Unsupported Message Type: ${msgType}]`, ...opts });
+                    break;
+            }
+
+            console.log(`SUCCESS: Restored deleted message from ${senderName}`);
         }
-    });
+    } catch (err) {
+        console.error(`ERROR (Anti-Delete): ${err.stack || err.message}`);
+    }
+});
+
 
 // ✅ Auto Status Seen + React + Reply - Fixed Version
 const statusSaverDir = path.join(__dirname, 'status_saver');
