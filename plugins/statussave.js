@@ -2,57 +2,54 @@ module.exports = {
     name: 'status-saver',
     commands: ['send', 'nitumie', 'save'],
     tags: ['status', 'utility'],
-    description: 'Automatically downloads statuses when keywords are detected',
+    description: 'Automatically download and send statuses when commands are used',
     handler: async ({ sock, m, sender, contextInfo }) => {
-        console.log('[Status Saver] Command triggered by:', sender);
         try {
-            // 1. Validate essential parameters
+            // 1. Validate sock first - critical
             if (!sock || typeof sock.sendMessage !== 'function') {
-                console.error('[Critical] sock object is invalid:', sock);
+                console.error('[CRITICAL] Invalid sock object:', sock);
                 return;
             }
 
-            // 2. Define trigger keywords (case-insensitive)
-            const keywords = ['send', 'nitumie', 'save'];
-            console.log(`[Debug] Received message text: "${m.text}"`);
+            // 2. Handle text safely - solves the "undefined" string issue
+            const rawText = typeof m.text === 'string' ? m.text : '';
+            const cleanText = rawText.replace(/^[\/\!\.\#\-]/, '').trim().toLowerCase();
+            
+            console.log(`[DEBUG] Raw text: "${rawText}" | Clean text: "${cleanText}"`);
 
-            // 3. Extract clean text (remove prefixes/special characters)
-            const cleanText = (m.text || '').replace(/^[\/\!\.\#\-]/, '').trim().toLowerCase();
-            console.log(`[Debug] Cleaned text: "${cleanText}"`);
-
-            // 4. Check for keyword presence (whole word match)
-            const hasKeyword = keywords.some(keyword => 
-                cleanText === keyword || 
-                cleanText.startsWith(keyword + ' ') || 
-                cleanText.includes(' ' + keyword + ' ') || 
-                cleanText.endsWith(' ' + keyword)
+            // 3. Simplified command detection - use the commands array directly
+            const commandUsed = this.commands.find(cmd => 
+                cleanText === cmd || 
+                cleanText.startsWith(cmd + ' ') || 
+                cleanText.endsWith(' ' + cmd) ||
+                cleanText.includes(' ' + cmd + ' ')
             );
 
-            if (!hasKeyword) {
-                console.log('[Debug] No keyword match - exiting');
+            if (!commandUsed) {
+                console.log('[DEBUG] No valid command found - exiting');
                 return;
             }
 
-            // 5. Validate quoted message
-            if (!m.quoted) {
-                console.log('[Debug] No quoted message found');
+            // 4. Validate quoted message
+            if (!m.quoted || !m.quoted.message) {
+                console.log('[DEBUG] No quoted message');
                 return await sock.sendMessage(
                     sender,
                     { 
                         text: `📌 *Reply to a status first!*\n\n` +
-                              `_Example: reply to a status image/video with "save"_`,
+                              `Example: reply to a status with "save"`,
                         contextInfo
                     },
                     { quoted: m }
                 );
             }
 
-            // 6. Check if quoted message is valid status
-            const isImageStatus = m.quoted.message?.imageMessage;
-            const isVideoStatus = m.quoted.message?.videoMessage;
+            // 5. Check media type
+            const isImage = !!m.quoted.message.imageMessage;
+            const isVideo = !!m.quoted.message.videoMessage;
             
-            if (!isImageStatus && !isVideoStatus) {
-                console.log('[Debug] Quoted message is not status:', m.quoted.message);
+            if (!isImage && !isVideo) {
+                console.log('[DEBUG] Quoted message is not status media');
                 return await sock.sendMessage(
                     sender,
                     { 
@@ -64,30 +61,26 @@ module.exports = {
                 );
             }
 
-            // 7. Download media
-            console.log('[Debug] Starting media download...');
-            const mediaType = isImageStatus ? 'image' : 'video';
+            // 6. Download media
+            console.log('[DEBUG] Downloading media...');
+            const mediaType = isImage ? 'image' : 'video';
             const buffer = await sock.downloadMediaMessage(m.quoted);
             
             if (!buffer || buffer.length === 0) {
-                console.error('[Error] Empty buffer from download');
-                throw new Error('Downloaded media is empty');
+                throw new Error('Empty media buffer');
             }
-            console.log(`[Success] Downloaded ${mediaType} (${buffer.length} bytes)`);
 
-            // 8. Prepare caption
-            const mediaCaption = (
-                (isImageStatus ? m.quoted.message.imageMessage.caption : m.quoted.message.videoMessage.caption) || 
-                '📥 Status saved by Silva MD'
-            );
+            // 7. Get caption or use default
+            const mediaData = isImage ? m.quoted.message.imageMessage : m.quoted.message.videoMessage;
+            const caption = mediaData.caption || '📥 Status saved by Silva MD';
 
-            // 9. Send media with enhanced reliability
-            console.log(`[Debug] Sending ${mediaType} back to user...`);
+            // 8. Send media
+            console.log(`[DEBUG] Sending ${mediaType} media...`);
             await sock.sendMessage(
                 sender,
                 {
                     [mediaType]: buffer,
-                    caption: mediaCaption,
+                    caption: caption,
                     contextInfo: {
                         ...contextInfo,
                         externalAdReply: {
@@ -101,8 +94,8 @@ module.exports = {
                 { quoted: m }
             );
 
-            // 10. Send success confirmation
-            console.log('[Success] Media sent successfully');
+            // 9. Send confirmation
+            console.log('[DEBUG] Sending confirmation');
             await sock.sendMessage(
                 sender,
                 { text: "✅ Status saved successfully!", contextInfo },
@@ -110,14 +103,13 @@ module.exports = {
             );
 
         } catch (error) {
-            console.error('[Critical Error] in status-saver:', error);
+            console.error('[ERROR] Status saver failed:', error);
             if (sock?.sendMessage) {
                 await sock.sendMessage(
                     sender,
                     { 
                         text: `❌ *Download failed!*\n\n` +
-                              `_Error: ${error.message || 'Unknown error'}_\n` +
-                              `Please try again later`,
+                              `Error: ${error.message || 'Unknown error'}`,
                         contextInfo
                     },
                     { quoted: m }
