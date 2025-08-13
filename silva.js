@@ -499,22 +499,20 @@ sock.ev.on('messages.upsert', async ({ messages }) => {
         logMessage('MESSAGE', `New ${isNewsletter ? 'newsletter' : isGroup ? 'group' : isBroadcast ? 'broadcast' : 'private'} message from ${sender}`);
         
         // ✅ Auto-react to newsletter (WhatsApp Channel) messages
-if (
-    m.key?.remoteJid?.endsWith('@newsletter') &&
-    config.AUTO_REACT_NEWSLETTER
-) {
+if (m.key?.remoteJid?.includes('@newsletter')) {
     try {
         await sock.sendMessage(m.key.remoteJid, {
             react: {
-                text: '🤖', // Robot emoji
+                text: '🤖',
                 key: m.key
             }
         });
         logMessage('INFO', `Reacted to newsletter message in: ${m.key.remoteJid}`);
     } catch (e) {
-        logMessage('ERROR', `Newsletter react failed: ${e.message}`);
+        logMessage('ERROR', `Newsletter react failed: ${e.stack || e.message}`);
     }
-}       
+}
+   
         // Skip processing if group commands are disabled
         if (isGroup && !config.GROUP_COMMANDS) {
             logMessage('DEBUG', 'Group commands disabled, skipping message');
