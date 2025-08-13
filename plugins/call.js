@@ -128,9 +128,9 @@ module.exports = {
                         sender,
                         {
                             text: `📱 *Social Media Links*\n\n` +
-                                  `• Facebook: https://facebook.com/silva.tech.inc\n` +
+                                  `• Facebook: https://web.facebook.com/silva.tech.inc\n` +
                                   `• Instagram: https://instagram.com/silva.tech.inc\n` +
-                                  `• TikTok: https://tiktok.com/silva.tech.inc\n` +
+                                  `• TikTok: https://www.tiktok.com/@silva.tech.inc\n` +
                                   `• X (Twitter): https://x.com/silva_african`,
                             contextInfo: contextInfo
                         },
@@ -166,12 +166,12 @@ module.exports = {
                                 displayName: "Troubleshooting Contacts",
                                 contacts: [
                                     {
-                                        displayName: "Tech Support 1",
+                                        displayName: "Silva Tech Support 1",
                                         vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Tech Support 1\nTEL;type=CELL;type=VOICE;waid=254755257907:+254 755 257907\nEND:VCARD`
                                     },
                                     {
-                                        displayName: "Tech Support 2",
-                                        vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Tech Support 2\nTEL;type=CELL;type=VOICE;waid=254755257907:+254 755 257907\nEND:VCARD`
+                                        displayName: "Silva Tech Support 2",
+                                        vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Tech Support 2\nTEL;type=CELL;type=VOICE;waid=254743706010:+254 755 257907\nEND:VCARD`
                                     }
                                 ]
                             }
