@@ -1,7 +1,6 @@
 {
   "name": "silva-md",
   "description": "Javascript WhatsApp bot made by Silva.",
-  "logo": "https://files.catbox.moe/5uli5p.jpeg",
   "keywords": ["silva-md", "whatsapp", "baileys", "bot"],
   "success_url": "/",
   "stack": "heroku-24",
@@ -121,21 +120,9 @@
       "required": false,
       "value": "true"
     },
-    "DEBUG": {
-      "description": "Enable debug logs.",
-      "required": false,
-      "value": "true"
-    }
-  },
   "buildpacks": [
     {
       "url": "https://github.com/heroku/heroku-buildpack-nodejs.git"
-    },
-    {
-      "url": "https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest.git"
-    },
-    {
-      "url": "https://github.com/DuckyTeam/heroku-buildpack-imagemagick.git"
     }
   ]
 }
