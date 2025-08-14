@@ -22,19 +22,31 @@ module.exports = {
             }, { quoted: m });
 
             // Fetch video data from Silva API using axios
-            const apiUrl = `https://apis-keith.vercel.app/download/tiktokdl2?url=${encodeURIComponent(url)}`;
-            const response = await axios.get(apiUrl);
+            const apiUrl = `https://silva-api.vercel.app/download/tiktokdl?url=${encodeURIComponent(url)}`;
+            const response = await axios.get(apiUrl, {
+                timeout: 15000, // 15-second timeout
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36'
+                }
+            });
+            
             const data = response.data;
+            console.log('API Response:', JSON.stringify(data, null, 2)); // Log for debugging
 
-            // Handle API errors
-            if (data.status !== "success") {
-                throw new Error(data.message || 'API returned non-success status');
+            // Handle different API response formats
+            let downloadUrl;
+            if (data.status === "success") {
+                // New API format
+                const video = data.result;
+                downloadUrl = video.nowm || video.wm || video.hd || video.sd;
+            } else if (data.videoUrl) {
+                // Alternative API format
+                downloadUrl = data.videoUrl;
+            } else if (data.url) {
+                // Another possible format
+                downloadUrl = data.url;
             }
 
-            // Get best available video URL
-            const video = data.result;
-            const downloadUrl = video.nowm || video.wm || video.hd || video.sd;
-            
             if (!downloadUrl) {
                 throw new Error('No downloadable video found in API response');
             }
@@ -42,14 +54,16 @@ module.exports = {
             // Send video with metadata
             await sock.sendMessage(sender, {
                 video: { url: downloadUrl },
-                caption: `⬇️ *TikTok Download*\n\n🔗 Source: ${url}\n🎬 Quality: ${video.nowm ? 'No Watermark' : video.wm ? 'With Watermark' : 'Standard'}\n\n✨ _Powered by Silva API_`,
+                caption: `⬇️ *TikTok Download*\n\n🔗 Source: ${url}\n✨ _Powered by Silva API_`,
                 contextInfo
             }, { quoted: m });
 
         } catch (error) {
             console.error('❌ TikTok Download Error:', error.message);
+            console.error('Error details:', error.response?.data || error.stack);
+            
             await sock.sendMessage(sender, {
-                text: `⚠️ Download failed!\nReason: ${error.message || 'Unknown error'}\n\nPlease try again later with a different URL.`,
+                text: `⚠️ Download failed!\nReason: ${error.message || 'API service unavailable'}\n\nTry again later or use a different URL.`,
                 contextInfo
             }, { quoted: m });
         }
