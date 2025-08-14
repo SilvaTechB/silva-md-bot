@@ -22,7 +22,7 @@ module.exports = {
             }, { quoted: m });
 
             // Fetch video data from Silva API using axios
-            const apiUrl = `https://silva-api.vercel.app/download/tiktokdl?url=${encodeURIComponent(url)}`;
+            const apiUrl = `https://apis-keith.vercel.app/download/tiktokdl2?url=${encodeURIComponent(url)}`;
             const response = await axios.get(apiUrl);
             const data = response.data;
 
