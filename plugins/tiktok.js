@@ -1,4 +1,4 @@
-const fetch = require('node-fetch');
+const axios = require('axios');
 
 module.exports = {
     commands: ['tiktok', 'ttdl', 'tiktokdl'],
@@ -21,10 +21,10 @@ module.exports = {
                 contextInfo
             }, { quoted: m });
 
-            // Fetch video data from Silva API
+            // Fetch video data from Silva API using axios
             const apiUrl = `https://silva-api.vercel.app/download/tiktokdl?url=${encodeURIComponent(url)}`;
-            const response = await fetch(apiUrl);
-            const data = await response.json();
+            const response = await axios.get(apiUrl);
+            const data = response.data;
 
             // Handle API errors
             if (data.status !== "success") {
