@@ -21,95 +21,84 @@ module.exports = {
                 contextInfo
             }, { quoted: m });
 
-            // API endpoints to try (fallback system)
-            const apiVersions = [
-                'https://api.tiklydown.eu.org/api/download/v5',
-                'https://api.tiklydown.eu.org/api/download/v4',
-                'https://api.tiklydown.eu.org/api/download/v3',
-                'https://api.tiklydown.eu.org/api/download/v2',
-                'https://api.tiklydown.eu.org/api/download'
+            // Multiple API endpoints as fallbacks
+            const apiEndpoints = [
+                {
+                    url: `https://api.tiklydown.eu.org/api/download?url=${encodeURIComponent(url)}`,
+                    handler: (data) => data.videoUrl ? { videoUrl: data.videoUrl, ...data } : null
+                },
+                {
+                    url: `https://api16-normal-c-useast1a.tiktokv.com/aweme/v1/feed/?aweme_id=${url.split('/').pop().split('?')[0]}`,
+                    handler: (data) => {
+                        if (data.aweme_list?.[0]?.video?.play_addr?.url_list?.[0]) {
+                            const item = data.aweme_list[0];
+                            return {
+                                videoUrl: item.video.play_addr.url_list[0],
+                                author: item.author,
+                                stats: item.statistics
+                            };
+                        }
+                        return null;
+                    }
+                },
+                {
+                    url: `https://tikwm.com/api/?url=${encodeURIComponent(url)}`,
+                    handler: (data) => data.data?.wmplay ? { 
+                        videoUrl: data.data.wmplay, 
+                        author: data.data.author,
+                        stats: data.data
+                    } : null
+                },
+                {
+                    url: `https://www.tikwm.com/api/?url=${encodeURIComponent(url)}`,
+                    handler: (data) => data.data?.wmplay ? { 
+                        videoUrl: data.data.wmplay, 
+                        author: data.data.author,
+                        stats: data.data
+                    } : null
+                }
             ];
 
-            const apiKey = 'tk_134e318954fbc49653bed696ff22e0e441145ea17e22196a628fa54fb5dd449b';
-            let response;
-            let lastError;
+            let result = null;
+            let lastError = null;
 
             // Try each API endpoint until one works
-            for (const endpoint of apiVersions) {
+            for (const endpoint of apiEndpoints) {
                 try {
-                    const apiUrl = `${endpoint}?url=${encodeURIComponent(url)}&apikey=${apiKey}`;
-                    response = await axios.get(apiUrl, {
-                        timeout: 15000,
+                    const response = await axios.get(endpoint.url, {
+                        timeout: 20000,
                         headers: {
-                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36'
+                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36',
+                            'Accept': 'application/json'
                         }
                     });
-                    
-                    // If we got a successful response, break the loop
-                    if (response.data && (response.data.videoUrl || response.data.images)) {
-                        break;
-                    }
+
+                    result = endpoint.handler(response.data);
+                    if (result) break;
                 } catch (err) {
                     lastError = err;
-                    continue; // Try next endpoint
+                    continue;
                 }
             }
 
-            // Check if we got a valid response
-            if (!response || !response.data) {
-                throw lastError || new Error('All API endpoints failed');
+            if (!result) {
+                throw lastError || new Error('All API endpoints failed to return media');
             }
 
-            const data = response.data;
-            
-            // Handle video response
-            if (data.videoUrl) {
+            // Send the media
+            if (result.videoUrl) {
                 await sock.sendMessage(sender, {
-                    video: { url: data.videoUrl },
+                    video: { url: result.videoUrl },
                     caption: `🎵 *TikTok Video*\n\n` +
-                             `👤 *Author:* ${data.author?.nickname || 'Unknown'}\n` +
-                             `❤️ *Likes:* ${data.stats?.diggCount || 'N/A'}\n` +
-                             `💬 *Comments:* ${data.stats?.commentCount || 'N/A'}\n` +
+                             `👤 *Author:* ${result.author?.nickname || 'Unknown'}\n` +
+                             `❤️ *Likes:* ${result.stats?.digg_count || result.stats?.likeCount || 'N/A'}\n` +
+                             `💬 *Comments:* ${result.stats?.comment_count || 'N/A'}\n` +
                              `🔗 *Original URL:* ${url}\n\n` +
-                             `_Powered by Tiklydown API_`,
+                             `_Powered by Silva MD Bot_`,
                     contextInfo
                 }, { quoted: m });
-            }
-            // Handle photo response (slideshow)
-            else if (data.images && data.images.length > 0) {
-                // For single image
-                if (data.images.length === 1) {
-                    await sock.sendMessage(sender, {
-                        image: { url: data.images[0] },
-                        caption: `📸 *TikTok Photo*\n\n` +
-                                 `👤 *Author:* ${data.author?.nickname || 'Unknown'}\n` +
-                                 `❤️ *Likes:* ${data.stats?.diggCount || 'N/A'}\n` +
-                                 `🔗 *Original URL:* ${url}\n\n` +
-                                 `_Powered by Tiklydown API_`,
-                        contextInfo
-                    }, { quoted: m });
-                }
-                // For multiple images (slideshow)
-                else {
-                    const imageMessages = data.images.map((imgUrl, index) => ({
-                        image: { url: imgUrl },
-                        caption: index === 0 ? 
-                            `🖼️ *TikTok Slideshow (${data.images.length} photos)*\n\n` +
-                            `👤 *Author:* ${data.author?.nickname || 'Unknown'}\n` +
-                            `❤️ *Likes:* ${data.stats?.diggCount || 'N/A'}\n` +
-                            `🔗 *Original URL:* ${url}\n\n` +
-                            `_Powered by Tiklydown API_` : '',
-                        contextInfo: index === 0 ? contextInfo : undefined
-                    }));
-
-                    // Send images sequentially
-                    for (const msg of imageMessages) {
-                        await sock.sendMessage(sender, msg, { quoted: m });
-                    }
-                }
-            }
-            else {
-                throw new Error('No media found in response');
+            } else {
+                throw new Error('No downloadable media found');
             }
 
         } catch (error) {
@@ -117,7 +106,7 @@ module.exports = {
             console.error('Error details:', error.response?.data || error.stack);
             
             await sock.sendMessage(sender, {
-                text: `⚠️ Download failed!\nReason: ${error.message || 'API service unavailable'}\n\nTry again later or use a different URL.`,
+                text: `⚠️ Download failed!\nReason: ${error.message || 'API service unavailable'}\n\nPossible solutions:\n1. Try again later\n2. Use a different URL\n3. The video may be private or restricted\n4. Server may be temporarily down`,
                 contextInfo
             }, { quoted: m });
         }
