@@ -36,7 +36,7 @@ module.exports = {
             }, { quoted: m });
 
             // VirusTotal API request
-            const apiKey = 'YOUR_VIRUSTOTAL_API_KEY'; // Replace with your actual API key
+            const apiKey = '23e62ab81fe1c82d865f39fc674dead42b1ae2b3079fffebf96be5b19aebcf47'; // Replace with your actual API key
             const response = await axios.post(
                 'https://www.virustotal.com/api/v3/urls',
                 { url: url },
