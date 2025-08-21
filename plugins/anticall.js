@@ -9,7 +9,7 @@ const defaultSettings = {
     rejectCalls: true,
     blockCaller: false,
     notifyAdmin: true,
-    autoReply: "Sorry, I don't accept calls. Please send a text message instead.",
+    autoReply: "🚫 I don't accept calls. Please send a text message instead.",
     blockedUsers: [],
     adminNumber: '254700143167@s.whatsapp.net' // Replace with your admin number
 };
@@ -46,63 +46,94 @@ module.exports = {
     
     // Initialize the plugin
     init: (sock) => {
+        console.log('Anti-call plugin initialized');
+        
         // Listen for incoming calls
-        sock.ev.on('call', async (callData) => {
+        sock.ev.on('call', async (callDataArray) => {
             try {
-                const caller = callData.from;
-                const callType = callData.isVideo ? 'video' : 'voice';
-                
-                console.log(`Incoming ${callType} call from: ${caller}`);
-                
-                // Check if user is blocked
-                if (settings.blockedUsers.includes(caller)) {
-                    console.log(`Blocked user ${caller} attempted a call, rejecting automatically.`);
-                    await sock.rejectCall(callData.id, caller);
-                    return;
-                }
-                
-                // Reject the call if enabled
-                if (settings.rejectCalls) {
-                    try {
-                        await sock.rejectCall(callData.id, caller);
-                        console.log(`Call from ${caller} rejected successfully.`);
-                        
-                        // Send auto-reply message
-                        if (settings.autoReply) {
-                            await sock.sendMessage(
-                                caller,
-                                { text: settings.autoReply }
-                            );
+                // callDataArray is an array of call events
+                for (const callData of callDataArray) {
+                    const { id, from, status, isVideo } = callData;
+                    
+                    // Only handle incoming call offers
+                    if (status !== 'offer') continue;
+                    
+                    const caller = from;
+                    const callType = isVideo ? 'video' : 'voice';
+                    
+                    console.log(`Incoming ${callType} call from: ${caller}`);
+                    
+                    // Check if user is blocked
+                    if (settings.blockedUsers.includes(caller)) {
+                        console.log(`Blocked user ${caller} attempted a call, rejecting automatically.`);
+                        await sock.rejectCall(id, from);
+                        return;
+                    }
+                    
+                    // Reject the call if enabled
+                    if (settings.rejectCalls) {
+                        try {
+                            await sock.rejectCall(id, from);
+                            console.log(`Call from ${caller} rejected successfully.`);
+                            
+                            // Send auto-reply message
+                            if (settings.autoReply) {
+                                await sock.sendMessage(
+                                    caller,
+                                    { 
+                                        text: settings.autoReply,
+                                        contextInfo: {
+                                            externalAdReply: {
+                                                title: "Call Rejected",
+                                                body: "This bot doesn't accept calls",
+                                                thumbnailUrl: "https://files.catbox.moe/5uli5p.jpeg",
+                                                mediaType: 1
+                                            }
+                                        }
+                                    }
+                                );
+                            }
+                        } catch (error) {
+                            console.error('Error rejecting call:', error);
                         }
-                    } catch (error) {
-                        console.error('Error rejecting call:', error);
                     }
-                }
-                
-                // Block the caller if enabled
-                if (settings.blockCaller) {
-                    if (!settings.blockedUsers.includes(caller)) {
-                        settings.blockedUsers.push(caller);
-                        saveSettings(settings);
-                        console.log(`User ${caller} has been blocked from calling.`);
+                    
+                    // Block the caller if enabled
+                    if (settings.blockCaller) {
+                        if (!settings.blockedUsers.includes(caller)) {
+                            settings.blockedUsers.push(caller);
+                            saveSettings(settings);
+                            console.log(`User ${caller} has been blocked from calling.`);
+                        }
                     }
-                }
-                
-                // Notify admin if enabled
-                if (settings.notifyAdmin) {
-                    try {
-                        const message = `📞 Anti-Call Alert: ${caller} attempted a ${callType} call.`;
-                        await sock.sendMessage(settings.adminNumber, { text: message });
-                    } catch (error) {
-                        console.error('Error notifying admin:', error);
+                    
+                    // Notify admin if enabled
+                    if (settings.notifyAdmin) {
+                        try {
+                            const message = `📞 *Anti-Call Alert*\n\nCaller: ${caller}\nType: ${callType} call\nStatus: Automatically rejected`;
+                            await sock.sendMessage(
+                                settings.adminNumber, 
+                                { 
+                                    text: message,
+                                    contextInfo: {
+                                        externalAdReply: {
+                                            title: "Call Blocked",
+                                            body: "Silva MD Anti-Call Protection",
+                                            thumbnailUrl: "https://files.catbox.moe/5uli5p.jpeg",
+                                            mediaType: 1
+                                        }
+                                    }
+                                }
+                            );
+                        } catch (error) {
+                            console.error('Error notifying admin:', error);
+                        }
                     }
                 }
             } catch (error) {
                 console.error('Error handling call:', error);
             }
         });
-        
-        console.log('Anti-call plugin initialized');
     },
     
     handler: async ({ sock, m, sender, args, contextInfo, isGroup }) => {
