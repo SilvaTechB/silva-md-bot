@@ -35,6 +35,9 @@ const tempDir = path.join(os.tmpdir(), 'silva-cache');
 const port = process.env.PORT || 25680;
 const pluginsDir = path.join(__dirname, 'plugins');
 
+// ✅ Message Cache for Anti-Delete
+const messageCache = new Map();
+
 // ✅ Message Logger Setup
 const logDir = path.join(__dirname, 'logs');
 if (!fs.existsSync(logDir)) fs.mkdirSync(logDir);
@@ -64,10 +67,19 @@ const globalContextInfo = {
     isForwarded: true,
     forwardedNewsletterMessageInfo: {
         newsletterJid: '120363200367779016@newsletter',
-        newsletterName: '◢◤ Silva Tech Inc ◢◤',
+        newsletterName: '◢◤ Silva Tech Nexus ◢◤',
         serverMessageId: 144
     }
 };
+
+// ✅ Safe Get User JID
+function safeGetUserJid(sock) {
+    try {
+        return sock.user?.id || null;
+    } catch {
+        return null;
+    }
+}
 
 // ✅ Ensure Temp Directory Exists
 if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
@@ -334,7 +346,69 @@ async function connectToWhatsApp() {
 
     sock.ev.on('creds.update', saveCreds);
 
-    // Anti-delete handler
+    // ✅ Cache messages for anti-delete
+    sock.ev.on('messages.upsert', ({ messages }) => {
+        if (!Array.isArray(messages)) return;
+        
+        for (const m of messages) {
+            if (!m.message || !m.key.id) continue;
+            
+            const cacheKey = `${m.key.remoteJid}-${m.key.id}`;
+            messageCache.set(cacheKey, {
+                message: m.message,
+                timestamp: Date.now()
+            });
+        }
+        
+        // Clean old cache entries (older than 1 hour)
+        const now = Date.now();
+        for (const [key, value] of messageCache.entries()) {
+            if (now - value.timestamp > 60 * 60 * 1000) { // 1 hour
+                messageCache.delete(key);
+            }
+        }
+    });
+
+    // ✅ Anti-delete handler (messages.update)
+    sock.ev.on("messages.update", async (updates) => {
+        for (const { key, update } of updates) {
+            if (key.remoteJid === "status@broadcast") continue;
+            if (update?.message === null && !key.fromMe) {
+                const cacheKey = `${key.remoteJid}-${key.id}`;
+                const original = messageCache.get(cacheKey);
+                const owner = safeGetUserJid(sock);
+
+                if (!original?.message || !owner) continue;
+                
+                sock.sendMessage(owner, {
+                    text: `🚨 *Anti-Delete* — Message recovered from ${key.participant || key.remoteJid}`,
+                    contextInfo: globalContextInfo
+                }).catch(() => {});
+
+                const msgObj = original.message;
+                const mType = Object.keys(msgObj)[0];
+
+                try {
+                    if (["conversation", "extendedTextMessage"].includes(mType)) {
+                        const text = msgObj.conversation || msgObj.extendedTextMessage?.text;
+                        await sock.sendMessage(owner, { text, contextInfo: globalContextInfo });
+                    } else if (["imageMessage", "videoMessage", "audioMessage", "stickerMessage", "documentMessage"].includes(mType)) {
+                        const stream = await downloadContentFromMessage(msgObj[mType], mType.replace("Message", ""));
+                        let buffer = Buffer.from([]);
+                        for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
+                        const field = mType.replace("Message", "");
+                        const payload = { [field]: buffer, contextInfo: globalContextInfo };
+                        if (msgObj[mType]?.caption) payload.caption = msgObj[mType].caption;
+                        await sock.sendMessage(owner, payload);
+                    }
+                } catch (err) {
+                    logMessage("DEBUG", `Recovery failed: ${err.message}`);
+                }
+            }
+        }
+    });
+
+    // Anti-delete handler (messages.delete - existing)
     sock.ev.on('messages.delete', async (item) => {
         try {
             logMessage('DEBUG', 'messages.delete triggered');
