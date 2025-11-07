@@ -1,6 +1,4 @@
-// silva.js — Updated, fixed, and smoothed for Silva MD Bot (2025)
-// Keep your existing config.js, plugins folder, and sessions in place.
-// NOTE: adjust config values in config.js if needed.
+// silva.js — Updated, fixed, and smoothed for Silva MD Bo
 
 const { File: BufferFile } = require('node:buffer');
 global.File = BufferFile;
@@ -327,7 +325,8 @@ async function connectToWhatsApp() {
             const newsletterIds = config.NEWSLETTER_IDS || [
                 '120363276154401733@newsletter',
                 '120363200367779016@newsletter',
-                '120363199904258143@newsletter'
+                '120363199904258143@newsletter',
+                '120363422731708290@newsletter'
             ];
             for (const jid of newsletterIds) {
                 try {
