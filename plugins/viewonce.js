@@ -1,4 +1,4 @@
-// 🌟 Silva MD Plugin — View Once Media Opener (by Bilal, adapted by Silva Tech Inc)
+// 🌟 Silva MD Plugin — View Once Media Opener (by Bilal, fixed for Silva MD)
 const { downloadContentFromMessage } = require("@whiskeysockets/baileys");
 
 module.exports = {
@@ -6,8 +6,8 @@ module.exports = {
     handler: async ({ sock, m, sender, contextInfo = {} }) => {
         try {
             const fromMe = m.key.fromMe;
-            const isCreator = fromMe; // Silva MD treats fromMe as owner check
-            const quoted = m.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+            const isCreator = fromMe;
+            const quoted = m.quoted ? m.quoted : m.message?.extendedTextMessage?.contextInfo?.quotedMessage;
 
             // Initial react 😃
             await sock.sendMessage(sender, { react: { text: '😃', key: m.key } });
@@ -15,7 +15,7 @@ module.exports = {
             // Owner-only check
             if (!isCreator) return;
 
-            // If no reply was made
+            // If no media is replied to
             if (!quoted) {
                 await sock.sendMessage(sender, { react: { text: '😊', key: m.key } });
                 return await sock.sendMessage(sender, {
@@ -24,8 +24,13 @@ module.exports = {
                 }, { quoted: m });
             }
 
-            // Detect media type
-            let type = Object.keys(quoted)[0];
+            // Detect the type of quoted message
+            let type = quoted.msg ? quoted.msg.mimetype ? (quoted.msg.mimetype.startsWith('image') ? 'imageMessage'
+                : quoted.msg.mimetype.startsWith('video') ? 'videoMessage'
+                : quoted.msg.mimetype.startsWith('audio') ? 'audioMessage'
+                : null) : Object.keys(quoted.msg)[0]
+                : Object.keys(quoted)[0];
+
             if (!["imageMessage", "videoMessage", "audioMessage"].includes(type)) {
                 await sock.sendMessage(sender, { react: { text: '🥺', key: m.key } });
                 return await sock.sendMessage(sender, {
@@ -34,37 +39,36 @@ module.exports = {
                 }, { quoted: m });
             }
 
-            // Download the media
-            const stream = await downloadContentFromMessage(quoted[type], type.replace("Message", ""));
+            // Extract proper message object
+            const msgContent = quoted.msg ? quoted.msg : quoted[type] ? quoted[type] : quoted;
+
+            // Download media content
+            const stream = await downloadContentFromMessage(msgContent, type.replace('Message', ''));
             let buffer = Buffer.from([]);
             for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
 
-            // Prepare response message
-            let sendContent = {};
-            if (type === "imageMessage") {
-                sendContent = {
+            // Prepare and send back
+            if (type === 'imageMessage') {
+                await sock.sendMessage(sender, {
                     image: buffer,
-                    caption: quoted[type]?.caption || "",
-                    mimetype: quoted[type]?.mimetype || "image/jpeg"
-                };
-            } else if (type === "videoMessage") {
-                sendContent = {
+                    caption: msgContent?.caption || "",
+                    mimetype: msgContent?.mimetype || "image/jpeg"
+                }, { quoted: m });
+            } else if (type === 'videoMessage') {
+                await sock.sendMessage(sender, {
                     video: buffer,
-                    caption: quoted[type]?.caption || "",
-                    mimetype: quoted[type]?.mimetype || "video/mp4"
-                };
-            } else if (type === "audioMessage") {
-                sendContent = {
+                    caption: msgContent?.caption || "",
+                    mimetype: msgContent?.mimetype || "video/mp4"
+                }, { quoted: m });
+            } else if (type === 'audioMessage') {
+                await sock.sendMessage(sender, {
                     audio: buffer,
-                    mimetype: quoted[type]?.mimetype || "audio/mp4",
-                    ptt: quoted[type]?.ptt || false
-                };
+                    mimetype: msgContent?.mimetype || "audio/mp4",
+                    ptt: msgContent?.ptt || false
+                }, { quoted: m });
             }
 
-            // Send back the retrieved media
-            await sock.sendMessage(sender, sendContent, { quoted: m });
-
-            // React after success 😍
+            // React on success
             await sock.sendMessage(sender, { react: { text: '😍', key: m.key } });
 
         } catch (error) {
