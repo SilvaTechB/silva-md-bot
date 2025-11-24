@@ -1,4 +1,4 @@
-# ⚡ **SILVA MD BOT — VERSION 5.0 IS HERE!** ⚡
+# ⚡ **SILVA MD BOT & SILVATRIX— VERSION 5.0 IS HERE!** ⚡
 
 [![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code\&size=32\&duration=3000\&pause=700\&color=FF00A6\&center=true\&vCenter=true\&width=1000\&height=80\&lines=🚀+Welcome+to+SILVA+MD+BOT+v5.0;🤖+Now+Smarter%2C+Faster%2C+and+More+Magical;💬+Powered+by+Silva+Tech+AI+Labs;✨+Optimized+for+2025+and+Beyond!)](https://git.io/typing-svg)
 
@@ -21,7 +21,7 @@
 | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 🌐 **Get Session**      | [![Get Session](https://img.shields.io/badge/-SILVA%20SESSION-1e293b?style=for-the-badge\&logo=whatsapp\&logoColor=green)](https://silva-session-selector.vercel.app/) |
 | 🚀 **Deploy Now**       | [![Deploy Heroku](https://img.shields.io/badge/-DEPLOY%20NOW-6f42c1?style=for-the-badge\&logo=heroku\&logoColor=white)](https://silva-md-fork-checker.vercel.app/)     |
-| 🔌 **External Plugins** | [![Plugins](https://img.shields.io/badge/-EXTERNAL%20PLUGINS-4b5563?style=for-the-badge\&logo=code\&logoColor=white)](https://github.com/SilvaTechB/EXTERNAL-PLUGINS)  |
+| 🔌 **External Plugins** | [![SILVATRIX](https://img.shields.io/badge/-SILVATRIX%20FREEBOT-4b5563?style=for-the-badge\&logo=code\&logoColor=white)](https://silvatrix.silvatech.top)  |
 
 ---
 
@@ -78,6 +78,7 @@
 | 🚄 Railway   | [![Deploy Railway](https://img.shields.io/badge/-DEPLOY%20ON%20RAILWAY-0b0b0b?style=for-the-badge\&logo=railway\&logoColor=white)](https://silva-md-fork-checker.vercel.app/)    |
 | 🌀 Koyeb     | [![Deploy Koyeb](https://img.shields.io/badge/-DEPLOY%20ON%20KOYEB-ff0050?style=for-the-badge\&logo=koyeb\&logoColor=white)](https://silva-md-fork-checker.vercel.app/)          |
 | 🧩 Talkdrove | [![Deploy Talkdrove](https://img.shields.io/badge/-DEPLOY%20ON%20TALKDROVE-2196F3?style=for-the-badge\&logo=whatsapp\&logoColor=white)](https://host.talkdrove.com/share-bot/49) |
+| 🧩 SILVATRIX | [![Deploy SILVATRIX](https://img.shields.io/badge/-DEPLOY%20ON%20SILVATRIX-2196F3?style=for-the-badge\&logo=whatsapp\&logoColor=white)](https://silvatrix.silvatech.top) |
 
 ---
 
