@@ -1,5 +1,4 @@
-// silva.js — Updated, fixed, and smoothed for Silva MD Bo
-
+// silva.js — Updated with new session loader
 const { File: BufferFile } = require('node:buffer');
 global.File = BufferFile;
 
@@ -22,9 +21,10 @@ const {
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const zlib = require('zlib'); // Added for session decompression
 const express = require('express');
 const P = require('pino');
-const { handleMessages } = require('./handler'); // your handler file (keeps compatibility)
+const { handleMessages } = require('./handler');
 const config = require('./config.js');
 const store = makeInMemoryStore({ logger: P({ level: 'silent' }) });
 
@@ -32,6 +32,54 @@ const prefix = config.PREFIX || '.';
 const tempDir = path.join(os.tmpdir(), 'silva-cache');
 const port = process.env.PORT || 25680;
 const pluginsDir = path.join(__dirname, 'plugins');
+
+// ✅ Session paths
+const sessionDir = path.join(__dirname, 'session');
+const credsPath = path.join(sessionDir, 'creds.json');
+
+// ✅ Create session directory if not exists
+function createDirIfNotExist(dir) {
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+    }
+}
+createDirIfNotExist(sessionDir);
+
+// ✅ Load session from compressed base64
+async function loadSession() {
+    try {
+        // Remove old session file if exists
+        if (fs.existsSync(credsPath)) {
+            fs.unlinkSync(credsPath);
+            logMessage('INFO', "♻️ ᴏʟᴅ ꜱᴇꜱꜱɪᴏɴ ʀᴇᴍᴏᴠᴇᴅ");
+        }
+
+        if (!config.SESSION_ID || typeof config.SESSION_ID !== 'string') {
+            throw new Error("❌ SESSION_ID is missing or invalid");
+        }
+
+        const [header, b64data] = config.SESSION_ID.split('~');
+
+        if (header !== "Silva" || !b64data) {
+            throw new Error("❌ Invalid session format. Expected 'Silva~.....'");
+        }
+
+        // Clean and decode base64
+        const cleanB64 = b64data.replace('...', '');
+        const compressedData = Buffer.from(cleanB64, 'base64');
+        
+        // Decompress using zlib
+        const decompressedData = zlib.gunzipSync(compressedData);
+
+        // Write the decompressed session data
+        fs.writeFileSync(credsPath, decompressedData, "utf8");
+        logMessage('SUCCESS', "✅ ɴᴇᴡ ꜱᴇꜱꜱɪᴏɴ ʟᴏᴀᴅᴇᴅ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ");
+
+    } catch (e) {
+        logMessage('ERROR', `Session Error: ${e.message}`);
+        throw e;
+    }
+}
 
 // ✅ Message Cache for Anti-Delete
 const messageCache = new Map();
@@ -106,35 +154,7 @@ function loadPlugins() {
 }
 loadPlugins();
 
-// ✅ Setup Session from Mega.nz
-async function setupSession() {
-    const sessionPath = path.join(__dirname, 'sessions', 'creds.json');
-    if (!fs.existsSync(sessionPath)) {
-        if (!config.SESSION_ID || !config.SESSION_ID.startsWith('Silva~')) {
-            throw new Error('Invalid or missing SESSION_ID. Must start with Silva~');
-        }
-        logMessage('INFO', '⬇ Downloading session from Mega.nz...');
-        const megaCode = config.SESSION_ID.replace('Silva~', '');
-
-        const mega = require('megajs');
-        const file = mega.File.fromURL(`https://mega.nz/file/${megaCode}`);
-
-        await new Promise((resolve, reject) => {
-            file.download((err, data) => {
-                if (err) {
-                    logMessage('ERROR', `❌ Mega download failed: ${err.message}`);
-                    return reject(err);
-                }
-                fs.mkdirSync(path.join(__dirname, 'sessions'), { recursive: true });
-                fs.writeFileSync(sessionPath, data);
-                logMessage('SUCCESS', '✅ Session downloaded and saved.');
-                resolve();
-            });
-        });
-    }
-}
-
-// ✅ Utility helpers added (were missing)
+// ✅ Utility helpers
 async function downloadAsBuffer(messageObj, typeHint = 'file') {
     try {
         const stream = await downloadContentFromMessage(messageObj, typeHint);
@@ -158,7 +178,7 @@ function isBotMentioned(message, botJid) {
     }
 }
 
-// ✅ Generate Config Table (unchanged)
+// ✅ Generate Config Table
 function generateConfigTable() {
     const configs = [
         { name: 'MODE', value: config.MODE },
@@ -187,7 +207,7 @@ function generateConfigTable() {
     return table;
 }
 
-// ✅ Fancy Bio Generator (unchanged)
+// ✅ Fancy Bio Generator
 function generateFancyBio() {
     const now = new Date();
     const dateStr = now.toLocaleDateString('en-KE', {
@@ -214,7 +234,7 @@ function generateFancyBio() {
     return bios[Math.floor(Math.random() * bios.length)];
 }
 
-// ✅ Welcome Message with Config Status (unchanged)
+// ✅ Welcome Message with Config Status
 async function sendWelcomeMessage(sock) {
     const configTable = generateConfigTable();
 
@@ -248,7 +268,7 @@ async function sendWelcomeMessage(sock) {
     }
 }
 
-// ✅ Update Profile Status (unchanged)
+// ✅ Update Profile Status
 async function updateProfileStatus(sock) {
     try {
         const bio = generateFancyBio();
@@ -261,8 +281,11 @@ async function updateProfileStatus(sock) {
 
 // ✅ Connect to WhatsApp (main)
 async function connectToWhatsApp() {
-    await setupSession();
-    const { state, saveCreds } = await useMultiFileAuthState(path.join(__dirname, 'sessions'));
+    // Load session from compressed base64
+    await loadSession();
+    
+    // Use the session directory for multi-file auth state
+    const { state, saveCreds } = await useMultiFileAuthState(sessionDir);
     const { version } = await fetchLatestBaileysVersion();
 
     const cryptoOptions = {
