@@ -1,24 +1,25 @@
 {
-  "name": "silva-md",
-  "description": "Javascript WhatsApp bot made by Silva.",
+  "name": "spider-md",
+  "description": "Javascript WhatsApp bot made by Peter.",
   "keywords": ["silva-md", "whatsapp", "baileys", "bot"],
   "success_url": "/",
-  "stack": "heroku-24",
+  "stack": "rialway",
   "env": {
     "SESSION_ID": {
-      "description": "Put the session-id here.",
+      "description": "Silva~H4sIAAAAAAAAA5VUy47iRhT9lai2oMEvoLHUUgwY2zyMH91gHM2isAtT2Nimqgw2I6TZRIryI4kiZTFSPqb7byJD9/QskknHmypXle4995xz7yeQZpiiCaqA/AnkBB8hQ/WWVTkCMugXmw0ioAlCyCCQwd7g3ZKjLdNOA2m4F6qVcxITwkZ6xYq4VfHY452pzovJ6R5cmiAv1gkOvhNw4osjRncNK+iqcz8cTQeFiyZ55rWFOSQC97jBw7kZpD1XugeXOiLEBKeRmm/RHhGYTFBlQUzeB1/rB9KjWJyl7a6UyGGSkXlW9deTydmrWrHjZ/POfrGXpkL8+D74xeJc5gc685aFA6fnYb4t050RJKI3FFqT6VZPgtZdo0Fn/N0NPsVRikIjRCnDrHo373c67Z3TqN1axDu3p6YSsWAstqUAtTxX9/igRa1pAjuaFr8PuDgUoe6OOR2PdntjN7Ysyw+EVjVD/F1CT0Z6fCC44YtQMb4FbpFXr8T/h/fO8LRY+m7ux7O16eeWaXb8ddfkD9aAQxLf1wWLi84KpyXZ++DPebjipFBZ986TTukN0HlCj2xedHQuELKH0vUavQgfVy1l9gYfsoJ8DyWR+oZqwOmCF86ZT/3FZPXoJtLEm0o9t9VKyTLv2uezGkWW5C1F9ODzXgM5R2/JHU4tAxbmgROPVVxOhqNtQKg3b1iKcn+tKEaVEQKZvzQBQRGmjECGs/R6xjUBDI8uCghiV3ZBjuyI+b4WpYpoDo0qL7qE3/h9ZWTq0MClczLtJRN1vMvuQRPkJAsQpSjUMWUZqWaIUhghCuSfPjZBikp2063OJvJNsMGEsse0yJMMhq+ivl7CIMiKlLlVGgzqDSJA5t6OEWM4jWhNY5FCEmzxEQ22kFEgb2BC0dcCEUEhkBkp0NemHWRhzbvV1z31cTECTbC/6oFDIAOB49scdycJ7TYn9/gf6YdTHRbm+YcUMdAEye0Z3+21u6LQ4bsdSejUL+uLJkhhHQw8/f78+Yfnz8+/XpenP27Llx+ef3766/nz05/Pvzz99vSlluSlohpAiBjECQUyGMw6sUhsTZ1PBe4u1jRFjZRBpIA3Bl6ddJNqSwXRYdzKn5/H7V7MVFd1Z8fcWjuaZzIjTo7qAnkjtk3V+38IAmRQImaMg5PpLCRztiwPq6x3zGfEths00Lsz+xgbmPrr9q6xiDt757CwzaRhDHu2xdtdc0fuRoepxMSHzNSWbntoD6SYH5zu62whOuIAfZssccduarYPI61rsDY+cyIX5cXCNrVsMSxjxwzhdLNyrY2GmZqW6abfOdBNmA0c0Rs53dQc7xqPXXMAsepoysGK1vl+YN88fu2x5GW24av9am3r3w1G11HxItJ/an0DXluSuzS/ifEyfP6lgfurtcm4dahpD7RCG3/qqFt1N+08CJyTnNfueLwuR15Srld+CS6Xj02QJ5BtMrIHMoBpSLKrk0hW1B430k32nWSDvmH07cisK08gZcpb3zzgPaIM7nMg891Om+v2enz79soiWa5DugUy4CfSVpfqJqiUPHcZZK9tCJTr563A5W/oXZxxoQcAAA==
+> *SILVA TECH NEXUS*",
       "required": true,
       "value": ""
     },
     "ALIVE_IMG": {
-      "description": "Paste your image URL here.",
+      "description": "https://files.catbox.moe/8pxgec.jpg",
       "required": false,
-      "value": "https://files.catbox.moe/5uli5p.jpeg"
+      "value": "https://files.catbox.moe/8pxgec.jpg"
     },
     "LIVE_MSG": {
       "description": "Paste your alive message here.",
       "required": false,
-      "value": "> SILVA MD IS ACTIVE AND RUNNING ⚡"
+      "value": "> Spider MD IS ACTIVE AND RUNNING ⚡"
     },
     "ANTIDELETE_PRIVATE": {
       "description": "Restore deleted messages in private chat.",
@@ -38,12 +39,12 @@
     "MODE": {
       "description": "Bot mode: public, private, group, inbox.",
       "required": false,
-      "value": "public"
+      "value": "private"
     },
     "AUTO_STATUS_REACT": {
       "description": "Enable auto status reactions.",
-      "required": false,
-      "value": "true"
+      "required": true,
+      "value": "false"
     },
     "ALWAYS_ONLINE": {
       "description": "Keep bot always online.",
@@ -53,7 +54,7 @@
     "AUTO_STATUS_SEEN": {
       "description": "Enable auto status seen.",
       "required": true,
-      "value": "true"
+      "value"false"
     },
     "AUTO_STATUS_REPLY": {
       "description": "Enable auto status reply.",
@@ -63,22 +64,22 @@
     "AUTO_STATUS__MSG": {
       "description": "Message for auto status reply.",
       "required": true,
-      "value": "*👀 Seen by Silva MD ✅*"
+      "value": "*👀 Seen by Spider MD ✅*"
     },
     "OWNER_NAME": {
       "description": "Bot owner name.",
       "required": false,
-      "value": "Silva MD"
+      "value": "Peter"
     },
     "OWNER_NUMBER": {
       "description": "Owner WhatsApp number.",
       "required": false,
-      "value": "254700143167"
+      "value": "201500842550"
     },
     "BOT_NAME": {
       "description": "Bot display name.",
       "required": false,
-      "value": "✦ Silva ✦ MD ✦"
+      "value": "✦ Spider ✦ MD ✦"
     },
     "ANTI_LINK": {
       "description": "Enable anti-link feature in groups.",
@@ -93,12 +94,12 @@
     "DESCRIPTION": {
       "description": "Caption for menu and bot branding.",
       "required": false,
-      "value": "*© ✦ Silva ✦ MD ✦*"
+      "value": "*© ✦ Spider ✦ MD ✦*"
     },
     "DELETE_LINKS": {
       "description": "Remove links from group without removing member.",
       "required": false,
-      "value": "true"
+      "value": "false"
     },
     "AUTO_RECORDING": {
       "description": "Enable auto recording simulation.",
@@ -108,7 +109,7 @@
     "AUTO_TYPING": {
       "description": "Enable auto typing simulation.",
       "required": false,
-      "value": "true"
+      "value": "false"
     },
     "AUTO_REACT": {
       "description": "Enable auto reactions for all messages.",
@@ -135,10 +136,8 @@
       "required": false,
       "value": "false"
     }
-  },
-  "buildpacks": [
-    {
-      "url": "https://github.com/heroku/heroku-buildpack-nodejs.git"
+  }
     }
   ]
 }
+
