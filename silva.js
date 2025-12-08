@@ -1,4 +1,4 @@
-// silva.js — Updated with new session loader
+// silva.js — Updated with fixes for group functionality and error handling
 const { File: BufferFile } = require('node:buffer');
 global.File = BufferFile;
 
@@ -234,28 +234,36 @@ function generateFancyBio() {
     return bios[Math.floor(Math.random() * bios.length)];
 }
 
-// ✅ Welcome Message with Config Status
+// ✅ Modernized Welcome Message
 async function sendWelcomeMessage(sock) {
     const configTable = generateConfigTable();
+    
+    const welcomeMsg = `
+*✨ ${config.BOT_NAME} is now active!*
 
-    const welcomeMsg = `*Hello ✦ ${config.BOT_NAME} ✦ User!*\n\n` +
-        `✅ Silva MD Bot is now active!\n\n` +
-        `*Prefix:* ${prefix}\n` +
-        `*Mode:* ${config.MODE}\n` +
-        `*Plugins Loaded:* ${plugins.size}\n\n` +
-        `*⚙️ Configuration Status:*\n\`\`\`${configTable}\`\`\`\n\n` +
-        `*Description:* ${config.DESCRIPTION}\n\n` +
-        `⚡ Powered by Silva Tech Inc\nGitHub: https://github.com/SilvaTechB/silva-md-bot`;
+• **Prefix:** \`${prefix}\`
+• **Mode:** ${config.MODE}
+• **Plugins Loaded:** ${plugins.size}
+
+*⚙️ Active Configuration:*
+\`\`\`
+${configTable}
+\`\`\`
+
+*📝 Description:*
+${config.DESCRIPTION}
+
+_⚡ Powered by Silva Tech Inc._
+    `.trim();
 
     try {
         await sock.sendMessage(sock.user.id, {
-            image: { url: config.ALIVE_IMG },
-            caption: welcomeMsg,
+            text: welcomeMsg,
             contextInfo: {
                 ...globalContextInfo,
                 externalAdReply: {
-                    title: `✦ ${config.BOT_NAME} ✦ Official`,
-                    body: "Your bot is live with enhanced features!",
+                    title: `${config.BOT_NAME} Online`,
+                    body: "Enhanced multi-device WhatsApp bot",
                     thumbnailUrl: "https://files.catbox.moe/5uli5p.jpeg",
                     sourceUrl: "https://github.com/SilvaTechB/silva-md-bot",
                     mediaType: 1,
@@ -263,8 +271,15 @@ async function sendWelcomeMessage(sock) {
                 }
             }
         });
+        logMessage('SUCCESS', 'Modern welcome message sent to owner.');
     } catch (e) {
         logMessage('WARN', `Welcome message failed: ${e.message}`);
+        // Fallback: try sending without the complex ad reply
+        try {
+            await sock.sendMessage(sock.user.id, { text: `✅ ${config.BOT_NAME} is now online!\nPrefix: ${prefix}` });
+        } catch (fallbackErr) {
+            logMessage('DEBUG', `Fallback also failed: ${fallbackErr.message}`);
+        }
     }
 }
 
@@ -551,6 +566,12 @@ async function connectToWhatsApp() {
         try {
             if (!Array.isArray(messages) || messages.length === 0) return;
 
+            // ✅ FIX 1: Correct event filtering - process only real-time messages
+            if (type && !['notify', 'append'].includes(type)) {
+                logMessage('DEBUG', `Skipping message type: ${type}`);
+                return;
+            }
+
             for (const m of messages) {
                 // ---- STATUS handling (status@broadcast)
                 if (m.key.remoteJid === 'status@broadcast') {
@@ -649,9 +670,6 @@ async function connectToWhatsApp() {
                 }
 
                 // ---- For other messages: newsletter / broadcast / group / private commands
-                // only process notifications (skip 'append' / other non-notify types)
-                if (type && type !== 'notify') continue;
-
                 if (!m.message) continue;
 
                 const sender = m.key.remoteJid;
@@ -676,9 +694,10 @@ async function connectToWhatsApp() {
                     }
                 }
 
-                // ---- Skip group commands if disabled
-                if (isGroupMsg && !config.GROUP_COMMANDS) {
-                    logMessage('DEBUG', 'Group commands disabled, skipping processing for this message.');
+                // ✅ FIX 2: Simplified group command handling
+                // Allow commands in groups only if GROUP_COMMANDS config is enabled
+                if (isGroupMsg && config.GROUP_COMMANDS !== true) {
+                    logMessage('DEBUG', 'Group commands disabled in config, skipping message.');
                     continue;
                 }
 
@@ -819,10 +838,20 @@ async function connectToWhatsApp() {
                             await plugin.handler({ sock, m, sender, args, contextInfo: globalContextInfo, isGroup: isGroupMsg });
                             logMessage('SUCCESS', `Plugin executed: ${plugin.commands}`);
                         } catch (err) {
-                            logMessage('ERROR', `Plugin error: ${plugin.commands} - ${err.message}`);
+                            // ✅ FIX 3: Enhanced error logging
+                            logMessage('ERROR', `❌ Plugin "${plugin.commands}" failed for command "${command}"`);
+                            logMessage('ERROR', `   Error: ${err.message}`);
+                            logMessage('ERROR', `   Stack: ${err.stack || 'No stack trace'}`);
+                            logMessage('DEBUG', `   Sender: ${sender}, Args: ${args}`);
+
+                            // Optionally notify the user
                             try {
-                                await sock.sendMessage(sender, { text: `❌ Plugin error: ${err.message || 'Unknown error'}` }, { quoted: m });
-                            } catch (e) { /* ignore send error */ }
+                                await sock.sendMessage(sender, {
+                                    text: `❌ Command "${command}" failed. Check bot logs for details.`
+                                }, { quoted: m });
+                            } catch (sendErr) {
+                                logMessage('WARN', `Could not send error message: ${sendErr.message}`);
+                            }
                         }
                         break;
                     }
