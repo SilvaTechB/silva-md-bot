@@ -9,7 +9,7 @@
     "OWNERS": {
       "description": "owner numbers",
       "required": true,
-      "value": "254743706010;𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓"
+      "value": "254734290140;𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓"
     },
     "BOTNAME": {
       "description": "Give your BOT a name",
@@ -19,7 +19,7 @@
     "SESSION_ID": {
       "description": "your session id. get session here https://silva-session-selector.vercel.app/",
       "required": true,
-      "value": ""
+      "value": "Silva~H4sIAAAAAAAAA5VU2ZKiSBT9lYl81WjZFDCiIoZFUSlFXNGJfkghWRSSNDNRscN/n8Cq6uqHmZ4anpJc7jn3nnPvD4DLjCEX1aD/AxCaXSBHzZLXBIE+MKs4RhS0QQQ5BH0gvXZcqwguytAIlgN9LibbFr5nM9X1VoeNVsGK1acwmsuB9gIebUCqQ56Fvwl4Du7EO+3Fmc/WBcqC45kk11C8npUW3ouvbBVObno02c7v4xfwaCLCjGY4GZAUFYjC3EX1HGb0a/R91zpaQ91meVCP44vTY5fFfhuc4oOvGtdL0CXiJHfkS7FZf40+nZvC0O9F3U7R3WACO0nlhLj1Si2v42DbwPOjKenccUbaG32WJRhF4whhnvH6y3X3hys3H83W+8lRCjonuaUaAi+OwSm4ebfJ0Exb56qwzRs/+V8jriPVMO8jy26dvZInGAl50anl2An5xjpAPSDWmEZzpbsVfiU+px9eOf2fuksWth0c1KM7XcgbOcglbDChnMfqnY8d7tTa6/o2mWm680X6lR/CaWejXM9EKWZ1b2phJ0S1oO0Ox3M+jbTOcVOtr4T510/6kFf0dyxzRVc0xS0UtbtZO2NHMLVA9OK45w86JyWU99sLwUGhTcw1snK18vQWmcRZtNI0EoooPZdImJb0eG7N4+09Ec7FMLKvL8+MTqgeR6AvPtqAoiRjnEKelfi5J7QBjC5LFFLEn9UFOwK3c3uqTr3F7V55d3padfKdXoeVu98vBHkfDK28QtnwJryANiC0DBFjKBpljJe0niLGYIIY6P/1vQ0wuvE33Ro0WWyDOKOMr3FF8hJGH6J+HMIwLCvMlzUOrWaBKOgLn9uI8wwnrCljhSEN0+yCrBRyBvoxzBn6mSCiKAJ9Tiv0s2mtMmrqvvB2XWnomKANiqceWdR4pKuosiLpgqgIfU39k327NmEhId8w4qANMGxugzUOc/SHizBog/z5UtS1ri5KsqKKuq6JzePm4PGTdIMRIQ6znIE+sGbxrVUq9mBWDPRp6TjGLjGsxACfSX6Y5U2NlXtctrrlQhTdNEiFNMzUNRxHk6GOTztvt5+7DKVW0bWT5OUfgoA+MFplwDoe3U4lt4vS+26UkGwtWYubm4wOdRH1JGlJlvO4ehVfEz5lKqT3q2Om5aQ0ridmp/tdCW38Wm07vjK4BFRTjeSlQYvQJQvRr2C5z2LpnOVkp7tkzwZD5XJOVe88sDu+5m8uy2MZ6a3pKtYEz4OyLI/SZdhlNpQGZo/WEVvQUWBtVZEkCYqOS079jum/2fjZRvn7+MqeDmvka37jDD2nwbtM/ynnG/HGdcKj/UuM9/nyLz1qrutSuFRwEEXLcqNE42BciU42Wi7ifdexC2dV01Hpk8pXxuDx+N4GJIc8LmkB+oAVBwjagJZV4+ExjsvfIFnmeGz6yaxJO4eMG599scoKxDgsCOiLak9VBVmUtbdbc1qSEWRpY0tXSUdKY/LaIGTJIf9oM2A0nydMwONv9zcKL4EHAAA="
     },
     "MODE": {
       "description": "mode public or private",
@@ -29,7 +29,7 @@
     "PREFIX": {
       "description": "put any one symbol here except @ and + , leave it Blank if you want to use multiple prefix",
       "required": true,
-      "value": "."
+      "value": "/"
     },
     "statusview": {
       "description": "make it true if you want bot to view status",
