@@ -168,14 +168,14 @@ No app installs. No complex setup. Just scan, deploy, and go.
 
 ## How to Connect
 
-### Option 1 — QR Code (Recommended)
+### Option 1 — QR Code 
 
 1. Deploy the bot on any platform (see below)
 2. Open the console/logs
 3. Scan the QR code with WhatsApp (Settings > Linked Devices > Link a Device)
 4. Bot connects instantly
 
-### Option 2 — Session ID
+### Option 2 — Session ID (Recommended)
 
 1. Visit the [Session Generator](https://silva-session-selector.vercel.app/)
 2. Scan QR to get your `SESSION_ID`
@@ -308,9 +308,9 @@ Silva MD Bot can automatically pull the latest plugins and library updates from 
 
 <div align="center">
 
-| <img src="https://github.com/SilvaTechB.png?size=100" width="80" style="border-radius:50%"> | <img src="https://github.com/shizothetechie.png?size=100" width="80" style="border-radius:50%"> | <img src="https://github.com/Lazack28.png?size=100" width="80" style="border-radius:50%"> |
+| <img src="https://github.com/SilvaTechB.png?size=100" width="80" style="border-radius:50%"> | <img src="https://github.com/SilvaTechB.png?size=100" width="80" style="border-radius:50%"> | <img src="https://github.com/Sylivanu.png?size=100" width="80" style="border-radius:50%"> |
 |:---:|:---:|:---:|
-| **[Silva](https://github.com/SilvaTechB)** | **[Shizo](https://github.com/shizothetechie)** | **[Lazack28](https://github.com/Lazack28)** |
+| **[Silva](https://github.com/SilvaTechB)** | **[DEVELOPER](https://github.com/SilvaTechB)** | **[CEO](https://github.com/Sylivanu)** |
 | Creator & Lead Dev | Contributor | Contributor |
 
 </div>
