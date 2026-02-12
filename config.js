@@ -51,6 +51,10 @@ module.exports = {
     // Newsletter Settings
     NEWSLETTER_IDS: process.env.NEWSLETTER_IDS ? process.env.NEWSLETTER_IDS.split(',') : null,
     
+    // Auto-update Settings
+    AUTO_UPDATE: process.env.AUTO_UPDATE !== 'false',
+    UPDATE_REPO: process.env.UPDATE_REPO || 'https://github.com/SilvaTechB/silva-md-bot',
+    
     // Bot Info
     VERSION: '3.0.0',
     AUTHOR: 'Silva Tech Nexus',

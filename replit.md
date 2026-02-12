@@ -23,7 +23,9 @@ Silva MD Bot is a WhatsApp bot built with Node.js using the Baileys library. It 
 - **Anti-Spam**: Detects and warns spam behavior in groups
 - **Welcome/Goodbye**: Configurable welcome and goodbye messages per group
 - **Anti-Bot**: Detects and removes other bots from groups when enabled
-- **Plugin System**: 87 commands loaded from `silvaxlab/` directory
+- **Plugin System**: 90 commands loaded from `silvaxlab/` directory
+- **Ephoto360**: Text-to-image effects with 20 styles (neon, fire, galaxy, etc.)
+- **TextPro.me**: Text effect generator with 25 styles (matrix, toxic, lava, etc.)
 - **Self-Hosted Media API**: Express server on port 3001 using yt-dlp for reliable media downloads
 - **AI Chat**: GPT/AI integration for conversational AI
 - **TTS**: Text-to-speech in 19+ languages
@@ -63,6 +65,8 @@ Environment variables:
 - `ANTI_DELETE` - Anti-delete feature (default: true)
 - `ANTI_CALL` - Auto-reject calls (default: true)
 - `NEWSLETTER_IDS` - Comma-separated newsletter JIDs to auto-follow
+- `AUTO_UPDATE` - Enable auto-update from GitHub (default: true)
+- `UPDATE_REPO` - GitHub repo URL for updates (default: SilvaTechB/silva-md-bot)
 
 ## Running
 The bot runs via `node index.js` which starts:
@@ -76,6 +80,8 @@ The bot runs via `node index.js` which starts:
 - **Package.json**: Uses `dgxeon-soket` (custom Baileys fork). Express added for API server.
 
 ## Recent Changes
+- 2026-02-12: v3.5 - Fixed antidemote botAdmin check (LID format support). Fixed group event handler (unified welcome/goodbye systems). Made startup parallel (session + plugins load concurrently). Added ephoto360 plugin (20 effects). Added textpro.me plugin (25 effects). Updated menu with maker section. Total: 90 plugins.
+- 2026-02-12: v3.4 - Fixed duplicate command responses (filter by message type 'notify', skip bot's own messages, removed overlapping built-in commands). Fixed music/video download (installed yt-dlp, improved media API with better error handling and additional fallback APIs). Added auto-update system that checks main GitHub repo (SilvaTechB/silva-md-bot) every 30 minutes for plugin and lib updates. New update plugin for manual updates.
 - 2026-02-10: v3.3 - Replaced JSON health check with modern HTML dashboard (live uptime counter, plugin count, memory usage, protection status, bot config). Cleaned up obfuscated index.js.
 - 2026-02-10: v3.2 - Created antibot plugin. Fixed ai.js/gpt.js command conflict (ai.js now only /^(ai)$/, gpt.js handles gpt/chatgpt/ask). Removed all broken templateButtons/sections code from alive.js, ping.js, menu.js (deprecated in modern Baileys). Rewrote start command with comprehensive info display (uptime, RAM, plugin count, protection status, quick start guide, banner image). Updated menu with all new plugins (warn, poll, announce, gdesc, admins, revoke, antibot, setwelcome, setgoodbye). Reduced status handler log verbosity. Total: 87 plugins.
 - 2026-02-10: Major upgrade v3.1 - Fixed antidelete, created self-hosted Media API server, enhanced bug plugin, added 10 new plugins, updated menu. Total: 80 plugins.

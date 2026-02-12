@@ -28,6 +28,9 @@ const config = require('./config.js');
 // Import status handler
 const statusHandler = require('./lib/status.js');
 
+// Import auto-updater
+const updater = require('./lib/updater.js');
+
 // Start media API server
 try {
     const mediaApi = require('./lib/mediaApi.js');
@@ -472,14 +475,28 @@ class PluginManager {
                     if (handler.botAdmin && isGroup) {
                         try {
                             const metadata = await sock.groupMetadata(jid);
-                            const botJid = sock.user.id.split(':')[0] + '@s.whatsapp.net';
-                            const botParticipant = metadata.participants.find(p => p.id === botJid);
+                            const botId = sock.user?.id || '';
+                            const botNum = botId.split(':')[0].split('@')[0].replace(/[^0-9]/g, '');
+                            const botLid = this.functions?.botLid;
+                            
+                            const botParticipant = metadata.participants.find(p => {
+                                if (!p) return false;
+                                const pNum = p.id.split(':')[0].split('@')[0].replace(/[^0-9]/g, '');
+                                if (pNum === botNum) return true;
+                                if (botLid && p.id === botLid) return true;
+                                if (p.lid && botLid && p.lid === botLid) return true;
+                                if (p.lid) {
+                                    const lidNum = p.lid.split(':')[0].split('@')[0].replace(/[^0-9]/g, '');
+                                    if (lidNum === botNum) return true;
+                                }
+                                return false;
+                            });
                             if (!botParticipant || !botParticipant.admin) {
                                 await sock.sendMessage(jid, { text: '⚠️ Bot needs admin rights' }, { quoted: message });
                                 return true;
                             }
                         } catch (e) {
-                            // Ignore error
+                            botLogger.log('DEBUG', 'BotAdmin check error: ' + e.message);
                         }
                     }
                     
@@ -539,15 +556,15 @@ class SilvaBot {
         this.reconnectDelay = 5000;
         this.keepAliveInterval = null;
         
-        // Built-in commands
+        // Built-in commands (fallbacks if plugins don't handle them)
         this.commands = {
             help: this.helpCommand.bind(this),
             menu: this.menuCommand.bind(this),
             ping: this.pingCommand.bind(this),
             owner: this.ownerCommand.bind(this),
+            start: this.startCommand.bind(this),
             stats: this.statsCommand.bind(this),
             plugins: this.pluginsCommand.bind(this),
-            start: this.startCommand.bind(this),
             antidelete: this.antideleteCommand.bind(this),
             statusview: this.statusviewCommand.bind(this)
         };
@@ -560,11 +577,19 @@ class SilvaBot {
             botLogger.log('INFO', "Owner: " + (config.OWNER_NUMBER || 'Not configured'));
             botLogger.log('INFO', "Prefix: " + config.PREFIX);
             
-            if (config.SESSION_ID) {
-                await loadSession();
-            }
+            const sessionPromise = config.SESSION_ID ? loadSession() : Promise.resolve();
+            const pluginPromise = this.pluginManager.loadPlugins('silvaxlab');
 
-            await this.pluginManager.loadPlugins('silvaxlab');
+            await Promise.all([sessionPromise, pluginPromise]);
+            
+            if (config.AUTO_UPDATE !== false) {
+                updater.startAutoUpdate(
+                    (level, msg) => botLogger.log(level, msg),
+                    this.pluginManager
+                );
+            } else {
+                botLogger.log('INFO', '[UPDATER] Auto-update is disabled via config');
+            }
             
             await this.connect();
         } catch (error) {
@@ -781,6 +806,8 @@ Connected Number: ${this.functions.botNumber || 'Unknown'}
                     saveMedia: this.saveMedia.bind(this)
                 });
                 
+                if (type !== 'notify') return;
+                
                 // Handle regular messages (commands, etc.)
                 await this.handleMessages(m);
             } catch (error) {
@@ -824,39 +851,57 @@ Connected Number: ${this.functions.botNumber || 'Unknown'}
                 }
 
                 // Welcome/Goodbye messages
-                try {
-                    const { welcomeGroups } = require('./silvaxlab/welcome');
-                    const settings = welcomeGroups.get(id);
-                    if (settings) {
-                        let metadata;
-                        try { metadata = await sock.groupMetadata(id); } catch(e) { metadata = { subject: 'Group' }; }
-                        const groupName = metadata.subject || 'Group';
-                        const memberCount = metadata.participants?.length || '?';
+                if (action === 'add' || action === 'remove') {
+                    try {
+                        const { welcomeGroups } = require('./silvaxlab/welcome');
+                        const settings = welcomeGroups.get(id);
+                        if (settings && ((action === 'add' && settings.welcome) || (action === 'remove' && settings.goodbye))) {
+                            let metadata;
+                            try { metadata = await sock.groupMetadata(id); } catch(e) { metadata = { subject: 'Group' }; }
+                            const groupName = metadata.subject || 'Group';
+                            const memberCount = metadata.participants?.length || '?';
 
-                        for (const participant of participants) {
-                            const tag = `@${participant.split('@')[0]}`;
-                            if (action === 'add' && settings.welcome) {
-                                const defaultWelcome = `╭━━━━━━━━━━━━━━━━━━━━╮\n┃   👋 WELCOME        ┃\n╰━━━━━━━━━━━━━━━━━━━━╯\n\nWelcome ${tag} to *${groupName}*!\n\n👥 Member #${memberCount}\n\nEnjoy your stay and follow the group rules!\n\n_Powered by ${config.BOT_NAME}_`;
-                                let welcomeText = settings.welcomeMsg 
-                                    ? settings.welcomeMsg.replace('{user}', tag).replace('{group}', groupName).replace('{count}', memberCount.toString())
-                                    : defaultWelcome;
-                                await sock.sendMessage(id, {
-                                    text: welcomeText,
-                                    mentions: [participant]
-                                });
-                            } else if (action === 'remove' && settings.goodbye) {
-                                const defaultGoodbye = `╭━━━━━━━━━━━━━━━━━━━━╮\n┃   👋 GOODBYE        ┃\n╰━━━━━━━━━━━━━━━━━━━━╯\n\n${tag} has left *${groupName}*.\n\nWe'll miss you! 👋\n\n_Powered by ${config.BOT_NAME}_`;
-                                let goodbyeText = settings.goodbyeMsg
-                                    ? settings.goodbyeMsg.replace('{user}', tag).replace('{group}', groupName)
-                                    : defaultGoodbye;
-                                await sock.sendMessage(id, {
-                                    text: goodbyeText,
-                                    mentions: [participant]
-                                });
+                            for (const participant of participants) {
+                                if (participant === botJid) continue;
+                                const tag = `@${participant.split('@')[0]}`;
+                                
+                                if (action === 'add' && settings.welcome) {
+                                    const defaultWelcome = `╭━━━━━━━━━━━━━━━━━━━━╮\n┃   👋 WELCOME        ┃\n╰━━━━━━━━━━━━━━━━━━━━╯\n\nWelcome ${tag} to *${groupName}*!\n\n👥 Member #${memberCount}\n\nEnjoy your stay and follow the group rules!\n\n_Powered by ${config.BOT_NAME}_`;
+                                    let welcomeText = settings.welcomeMsg 
+                                        ? settings.welcomeMsg.replace(/{user}/g, tag).replace(/{group}/g, groupName).replace(/{count}/g, memberCount.toString())
+                                        : defaultWelcome;
+                                    
+                                    let ppUrl;
+                                    try { ppUrl = await sock.profilePictureUrl(participant, 'image'); } catch(e) {}
+                                    
+                                    if (ppUrl) {
+                                        const axios = require('axios');
+                                        try {
+                                            const { data: imgBuffer } = await axios.get(ppUrl, { responseType: 'arraybuffer', timeout: 10000 });
+                                            await sock.sendMessage(id, {
+                                                image: Buffer.from(imgBuffer),
+                                                caption: welcomeText,
+                                                mentions: [participant]
+                                            });
+                                        } catch(e) {
+                                            await sock.sendMessage(id, { text: welcomeText, mentions: [participant] });
+                                        }
+                                    } else {
+                                        await sock.sendMessage(id, { text: welcomeText, mentions: [participant] });
+                                    }
+                                } else if (action === 'remove' && settings.goodbye) {
+                                    const defaultGoodbye = `╭━━━━━━━━━━━━━━━━━━━━╮\n┃   👋 GOODBYE        ┃\n╰━━━━━━━━━━━━━━━━━━━━╯\n\n${tag} has left *${groupName}*.\n\nWe'll miss you! 👋\n\n_Powered by ${config.BOT_NAME}_`;
+                                    let goodbyeText = settings.goodbyeMsg
+                                        ? settings.goodbyeMsg.replace(/{user}/g, tag).replace(/{group}/g, groupName)
+                                        : defaultGoodbye;
+                                    await sock.sendMessage(id, { text: goodbyeText, mentions: [participant] });
+                                }
                             }
                         }
+                    } catch (e) {
+                        botLogger.log('DEBUG', 'Welcome/goodbye error: ' + e.message);
                     }
-                } catch (e) {}
+                }
 
             } catch (error) {
                 botLogger.log('ERROR', 'Group update error: ' + error.message);
@@ -1168,6 +1213,8 @@ _Type ${p}menu to see all ${totalPlugins}+ commands!_`;
                         }
                     } catch (e) {}
                 }
+
+                if (isFromMe && !this.functions.isOwner(sender)) continue;
 
                 // Check if message starts with prefix
                 if (text && text.startsWith(config.PREFIX)) {
