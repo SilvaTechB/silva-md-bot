@@ -1,134 +1,343 @@
-# ⚡ **SILVA MD BOT & SILVATRIX— VERSION 5.0 IS HERE!** ⚡
-
-[![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code\&size=32\&duration=3000\&pause=700\&color=FF00A6\&center=true\&vCenter=true\&width=1000\&height=80\&lines=🚀+Welcome+to+SILVA+MD+BOT+v5.0;🤖+Now+Smarter%2C+Faster%2C+and+More+Magical;💬+Powered+by+Silva+Tech+AI+Labs;✨+Optimized+for+2025+and+Beyond!)](https://git.io/typing-svg)
-
-<img src="https://i.imgur.com/dBaSKWF.gif" height="90" width="100%">
-
-<a href="https://git.io/typing-svg">
-  <img src="https://readme-typing-svg.demolab.com?font=Rubik+Glitch&size=55&pause=700&color=FF007F&center=true&vCenter=true&width=990&height=100&lines=%F0%9F%91%91+SILVA+MD+BOT+V5.0+%F0%9F%94%A5;NOW+FULLY+OPERATIONAL" alt="Typing SVG">
-</a>
-
-<img src="https://i.imgur.com/dBaSKWF.gif" height="90" width="100%">
-
-> **The maintenance phase is over — Silva MD Bot v5.0 is officially LIVE!**
-> Experience lightning performance ⚡, upgraded AI 🧠, and a new immersive interface 💎.
-
----
-
-## 🧭 **Quick Links**
-
-| Action                  | Link                                                                                                                                                                   |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 🌐 **Get Session**      | [![Get Session](https://img.shields.io/badge/-SILVA%20SESSION-1e293b?style=for-the-badge\&logo=whatsapp\&logoColor=green)](https://silva-session-selector.vercel.app/) |
-| 🚀 **Deploy Now**       | [![Deploy Heroku](https://img.shields.io/badge/-DEPLOY%20NOW-6f42c1?style=for-the-badge\&logo=heroku\&logoColor=white)](https://silva-md-fork-checker.vercel.app/)     |
-| 🧨 **SILVATRIX FREE BOT** | [![SILVATRIX](https://img.shields.io/badge/-SILVATRIX%20FREEBOT-4b5563?style=for-the-badge\&logo=code\&logoColor=white)](https://silvatrix.silvatech.top)  |
-
----
-
-## 💡 **What’s New in Version 5.0**
-
-* 🧠 Enhanced AI: Smarter conversations & responses
-* ⚙️ Dynamic Core: Faster startup and cleaner structure
-* 🖥️ Sleek UI for console and web view
-* 📡 Advanced Broadcast + Channel automation
-* 💬 Context-aware message reactions
-* 🎵 Built-in Media Tools (YouTube, Insta, FB, TikTok downloader)
-* 🔒 Reinforced stability and anti-ban engine
-* 💫 Cross-platform deploy options (Heroku, Railway, Koyeb, Talkdrove)
-
-<img src="https://i.imgur.com/dBaSKWF.gif" height="90" width="100%">
-
-## 🌟 **Connect With Silva**
-
-ᴄʟɪᴄᴋ ᴡᴀ ʟᴏɢᴏ ᴛᴏ ᴊᴏɪɴ sᴜᴘᴘᴏʀᴛ 👇
-[![join](https://raw.githubusercontent.com/SecktorBot/Brandimages/main/secktor.png)](https://chat.whatsapp.com/Ik0YpP0dM8jHVjScf1Ay5S)
-
-<h4 align="center">SILVA SUPPORT GROUP</h4>
-
-<p align="center">
-  <a href="https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v"><img src="https://raw.githubusercontent.com/shizothetechie/database/main/icon/WhatsApp.png" width="10%"></a>
-  <a href="https://instagram.com/_its.silva"><img src="https://raw.githubusercontent.com/shizothetechie/database/main/icon/Instagram.png" width="11%"></a>
-  <a href="https://www.facebook.com/profile.php?id=100055490090211"><img src="https://raw.githubusercontent.com/shizothetechie/database/main/icon/Facebook.png" width="12%"></a>
-  <a href="https://x.com/silva_african"><img src="https://raw.githubusercontent.com/shizothetechie/database/main/icon/twitter.png" width="10%"></a>
-</p>
-
----
-
-## 📊 **Project Stats**
-
 <div align="center">
 
-| Metric               | Badge                                                                                                                          |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| 👀 **Profile Views** | <img src="https://komarev.com/ghpvc/?username=SilvaMDBot&label=Views&color=FF00A6&style=flat-square">                          |
-| 🕓 **Last Update**   | <img src="https://img.shields.io/github/last-commit/SilvaTechB/silva-md-bot?color=FF00A6&label=Last+Update&style=flat-square"> |
-| 💾 **Repo Size**     | <img src="https://img.shields.io/github/repo-size/SilvaTechB/silva-md-bot?color=FF00A6&label=Repo+Size&style=flat-square">     |
-| ⭐ **Stars**          | <img src="https://img.shields.io/github/stars/SilvaTechB/silva-md-bot?color=FF00A6&label=Stars&style=flat-square">             |
-| 🍴 **Forks**         | <img src="https://img.shields.io/github/forks/SilvaTechB/silva-md-bot?color=FF00A6&label=Forks&style=flat-square">             |
+<img src="https://i.imgur.com/dBaSKWF.gif" height="20" width="100%">
+
+<br>
+
+[![Typing SVG](https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=800&size=45&duration=3000&pause=800&color=FF00A6&center=true&vCenter=true&width=900&height=80&lines=SILVA+MD+BOT;Next-Gen+WhatsApp+Bot)](https://git.io/typing-svg)
+
+<br>
+
+<img src="https://i.imgur.com/RvEKtPJ.jpeg" alt="Silva MD Bot" width="280" style="border-radius: 20px;">
+
+<br><br>
+
+[![Stars](https://img.shields.io/github/stars/SilvaTechB/silva-md-bot?style=for-the-badge&logo=github&logoColor=white&labelColor=0d1117&color=FF00A6)](https://github.com/SilvaTechB/silva-md-bot/stargazers)
+[![Forks](https://img.shields.io/github/forks/SilvaTechB/silva-md-bot?style=for-the-badge&logo=git&logoColor=white&labelColor=0d1117&color=6f42c1)](https://github.com/SilvaTechB/silva-md-bot/network/members)
+[![Last Commit](https://img.shields.io/github/last-commit/SilvaTechB/silva-md-bot?style=for-the-badge&logo=github&logoColor=white&labelColor=0d1117&color=00d4aa)](https://github.com/SilvaTechB/silva-md-bot/commits)
+[![License](https://img.shields.io/github/license/SilvaTechB/silva-md-bot?style=for-the-badge&logo=opensourceinitiative&logoColor=white&labelColor=0d1117&color=3b82f6)](LICENSE)
+
+<br>
+
+**A powerful, feature-rich WhatsApp bot with 90+ commands, AI integration, media tools, group management, and a self-hosted media API — built on Node.js and the Baileys library.**
+
+<img src="https://i.imgur.com/dBaSKWF.gif" height="20" width="100%">
 
 </div>
 
 ---
 
-## 🚀 **Deploy Instantly**
+## What is Silva MD Bot?
 
-| Platform     | Deploy                                                                                                                                                                           |
-| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ☁️ Heroku    | [![Deploy Heroku](https://img.shields.io/badge/-DEPLOY%20ON%20HEROKU-6f42c1?style=for-the-badge\&logo=heroku\&logoColor=white)](https://silva-md-fork-checker.vercel.app/)       |
-| 🚄 Railway   | [![Deploy Railway](https://img.shields.io/badge/-DEPLOY%20ON%20RAILWAY-0b0b0b?style=for-the-badge\&logo=railway\&logoColor=white)](https://silva-md-fork-checker.vercel.app/)    |
-| 🌀 Koyeb     | [![Deploy Koyeb](https://img.shields.io/badge/-DEPLOY%20ON%20KOYEB-ff0050?style=for-the-badge\&logo=koyeb\&logoColor=white)](https://silva-md-fork-checker.vercel.app/)          |
-| 🧩 Talkdrove | [![Deploy Talkdrove](https://img.shields.io/badge/-DEPLOY%20ON%20TALKDROVE-2196F3?style=for-the-badge\&logo=whatsapp\&logoColor=white)](https://host.talkdrove.com/share-bot/49) |
-| 🧩 SILVATRIX | [![Deploy SILVATRIX](https://img.shields.io/badge/-DEPLOY%20ON%20SILVATRIX-2196F3?style=for-the-badge\&logo=whatsapp\&logoColor=white)](https://silvatrix.silvatech.top) |
+Silva MD Bot is a multi-purpose WhatsApp automation bot designed for groups, personal use, and communities. It connects to WhatsApp via QR code and gives you full control over messaging, media, AI conversations, group moderation, and much more — all through simple chat commands.
+
+No app installs. No complex setup. Just scan, deploy, and go.
 
 ---
 
-## 💻 **Developer Zone**
+## Quick Start
 
-> A powerful WhatsApp userbot built using the [Baileys](https://github.com/SilvaTechB/Baileys) library.
-> Automate chats, run media tools, and integrate AI with ease.
-> Built with ❤️ by [Silva Tech Inc](https://github.com/SilvaTechB).
+<div align="center">
 
-<p align="center">
-  <a href="https://github.com/SilvaTechB/silva-md-bot">
-    <img alt="Silva docs" height="250" src="https://i.imgur.com/RvEKtPJ.jpeg">
-  </a>
-</p>
+| Step | Action | Link |
+|:---:|--------|------|
+| **1** | Get your session ID | [![Get Session](https://img.shields.io/badge/GET_SESSION-1e293b?style=for-the-badge&logo=whatsapp&logoColor=25D366)](https://silva-session-selector.vercel.app/) |
+| **2** | Fork & deploy | [![Deploy](https://img.shields.io/badge/DEPLOY_NOW-6f42c1?style=for-the-badge&logo=rocket&logoColor=white)](https://silva-md-fork-checker.vercel.app/) |
+| **3** | Join support | [![Support](https://img.shields.io/badge/WHATSAPP_GROUP-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/Ik0YpP0dM8jHVjScf1Ay5S) |
 
----
-
-## 🧩 **Feature Highlights**
-
-* 💬 Auto-replies + smart reactions
-* 🧠 AI-driven message responses
-* 🎵 YouTube & media downloader
-* 🧹 Auto-clean messages on keywords
-* 🗳️ Fun polls & reactions
-* 👀 Status read and control options
-* 🤝 Group & channel broadcast automation
+</div>
 
 ---
 
-## 👥 **Contributors**
+## Features at a Glance
 
-| ![Silva](https://github.com/SilvaTechB.png?size=80) | ![Shizo](https://github.com/shizothetechie.png?size=80) | ![Lazack](https://github.com/Lazack28.png?size=80) |
-| --------------------------------------------------- | ------------------------------------------------------- | -------------------------------------------------- |
-| [Silva](https://github.com/SilvaTechB)              | [Shizo](https://github.com/shizothetechie)              | [Lazack28](https://github.com/Lazack28)            |
+<table>
+<tr>
+<td width="50%">
+
+### Media & Downloads
+- YouTube music & video downloads
+- TikTok video downloader
+- Instagram reels & posts
+- Facebook video downloads
+- Spotify song search
+- Lyrics finder
+- APK downloader from Play Store
+- URL shortener
+- Self-hosted media API (yt-dlp)
+
+</td>
+<td width="50%">
+
+### AI & Smart Tools
+- GPT / AI chat assistant
+- Text-to-speech (19+ languages)
+- Image text effects (Ephoto360 — 20 styles)
+- Text art generator (TextPro — 25 styles)
+- Code compiler (multi-language)
+- Weather lookup
+- Movie search
+- Element lookup
+- Fancy Unicode text (10 font styles)
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### Group Management
+- Kick, promote, demote members
+- Anti-link protection
+- Anti-spam detection
+- Anti-bot detection & removal
+- Welcome & goodbye messages (custom)
+- Group events dashboard
+- Tag all / hidetag members
+- Mute & unmute groups
+- Set group picture & description
+- Announcement mode toggle
+- 3-strike warning system
+- Native WhatsApp polls
+- Admin list & group info
+
+</td>
+<td width="50%">
+
+### Fun & Games
+- Truth or Dare
+- Magic 8-Ball
+- Rock Paper Scissors
+- Coin flip
+- Love meter (ship)
+- Random jokes & riddles
+- Inspirational quotes
+- Random facts
+- Bug sender (10 types)
+- Sticker maker (images & videos)
+
+### Owner Tools
+- Ban / unban users
+- Broadcast to all chats
+- Bot settings panel
+- Auto-update from GitHub
+- Eval & runtime commands
+
+</td>
+</tr>
+</table>
+
+### Protection Suite
+
+| Feature | What it does |
+|---------|-------------|
+| **Anti-Delete** | Recovers deleted messages and forwards them to the owner with full media |
+| **Anti-Link** | Auto-detects and removes links from non-admins in groups |
+| **Anti-Call** | Automatically rejects incoming calls (except from bot owner) |
+| **Anti-Spam** | Warns and takes action on spam behavior in groups |
+| **Anti-Bot** | Detects and removes other bots operating in your groups |
+| **Anti-Demote** | Automatically re-promotes demoted admins (LID format aware) |
+| **Auto Status View** | Silently views all contact statuses |
+| **Auto Status React** | Reacts to statuses with random emojis |
 
 ---
 
-## ⭐ **Community Love**
+## Built With
+
+<div align="center">
+
+[![Node.js](https://img.shields.io/badge/Node.js_20-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org)
+[![Baileys](https://img.shields.io/badge/Baileys-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://github.com/SilvaTechB/Baileys)
+[![Express](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com)
+[![yt-dlp](https://img.shields.io/badge/yt--dlp-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://github.com/yt-dlp/yt-dlp)
+[![Sharp](https://img.shields.io/badge/Sharp-99CC00?style=for-the-badge&logo=sharp&logoColor=white)](https://sharp.pixelplumbing.com)
+[![FFmpeg](https://img.shields.io/badge/FFmpeg-007808?style=for-the-badge&logo=ffmpeg&logoColor=white)](https://ffmpeg.org)
+
+</div>
+
+| Component | Technology |
+|-----------|-----------|
+| **Runtime** | Node.js 20.x |
+| **WhatsApp Engine** | Baileys (custom fork) |
+| **Media API** | Express.js + yt-dlp (self-hosted on port 3001) |
+| **Image Processing** | Sharp |
+| **Video Processing** | FFmpeg |
+| **Sticker Engine** | Sharp + FFmpeg |
+| **Plugin System** | Dynamic module loader (90 plugins) |
+
+---
+
+## How to Connect
+
+### Option 1 — QR Code (Recommended)
+
+1. Deploy the bot on any platform (see below)
+2. Open the console/logs
+3. Scan the QR code with WhatsApp (Settings > Linked Devices > Link a Device)
+4. Bot connects instantly
+
+### Option 2 — Session ID
+
+1. Visit the [Session Generator](https://silva-session-selector.vercel.app/)
+2. Scan QR to get your `SESSION_ID`
+3. Set it as an environment variable on your deployment platform
+4. Deploy — the bot auto-connects using the saved session
+
+---
+
+## Deploy Anywhere
+
+<div align="center">
+
+| Platform | One-Click Deploy |
+|:--------:|:----------------:|
+| **Heroku** | [![Deploy](https://img.shields.io/badge/HEROKU-430098?style=for-the-badge&logo=heroku&logoColor=white)](https://silva-md-fork-checker.vercel.app/) |
+| **Railway** | [![Deploy](https://img.shields.io/badge/RAILWAY-0B0D0E?style=for-the-badge&logo=railway&logoColor=white)](https://silva-md-fork-checker.vercel.app/) |
+| **Koyeb** | [![Deploy](https://img.shields.io/badge/KOYEB-121212?style=for-the-badge&logo=koyeb&logoColor=white)](https://silva-md-fork-checker.vercel.app/) |
+| **Replit** | [![Deploy](https://img.shields.io/badge/REPLIT-F26207?style=for-the-badge&logo=replit&logoColor=white)](https://replit.com) |
+| **Talkdrove** | [![Deploy](https://img.shields.io/badge/TALKDROVE-2196F3?style=for-the-badge&logo=whatsapp&logoColor=white)](https://host.talkdrove.com/share-bot/49) |
+
+</div>
+
+### Manual Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/SilvaTechB/silva-md-bot.git
+cd silva-md-bot
+
+# Install dependencies
+npm install
+
+# Set your environment variables (see below)
+
+# Start the bot
+node index.js
+```
+
+---
+
+## Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `SESSION_ID` | WhatsApp session credentials | *required* |
+| `PREFIX` | Command prefix character | `.` |
+| `BOT_NAME` | Display name for the bot | `Silva MD Bot` |
+| `OWNER_NUMBER` | Your WhatsApp number (with country code) | — |
+| `PORT` | HTTP server port | `5000` |
+| `AUTO_STATUS_VIEW` | Auto-view all statuses | `true` |
+| `AUTO_STATUS_REACT` | Auto-react to statuses | `true` |
+| `ANTI_DELETE` | Forward deleted messages to owner | `true` |
+| `ANTI_CALL` | Auto-reject calls | `true` |
+| `AUTO_UPDATE` | Auto-pull updates from GitHub | `true` |
+| `UPDATE_REPO` | GitHub repo for auto-updates | `SilvaTechB/silva-md-bot` |
+
+---
+
+## Project Structure
+
+```
+silva-md-bot/
+├── index.js          # Entry point — starts HTTP server + bot
+├── silva.js          # WhatsApp connection & message handler
+├── config.js         # Configuration via environment variables
+├── silvaxlab/        # Plugin directory (90 command plugins)
+│   ├── menu.js       # Interactive command menu
+│   ├── music.js      # YouTube audio downloader
+│   ├── video.js      # YouTube video downloader
+│   ├── ai.js         # AI chat integration
+│   ├── ephoto.js     # Ephoto360 text effects (20 styles)
+│   ├── textpro.js    # TextPro.me text effects (25 styles)
+│   ├── sticker.js    # Sticker maker
+│   ├── welcome.js    # Welcome/goodbye system
+│   ├── groupevent.js # Group events dashboard
+│   └── ...           # 80+ more plugins
+├── lib/
+│   ├── mediaApi.js   # Self-hosted media download API
+│   ├── updater.js    # Auto-update system
+│   ├── events.js     # Event handlers
+│   └── logger.js     # Logging utility
+└── package.json
+```
+
+---
+
+## Command Categories
+
+| Category | Count | Examples |
+|----------|:-----:|---------|
+| Media & Downloads | 12 | `.music`, `.video`, `.tiktok`, `.ig`, `.fb`, `.apk` |
+| AI & Tools | 10 | `.ai`, `.gpt`, `.tts`, `.translate`, `.compile`, `.weather` |
+| Maker | 2 | `.ephoto <effect> <text>`, `.textpro <effect> <text>` |
+| Group Management | 18 | `.kick`, `.promote`, `.warn`, `.mute`, `.antilink`, `.events` |
+| Fun & Games | 13 | `.truth`, `.dare`, `.8ball`, `.joke`, `.riddle`, `.ship` |
+| Stickers | 3 | `.sticker`, `.take`, `.tourl` |
+| Protection | 6 | `.antilink`, `.anticall`, `.antispam`, `.antibot`, `.antidemote` |
+| Owner | 10 | `.ban`, `.broadcast`, `.eval`, `.update`, `.settings` |
+| Utility | 16 | `.menu`, `.ping`, `.alive`, `.whois`, `.pp`, `.short` |
+| **Total** | **90** | — |
+
+---
+
+## Auto-Update System
+
+Silva MD Bot can automatically pull the latest plugins and library updates from the main GitHub repository. Updates are checked every 30 minutes when enabled.
+
+- New plugins are downloaded automatically
+- Existing plugins are updated if a newer version is available
+- Core libraries in `lib/` are kept in sync
+- Manual update: send `.update` command via WhatsApp
+
+---
+
+## Connect With Silva
+
+<div align="center">
+
+[![WhatsApp Channel](https://img.shields.io/badge/WhatsApp_Channel-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v)
+[![Instagram](https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white)](https://instagram.com/_its.silva)
+[![Facebook](https://img.shields.io/badge/Facebook-1877F2?style=for-the-badge&logo=facebook&logoColor=white)](https://www.facebook.com/profile.php?id=100055490090211)
+[![Twitter](https://img.shields.io/badge/X_(Twitter)-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/silva_african)
+[![Support Group](https://img.shields.io/badge/Support_Group-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/Ik0YpP0dM8jHVjScf1Ay5S)
+
+</div>
+
+---
+
+## Contributors
+
+<div align="center">
+
+| <img src="https://github.com/SilvaTechB.png?size=100" width="80" style="border-radius:50%"> | <img src="https://github.com/shizothetechie.png?size=100" width="80" style="border-radius:50%"> | <img src="https://github.com/Lazack28.png?size=100" width="80" style="border-radius:50%"> |
+|:---:|:---:|:---:|
+| **[Silva](https://github.com/SilvaTechB)** | **[Shizo](https://github.com/shizothetechie)** | **[Lazack28](https://github.com/Lazack28)** |
+| Creator & Lead Dev | Contributor | Contributor |
+
+</div>
+
+---
+
+## Community
+
+<div align="center">
 
 [![Forkers](https://reporoster.com/forks/SilvaTechB/silva-md-bot)](https://github.com/SilvaTechB/silva-md-bot/network/members)
-[![Stars](https://reporoster.com/stars/SilvaTechB/silva-md-bot)](https://github.com/SilvaTechB/silva-md-bot/stargazers)
+[![Stargazers](https://reporoster.com/stars/SilvaTechB/silva-md-bot)](https://github.com/SilvaTechB/silva-md-bot/stargazers)
+
+</div>
 
 ---
 
-## ⚖️ **License**
+## License
 
-Licensed under MIT.
-© 2025 [Silva Tech Inc](https://github.com/SilvaTechB).
+MIT License — free to use, modify, and distribute.
 
-> Silva MD Bot — Version **5.0** | Rebuilt, Reinvented, Ready.
+<div align="center">
 
-<img src="https://i.imgur.com/dBaSKWF.gif" height="90" width="100%">
+**Built with purpose by [Silva Tech Inc](https://github.com/SilvaTechB)**
 
+<img src="https://i.imgur.com/dBaSKWF.gif" height="20" width="100%">
+
+<sub>Silva MD Bot — 90 commands. One scan. Unlimited possibilities.</sub>
+
+</div>
