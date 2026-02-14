@@ -41,7 +41,7 @@ const handler = {
                         return sock.sendMessage(jid, {
                             text: `╭━━━━━━━━━━━━━━━━━━━━╮
 ┃   🛡️ ANTI-DEMOTE     ┃
-╰━━━━━━━━━━━━━━━━━━━━╯
+╰━━━━━━���━━━━━━━━━━━━━╯
 
 📊 *Status:* ${groupProtection.enabled ? '✅ ENABLED' : '❌ DISABLED'}
 🛡️ *Protected Users:* ${groupProtection.users.length}
