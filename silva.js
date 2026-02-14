@@ -435,8 +435,9 @@ class PluginManager {
         
         botLogger.log('COMMAND', `🔄 Processing command: ${text} from ${sender}`);
         
-        // Check if user is allowed
-        if (!this.functions.isAllowed(sender, jid)) {
+        // Check if user is allowed (fromMe messages are always allowed - owner using bot)
+        const isFromMe = message?.key?.fromMe || false;
+        if (!isFromMe && !this.functions.isAllowed(sender, jid)) {
             if (config.BOT_MODE === 'private') {
                 await sock.sendMessage(jid, { 
                     text: '🔒 Private mode: Contact owner for access.' 
@@ -815,9 +816,25 @@ Connected Number: ${this.functions.botNumber || 'Unknown'}
             }
         });
 
-        // Handle group participants updates (welcome/goodbye + bot added)
+        // Handle group participants updates (welcome/goodbye + bot added + antidemote)
         sock.ev.on('group-participants.update', async (event) => {
             try {
+                // Antidemote protection handler
+                try {
+                    const { handleGroupUpdate: antidemoteHandler } = require('./silvaxlab/antidemote');
+                    await antidemoteHandler(event, sock);
+                } catch (e) {
+                    botLogger.log('DEBUG', '[ANTIDEMOTE] Handler error: ' + e.message);
+                }
+
+                // Antifake protection handler
+                try {
+                    const { handleAntifake } = require('./silvaxlab/antifake');
+                    await handleAntifake(event, sock);
+                } catch (e) {
+                    botLogger.log('DEBUG', '[ANTIFAKE] Handler error: ' + e.message);
+                }
+
                 const { id, participants, action } = event;
                 const botJid = this.sock.user?.id?.split(':')[0] + '@s.whatsapp.net';
 
