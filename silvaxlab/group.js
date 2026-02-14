@@ -10,7 +10,7 @@ const handler = {
     group: true,
     admin: true,
     botAdmin: false,
-    owner: false,
+    owner: true,
 
     execute: async ({ jid, sock, message, args }) => {
         const sender = message.key.participant || message.key.remoteJid
