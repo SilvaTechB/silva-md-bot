@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Silva MD Bot</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a1a;
+            color: #e0e0e0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-glow {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            filter: blur(150px);
+            opacity: 0.15;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .glow-1 { top: -200px; left: -100px; background: #00d4ff; }
+        .glow-2 { bottom: -200px; right: -100px; background: #7c3aed; }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 60px 0 40px;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: rgba(0,212,255,0.1);
+            border: 1px solid rgba(0,212,255,0.3);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: #00d4ff;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 16px;
+        }
+
+        .hero h1 .gradient {
+            background: linear-gradient(135deg, #00d4ff 0%, #7c3aed 50%, #f472b6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: #888;
+            max-width: 600px;
+            margin: 0 auto 30px;
+            line-height: 1.7;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff, #7c3aed);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0,212,255,0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #ccc;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .btn-outline:hover {
+            border-color: rgba(255,255,255,0.4);
+            background: rgba(255,255,255,0.05);
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 50px 0;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00d4ff, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .section-sub {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 0.95rem;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 60px;
+        }
+
+        .feature-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 28px;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            border-color: rgba(0,212,255,0.2);
+            background: rgba(255,255,255,0.05);
+            transform: translateY(-4px);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 16px;
+        }
+
+        .feature-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #f0f0f0;
+        }
+
+        .feature-card p {
+            font-size: 0.9rem;
+            color: #777;
+            line-height: 1.6;
+        }
+
+        .commands-section {
+            margin-bottom: 60px;
+        }
+
+        .commands-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+        }
+
+        .cmd-group {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .cmd-group h4 {
+            font-size: 0.85rem;
+            color: #00d4ff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .cmd-group ul {
+            list-style: none;
+        }
+
+        .cmd-group li {
+            font-size: 0.85rem;
+            color: #888;
+            padding: 4px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .cmd-group li::before {
+            content: '.';
+            color: #7c3aed;
+            font-weight: bold;
+        }
+
+        .setup-section {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 60px;
+        }
+
+        .setup-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+            margin-top: 30px;
+        }
+
+        .step {
+            text-align: center;
+        }
+
+        .step-num {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00d4ff, #7c3aed);
+            color: #fff;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            font-size: 1rem;
+        }
+
+        .step h4 {
+            font-size: 0.95rem;
+            margin-bottom: 6px;
+            color: #e0e0e0;
+        }
+
+        .step p {
+            font-size: 0.8rem;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 16px;
+            background: rgba(0,212,255,0.05);
+            border: 1px solid rgba(0,212,255,0.15);
+            border-radius: 12px;
+            margin-bottom: 60px;
+        }
+
+        .pulse-dot {
+            width: 10px;
+            height: 10px;
+            background: #00d4ff;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.3); }
+        }
+
+        .status-text {
+            font-size: 0.9rem;
+            color: #00d4ff;
+            font-weight: 500;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 40px 0;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: #888;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover { color: #00d4ff; }
+
+        .footer-copy {
+            font-size: 0.8rem;
+            color: #444;
+        }
+
+        .footer-copy a {
+            color: #7c3aed;
+            text-decoration: none;
+        }
+
+        @media (max-width: 600px) {
+            .stats-bar { gap: 24px; }
+            .setup-section { padding: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="bg-glow glow-1"></div>
+    <div class="bg-glow glow-2"></div>
+
+    <div class="container">
+        <div class="hero">
+            <div class="hero-badge">WHATSAPP BOT</div>
+            <h1><span class="gradient">Silva MD Bot</span></h1>
+            <p>A powerful multi-functional WhatsApp bot with AI features, group moderation, media tools, and 250+ commands. Built with Baileys.</p>
+            <div class="hero-buttons">
+                <a href="https://github.com/SilvaTechB/silva-md-bot" class="btn btn-primary" target="_blank">View on GitHub</a>
+                <a href="https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v" class="btn btn-outline" target="_blank">WhatsApp Channel</a>
+            </div>
+        </div>
+
+        <div class="status-bar">
+            <div class="pulse-dot"></div>
+            <span class="status-text" id="bot-status">Bot is running</span>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat">
+                <div class="stat-value" id="stat-plugins">257</div>
+                <div class="stat-label">Plugins</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="stat-stars">--</div>
+                <div class="stat-label">GitHub Stars</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="stat-forks">--</div>
+                <div class="stat-label">Forks</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="stat-uptime">--</div>
+                <div class="stat-label">Uptime</div>
+            </div>
+        </div>
+
+        <h2 class="section-title">Features</h2>
+        <p class="section-sub">Everything you need to supercharge your WhatsApp experience</p>
+
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon">&#129302;</div>
+                <h3>AI Assistant</h3>
+                <p>Chat with AI models, generate images, get answers to questions, and use AI-powered tools directly in WhatsApp.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#128737;</div>
+                <h3>Group Moderation</h3>
+                <p>Anti-link, anti-spam, warn system, kick, mute, promote/demote members, and auto-moderation tools.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#127909;</div>
+                <h3>Media Tools</h3>
+                <p>Download videos from YouTube, TikTok, Instagram. Convert stickers, manipulate images, and more.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#127911;</div>
+                <h3>Music &amp; Audio</h3>
+                <p>Play music, convert audio formats, text-to-speech, and audio effects for your chats.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#128736;</div>
+                <h3>Utility Commands</h3>
+                <p>Weather, translation, calculator, QR generator, URL shortener, and dozens of handy tools.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#127918;</div>
+                <h3>Fun &amp; Games</h3>
+                <p>Trivia, truth or dare, RPG leveling system, economy, and interactive group games.</p>
+            </div>
+        </div>
+
+        <div class="commands-section">
+            <h2 class="section-title">Popular Commands</h2>
+            <p class="section-sub">Just a taste of what Silva MD can do</p>
+
+            <div class="commands-grid">
+                <div class="cmd-group">
+                    <h4>AI &amp; Chat</h4>
+                    <ul>
+                        <li>ai &lt;prompt&gt;</li>
+                        <li>dalle &lt;prompt&gt;</li>
+                        <li>gpt &lt;question&gt;</li>
+                        <li>imagine &lt;desc&gt;</li>
+                    </ul>
+                </div>
+                <div class="cmd-group">
+                    <h4>Downloads</h4>
+                    <ul>
+                        <li>play &lt;song&gt;</li>
+                        <li>ytmp4 &lt;url&gt;</li>
+                        <li>tiktok &lt;url&gt;</li>
+                        <li>ig &lt;url&gt;</li>
+                    </ul>
+                </div>
+                <div class="cmd-group">
+                    <h4>Group Admin</h4>
+                    <ul>
+                        <li>kick @user</li>
+                        <li>warn @user</li>
+                        <li>mute</li>
+                        <li>antilink on</li>
+                    </ul>
+                </div>
+                <div class="cmd-group">
+                    <h4>Tools</h4>
+                    <ul>
+                        <li>sticker</li>
+                        <li>translate &lt;text&gt;</li>
+                        <li>weather &lt;city&gt;</li>
+                        <li>menu</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="setup-section">
+            <h2 class="section-title">Quick Setup</h2>
+            <p class="section-sub">Get Silva MD running in minutes</p>
+
+            <div class="setup-steps">
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <h4>Fork the Repo</h4>
+                    <p>Fork the Silva MD Bot repository on GitHub or deploy on Replit</p>
+                </div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <h4>Get Session</h4>
+                    <p>Generate your SESSION_ID using the session generator tool</p>
+                </div>
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <h4>Configure</h4>
+                    <p>Set your SESSION_ID and customize bot settings in environment variables</p>
+                </div>
+                <div class="step">
+                    <div class="step-num">4</div>
+                    <h4>Deploy</h4>
+                    <p>Start the bot and scan the QR code from the terminal to pair</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-links">
+                <a href="https://github.com/SilvaTechB/silva-md-bot" target="_blank">GitHub</a>
+                <a href="https://youtube.com/@silvaedits254" target="_blank">YouTube</a>
+                <a href="https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v" target="_blank">WhatsApp Channel</a>
+                <a href="https://wa.me/254700143167" target="_blank">Contact Developer</a>
+            </div>
+            <p class="footer-copy">Silva MD Bot &copy; 2024 - 2026 <a href="https://github.com/SilvaTechB">Silva Tech Inc.</a> | Developer: Sylivanus Momanyi</p>
+        </div>
+    </div>
+
+    <script>
+        const repoUrl = 'https://api.github.com/repos/SilvaTechB/silva-md-bot';
+
+        async function fetchRepoStats() {
+            try {
+                const response = await fetch(repoUrl);
+                const data = await response.json();
+                document.getElementById('stat-stars').textContent = data.stargazers_count || '--';
+                document.getElementById('stat-forks').textContent = data.forks_count || '--';
+            } catch (e) {
+                console.error('Failed to fetch repo stats:', e);
+            }
+        }
+
+        fetchRepoStats();
+
+        const startTime = Date.now();
+        function updateUptime() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const h = Math.floor(elapsed / 3600);
+            const m = Math.floor((elapsed % 3600) / 60);
+            const s = elapsed % 60;
+            document.getElementById('stat-uptime').textContent =
+                h > 0 ? h + 'h ' + m + 'm' : m + 'm ' + s + 's';
+        }
+
+        setInterval(updateUptime, 1000);
+        updateUptime();
+    </script>
+</body>
+</html>

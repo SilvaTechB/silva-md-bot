@@ -1,0 +1,131 @@
+{
+  "name": "𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓",
+  "description": "A powerful multi-functional WhatsApp bot with AI features, group moderation, media tools, and 250+ commands. Built with gifted-baileys.",
+  "keywords": [
+    "whatsapp bot",
+    "silva md",
+    "baileys",
+    "chatbot",
+    "automation"
+  ],
+  "repository": "https://github.com/SilvaTechB/silva-md-bot",
+  "logo": "https://raw.githubusercontent.com/SilvaTechB/silva-md-bot/main/jusorts/sylivanus.jpg",
+  "env": {
+    "SESSION_ID": {
+      "description": "Your session ID. Get one at https://silva-session-selector.vercel.app/",
+      "required": true,
+      "value": ""
+    },
+    "OWNERS": {
+      "description": "Owner phone numbers separated by semicolons (e.g., 254743706010;Silva MD Bot)",
+      "required": true,
+      "value": "254743706010;𝐒𝐈𝐋𝐕𝐀 𝐌𝐃 𝐁𝐎𝐓"
+    },
+    "BOTNAME": {
+      "description": "Give your bot a display name",
+      "required": true,
+      "value": "SILVA-MD-BOT"
+    },
+    "MODE": {
+      "description": "Bot mode: public (responds to everyone) or private (owner only)",
+      "required": true,
+      "value": "public"
+    },
+    "PREFIX": {
+      "description": "Command prefix symbol (e.g., . or ! or #). Leave blank for multi-prefix",
+      "required": true,
+      "value": "."
+    },
+    "PORT": {
+      "description": "Server port for the landing page",
+      "required": false,
+      "value": "5000"
+    },
+    "statusview": {
+      "description": "Auto-view WhatsApp statuses (true/false)",
+      "required": false,
+      "value": "true"
+    },
+    "autoRead": {
+      "description": "Auto-read incoming messages (true/false)",
+      "required": false,
+      "value": "false"
+    },
+    "AUTO_STATUS_LIKE": {
+      "description": "Auto-like WhatsApp statuses with an emoji (true/false)",
+      "required": false,
+      "value": "true"
+    },
+    "AUTO_STATUS_LIKE_EMOJI": {
+      "description": "Emoji used to react to statuses",
+      "required": false,
+      "value": "💚"
+    },
+    "Status_Saver": {
+      "description": "Forward viewed statuses to bot owner (true/false)",
+      "required": false,
+      "value": "false"
+    },
+    "STATUS_REPLY": {
+      "description": "Auto-reply to people who post statuses (true/false)",
+      "required": false,
+      "value": "false"
+    },
+    "STATUS_MSG": {
+      "description": "Custom message sent as status reply",
+      "required": false,
+      "value": "SILVA MD BOT SUCCESSFULLY VIEWED YOUR STATUS 💖💚"
+    },
+    "WELCOME_MSG": {
+      "description": "Send welcome message when someone joins a group (true/false)",
+      "required": false,
+      "value": "true"
+    },
+    "GOODBYE_MSG": {
+      "description": "Send goodbye message when someone leaves a group (true/false)",
+      "required": false,
+      "value": "true"
+    },
+    "ANTILINK": {
+      "description": "Auto-delete group links sent in groups when bot is admin (true/false)",
+      "required": false,
+      "value": "true"
+    },
+    "antidelete": {
+      "description": "Forward deleted messages to bot owner (true/false)",
+      "required": false,
+      "value": "true"
+    },
+    "AUTO_RECORDING": {
+      "description": "Show recording status when processing commands (true/false)",
+      "required": false,
+      "value": "false"
+    },
+    "AUTO_TYPING": {
+      "description": "Show typing status when processing commands (true/false)",
+      "required": false,
+      "value": "false"
+    },
+    "ANTICALL": {
+      "description": "Auto-reject and block callers (true/false)",
+      "required": false,
+      "value": "true"
+    },
+    "ANTIVIEWONCE": {
+      "description": "Forward view-once messages so they can be seen again (true/false)",
+      "required": false,
+      "value": "false"
+    },
+    "REMOVEBG_KEY": {
+      "description": "API key for remove.bg background removal (get at https://www.remove.bg/api)",
+      "required": false,
+      "value": ""
+    }
+  },
+  "scripts": {
+    "start": "node silva.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
