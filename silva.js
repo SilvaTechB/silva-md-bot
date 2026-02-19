@@ -55,20 +55,17 @@ async function start(file) {
 
   child.on('exit', code => {
     isRunning = false
-    console.error(chalk.red(`❌ Exited with code: ${code}`))
-    if (code !== 0) {
-      fs.watchFile(args[0], () => {
-        fs.unwatchFile(args[0])
-        start(file)
-      })
+    if (code !== 0 && code !== null) {
+      console.error(chalk.red(`Bot exited with code: ${code} - restarting in 5s...`))
+      setTimeout(() => start(file), 5000)
     }
   })
 
   child.on('error', err => {
-    console.error(chalk.red(`❌ Child process error: ${err}`))
-    child.kill()
+    console.error(chalk.red(`Child process error: ${err.message}`))
+    try { child.kill() } catch {}
     isRunning = false
-    start(file)
+    setTimeout(() => start(file), 5000)
   })
 
   const pluginsFolder = path.join(__dirname, 'silvaxlab')
@@ -85,10 +82,4 @@ start('sylivanus.js')
 
 process.on('unhandledRejection', err => {
   console.error(chalk.red('Unhandled rejection:'), err)
-  start('sylivanus.js')
-})
-
-process.on('exit', code => {
-  console.error(chalk.red(`Process exited with code ${code}`))
-  start('sylivanus.js')
 })

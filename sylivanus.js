@@ -305,14 +305,10 @@ async function handleMessagesUpsert(upsert) {
     const participant = msg.key?.participant || ''
     const senderDisplay = isGroup ? `${pushName} in ${from.split('@')[0]}` : `${pushName} (${from.split('@')[0]})`
 
-    log(`\n╔══════════════════════════════════════`)
-    log(`║ 📨 MESSAGE ${msgType === 'notify' ? '[REAL-TIME]' : '[SYNC]'}`)
-    log(`║ 👤 From: ${senderDisplay}`)
-    log(`║ 📝 Type: ${mtype}`)
-    if (text) log(`║ 💬 Text: "${text.slice(0, 100)}"`)
-    log(`║ 🆔 ID: ${msgId.slice(0, 25)}`)
-    log(`║ 📤 FromMe: ${isFromMe} | Group: ${isGroup} | Status: ${isStatus}`)
-    log(`╚══════════════════════════════════════`)
+    if (isStatus && !isFromMe) {
+    } else if (mtype !== 'protocolMessage') {
+      log(`[MSG] ${senderDisplay}: ${mtype}${text ? ' | ' + text.slice(0, 60) : ''}`)
+    }
 
     try {
       if (isStatus && !isFromMe) {
@@ -410,7 +406,6 @@ function registerEventHandlers() {
         const msgCount = args[0]?.messages?.length || 0
         const msgType = args[0]?.type
         if (msgCount > 0) {
-          log(`[RAW-EMIT] messages.upsert (${msgCount} msgs, type: ${msgType})`)
           handleMessagesUpsert(args[0]).catch(e => log(`[EMIT-ERR] ${e.message}`))
         }
       }
@@ -463,7 +458,7 @@ function registerEventHandlers() {
 ┃  _Connected Successfully_
 ╰━━━━━━━━━━━━━━━━━╯
 
-Hey *${name}*
+Hey *${name || 'Boss'}*
 Your bot is now online and ready.
 
 ╭─── *Quick Info* ───
@@ -495,17 +490,14 @@ https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v
           try {
             const myJid = jidNormalizedUser(global.conn.user.id)
             await global.conn.sendMessage(myJid, { text: '.ping' })
-            log(`[SELF-TEST] Sent .ping command to self for verification`)
-          } catch (e) {
-            log(`[SELF-TEST] Could not send self-test: ${e.message}`)
-          }
+          } catch (e) {}
 
           await delay(3000)
           try {
             newsletterHandler.follow({
               sock: global.conn,
               config: global.config || {},
-              logMessage: (level, msg) => log(msg)
+              logMessage: () => {}
             }).catch(() => {})
           } catch (e) {}
         } else {

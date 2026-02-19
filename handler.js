@@ -36,19 +36,8 @@ export async function handler(chatUpdate) {
   if (global.db.data == null) await global.loadDatabase()
   try {
     m = smsg(this, m) || m
-    if (!m) {
-      process.stdout.write(`[DEBUG-HANDLER] smsg returned null - message dropped\n`)
-      return
-    }
-    if (m.isBaileys) {
-      process.stdout.write(`[DEBUG-HANDLER] isBaileys=true, skipping | id: ${m.key?.id?.slice(0,20)} | fromMe: ${m.key?.fromMe}\n`)
-      return
-    }
-    const senderName = m.pushName || m.sender?.split('@')[0] || 'Unknown'
-    const chatLabel = m.isGroup ? (m.chat?.split('@')[0] || 'group') : 'DM'
-    const msgPreview = m.text ? m.text.slice(0, 80) : `[${m.mtype || 'unknown'}]`
-    process.stdout.write(`[HANDLER] ${senderName} (${chatLabel}): ${msgPreview}\n`)
-    process.stdout.write(`[DEBUG-HANDLER] mtype: ${m.mtype} | text: "${(m.text || '').slice(0, 50)}" | fromMe: ${m.key?.fromMe} | sender: ${m.sender}\n`)
+    if (!m) return
+    if (m.isBaileys) return
     m.exp = 0
     m.credit = false
     m.bank = false
@@ -212,12 +201,10 @@ export async function handler(chatUpdate) {
       }, time)
     }
     if (process.env.MODE && process.env.MODE.toLowerCase() === 'private' && !(isROwner || isOwner)) {
-      process.stdout.write(`[DEBUG-HANDLER] BLOCKED by private mode | sender: ${m.sender} | isOwner: ${isOwner}\n`)
       return
     }
 
     if (m.isBaileys) {
-      process.stdout.write(`[DEBUG-HANDLER] isBaileys check #2 - skipping | id: ${m.key?.id?.slice(0,20)}\n`)
       return
     }
     m.exp += Math.ceil(Math.random() * 10)
@@ -241,7 +228,6 @@ export async function handler(chatUpdate) {
     const totalPlugins = Object.keys(global.plugins).length
     let pluginsChecked = 0
     let prefixMatched = false
-    process.stdout.write(`[DEBUG-HANDLER] Starting plugin loop | total plugins: ${totalPlugins} | prefix regex: ${global.prefix}\n`)
     for (let name in global.plugins) {
       let plugin = global.plugins[name]
       if (!plugin) continue
@@ -324,7 +310,6 @@ export async function handler(chatUpdate) {
       if ((usedPrefix = (match[0] || '')[0])) {
         if (!prefixMatched) {
           prefixMatched = true
-          process.stdout.write(`[DEBUG-HANDLER] Prefix matched: "${usedPrefix}" | text: "${m.text?.slice(0, 50)}"\n`)
         }
         let noPrefix = m.text.replace(usedPrefix, '')
         let [command, ...args] = noPrefix.trim().split` `.filter(v => v)
@@ -347,7 +332,6 @@ export async function handler(chatUpdate) {
                 : false
 
         if (!isAccept) continue
-        process.stdout.write(`[DEBUG-HANDLER] COMMAND MATCHED: "${command}" -> plugin: ${name} | commands: ${JSON.stringify(plugin.command)}\n`)
         m.plugin = name
         if (m.chat in global.db.data.chats || m.sender in global.db.data.users) {
           let chat = global.db.data.chats[m.chat]
@@ -404,7 +388,8 @@ export async function handler(chatUpdate) {
           continue
         }
         m.isCommand = true
-        process.stdout.write(`[CMD] ${senderName} ran: ${usedPrefix}${command} ${args.join(' ')}`.trim() + ` | plugin: ${name}\n`)
+        const cmdSender = m.pushName || m.sender?.split('@')[0] || 'Unknown'
+        process.stdout.write(`[CMD] ${cmdSender} ran: ${usedPrefix}${command} ${args.join(' ')}`.trim() + ` | plugin: ${name}\n`)
         let xp = 'exp' in plugin ? parseInt(plugin.exp) : 17 // XP Earning per command
         if (xp > 200) m.reply('cheater')
         else m.exp += xp
@@ -485,10 +470,7 @@ export async function handler(chatUpdate) {
         break
       }
     }
-    if (m.text && !m.isCommand && (m.text.startsWith('.') || m.text.startsWith('/'))) {
-      const attempted = m.text.slice(0, 30)
-      process.stdout.write(`[DEBUG-HANDLER] NO COMMAND MATCHED for: "${attempted}" | prefixMatched: ${prefixMatched} | pluginsChecked: ${pluginsChecked}\n`)
-    }
+    
   } catch (e) {
     process.stdout.write(`[HANDLER-CRASH] ${e.message}\n${e.stack}\n`)
     console.error(e)

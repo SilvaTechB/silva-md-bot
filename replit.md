@@ -77,6 +77,15 @@ The bot runs via `node silva.js` which:
 - **Error boundaries**: All event handlers wrapped in try/catch to prevent one error from breaking others
 
 ## Recent Changes
+- 2026-02-19: Major log noise reduction
+  - Removed verbose message boxes (RAW-EMIT, DEBUG-HANDLER) - replaced with single-line [MSG] format
+  - Silenced status broadcast messages and protocolMessage from logs
+  - Made heartbeat conditional (only logs when connected, high memory, or handler missing)
+  - Silenced newsletter follow errors and self-test logs
+  - Removed duplicate QR/IPC messages from parent process (silva.js)
+  - Fixed duplicate bot instances: removed restart-on-exit handler, added 5s delay before restart
+  - Fixed welcome message showing "undefined" name - now falls back to "Boss"
+  - Fixed senderName crash in handler.js after debug log cleanup
 - 2026-02-19: Fixed autoread bug - was reading messages even when autoRead was set to "false"
   - Root cause: `if (process.env.autoRead)` is truthy for ANY non-empty string including "false"
   - Fix: Changed to strict `=== 'true'` comparison in both handler.js and sylivanus.js
