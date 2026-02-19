@@ -1,86 +1,88 @@
-import { downloadContentFromMessage } from "@whiskeysockets/baileys";
+import { downloadContentFromMessage } from "@whiskeysockets/baileys"
 
-// Handler for processing view-once messages
-let handler = message => message;
+let handler = m => m
 
 handler.before = async function (msg, { conn }) {
-  // Check if ANTIVIEWONCE is enabled
-  if (process.env.ANTIVIEWONCE !== "true") {
-    console.log("Anti-View Once is disabled.");
-    return;
-  }
+  if (process.env.ANTIVIEWONCE !== "true") return
 
   try {
-    // Check if the message is a view-once type
-    if (["viewOnceMessageV2", "viewOnceMessageV2Extension"].includes(msg.mtype)) {
-      const viewOnceContent = 
-        msg.mtype === "viewOnceMessageV2"
-          ? msg.message.viewOnceMessageV2.message
-          : msg.message.viewOnceMessageV2Extension.message;
+    if (!["viewOnceMessageV2", "viewOnceMessageV2Extension"].includes(msg.mtype)) return
 
-      const mediaType = Object.keys(viewOnceContent)[0];
-      if (!["imageMessage", "videoMessage", "audioMessage"].includes(mediaType)) return;
+    const viewOnceContent =
+      msg.mtype === "viewOnceMessageV2"
+        ? msg.message?.viewOnceMessageV2?.message
+        : msg.message?.viewOnceMessageV2Extension?.message
 
-      // Download media content
-      const downloadType = mediaType.replace("Message", "").toLowerCase();
-      const mediaStream = await downloadContentFromMessage(viewOnceContent[mediaType], downloadType);
+    if (!viewOnceContent) return
 
-      // Collect media data into a buffer
-      const mediaBuffer = Buffer.concat(await toBuffer(mediaStream));
+    const mediaType = Object.keys(viewOnceContent).find(k =>
+      ["imageMessage", "videoMessage", "audioMessage"].includes(k)
+    )
+    if (!mediaType) return
 
-      // Format file size
-      const fileSize = formatFileSize(viewOnceContent[mediaType].fileLength);
+    const mediaMsg = viewOnceContent[mediaType]
+    const downloadType = mediaType.replace("Message", "").toLowerCase()
 
-      // Compose info message
-      const infoMessage = `
-*💀💀 SILVA MD ANTI VIEW ONCE 💀💀*
-*Type:* ${mediaType === "imageMessage" ? "Image 📸" : mediaType === "videoMessage" ? "Video 📹" : "Voice Message"}
-*Size:* \`${fileSize}\`
-*User:* @${msg.sender.split("@")[0]}
-${viewOnceContent[mediaType].caption ? "*Caption:* " + viewOnceContent[mediaType].caption : ""}
-      `.trim();
-
-      // Send the media and info message
-      if (mediaType === "imageMessage" || mediaType === "videoMessage") {
-        const fileExtension = mediaType === "imageMessage" ? ".jpg" : ".mp4";
-        await conn.sendFile(
-          conn.user.id,
-          mediaBuffer,
-          `view_once${fileExtension}`,
-          infoMessage,
-          msg,
-          false,
-          { mentions: [msg.sender] }
-        );
-      } else if (mediaType === "audioMessage") {
-        await conn.reply(conn.user.id, infoMessage, msg, { mentions: [msg.sender] });
-        await conn.sendMessage(
-          conn.user.id,
-          { audio: mediaBuffer, fileName: "view_once.mp3", mimetype: "audio/mpeg", ptt: true },
-          { quoted: msg }
-        );
+    let mediaBuffer
+    try {
+      const stream = await downloadContentFromMessage(mediaMsg, downloadType)
+      const chunks = []
+      for await (const chunk of stream) {
+        chunks.push(chunk)
       }
+      mediaBuffer = Buffer.concat(chunks)
+    } catch {
+      return
+    }
+
+    if (!mediaBuffer || mediaBuffer.length === 0) return
+
+    const fileSize = mediaMsg.fileLength
+      ? formatFileSize(Number(mediaMsg.fileLength))
+      : "Unknown"
+
+    const caption = mediaMsg.caption ? `*Caption:* ${mediaMsg.caption}\n` : ""
+    const senderNum = msg.sender?.split("@")[0] || "Unknown"
+
+    const infoMessage = `*💀 SILVA MD ANTI VIEW ONCE 💀*\n*Type:* ${
+      mediaType === "imageMessage" ? "Image 📸" : mediaType === "videoMessage" ? "Video 📹" : "Voice 🎤"
+    }\n*Size:* ${fileSize}\n*User:* @${senderNum}\n${caption}`.trim()
+
+    const mentions = msg.sender ? [msg.sender] : []
+
+    if (mediaType === "imageMessage") {
+      await conn.sendMessage(conn.user.id, {
+        image: mediaBuffer,
+        caption: infoMessage,
+        mentions
+      }, { quoted: msg })
+    } else if (mediaType === "videoMessage") {
+      await conn.sendMessage(conn.user.id, {
+        video: mediaBuffer,
+        caption: infoMessage,
+        mentions
+      }, { quoted: msg })
+    } else if (mediaType === "audioMessage") {
+      await conn.sendMessage(conn.user.id, {
+        text: infoMessage,
+        mentions
+      }, { quoted: msg })
+      await conn.sendMessage(conn.user.id, {
+        audio: mediaBuffer,
+        mimetype: "audio/mpeg",
+        ptt: true
+      }, { quoted: msg })
     }
   } catch (error) {
-    console.error("Error processing view-once message:", error.message);
+    console.error("[ANTIVIEWONCE]", error.message)
   }
-};
-
-// Export the handler
-export default handler;
-
-// Utility function: Convert a stream into a buffer
-async function toBuffer(stream) {
-  const chunks = [];
-  for await (const chunk of stream) {
-    chunks.push(chunk);
-  }
-  return chunks;
 }
 
-// Utility function: Format file sizes in a human-readable format
+export default handler
+
 function formatFileSize(sizeInBytes) {
-  const units = ["Bytes", "KB", "MB", "GB", "TB"];
-  const unitIndex = Math.floor(Math.log(sizeInBytes) / Math.log(1024));
-  return `${(sizeInBytes / Math.pow(1024, unitIndex)).toFixed(2)} ${units[unitIndex]}`;
+  if (!sizeInBytes || isNaN(sizeInBytes)) return "Unknown"
+  const units = ["Bytes", "KB", "MB", "GB"]
+  const i = Math.floor(Math.log(sizeInBytes) / Math.log(1024))
+  return `${(sizeInBytes / Math.pow(1024, i)).toFixed(2)} ${units[i] || "GB"}`
 }

@@ -77,6 +77,11 @@ The bot runs via `node silva.js` which:
 - **Error boundaries**: All event handlers wrapped in try/catch to prevent one error from breaking others
 
 ## Recent Changes
+- 2026-02-19: Fixed view once plugins and added group status plugin
+  - Fixed Antiviewonce.js: proper stream-to-buffer conversion, safe field access, sends to bot owner
+  - Fixed tools-readviewonce.js: handles viewOnceV2/V2Extension, proper media unwrapping, download fallbacks
+  - Added gp-togstatus.js: post text/image/video/audio as group status (commands: .togstatus, .swgc, .groupstatus)
+  - Improved vcf.js: uses conn.getName() for proper display names, WhatsApp-compatible vCard format with waid field
 - 2026-02-19: Added global contextInfo forwarding to all bot messages
   - All messages sent by the bot now appear forwarded from "Silva Tech Nexus" newsletter
   - Wrapped both sendMessage and relayMessage in lib/simple.js to inject contextInfo globally
