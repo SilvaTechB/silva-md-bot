@@ -9,14 +9,14 @@ Silva MD Bot is a multi-functional WhatsApp bot built with Node.js and the Baile
 - **handler.js** - Message handler that processes incoming messages and routes them to plugins
 - **config.js** - Bot configuration (owner numbers, API keys, bot settings)
 - **lib/makesession.js** - Session loader. Parses `Silva~<compressed_base64>` format, decompresses gzip, writes creds.json
-- **silvaxlab/** - Plugin commands directory (257 plugins)
+- **silvaxlab/** - Plugin commands directory (232+ plugins)
 - **lib/** - Utility libraries (scrapers, converters, database adapters, etc.)
 - **session/** - WhatsApp session credentials storage
 - **jusorts/** - Static assets served by Express (landing page, images)
 - **media/** - Media files (audio, images)
 
 ## Key Dependencies
-- `gifted-baileys@2.0.6` - WhatsApp Web API (uses buffered event system with `conn.ev.process()`)
+- `@whiskeysockets/baileys` - WhatsApp Web API (uses buffered event system with `conn.ev.process()`)
 - `express` - Web server for landing page
 - `pino` - Logging
 - `chalk` - Terminal colors
@@ -35,12 +35,12 @@ Silva MD Bot is a multi-functional WhatsApp bot built with Node.js and the Baile
 - `MODE` - Bot mode (public/private)
 - `PREFIX` - Command prefix (default: .)
 - `PORT` - Server port (default: 5000)
-- `statusview` - Auto-view WhatsApp statuses (true/false)
-- `autoRead` - Auto-read incoming messages (true/false)
-- `AUTO_STATUS_LIKE` - Auto-like WhatsApp statuses (true/false)
-- `AUTO_STATUS_LIKE_EMOJI` - Emoji used for status likes (default: 💚)
-- `Status_Saver` - Save statuses to bot owner (true/false)
-- `STATUS_REPLY` - Auto-reply to status posters (true/false)
+- `statusview` - Auto-view WhatsApp statuses (must be exactly "true" to enable)
+- `autoRead` - Auto-read incoming messages (must be exactly "true" to enable)
+- `AUTO_STATUS_LIKE` - Auto-like WhatsApp statuses (must be exactly "true" to enable)
+- `AUTO_STATUS_LIKE_EMOJI` - Emoji used for status likes (default: heart)
+- `Status_Saver` - Save statuses to bot owner (must be exactly "true" to enable)
+- `STATUS_REPLY` - Auto-reply to status posters (must be exactly "true" to enable)
 - `STATUS_MSG` - Custom reply message for status viewers
 
 ## Running the Bot
@@ -55,36 +55,49 @@ The bot runs via `node silva.js` which:
 - The bot includes a security check that verifies the package.json author name is "SILVA"
 - Unauthorized copies will not start
 
-## gifted-baileys Event System (CRITICAL)
-- gifted-baileys uses an internal event buffering system (`makeEventBuffer` in Utils/event-buffer.js)
+## Baileys Event System (CRITICAL)
+- Baileys uses an internal event buffering system (`makeEventBuffer` in Utils/event-buffer.js)
 - When the bot is already authenticated, socket.js calls `ev.buffer()` on startup to buffer events during initial sync
 - The buffer is only flushed when the `CB:ib,,offline` event fires (offline notifications handled)
 - **MUST use `ev.process(handler)` pattern** - this hooks into the aggregate 'event' emitter which fires on buffer flush
-- **DO NOT use `ev.on('messages.upsert', handler)`** - individual event listeners miss buffered events because the internal buffer consolidates events and dispatches via the 'event' aggregate event
+- **DO NOT use `ev.on('messages.upsert', handler)`** - individual event listeners miss buffered events
 - `ev.process()` returns an unsubscribe function that should be stored and called before re-registering
 - `registerEventHandlers()` function in sylivanus.js sets up all event listeners via `ev.process()`
 - On reconnect, the old process handler is unsubscribed (not `removeAllListeners` which destroys internal dispatch)
+- The emit interceptor uses `_silvaPatched` flag to prevent stacking on reconnection
 - Handler methods (conn.handler, conn.pollUpdate, etc.) are bound via `reloadHandler()` after initial import
 
+## Stability Features
+- **Handler timeout**: Plugin execution is wrapped in a 60-second timeout to prevent hanging
+- **Watchdog**: Heartbeat monitor every 60s checks if handler is bound, rebinds automatically if missing
+- **Emit interceptor guard**: `_silvaPatched` flag prevents emit wrapper from stacking on reconnection
+- **processedMsgIds cleared on reconnect**: Prevents missing messages after reconnection
+- **Handler auto-rebind**: If handler becomes null while connected, it's automatically rebound
+- **Memory management**: Automatic cache clearing when heap exceeds 300MB
+- **Error boundaries**: All event handlers wrapped in try/catch to prevent one error from breaking others
+
 ## Recent Changes
-- 2026-02-18: **CRITICAL FIX** - Switched from `ev.on()` to `ev.process()` pattern to fix message delivery
-  - Root cause: gifted-baileys buffers events internally (socket.js calls ev.buffer() on auth)
-  - ev.on() handlers never fired because buffered events only dispatch via aggregate 'event' event
-  - ev.process() hooks directly into the aggregate event, receiving all events reliably
-- 2026-02-18: Fixed reconnection to use unsubscribe pattern instead of removeAllListeners (which destroyed internal event dispatcher)
-- 2026-02-18: Reduced log noise by filtering out presence.update from event batch logging
-- 2026-02-18: Fixed endless reconnection loop by restricting welcome messages and newsletter auto-follows to first connection only
-- 2026-02-18: Added code 440-specific longer backoff delays (10s increments up to 60s)
-- 2026-02-18: Switched critical logging to process.stdout.write for child process reliability
-- 2026-02-18: Removed duplicate connectionUpdate function that caused double-reconnection race condition
-- 2026-02-18: Fixed QR mode startup - bot no longer returns early when no SESSION_ID is set
-- 2026-02-18: Added welcome message on successful WhatsApp connection (sent to bot owner)
-- 2026-02-18: Fixed session overwrite bug - makesession.js no longer overwrites creds.json on restart
-- 2026-02-18: Disabled destructive clearsession() that was deleting pre-keys every 10 minutes
-- 2026-02-18: Added lib/newsletter.js - auto-follows WhatsApp newsletters on connection open
-- 2026-02-18: Removed all database dependencies (lowdb, MongoDB, CloudDBAdapter) - bot uses in-memory storage only
-- 2026-02-18: Switched Baileys library from @fizzxydev/baileys-pro to gifted-baileys@2.0.6
-- 2026-02-18: Updated makesession.js to use Silva~ compressed base64 session format
+- 2026-02-19: Fixed autoread bug - was reading messages even when autoRead was set to "false"
+  - Root cause: `if (process.env.autoRead)` is truthy for ANY non-empty string including "false"
+  - Fix: Changed to strict `=== 'true'` comparison in both handler.js and sylivanus.js
+  - Same fix applied to statusview env variable
+- 2026-02-19: Major stability improvements to prevent bot from stopping responding
+  - Added 60s timeout on handler execution to prevent plugin hangs from blocking all messages
+  - Fixed emit interceptor stacking with `_silvaPatched` guard flag
+  - Added watchdog that auto-rebinds handler if it becomes null while connected
+  - Added handler auto-rebind on connection open
+  - Clear processedMsgIds on reconnect to prevent missing messages
+  - Wrapped all event handlers in try/catch for isolation
+  - Enhanced heartbeat with memory, message count, and last message time tracking
+- 2026-02-19: Cleaned up project - removed Docker, Heroku, Render, Koyeb deployment files
+  - Deleted: docker-compose.yml, heroku.yml, Procfile, render.yaml, CNAME, koyeb.js, server.js
+  - Deleted: app.json, auth_info.json, talkdrove.json, sample.env, silva.html
+  - Deleted: CODE_OF_CONDUCT.md, CONTRIBUTING.md, SECURITY.md, CODEOWNERS
+  - Added .gitignore for node_modules, session, temp, .cache, .env
+- 2026-02-18: Switched from `ev.on()` to `ev.process()` pattern to fix message delivery
+- 2026-02-18: Fixed reconnection to use unsubscribe pattern
+- 2026-02-18: Fixed endless reconnection loop
+- 2026-02-18: Removed all database dependencies - bot uses in-memory storage only
 
 ## Known Issues
 - console.log output is buffered/lost in child process context - use process.stdout.write for critical logs
@@ -94,3 +107,4 @@ The bot runs via `node silva.js` which:
 - Node.js 20+ required
 - QR code should print in terminal, not on web page
 - Landing page should show useful bot info (features, commands, stats)
+- User wants maximum stability - bot should recover from any error and keep responding

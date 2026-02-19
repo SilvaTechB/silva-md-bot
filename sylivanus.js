@@ -259,8 +259,21 @@ const MAX_FAILURES = 5
 let hasCompletedFirstConnect = false
 let unsubscribeProcess = null
 const processedMsgIds = new Set()
+let lastMessageTime = Date.now()
+let totalMessagesHandled = 0
 
 const log = (msg) => process.stdout.write(msg + '\n')
+
+const HANDLER_TIMEOUT = 60000
+
+async function runWithTimeout(fn, timeoutMs, label) {
+  return Promise.race([
+    fn(),
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error(`${label} timed out after ${timeoutMs}ms`)), timeoutMs)
+    )
+  ])
+}
 
 async function handleMessagesUpsert(upsert) {
   if (!upsert || !upsert.messages || !upsert.messages.length) return
@@ -273,10 +286,13 @@ async function handleMessagesUpsert(upsert) {
     if (!msgId) continue
     if (processedMsgIds.has(msgId)) continue
     processedMsgIds.add(msgId)
-    if (processedMsgIds.size > 1000) {
+    if (processedMsgIds.size > 2000) {
       const entries = [...processedMsgIds]
-      entries.slice(0, 500).forEach(id => processedMsgIds.delete(id))
+      entries.slice(0, 1500).forEach(id => processedMsgIds.delete(id))
     }
+
+    lastMessageTime = Date.now()
+    totalMessagesHandled++
 
     const from = msg.key?.remoteJid || 'unknown'
     const isFromMe = msg.key?.fromMe || false
@@ -303,7 +319,7 @@ async function handleMessagesUpsert(upsert) {
         const statusSender = participant?.split('@')[0] || 'unknown'
         if (process.env.statusview === 'true' || process.env.AUTO_STATUS_LIKE === 'true') {
           await global.conn.readMessages([msg.key]).catch(() => {})
-          log(`[STATUS] 👁️ Viewed status from ${pushName} (${statusSender})`)
+          log(`[STATUS] Viewed status from ${pushName} (${statusSender})`)
         }
         if (process.env.AUTO_STATUS_LIKE === 'true') {
           const likeEmoji = process.env.AUTO_STATUS_LIKE_EMOJI || '💚'
@@ -327,7 +343,7 @@ async function handleMessagesUpsert(upsert) {
                 text: `*AUTO STATUS SAVER*\n*From:* ${pushName}\n*Caption:* ${caption || 'None'}`,
                 mentions: [participant]
               }).catch(() => {})
-              log(`[STATUS] 💾 Saved status from ${pushName} (${statusSender})`)
+              log(`[STATUS] Saved status from ${pushName} (${statusSender})`)
             }
           } catch (e) {}
         }
@@ -339,7 +355,7 @@ async function handleMessagesUpsert(upsert) {
               message: msg.message
             }
             await global.conn.sendMessage(participant, { text: replyMsg }, { quoted: quotedStatus }).catch(() => {})
-            log(`[STATUS] 💬 Replied to status from ${pushName}`)
+            log(`[STATUS] Replied to status from ${pushName}`)
           } catch (e) {}
         }
       }
@@ -351,14 +367,33 @@ async function handleMessagesUpsert(upsert) {
 
   if (global.conn.handler) {
     try {
-      await global.conn.handler(upsert)
+      await runWithTimeout(
+        () => global.conn.handler(upsert),
+        HANDLER_TIMEOUT,
+        'Message handler'
+      )
     } catch (e) {
-      log(`[HANDLER-ERR] ${e.message}\n${e.stack}`)
+      if (e.message?.includes('timed out')) {
+        log(`[HANDLER-TIMEOUT] Handler took too long, skipping message batch`)
+      } else {
+        log(`[HANDLER-ERR] ${e.message}\n${e.stack}`)
+      }
     }
   } else {
     log(`[WARN] conn.handler is NOT set - messages will not be processed!`)
+    if (global.reloadHandler) {
+      log(`[WARN] Attempting to rebind handler...`)
+      try {
+        await global.reloadHandler(false)
+        log(`[WARN] Handler rebound successfully`)
+      } catch (e) {
+        log(`[WARN] Handler rebind failed: ${e.message}`)
+      }
+    }
   }
 }
+
+let emitPatched = false
 
 function registerEventHandlers() {
   const ev = global.conn.ev
@@ -368,13 +403,21 @@ function registerEventHandlers() {
     unsubscribeProcess = null
   }
 
-  const originalEmit = ev.emit.bind(ev)
-  ev.emit = function(eventName, ...args) {
-    if (eventName === 'messages.upsert') {
-      log(`[RAW-EMIT] messages.upsert intercepted (${args[0]?.messages?.length || 0} msgs, type: ${args[0]?.type})`)
-      handleMessagesUpsert(args[0]).catch(e => log(`[EMIT-ERR] ${e.message}`))
+  if (!emitPatched || !ev._silvaPatched) {
+    const originalEmit = ev.emit.bind(ev)
+    ev.emit = function(eventName, ...args) {
+      if (eventName === 'messages.upsert') {
+        const msgCount = args[0]?.messages?.length || 0
+        const msgType = args[0]?.type
+        if (msgCount > 0) {
+          log(`[RAW-EMIT] messages.upsert (${msgCount} msgs, type: ${msgType})`)
+          handleMessagesUpsert(args[0]).catch(e => log(`[EMIT-ERR] ${e.message}`))
+        }
+      }
+      return originalEmit(eventName, ...args)
     }
-    return originalEmit(eventName, ...args)
+    ev._silvaPatched = true
+    emitPatched = true
   }
 
   unsubscribeProcess = ev.process(async (events) => {
@@ -384,22 +427,30 @@ function registerEventHandlers() {
       if (connection) log(`[CONN] Status: ${connection}`)
 
       if (qr) {
-        log('\n📱 QR CODE GENERATED - Scan with WhatsApp:\n')
+        log('\nQR CODE GENERATED - Scan with WhatsApp:\n')
         qrcodeTerminal.generate(qr, { small: true }, (qrcode) => {
           log(qrcode)
         })
         try { process.send({ type: 'qr', qr }) } catch (e) {}
       }
       if (connection === 'open') {
-        log('✅ WhatsApp connected successfully!')
+        log('WhatsApp connected successfully!')
         connectionFailures = 0
+        processedMsgIds.clear()
         try { process.send({ type: 'connected' }) } catch (e) {}
         const { jid, name } = global.conn.user || {}
-        log(`📱 Logged in as: ${name || 'Unknown'} (${jid || 'N/A'})`)
+        log(`Logged in as: ${name || 'Unknown'} (${jid || 'N/A'})`)
+
+        if (!global.conn.handler && global.reloadHandler) {
+          log('[CONN] Handler not bound, rebinding...')
+          try { await global.reloadHandler(false) } catch (e) {
+            log(`[CONN] Handler rebind error: ${e.message}`)
+          }
+        }
 
         const pluginNames = Object.keys(global.plugins || {})
         log(`\n╔══════════════════════════════════════`)
-        log(`║ 🧩 LOADED PLUGINS: ${pluginNames.length}`)
+        log(`║ LOADED PLUGINS: ${pluginNames.length}`)
         log(`╠══════════════════════════════════════`)
         pluginNames.forEach((name, i) => {
           log(`║ ${String(i + 1).padStart(3)}. ${name}`)
@@ -418,24 +469,24 @@ function registerEventHandlers() {
 ┃  _Connected Successfully_
 ╰━━━━━━━━━━━━━━━━━╯
 
-Hey *${name}* 👋
+Hey *${name}*
 Your bot is now online and ready.
 
-╭─── *⚡ Quick Info* ───
-│ 📛 *Bot:* ${botName}
-│ 🔧 *Prefix:* [ ${prefix} ]
-│ 🧩 *Plugins:* ${pluginCount} loaded
-│ 🔒 *Mode:* ${mode}
-│ 🕐 *Started:* ${uptime}
+╭─── *Quick Info* ───
+│ *Bot:* ${botName}
+│ *Prefix:* [ ${prefix} ]
+│ *Plugins:* ${pluginCount} loaded
+│ *Mode:* ${mode}
+│ *Started:* ${uptime}
 ╰──────────────────
 
-╭─── *🏢 About* ───
-│ 👨‍💻 *Dev:* Sylivanus Momanyi
-│ 🏛️ *Org:* Silva Tech Inc.
-│ 📅 *Since:* Sep 2024
+╭─── *About* ───
+│ *Dev:* Sylivanus Momanyi
+│ *Org:* Silva Tech Inc.
+│ *Since:* Sep 2024
 ╰──────────────────
 
-📢 *Stay Updated:*
+*Stay Updated:*
 https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v
 
 > Type *${prefix}menu* to see all commands`
@@ -499,6 +550,7 @@ https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v
         const backoff = code === 440 ? Math.min(connectionFailures * 10000, 60000) : Math.min(connectionFailures * 3000, 15000)
         log(`[CONN] Reconnecting in ${backoff/1000}s...`)
         await delay(backoff)
+        emitPatched = false
         try {
           if (global.reloadHandler) {
             await global.reloadHandler(true)
@@ -518,20 +570,35 @@ https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v
 
     if (events['messages.update']) {
       const updates = events['messages.update']
-      if (global.conn.pollUpdate) global.conn.pollUpdate(updates)
+      if (global.conn.pollUpdate) {
+        try { global.conn.pollUpdate(updates) } catch (e) {
+          log(`[POLL-ERR] ${e.message}`)
+        }
+      }
     }
     if (events['group-participants.update']) {
       const update = events['group-participants.update']
-      log(`[GROUP] Participant update: ${JSON.stringify(update).slice(0, 200)}`)
-      if (global.conn.participantsUpdate) global.conn.participantsUpdate(update)
+      if (global.conn.participantsUpdate) {
+        try { global.conn.participantsUpdate(update) } catch (e) {
+          log(`[GROUP-ERR] ${e.message}`)
+        }
+      }
     }
     if (events['groups.update']) {
       const update = events['groups.update']
-      if (global.conn.groupsUpdate) global.conn.groupsUpdate(update)
+      if (global.conn.groupsUpdate) {
+        try { global.conn.groupsUpdate(update) } catch (e) {
+          log(`[GROUP-UPDATE-ERR] ${e.message}`)
+        }
+      }
     }
     if (events['message.delete']) {
       const update = events['message.delete']
-      if (global.conn.onDelete) global.conn.onDelete(update)
+      if (global.conn.onDelete) {
+        try { global.conn.onDelete(update) } catch (e) {
+          log(`[DELETE-ERR] ${e.message}`)
+        }
+      }
     }
   })
 
@@ -741,17 +808,23 @@ setInterval(saafsafai, 10 * 60 * 1000)
 setInterval(() => {
   const connState = global.conn?.ws?.readyState
   const stateNames = { 0: 'CONNECTING', 1: 'OPEN', 2: 'CLOSING', 3: 'CLOSED' }
-  process.stdout.write(`[HEARTBEAT] Bot alive | WS: ${stateNames[connState] || connState} | User: ${global.conn?.user?.id?.split(':')[0] || 'none'} | Plugins: ${Object.keys(global.plugins || {}).length} | Handler: ${!!global.conn?.handler}\n`)
-}, 60000)
-
-setInterval(() => {
-  try { if (global.gc) global.gc() } catch {}
   const mem = process.memoryUsage()
-  if (mem.heapUsed > 350 * 1024 * 1024) {
-    console.log(chalk.yellow(`⚠️ High memory: ${Math.round(mem.heapUsed / 1024 / 1024)}MB - clearing caches`))
+  const memMB = Math.round(mem.heapUsed / 1024 / 1024)
+  const timeSinceMsg = Math.round((Date.now() - lastMessageTime) / 1000)
+  process.stdout.write(`[HEARTBEAT] WS: ${stateNames[connState] || connState} | Mem: ${memMB}MB | Handler: ${!!global.conn?.handler} | Msgs: ${totalMessagesHandled} | LastMsg: ${timeSinceMsg}s ago | Plugins: ${Object.keys(global.plugins || {}).length}\n`)
+
+  if (connState === 1 && !global.conn?.handler && global.reloadHandler) {
+    log('[WATCHDOG] Handler missing while connected - rebinding...')
+    global.reloadHandler(false).catch(e => log(`[WATCHDOG] Rebind failed: ${e.message}`))
+  }
+
+  if (mem.heapUsed > 300 * 1024 * 1024) {
+    log(`[MEM] High memory: ${memMB}MB - clearing caches`)
     if (global.db?.data?.msgs) global.db.data.msgs = {}
     if (global.db?.data?.sticker) global.db.data.sticker = {}
+    processedMsgIds.clear()
+    try { if (global.gc) global.gc() } catch {}
   }
-}, 60 * 1000)
+}, 60000)
 
 _quickTest().catch(console.error)

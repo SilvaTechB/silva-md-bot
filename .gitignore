@@ -1,0 +1,10 @@
+node_modules/
+session/
+temp/
+.cache/
+.config/
+*.log
+.env
+.replit
+replit.nix
+.local/
