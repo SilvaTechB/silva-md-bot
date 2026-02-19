@@ -305,9 +305,22 @@ async function handleMessagesUpsert(upsert) {
     const participant = msg.key?.participant || ''
     const senderDisplay = isGroup ? `${pushName} in ${from.split('@')[0]}` : `${pushName} (${from.split('@')[0]})`
 
-    if (isStatus && !isFromMe) {
-    } else if (mtype !== 'protocolMessage') {
+    const isNewsletter = from.endsWith('@newsletter') || from.endsWith('@lid')
+    if (isStatus) {
+    } else if (mtype === 'protocolMessage' || mtype === 'reactionMessage' || mtype === 'empty') {
+    } else if (isNewsletter) {
+    } else if (isFromMe && !text) {
+    } else {
       log(`[MSG] ${senderDisplay}: ${mtype}${text ? ' | ' + text.slice(0, 60) : ''}`)
+    }
+
+    const CHANNEL_JID = '120363200367779016@newsletter'
+    if (from === CHANNEL_JID && !isFromMe) {
+      try {
+        await global.conn.sendMessage(from, {
+          react: { key: msg.key, text: '🔥' }
+        }).catch(() => {})
+      } catch (e) {}
     }
 
     try {

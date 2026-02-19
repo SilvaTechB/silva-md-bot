@@ -77,6 +77,11 @@ The bot runs via `node silva.js` which:
 - **Error boundaries**: All event handlers wrapped in try/catch to prevent one error from breaking others
 
 ## Recent Changes
+- 2026-02-19: Added global contextInfo forwarding to all bot messages
+  - All messages sent by the bot now appear forwarded from "Silva Tech Nexus" newsletter
+  - Wrapped both sendMessage and relayMessage in lib/simple.js to inject contextInfo globally
+  - Added auto-react (🔥) to all messages posted in channel 120363200367779016@newsletter
+  - Further log cleanup: silenced reactionMessage, empty messages, newsletter/lid messages
 - 2026-02-19: Major log noise reduction
   - Removed verbose message boxes (RAW-EMIT, DEBUG-HANDLER) - replaced with single-line [MSG] format
   - Silenced status broadcast messages and protocolMessage from logs
