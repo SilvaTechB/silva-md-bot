@@ -1,0 +1,88 @@
+{
+  "name": "Silva MD Bot",
+  "description": "Silva MD Bot is a powerful, multi-functional WhatsApp bot designed for moderation, automation, media tools, and smart AI features.",
+  "logo": "https://i.imgur.com/d3kxS7M.jpg",
+  "keywords": [
+    "silva-bot",
+    "whatsapp-bot",
+    "baileys-md",
+    "multi-device",
+    "silva-md"
+  ],
+  "repository": "https://github.com/SilvaTechB/silva-md-bot",
+  "website": "https://github.com/SilvaTechB",
+  "env": {
+    "SESSION_ID": {
+      "description": "WhatsApp session ID (format: Silva~base64data). Get from session generator.",
+      "required": true,
+      "value": ""
+    },
+    "BOTNAME": {
+      "description": "Display name for the bot",
+      "required": false,
+      "value": "Silva MD Bot"
+    },
+    "MODE": {
+      "description": "Bot mode: public or private",
+      "required": false,
+      "value": "public"
+    },
+    "PREFIX": {
+      "description": "Command prefix",
+      "required": false,
+      "value": "."
+    },
+    "OWNERS": {
+      "description": "Owner phone numbers separated by semicolons",
+      "required": false,
+      "value": "254743706010"
+    },
+    "statusview": {
+      "description": "Auto-view WhatsApp statuses (true/false)",
+      "required": false,
+      "value": "true"
+    },
+    "autoRead": {
+      "description": "Auto-read incoming messages (true/false)",
+      "required": false,
+      "value": "false"
+    },
+    "AUTO_STATUS_LIKE": {
+      "description": "Auto-like WhatsApp statuses (true/false)",
+      "required": false,
+      "value": "true"
+    },
+    "AUTO_STATUS_LIKE_EMOJI": {
+      "description": "Emoji used for auto-liking statuses",
+      "required": false,
+      "value": "💚"
+    },
+    "Status_Saver": {
+      "description": "Save statuses to bot owner (true/false)",
+      "required": false,
+      "value": "false"
+    },
+    "STATUS_REPLY": {
+      "description": "Auto-reply to status posters (true/false)",
+      "required": false,
+      "value": "false"
+    },
+    "STATUS_MSG": {
+      "description": "Custom reply message for status viewers",
+      "required": false,
+      "value": "SILVA MD SUCCESSFULLY VIEWED YOUR STATUS"
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "free"
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "stack": "heroku-22"
+}
