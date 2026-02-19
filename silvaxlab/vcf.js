@@ -1,66 +1,76 @@
-import { exec } from 'child_process'; 
-import fs from 'fs';
-import path from 'path';
+import fs from 'fs'
+import path from 'path'
 
 let handler = async (m, { conn }) => {
-  // Get the group metadata
-  const groupMetadata = await conn.groupMetadata(m.chat);
+  if (!m.isGroup) return m.reply('This command only works in groups.')
 
-  // Validate group size
-  const participants = groupMetadata.participants || [];
+  await m.reply('Generating VCF file for all group members... Please wait.')
+
+  const groupMetadata = await conn.groupMetadata(m.chat).catch(() => null)
+  if (!groupMetadata) return m.reply('Failed to get group info.')
+
+  const participants = groupMetadata.participants || []
   if (participants.length < 2) {
-    return m.reply('The group must have at least 2 members.');
-  }
-  if (participants.length > 1000) {
-    return m.reply('The group has more than 1000 members.');
+    return m.reply('The group must have at least 2 members.')
   }
 
-  // Generate VCF content
-  let vcfContent = '';
-  for (let participant of participants) {
-    const userJid = participant.id;  // Get participant's WhatsApp ID
-    const userName = userJid.split('@')[0];  // Extract username part (before '@')
+  let vcfContent = ''
+  let count = 0
 
-    const phoneNumber = userName;  // Assuming the username can be used as phone number
+  for (const participant of participants) {
+    const jid = participant.id
+    const phoneNumber = jid.split('@')[0]
 
-    // Use WhatsApp display name (assuming everyone has a name)
-    const displayName = participant.notify;  // Use WhatsApp display name as FN
+    let displayName = conn.getName(jid)
+      || participant.notify
+      || participant.name
+      || participant.vname
+      || phoneNumber
 
-    vcfContent += `
-BEGIN:VCARD
-VERSION:3.0
-FN:${displayName}
-TEL;TYPE=CELL:+${phoneNumber}
-NOTE:Generated for group: ${groupMetadata.subject}
-END:VCARD
-`.trim() + '\n';
+    displayName = displayName
+      .replace(/[\\;,]/g, ' ')
+      .replace(/\n/g, ' ')
+      .trim()
+
+    if (!displayName) displayName = phoneNumber
+
+    vcfContent += 'BEGIN:VCARD\r\n'
+    vcfContent += 'VERSION:3.0\r\n'
+    vcfContent += `FN:${displayName}\r\n`
+    vcfContent += `TEL;type=CELL;type=VOICE;waid=${phoneNumber}:+${phoneNumber}\r\n`
+    vcfContent += `X-WA-BIZ-NAME:${displayName}\r\n`
+    vcfContent += 'END:VCARD\r\n'
+    count++
   }
 
-  // Sanitize the group name and set the VCF file path using process.cwd()
-  const groupName = groupMetadata.subject || 'Group';
-  const sanitizedGroupName = groupName.replace(/[^a-zA-Z0-9]/g, '_');
-  const vcfFilePath = path.join(process.cwd(), `${sanitizedGroupName}.vcf`); // Use process.cwd()
+  const groupName = groupMetadata.subject || 'Group'
+  const sanitizedName = groupName.replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, '_').slice(0, 50)
+  const vcfFileName = `${sanitizedName}_contacts.vcf`
+  const vcfFilePath = path.join(process.cwd(), 'tmp', vcfFileName)
 
-  // Write VCF content to file
-  fs.writeFileSync(vcfFilePath, vcfContent);
-  console.log(`VCF file generated: ${vcfFilePath}`);
+  try {
+    if (!fs.existsSync(path.join(process.cwd(), 'tmp'))) {
+      fs.mkdirSync(path.join(process.cwd(), 'tmp'), { recursive: true })
+    }
+    fs.writeFileSync(vcfFilePath, vcfContent)
 
-  // Send the VCF file to the group
-  await conn.sendMessage(m.chat, {
-    document: { url: vcfFilePath },
-    mimetype: 'text/vcard',
-    fileName: `${sanitizedGroupName}.vcf`,
-    caption: `Here is the VCF file for all participants in *${groupName}* (${participants.length} members).`,
-  });
+    await conn.sendMessage(m.chat, {
+      document: fs.readFileSync(vcfFilePath),
+      mimetype: 'text/vcard',
+      fileName: vcfFileName,
+      caption: `*VCF Contact File*\n\n*Group:* ${groupName}\n*Total Contacts:* ${count}\n\n_Save this file to add all group members to your contacts._`
+    }, { quoted: m })
 
-  // Clean up the generated file after sending
-  fs.unlinkSync(vcfFilePath);
-};
+    fs.unlinkSync(vcfFilePath)
+  } catch (e) {
+    if (fs.existsSync(vcfFilePath)) fs.unlinkSync(vcfFilePath)
+    return m.reply('Failed to generate VCF file: ' + e.message)
+  }
+}
 
-handler.help = ['vcf'];
-handler.tags = ['tools'];
-handler.command = /^(vcf)$/i;
+handler.help = ['vcf']
+handler.tags = ['group']
+handler.command = /^(vcf|getcontacts|groupvcf)$/i
+handler.group = true
 
-handler.group = true; // Command works only in groups
-
-export default handler;
+export default handler
