@@ -427,7 +427,7 @@ function registerEventHandlers() {
       if (connection) log(`[CONN] Status: ${connection}`)
 
       if (qr) {
-        log('\nQR CODE GENERATED - Scan with WhatsApp:\n')
+        log('[QR] New QR code generated - scan with WhatsApp')
         qrcodeTerminal.generate(qr, { small: true }, (qrcode) => {
           log(qrcode)
         })
@@ -449,13 +449,7 @@ function registerEventHandlers() {
         }
 
         const pluginNames = Object.keys(global.plugins || {})
-        log(`\n╔══════════════════════════════════════`)
-        log(`║ LOADED PLUGINS: ${pluginNames.length}`)
-        log(`╠══════════════════════════════════════`)
-        pluginNames.forEach((name, i) => {
-          log(`║ ${String(i + 1).padStart(3)}. ${name}`)
-        })
-        log(`╚══════════════════════════════════════\n`)
+        log(`[PLUGINS] ${pluginNames.length} plugins loaded`)
 
         if (!hasCompletedFirstConnect) {
           hasCompletedFirstConnect = true
@@ -811,7 +805,9 @@ setInterval(() => {
   const mem = process.memoryUsage()
   const memMB = Math.round(mem.heapUsed / 1024 / 1024)
   const timeSinceMsg = Math.round((Date.now() - lastMessageTime) / 1000)
-  process.stdout.write(`[HEARTBEAT] WS: ${stateNames[connState] || connState} | Mem: ${memMB}MB | Handler: ${!!global.conn?.handler} | Msgs: ${totalMessagesHandled} | LastMsg: ${timeSinceMsg}s ago | Plugins: ${Object.keys(global.plugins || {}).length}\n`)
+  if (connState === 1 || memMB > 200 || !global.conn?.handler) {
+    process.stdout.write(`[HEARTBEAT] WS: ${stateNames[connState] || connState} | Mem: ${memMB}MB | Handler: ${!!global.conn?.handler} | Msgs: ${totalMessagesHandled} | LastMsg: ${timeSinceMsg}s ago\n`)
+  }
 
   if (connState === 1 && !global.conn?.handler && global.reloadHandler) {
     log('[WATCHDOG] Handler missing while connected - rebinding...')

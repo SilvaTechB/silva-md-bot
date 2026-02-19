@@ -39,15 +39,11 @@ async function start(file) {
   })
 
   child.on('message', data => {
-    if (typeof data === 'object' && data.type === 'qr') {
-      console.log(chalk.yellow('QR code generated - check the terminal to scan'))
-      return
-    }
+    if (typeof data === 'object' && data.type === 'qr') return
     if (typeof data === 'object' && data.type === 'connected') {
-      console.log(chalk.green('WhatsApp connected successfully!'))
+      console.log(chalk.green('WhatsApp connected!'))
       return
     }
-    console.log(chalk.cyan(`✔️ RECEIVED: ${data}`))
     if (data === 'reset') {
       child.kill()
       isRunning = false
