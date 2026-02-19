@@ -82,6 +82,10 @@ The bot runs via `node silva.js` which:
   - Wrapped both sendMessage and relayMessage in lib/simple.js to inject contextInfo globally
   - Added auto-react (🔥) to all messages posted in channel 120363200367779016@newsletter
   - Further log cleanup: silenced reactionMessage, empty messages, newsletter/lid messages
+- 2026-02-19: Fixed handler timeout causing bot to stop responding
+  - Newsletter/lid messages were going through all 256 plugins, causing crashes and hangs
+  - Added early return in handler.js to skip newsletter (@newsletter) and lid (@lid) messages
+  - Fixed `\${format(e)}` bug in error reporting (was showing literal text instead of error details)
 - 2026-02-19: Major log noise reduction
   - Removed verbose message boxes (RAW-EMIT, DEBUG-HANDLER) - replaced with single-line [MSG] format
   - Silenced status broadcast messages and protocolMessage from logs

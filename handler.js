@@ -33,6 +33,8 @@ export async function handler(chatUpdate) {
   }
   let m = chatUpdate.messages[chatUpdate.messages.length - 1]
   if (!m) return
+  const remoteJid = m.key?.remoteJid || ''
+  if (remoteJid.endsWith('@newsletter') || remoteJid.endsWith('@lid')) return
   if (global.db.data == null) await global.loadDatabase()
   try {
     m = smsg(this, m) || m
@@ -250,7 +252,7 @@ export async function handler(chatUpdate) {
             let data = (await conn.onWhatsApp(jid))[0] || {}
             if (data.exists)
               m.reply(
-                `*🗂️ Plugin:* ${name}\n*👤 Sender:* ${m.sender}\n*💬 Chat:* ${m.chat}\n*💻 Command:* ${m.text}\n\n\${format(e)}`.trim(),
+                `*🗂️ Plugin:* ${name}\n*👤 Sender:* ${m.sender}\n*💬 Chat:* ${m.chat}\n*💻 Command:* ${m.text}\n\n${format(e)}`.trim(),
                 data.jid
               )
           }
