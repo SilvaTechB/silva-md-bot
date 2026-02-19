@@ -307,9 +307,20 @@ async function handleMessagesUpsert(upsert) {
 
     const isNewsletter = from.endsWith('@newsletter') || from.endsWith('@lid')
     if (isStatus) {
-    } else if (mtype === 'protocolMessage' || mtype === 'reactionMessage' || mtype === 'empty') {
+      log(`[STATUS] ${pushName} (${participant.split('@')[0] || 'unknown'}): ${mtype}${text ? ' | ' + text.slice(0, 60) : ''}`)
+    } else if (mtype === 'reactionMessage') {
+      const reaction = msgContent.reactionMessage
+      log(`[REACTION] ${senderDisplay}: reacted ${reaction?.text || '?'} to msg ${reaction?.key?.id?.slice(0, 10) || '?'}`)
+    } else if (mtype === 'protocolMessage') {
+      const proto = msgContent.protocolMessage
+      const protoType = proto?.type != null ? proto.type : 'unknown'
+      log(`[PROTOCOL] ${senderDisplay}: protocolMessage type=${protoType}`)
+    } else if (mtype === 'empty') {
+      log(`[MSG] ${senderDisplay}: empty message`)
     } else if (isNewsletter) {
+      log(`[NEWSLETTER] ${pushName} (${from.split('@')[0]}): ${mtype}${text ? ' | ' + text.slice(0, 60) : ''}`)
     } else if (isFromMe && !text) {
+      log(`[MSG-SELF] ${senderDisplay}: ${mtype} (no text)`)
     } else {
       log(`[MSG] ${senderDisplay}: ${mtype}${text ? ' | ' + text.slice(0, 60) : ''}`)
     }
@@ -320,7 +331,10 @@ async function handleMessagesUpsert(upsert) {
         await global.conn.sendMessage(from, {
           react: { key: msg.key, text: '🔥' }
         }).catch(() => {})
-      } catch (e) {}
+        log(`[AUTO-REACT] 🔥 Reacted to message in Silva Tech Nexus channel`)
+      } catch (e) {
+        log(`[AUTO-REACT] Failed to react: ${e.message}`)
+      }
     }
 
     try {
@@ -810,9 +824,7 @@ setInterval(() => {
   const mem = process.memoryUsage()
   const memMB = Math.round(mem.heapUsed / 1024 / 1024)
   const timeSinceMsg = Math.round((Date.now() - lastMessageTime) / 1000)
-  if (connState === 1 || memMB > 200 || !global.conn?.handler) {
-    process.stdout.write(`[HEARTBEAT] WS: ${stateNames[connState] || connState} | Mem: ${memMB}MB | Handler: ${!!global.conn?.handler} | Msgs: ${totalMessagesHandled} | LastMsg: ${timeSinceMsg}s ago\n`)
-  }
+  process.stdout.write(`[HEARTBEAT] WS: ${stateNames[connState] || connState} | Mem: ${memMB}MB | Handler: ${!!global.conn?.handler} | Msgs: ${totalMessagesHandled} | LastMsg: ${timeSinceMsg}s ago\n`)
 
   if (connState === 1 && !global.conn?.handler && global.reloadHandler) {
     log('[WATCHDOG] Handler missing while connected - rebinding...')

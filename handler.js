@@ -36,7 +36,10 @@ export async function handler(chatUpdate) {
   let m = chatUpdate.messages[chatUpdate.messages.length - 1];
   if (!m) return;
   const remoteJid = m.key?.remoteJid || "";
-  if (remoteJid.endsWith("@newsletter") || remoteJid.endsWith("@lid")) return;
+  if (remoteJid.endsWith("@newsletter") || remoteJid.endsWith("@lid")) {
+    process.stdout.write(`[HANDLER-SKIP] Newsletter/LID message from ${remoteJid} - skipping plugin processing\n`);
+    return;
+  }
   if (global.db.data == null) await global.loadDatabase();
   try {
     m = smsg(this, m) || m;
