@@ -234,11 +234,16 @@ export async function handler(chatUpdate) {
     let _user =
       global.db.data && global.db.data.users && global.db.data.users[m.sender];
 
-    const groupMetadata =
-      (m.isGroup
-        ? (conn.chats[m.chat] || {}).metadata ||
-          (await this.groupMetadata(m.chat).catch((_) => null))
-        : {}) || {};
+    let groupMetadata = {};
+    if (m.isGroup) {
+      try {
+        groupMetadata = (conn.chats[m.chat] || {}).metadata ||
+          (await Promise.race([
+            this.groupMetadata(m.chat),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000))
+          ]).catch(() => null)) || {};
+      } catch { groupMetadata = {}; }
+    }
     const participants = (m.isGroup ? groupMetadata.participants : []) || [];
     const user =
       (m.isGroup
@@ -273,18 +278,7 @@ export async function handler(chatUpdate) {
             __filename,
           });
         } catch (e) {
-          // if (typeof e === "string") continue
-          console.error(e);
-          for (let [jid] of global.owner.filter(
-            ([number, _, isDeveloper]) => isDeveloper && number,
-          )) {
-            let data = (await conn.onWhatsApp(jid))[0] || {};
-            if (data.exists)
-              m.reply(
-                `*🗂️ Plugin:* ${name}\n*👤 Sender:* ${m.sender}\n*💬 Chat:* ${m.chat}\n*💻 Command:* ${m.text}\n\n${format(e)}`.trim(),
-                data.jid,
-              );
-          }
+          process.stdout.write(`[PLUGIN-ALL-ERR] ${name}: ${e.message || e}\n`);
         }
       }
       if (!opts["restrict"])

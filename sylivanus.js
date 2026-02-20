@@ -810,7 +810,7 @@ async function _quickTest() {
 }
 
 async function saafsafai() {
-  if (stopped === 'close' || !conn || !conn.user) return
+  if (!global.conn || !global.conn.user) return
   try {
     clearsession()
   } catch {}
