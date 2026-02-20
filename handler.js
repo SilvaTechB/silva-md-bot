@@ -510,6 +510,7 @@ export async function handler(chatUpdate) {
     }
   } catch (e) {
     process.stdout.write(`[HANDLER-CRASH] ${e.message}\n${e.stack}\n`);
+    try { process.send({ type: 'error', error: e.message || String(e), stack: e.stack?.split('\n')[1]?.trim() || '' }) } catch (_) {}
     console.error(e);
   } finally {
     if (opts["queque"] && m.text) {
