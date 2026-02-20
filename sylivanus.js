@@ -311,7 +311,9 @@ async function handleMessagesUpsert(upsert) {
     const senderDisplay = isGroup ? `${pushName} in ${from.split('@')[0]}` : `${pushName} (${from.split('@')[0]})`
 
     const isNewsletter = from.endsWith('@newsletter') || from.endsWith('@lid')
-    if (isStatus) {
+    if (isNewsletter) {
+      if (text) log(`[NEWSLETTER] ${pushName} (${from.split('@')[0]}): ${mtype} | ${text.slice(0, 60)}`)
+    } else if (isStatus) {
       log(`[STATUS] ${pushName} (${participant.split('@')[0] || 'unknown'}): ${mtype}${text ? ' | ' + text.slice(0, 60) : ''}`)
     } else if (mtype === 'reactionMessage') {
       const reaction = msgContent.reactionMessage
@@ -321,9 +323,6 @@ async function handleMessagesUpsert(upsert) {
       const protoType = proto?.type != null ? proto.type : 'unknown'
       log(`[PROTOCOL] ${senderDisplay}: protocolMessage type=${protoType}`)
     } else if (mtype === 'empty') {
-      log(`[MSG] ${senderDisplay}: empty message`)
-    } else if (isNewsletter) {
-      log(`[NEWSLETTER] ${pushName} (${from.split('@')[0]}): ${mtype}${text ? ' | ' + text.slice(0, 60) : ''}`)
     } else if (isFromMe && !text) {
       log(`[MSG-SELF] ${senderDisplay}: ${mtype} (no text)`)
     } else {
@@ -405,7 +404,16 @@ async function handleMessagesUpsert(upsert) {
     } catch (e) {}
   }
 
-  if (global.conn.handler) {
+  const isStartupGraceForHandler = connectionOpenTime > 0 && (Date.now() - connectionOpenTime) < STARTUP_GRACE_MS
+  const hasActualCommand = msgs.some(msg => {
+    const mc = msg.message || {}
+    const t = mc.conversation || mc.extendedTextMessage?.text || ''
+    return t && t.startsWith(global.prefix || '.')
+  })
+
+  if (isStartupGraceForHandler && !hasActualCommand) {
+    log(`[HANDLER] Skipping ${msgs.length} buffered messages during startup grace period`)
+  } else if (global.conn.handler) {
     try {
       await runWithTimeout(
         () => global.conn.handler(upsert),
@@ -478,8 +486,9 @@ function registerEventHandlers() {
         processedMsgIds.clear()
         connectionOpenTime = Date.now()
         statusProcessedCount = 0
-        try { process.send({ type: 'connected' }) } catch (e) {}
         const { jid, name } = global.conn.user || {}
+        const prefix = global.prefix || process.env.PREFIX || '.'
+        try { process.send({ type: 'connected', jid: jid || '', name: name || 'Unknown', prefix }) } catch (e) {}
         log(`Logged in as: ${name || 'Unknown'} (${jid || 'N/A'})`)
 
         if (!global.conn.handler && global.reloadHandler) {
