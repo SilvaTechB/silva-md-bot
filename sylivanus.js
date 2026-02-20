@@ -261,6 +261,11 @@ let unsubscribeProcess = null
 const processedMsgIds = new Set()
 let lastMessageTime = Date.now()
 let totalMessagesHandled = 0
+let connectionOpenTime = 0
+const STARTUP_GRACE_MS = 15000
+let statusProcessedCount = 0
+let lastStatusProcessedTime = 0
+const STATUS_RATE_DELAY = 2000
 
 const log = (msg) => process.stdout.write(msg + '\n')
 
@@ -338,48 +343,60 @@ async function handleMessagesUpsert(upsert) {
     }
 
     try {
+      const isStartupGrace = connectionOpenTime > 0 && (Date.now() - connectionOpenTime) < STARTUP_GRACE_MS
       if (isStatus && !isFromMe) {
         const statusSender = participant?.split('@')[0] || 'unknown'
-        if (process.env.statusview === 'true' || process.env.AUTO_STATUS_LIKE === 'true') {
-          await global.conn.readMessages([msg.key]).catch(() => {})
-          log(`[STATUS] Viewed status from ${pushName} (${statusSender})`)
-        }
-        if (process.env.AUTO_STATUS_LIKE === 'true') {
-          const likeEmoji = process.env.AUTO_STATUS_LIKE_EMOJI || '💚'
-          const myJid = global.conn.user?.id ? jidNormalizedUser(global.conn.user.id) : null
-          if (myJid) {
-            await global.conn.sendMessage('status@broadcast', {
-              react: { key: msg.key, text: likeEmoji }
-            }, {
-              statusJidList: [participant, myJid]
-            }).catch(() => {})
-            log(`[STATUS] ${likeEmoji} Liked status from ${pushName} (${statusSender})`)
+        if (isStartupGrace) {
+          log(`[STATUS] Skipping buffered status from ${pushName} (${statusSender}) during startup grace period`)
+        } else {
+          const now = Date.now()
+          if (now - lastStatusProcessedTime < STATUS_RATE_DELAY) {
+            await new Promise(r => setTimeout(r, STATUS_RATE_DELAY))
           }
-        }
-        if (process.env.Status_Saver === 'true') {
-          try {
-            const ownerJid = global.conn.user?.id ? jidNormalizedUser(global.conn.user.id) : null
-            if (ownerJid) {
-              await global.conn.copyNForward(ownerJid, msg, true).catch(() => {})
-              const caption = msgContent.imageMessage?.caption || msgContent.videoMessage?.caption || ''
-              await global.conn.sendMessage(ownerJid, {
-                text: `*AUTO STATUS SAVER*\n*From:* ${pushName}\n*Caption:* ${caption || 'None'}`,
-                mentions: [participant]
+          lastStatusProcessedTime = Date.now()
+          statusProcessedCount++
+
+          if (process.env.statusview === 'true' || process.env.AUTO_STATUS_LIKE === 'true') {
+            await global.conn.readMessages([msg.key]).catch(() => {})
+            log(`[STATUS] Viewed status from ${pushName} (${statusSender})`)
+          }
+          if (process.env.AUTO_STATUS_LIKE === 'true') {
+            const likeEmoji = process.env.AUTO_STATUS_LIKE_EMOJI || '💚'
+            const myJid = global.conn.user?.id ? jidNormalizedUser(global.conn.user.id) : null
+            if (myJid) {
+              await global.conn.sendMessage('status@broadcast', {
+                react: { key: msg.key, text: likeEmoji }
+              }, {
+                statusJidList: [participant, myJid]
               }).catch(() => {})
-              log(`[STATUS] Saved status from ${pushName} (${statusSender})`)
+              log(`[STATUS] ${likeEmoji} Liked status from ${pushName} (${statusSender})`)
             }
-          } catch (e) {}
-        }
-        if (process.env.STATUS_REPLY === 'true') {
-          try {
-            const replyMsg = process.env.STATUS_MSG || 'SILVA MD SUCCESSFULLY VIEWED YOUR STATUS'
-            const quotedStatus = {
-              key: { remoteJid: 'status@broadcast', id: msg.key.id, participant },
-              message: msg.message
-            }
-            await global.conn.sendMessage(participant, { text: replyMsg }, { quoted: quotedStatus }).catch(() => {})
-            log(`[STATUS] Replied to status from ${pushName}`)
-          } catch (e) {}
+          }
+          if (process.env.Status_Saver === 'true') {
+            try {
+              const ownerJid = global.conn.user?.id ? jidNormalizedUser(global.conn.user.id) : null
+              if (ownerJid) {
+                await global.conn.copyNForward(ownerJid, msg, true).catch(() => {})
+                const caption = msgContent.imageMessage?.caption || msgContent.videoMessage?.caption || ''
+                await global.conn.sendMessage(ownerJid, {
+                  text: `*AUTO STATUS SAVER*\n*From:* ${pushName}\n*Caption:* ${caption || 'None'}`,
+                  mentions: [participant]
+                }).catch(() => {})
+                log(`[STATUS] Saved status from ${pushName} (${statusSender})`)
+              }
+            } catch (e) {}
+          }
+          if (process.env.STATUS_REPLY === 'true') {
+            try {
+              const replyMsg = process.env.STATUS_MSG || 'SILVA MD SUCCESSFULLY VIEWED YOUR STATUS'
+              const quotedStatus = {
+                key: { remoteJid: 'status@broadcast', id: msg.key.id, participant },
+                message: msg.message
+              }
+              await global.conn.sendMessage(participant, { text: replyMsg }, { quoted: quotedStatus }).catch(() => {})
+              log(`[STATUS] Replied to status from ${pushName}`)
+            } catch (e) {}
+          }
         }
       }
       if (process.env.autoRead === 'true' && !isStatus) {
@@ -459,6 +476,8 @@ function registerEventHandlers() {
         log('WhatsApp connected successfully!')
         connectionFailures = 0
         processedMsgIds.clear()
+        connectionOpenTime = Date.now()
+        statusProcessedCount = 0
         try { process.send({ type: 'connected' }) } catch (e) {}
         const { jid, name } = global.conn.user || {}
         log(`Logged in as: ${name || 'Unknown'} (${jid || 'N/A'})`)
