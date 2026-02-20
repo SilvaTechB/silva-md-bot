@@ -17,9 +17,30 @@ figlet('Silva Bot', (err, data) => {
 const app = express()
 const port = process.env.PORT || 5000
 
+let botState = {
+  status: 'starting',
+  jid: '',
+  name: '',
+  prefix: process.env.PREFIX || '.',
+  uptime: Date.now(),
+  plugins: 0,
+  errors: [],
+  lastConnected: null
+}
+
 app.use(express.static(path.join(__dirname, 'jusorts')))
 
+app.get('/api/status', (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
+  res.json({
+    ...botState,
+    uptimeMs: Date.now() - botState.uptime,
+    errorCount: botState.errors.length
+  })
+})
+
 app.get('/', (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
   res.sendFile(path.join(__dirname, 'jusorts', 'silva.html'))
 })
 
@@ -39,10 +60,29 @@ async function start(file) {
   })
 
   child.on('message', data => {
-    if (typeof data === 'object' && data.type === 'qr') return
-    if (typeof data === 'object' && data.type === 'connected') {
-      console.log(chalk.green('WhatsApp connected!'))
-      return
+    if (typeof data === 'object') {
+      if (data.type === 'qr') {
+        botState.status = 'waiting_qr'
+        return
+      }
+      if (data.type === 'connected') {
+        botState.status = 'connected'
+        botState.jid = data.jid || ''
+        botState.name = data.name || 'Unknown'
+        botState.prefix = data.prefix || '.'
+        botState.lastConnected = Date.now()
+        console.log(chalk.green('WhatsApp connected!'))
+        return
+      }
+      if (data.type === 'error') {
+        botState.errors.unshift({
+          message: data.error,
+          source: data.stack || '',
+          time: Date.now()
+        })
+        if (botState.errors.length > 20) botState.errors.length = 20
+        return
+      }
     }
     if (data === 'reset') {
       child.kill()
@@ -55,6 +95,7 @@ async function start(file) {
 
   child.on('exit', code => {
     isRunning = false
+    botState.status = 'disconnected'
     if (code !== 0 && code !== null) {
       console.error(chalk.red(`Bot exited with code: ${code} - restarting in 5s...`))
       setTimeout(() => start(file), 5000)
@@ -65,6 +106,7 @@ async function start(file) {
     console.error(chalk.red(`Child process error: ${err.message}`))
     try { child.kill() } catch {}
     isRunning = false
+    botState.status = 'error'
     setTimeout(() => start(file), 5000)
   })
 
@@ -74,6 +116,7 @@ async function start(file) {
       console.error(chalk.red(`Error reading plugins: ${err}`))
       return
     }
+    botState.plugins = files.length
     console.log(chalk.yellow(`Installed ${files.length} plugins`))
   })
 }
