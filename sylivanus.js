@@ -314,7 +314,7 @@ async function handleMessagesUpsert(upsert) {
     if (isNewsletter) {
       if (text) log(`[NEWSLETTER] ${pushName} (${from.split('@')[0]}): ${mtype} | ${text.slice(0, 60)}`)
     } else if (isStatus) {
-      log(`[STATUS] ${pushName} (${participant.split('@')[0] || 'unknown'}): ${mtype}${text ? ' | ' + text.slice(0, 60) : ''}`)
+      if (mtype !== 'empty') log(`[STATUS] ${pushName} (${participant.split('@')[0] || 'unknown'}): ${mtype}${text ? ' | ' + text.slice(0, 60) : ''}`)
     } else if (mtype === 'reactionMessage') {
       const reaction = msgContent.reactionMessage
       log(`[REACTION] ${senderDisplay}: reacted ${reaction?.text || '?'} to msg ${reaction?.key?.id?.slice(0, 10) || '?'}`)
