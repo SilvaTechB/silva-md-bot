@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Silva MD Bot</title>
+    <title>Silva MD Bot - Dashboard</title>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Inter', sans-serif;
-            background: #0a0a1a;
+            background: #060611;
             color: #e0e0e0;
             min-height: 100vh;
             overflow-x: hidden;
@@ -22,262 +22,439 @@
             position: fixed;
             inset: 0;
             background-image:
-                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-            background-size: 60px 60px;
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 50px 50px;
             pointer-events: none;
             z-index: 0;
         }
 
         .bg-glow {
             position: fixed;
-            width: 600px;
-            height: 600px;
             border-radius: 50%;
-            filter: blur(150px);
-            opacity: 0.15;
+            filter: blur(120px);
+            opacity: 0.12;
             pointer-events: none;
             z-index: 0;
         }
 
-        .glow-1 { top: -200px; left: -100px; background: #00d4ff; }
-        .glow-2 { bottom: -200px; right: -100px; background: #7c3aed; }
+        .glow-1 { top: -150px; left: -100px; width: 500px; height: 500px; background: #00d4ff; }
+        .glow-2 { bottom: -150px; right: -100px; width: 500px; height: 500px; background: #7c3aed; }
+        .glow-3 { top: 50%; left: 50%; transform: translate(-50%, -50%); width: 400px; height: 400px; background: #10b981; opacity: 0.05; }
 
         .container {
             position: relative;
             z-index: 1;
             max-width: 1100px;
             margin: 0 auto;
-            padding: 40px 20px;
+            padding: 30px 20px;
         }
 
-        .hero {
-            text-align: center;
-            padding: 60px 0 40px;
-        }
-
-        .hero-badge {
-            display: inline-block;
-            padding: 6px 16px;
-            background: rgba(0,212,255,0.1);
-            border: 1px solid rgba(0,212,255,0.3);
-            border-radius: 20px;
-            font-size: 0.8rem;
-            color: #00d4ff;
-            font-weight: 500;
-            letter-spacing: 0.5px;
+        .nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
             margin-bottom: 20px;
         }
 
-        .hero h1 {
-            font-size: clamp(2.5rem, 6vw, 4rem);
-            font-weight: 800;
-            line-height: 1.1;
-            margin-bottom: 16px;
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .hero h1 .gradient {
-            background: linear-gradient(135deg, #00d4ff 0%, #7c3aed 50%, #f472b6 100%);
+        .nav-logo {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #00d4ff, #7c3aed);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1rem;
+            color: #fff;
+        }
+
+        .nav-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #f0f0f0;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-links a {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-decoration: none;
+            color: #999;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .nav-links a:hover {
+            color: #fff;
+            border-color: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.03);
+        }
+
+        .live-panel {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .live-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #00d4ff, #7c3aed, #f472b6);
+        }
+
+        .live-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .live-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-connected {
+            background: rgba(16,185,129,0.1);
+            border: 1px solid rgba(16,185,129,0.3);
+            color: #10b981;
+        }
+
+        .badge-disconnected {
+            background: rgba(239,68,68,0.1);
+            border: 1px solid rgba(239,68,68,0.3);
+            color: #ef4444;
+        }
+
+        .badge-waiting {
+            background: rgba(245,158,11,0.1);
+            border: 1px solid rgba(245,158,11,0.3);
+            color: #f59e0b;
+        }
+
+        .badge-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .badge-connected .badge-dot { background: #10b981; }
+        .badge-disconnected .badge-dot { background: #ef4444; }
+        .badge-waiting .badge-dot { background: #f59e0b; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.5); }
+        }
+
+        .live-uptime {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .contact-card {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .contact-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #00d4ff20, #7c3aed20);
+            border: 2px solid rgba(124,58,237,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .contact-info h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #f0f0f0;
+            margin-bottom: 4px;
+        }
+
+        .contact-meta {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .contact-meta span {
+            font-size: 0.8rem;
+            color: #888;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .meta-tag {
+            padding: 2px 8px;
+            border-radius: 6px;
+            background: rgba(124,58,237,0.15);
+            border: 1px solid rgba(124,58,237,0.25);
+            color: #a78bfa;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 14px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            border-color: rgba(0,212,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00d4ff, #7c3aed);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
-        .hero p {
-            font-size: 1.1rem;
-            color: #888;
-            max-width: 600px;
-            margin: 0 auto 30px;
-            line-height: 1.7;
-        }
-
-        .hero-buttons {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 28px;
-            border-radius: 10px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            border: none;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #00d4ff, #7c3aed);
-            color: #fff;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(0,212,255,0.3);
-        }
-
-        .btn-outline {
-            background: transparent;
-            color: #ccc;
-            border: 1px solid rgba(255,255,255,0.15);
-        }
-
-        .btn-outline:hover {
-            border-color: rgba(255,255,255,0.4);
-            background: rgba(255,255,255,0.05);
-        }
-
-        .stats-bar {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            margin: 50px 0;
-            flex-wrap: wrap;
-        }
-
-        .stat {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #00d4ff, #7c3aed);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
         .stat-label {
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             color: #666;
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-top: 4px;
         }
 
-        .section-title {
-            text-align: center;
-            font-size: 1.8rem;
-            font-weight: 700;
+        .errors-panel {
+            background: rgba(239,68,68,0.03);
+            border: 1px solid rgba(239,68,68,0.1);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .errors-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             margin-bottom: 12px;
         }
 
-        .section-sub {
-            text-align: center;
-            color: #666;
-            margin-bottom: 40px;
-            font-size: 0.95rem;
-        }
-
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 60px;
-        }
-
-        .feature-card {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 16px;
-            padding: 28px;
-            transition: all 0.3s ease;
-        }
-
-        .feature-card:hover {
-            border-color: rgba(0,212,255,0.2);
-            background: rgba(255,255,255,0.05);
-            transform: translateY(-4px);
-        }
-
-        .feature-icon {
-            font-size: 2rem;
-            margin-bottom: 16px;
-        }
-
-        .feature-card h3 {
-            font-size: 1.1rem;
+        .errors-title {
+            font-size: 0.85rem;
             font-weight: 600;
+            color: #ef4444;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .error-count-badge {
+            background: rgba(239,68,68,0.2);
+            color: #ef4444;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .errors-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .error-item {
+            padding: 10px 12px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            margin-bottom: 6px;
+            border-left: 3px solid rgba(239,68,68,0.4);
+        }
+
+        .error-msg {
+            font-size: 0.8rem;
+            color: #f87171;
+            font-family: 'Courier New', monospace;
+            word-break: break-word;
+        }
+
+        .error-source {
+            font-size: 0.7rem;
+            color: #666;
+            margin-top: 3px;
+        }
+
+        .error-time {
+            font-size: 0.65rem;
+            color: #555;
+            margin-top: 2px;
+        }
+
+        .no-errors {
+            color: #4ade80;
+            font-size: 0.8rem;
+            text-align: center;
+            padding: 12px;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 700;
             margin-bottom: 8px;
             color: #f0f0f0;
         }
 
+        .section-sub {
+            color: #666;
+            margin-bottom: 24px;
+            font-size: 0.85rem;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 14px;
+            margin-bottom: 40px;
+        }
+
+        .feature-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 14px;
+            padding: 22px;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            border-color: rgba(0,212,255,0.15);
+            background: rgba(255,255,255,0.04);
+            transform: translateY(-2px);
+        }
+
+        .feature-icon {
+            font-size: 1.6rem;
+            margin-bottom: 10px;
+        }
+
+        .feature-card h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #e0e0e0;
+        }
+
         .feature-card p {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             color: #777;
             line-height: 1.6;
         }
 
-        .commands-section {
-            margin-bottom: 60px;
-        }
-
         .commands-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 12px;
+            margin-bottom: 40px;
         }
 
         .cmd-group {
-            background: rgba(255,255,255,0.03);
+            background: rgba(255,255,255,0.02);
             border: 1px solid rgba(255,255,255,0.06);
             border-radius: 12px;
-            padding: 20px;
+            padding: 18px;
         }
 
         .cmd-group h4 {
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             color: #00d4ff;
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
-        .cmd-group ul {
-            list-style: none;
-        }
+        .cmd-group ul { list-style: none; }
 
         .cmd-group li {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: #888;
-            padding: 4px 0;
+            padding: 3px 0;
             font-family: 'Courier New', monospace;
         }
 
-        .cmd-group li::before {
-            content: '.';
+        .cmd-prefix {
             color: #7c3aed;
             font-weight: bold;
         }
 
         .setup-section {
-            background: rgba(255,255,255,0.03);
+            background: rgba(255,255,255,0.02);
             border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 20px;
-            padding: 40px;
-            margin-bottom: 60px;
+            border-radius: 18px;
+            padding: 32px;
+            margin-bottom: 40px;
         }
 
         .setup-steps {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 24px;
-            margin-top: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
         }
 
-        .step {
-            text-align: center;
-        }
+        .step { text-align: center; }
 
         .step-num {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             background: linear-gradient(135deg, #00d4ff, #7c3aed);
             color: #fff;
@@ -285,78 +462,47 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 12px;
-            font-size: 1rem;
+            margin: 0 auto 10px;
+            font-size: 0.9rem;
         }
 
         .step h4 {
-            font-size: 0.95rem;
-            margin-bottom: 6px;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
             color: #e0e0e0;
         }
 
         .step p {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: #666;
             line-height: 1.5;
         }
 
-        .status-bar {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 16px;
-            background: rgba(0,212,255,0.05);
-            border: 1px solid rgba(0,212,255,0.15);
-            border-radius: 12px;
-            margin-bottom: 60px;
-        }
-
-        .pulse-dot {
-            width: 10px;
-            height: 10px;
-            background: #00d4ff;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.3); }
-        }
-
-        .status-text {
-            font-size: 0.9rem;
-            color: #00d4ff;
-            font-weight: 500;
-        }
-
         .footer {
             text-align: center;
-            padding: 40px 0;
-            border-top: 1px solid rgba(255,255,255,0.06);
+            padding: 30px 0;
+            border-top: 1px solid rgba(255,255,255,0.05);
         }
 
         .footer-links {
             display: flex;
             justify-content: center;
-            gap: 24px;
-            margin-bottom: 20px;
+            gap: 20px;
+            margin-bottom: 14px;
             flex-wrap: wrap;
         }
 
         .footer-links a {
             color: #888;
             text-decoration: none;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             transition: color 0.2s;
         }
 
         .footer-links a:hover { color: #00d4ff; }
 
         .footer-copy {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: #444;
         }
 
@@ -365,9 +511,17 @@
             text-decoration: none;
         }
 
+        .hidden { display: none !important; }
+
+        .errors-list::-webkit-scrollbar { width: 4px; }
+        .errors-list::-webkit-scrollbar-track { background: transparent; }
+        .errors-list::-webkit-scrollbar-thumb { background: rgba(239,68,68,0.3); border-radius: 4px; }
+
         @media (max-width: 600px) {
-            .stats-bar { gap: 24px; }
-            .setup-section { padding: 24px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .contact-card { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .nav-links { display: none; }
+            .live-panel { padding: 20px; }
         }
     </style>
 </head>
@@ -375,146 +529,173 @@
     <div class="bg-grid"></div>
     <div class="bg-glow glow-1"></div>
     <div class="bg-glow glow-2"></div>
+    <div class="bg-glow glow-3"></div>
 
     <div class="container">
-        <div class="hero">
-            <div class="hero-badge">WHATSAPP BOT</div>
-            <h1><span class="gradient">Silva MD Bot</span></h1>
-            <p>A powerful multi-functional WhatsApp bot with AI features, group moderation, media tools, and 250+ commands. Built with Baileys.</p>
-            <div class="hero-buttons">
-                <a href="https://github.com/SilvaTechB/silva-md-bot" class="btn btn-primary" target="_blank">View on GitHub</a>
-                <a href="https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v" class="btn btn-outline" target="_blank">WhatsApp Channel</a>
+        <nav class="nav">
+            <div class="nav-brand">
+                <div class="nav-logo">S</div>
+                <span class="nav-title">Silva MD Bot</span>
+            </div>
+            <div class="nav-links">
+                <a href="https://github.com/SilvaTechB/silva-md-bot" target="_blank">GitHub</a>
+                <a href="https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v" target="_blank">Channel</a>
+                <a href="https://youtube.com/@silvaedits254" target="_blank">YouTube</a>
+            </div>
+        </nav>
+
+        <div class="live-panel">
+            <div class="live-header">
+                <div id="status-badge" class="live-badge badge-waiting">
+                    <div class="badge-dot"></div>
+                    <span id="status-text">Starting...</span>
+                </div>
+                <span class="live-uptime" id="live-uptime">Uptime: --</span>
+            </div>
+            <div class="contact-card">
+                <div class="contact-avatar" id="contact-avatar">&#129302;</div>
+                <div class="contact-info">
+                    <h2 id="contact-name">Waiting for connection...</h2>
+                    <div class="contact-meta">
+                        <span id="contact-number"></span>
+                        <span id="contact-prefix"></span>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="status-bar">
-            <div class="pulse-dot"></div>
-            <span class="status-text" id="bot-status">Bot is running</span>
-        </div>
-
-        <div class="stats-bar">
-            <div class="stat">
-                <div class="stat-value" id="stat-plugins">257</div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="stat-plugins">--</div>
                 <div class="stat-label">Plugins</div>
             </div>
-            <div class="stat">
+            <div class="stat-card">
                 <div class="stat-value" id="stat-stars">--</div>
-                <div class="stat-label">GitHub Stars</div>
+                <div class="stat-label">Stars</div>
             </div>
-            <div class="stat">
+            <div class="stat-card">
                 <div class="stat-value" id="stat-forks">--</div>
                 <div class="stat-label">Forks</div>
             </div>
-            <div class="stat">
-                <div class="stat-value" id="stat-uptime">--</div>
-                <div class="stat-label">Uptime</div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-errors">0</div>
+                <div class="stat-label">Errors</div>
+            </div>
+        </div>
+
+        <div id="errors-panel" class="errors-panel hidden">
+            <div class="errors-header">
+                <span class="errors-title">
+                    &#9888; Critical Errors
+                    <span class="error-count-badge" id="error-count">0</span>
+                </span>
+            </div>
+            <div class="errors-list" id="errors-list">
+                <div class="no-errors">No errors detected</div>
             </div>
         </div>
 
         <h2 class="section-title">Features</h2>
-        <p class="section-sub">Everything you need to supercharge your WhatsApp experience</p>
+        <p class="section-sub">Everything you need to supercharge your WhatsApp</p>
 
         <div class="features">
             <div class="feature-card">
                 <div class="feature-icon">&#129302;</div>
                 <h3>AI Assistant</h3>
-                <p>Chat with AI models, generate images, get answers to questions, and use AI-powered tools directly in WhatsApp.</p>
+                <p>Chat with AI models, generate images, and get intelligent answers directly in WhatsApp.</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">&#128737;</div>
                 <h3>Group Moderation</h3>
-                <p>Anti-link, anti-spam, warn system, kick, mute, promote/demote members, and auto-moderation tools.</p>
+                <p>Anti-link, anti-spam, warn system, kick, mute, and auto-moderation tools.</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">&#127909;</div>
-                <h3>Media Tools</h3>
-                <p>Download videos from YouTube, TikTok, Instagram. Convert stickers, manipulate images, and more.</p>
+                <h3>Media Downloads</h3>
+                <p>Download videos from YouTube, TikTok, Instagram and convert media formats.</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">&#127911;</div>
                 <h3>Music &amp; Audio</h3>
-                <p>Play music, convert audio formats, text-to-speech, and audio effects for your chats.</p>
+                <p>Play music, text-to-speech, audio effects, and audio format conversion.</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">&#128736;</div>
-                <h3>Utility Commands</h3>
-                <p>Weather, translation, calculator, QR generator, URL shortener, and dozens of handy tools.</p>
+                <h3>Utility Tools</h3>
+                <p>Weather, translation, calculator, QR generator, stickers, and dozens more.</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">&#127918;</div>
                 <h3>Fun &amp; Games</h3>
-                <p>Trivia, truth or dare, RPG leveling system, economy, and interactive group games.</p>
+                <p>Trivia, truth or dare, RPG leveling, economy system, and interactive games.</p>
             </div>
         </div>
 
-        <div class="commands-section">
-            <h2 class="section-title">Popular Commands</h2>
-            <p class="section-sub">Just a taste of what Silva MD can do</p>
+        <h2 class="section-title">Popular Commands</h2>
+        <p class="section-sub">Just a sample of <span id="cmd-prefix-display">.</span> commands available</p>
 
-            <div class="commands-grid">
-                <div class="cmd-group">
-                    <h4>AI &amp; Chat</h4>
-                    <ul>
-                        <li>ai &lt;prompt&gt;</li>
-                        <li>dalle &lt;prompt&gt;</li>
-                        <li>gpt &lt;question&gt;</li>
-                        <li>imagine &lt;desc&gt;</li>
-                    </ul>
-                </div>
-                <div class="cmd-group">
-                    <h4>Downloads</h4>
-                    <ul>
-                        <li>play &lt;song&gt;</li>
-                        <li>ytmp4 &lt;url&gt;</li>
-                        <li>tiktok &lt;url&gt;</li>
-                        <li>ig &lt;url&gt;</li>
-                    </ul>
-                </div>
-                <div class="cmd-group">
-                    <h4>Group Admin</h4>
-                    <ul>
-                        <li>kick @user</li>
-                        <li>warn @user</li>
-                        <li>mute</li>
-                        <li>antilink on</li>
-                    </ul>
-                </div>
-                <div class="cmd-group">
-                    <h4>Tools</h4>
-                    <ul>
-                        <li>sticker</li>
-                        <li>translate &lt;text&gt;</li>
-                        <li>weather &lt;city&gt;</li>
-                        <li>menu</li>
-                    </ul>
-                </div>
+        <div class="commands-grid">
+            <div class="cmd-group">
+                <h4>AI &amp; Chat</h4>
+                <ul>
+                    <li><span class="cmd-prefix">.</span>ai &lt;prompt&gt;</li>
+                    <li><span class="cmd-prefix">.</span>dalle &lt;prompt&gt;</li>
+                    <li><span class="cmd-prefix">.</span>gpt &lt;question&gt;</li>
+                    <li><span class="cmd-prefix">.</span>imagine &lt;desc&gt;</li>
+                </ul>
+            </div>
+            <div class="cmd-group">
+                <h4>Downloads</h4>
+                <ul>
+                    <li><span class="cmd-prefix">.</span>play &lt;song&gt;</li>
+                    <li><span class="cmd-prefix">.</span>ytmp4 &lt;url&gt;</li>
+                    <li><span class="cmd-prefix">.</span>tiktok &lt;url&gt;</li>
+                    <li><span class="cmd-prefix">.</span>ig &lt;url&gt;</li>
+                </ul>
+            </div>
+            <div class="cmd-group">
+                <h4>Group Admin</h4>
+                <ul>
+                    <li><span class="cmd-prefix">.</span>kick @user</li>
+                    <li><span class="cmd-prefix">.</span>warn @user</li>
+                    <li><span class="cmd-prefix">.</span>mute</li>
+                    <li><span class="cmd-prefix">.</span>antilink on</li>
+                </ul>
+            </div>
+            <div class="cmd-group">
+                <h4>Tools</h4>
+                <ul>
+                    <li><span class="cmd-prefix">.</span>sticker</li>
+                    <li><span class="cmd-prefix">.</span>translate &lt;text&gt;</li>
+                    <li><span class="cmd-prefix">.</span>weather &lt;city&gt;</li>
+                    <li><span class="cmd-prefix">.</span>menu</li>
+                </ul>
             </div>
         </div>
 
         <div class="setup-section">
             <h2 class="section-title">Quick Setup</h2>
             <p class="section-sub">Get Silva MD running in minutes</p>
-
             <div class="setup-steps">
                 <div class="step">
                     <div class="step-num">1</div>
-                    <h4>Fork the Repo</h4>
-                    <p>Fork the Silva MD Bot repository on GitHub or deploy on Replit</p>
+                    <h4>Fork Repo</h4>
+                    <p>Fork the Silva MD Bot repository on GitHub</p>
                 </div>
                 <div class="step">
                     <div class="step-num">2</div>
                     <h4>Get Session</h4>
-                    <p>Generate your SESSION_ID using the session generator tool</p>
+                    <p>Generate your SESSION_ID using the session generator</p>
                 </div>
                 <div class="step">
                     <div class="step-num">3</div>
                     <h4>Configure</h4>
-                    <p>Set your SESSION_ID and customize bot settings in environment variables</p>
+                    <p>Set SESSION_ID and customize bot settings</p>
                 </div>
                 <div class="step">
                     <div class="step-num">4</div>
                     <h4>Deploy</h4>
-                    <p>Start the bot and scan the QR code from the terminal to pair</p>
+                    <p>Deploy to Heroku, Replit, or your preferred host</p>
                 </div>
             </div>
         </div>
@@ -526,38 +707,129 @@
                 <a href="https://whatsapp.com/channel/0029VaAkETLLY6d8qhLmZt2v" target="_blank">WhatsApp Channel</a>
                 <a href="https://wa.me/254700143167" target="_blank">Contact Developer</a>
             </div>
-            <p class="footer-copy">Silva MD Bot &copy; 2024 - 2026 <a href="https://github.com/SilvaTechB">Silva Tech Inc.</a> | Developer: Sylivanus Momanyi</p>
+            <p class="footer-copy">Silva MD Bot &copy; 2024 - 2026 <a href="https://github.com/SilvaTechB">Silva Tech Inc.</a> | Dev: Sylivanus Momanyi</p>
         </div>
     </div>
 
     <script>
-        const repoUrl = 'https://api.github.com/repos/SilvaTechB/silva-md-bot';
+        let currentPrefix = '.';
 
-        async function fetchRepoStats() {
+        async function fetchBotStatus() {
             try {
-                const response = await fetch(repoUrl);
-                const data = await response.json();
-                document.getElementById('stat-stars').textContent = data.stargazers_count || '--';
-                document.getElementById('stat-forks').textContent = data.forks_count || '--';
+                const res = await fetch('/api/status');
+                const data = await res.json();
+
+                const badge = document.getElementById('status-badge');
+                const statusText = document.getElementById('status-text');
+                const contactName = document.getElementById('contact-name');
+                const contactNumber = document.getElementById('contact-number');
+                const contactPrefix = document.getElementById('contact-prefix');
+                const contactAvatar = document.getElementById('contact-avatar');
+
+                badge.className = 'live-badge';
+                if (data.status === 'connected') {
+                    badge.classList.add('badge-connected');
+                    statusText.textContent = 'Connected';
+                    const name = data.name || 'Unknown';
+                    const number = data.jid ? data.jid.split('@')[0] : '';
+                    contactName.textContent = name;
+                    contactNumber.innerHTML = number ? '&#128222; +' + number : '';
+                    contactAvatar.textContent = name.charAt(0).toUpperCase();
+                    currentPrefix = data.prefix || '.';
+                    contactPrefix.innerHTML = 'Prefix: <span class="meta-tag">' + currentPrefix + '</span>';
+                    updatePrefixes(currentPrefix);
+                } else if (data.status === 'waiting_qr') {
+                    badge.classList.add('badge-waiting');
+                    statusText.textContent = 'Waiting for QR scan';
+                    contactName.textContent = 'Scan QR code in terminal to connect';
+                    contactNumber.textContent = '';
+                    contactPrefix.textContent = '';
+                    contactAvatar.innerHTML = '&#128274;';
+                } else if (data.status === 'disconnected' || data.status === 'error') {
+                    badge.classList.add('badge-disconnected');
+                    statusText.textContent = data.status === 'error' ? 'Error' : 'Disconnected';
+                    contactName.textContent = 'Bot is not connected';
+                    contactNumber.textContent = '';
+                    contactPrefix.textContent = '';
+                    contactAvatar.innerHTML = '&#9888;';
+                } else {
+                    badge.classList.add('badge-waiting');
+                    statusText.textContent = 'Starting...';
+                    contactName.textContent = 'Bot is starting up...';
+                    contactAvatar.innerHTML = '&#8987;';
+                }
+
+                if (data.plugins) {
+                    document.getElementById('stat-plugins').textContent = data.plugins;
+                }
+
+                const errPanel = document.getElementById('errors-panel');
+                const errList = document.getElementById('errors-list');
+                const errCount = document.getElementById('error-count');
+                const statErrors = document.getElementById('stat-errors');
+                statErrors.textContent = data.errorCount || 0;
+
+                if (data.errors && data.errors.length > 0) {
+                    errPanel.classList.remove('hidden');
+                    errCount.textContent = data.errors.length;
+                    errList.innerHTML = data.errors.slice(0, 10).map(e => {
+                        const ago = formatTimeAgo(e.time);
+                        return '<div class="error-item">' +
+                            '<div class="error-msg">' + escapeHtml(e.message) + '</div>' +
+                            (e.source ? '<div class="error-source">' + escapeHtml(e.source) + '</div>' : '') +
+                            '<div class="error-time">' + ago + '</div>' +
+                            '</div>';
+                    }).join('');
+                } else {
+                    errPanel.classList.add('hidden');
+                }
+
+                const uptimeMs = data.uptimeMs || 0;
+                const h = Math.floor(uptimeMs / 3600000);
+                const m = Math.floor((uptimeMs % 3600000) / 60000);
+                const s = Math.floor((uptimeMs % 60000) / 1000);
+                document.getElementById('live-uptime').textContent =
+                    'Uptime: ' + (h > 0 ? h + 'h ' + m + 'm' : m > 0 ? m + 'm ' + s + 's' : s + 's');
+
             } catch (e) {
-                console.error('Failed to fetch repo stats:', e);
+                console.error('Status fetch error:', e);
             }
         }
 
-        fetchRepoStats();
-
-        const startTime = Date.now();
-        function updateUptime() {
-            const elapsed = Math.floor((Date.now() - startTime) / 1000);
-            const h = Math.floor(elapsed / 3600);
-            const m = Math.floor((elapsed % 3600) / 60);
-            const s = elapsed % 60;
-            document.getElementById('stat-uptime').textContent =
-                h > 0 ? h + 'h ' + m + 'm' : m + 'm ' + s + 's';
+        function updatePrefixes(prefix) {
+            document.querySelectorAll('.cmd-prefix').forEach(el => {
+                el.textContent = prefix;
+            });
+            const display = document.getElementById('cmd-prefix-display');
+            if (display) display.textContent = prefix;
         }
 
-        setInterval(updateUptime, 1000);
-        updateUptime();
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function formatTimeAgo(ts) {
+            const diff = Date.now() - ts;
+            if (diff < 60000) return 'just now';
+            if (diff < 3600000) return Math.floor(diff / 60000) + 'm ago';
+            if (diff < 86400000) return Math.floor(diff / 3600000) + 'h ago';
+            return Math.floor(diff / 86400000) + 'd ago';
+        }
+
+        async function fetchRepoStats() {
+            try {
+                const res = await fetch('https://api.github.com/repos/SilvaTechB/silva-md-bot');
+                const data = await res.json();
+                document.getElementById('stat-stars').textContent = data.stargazers_count || '--';
+                document.getElementById('stat-forks').textContent = data.forks_count || '--';
+            } catch (e) {}
+        }
+
+        fetchBotStatus();
+        fetchRepoStats();
+        setInterval(fetchBotStatus, 5000);
     </script>
 </body>
 </html>
