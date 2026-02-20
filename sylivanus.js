@@ -408,7 +408,12 @@ async function handleMessagesUpsert(upsert) {
   const hasActualCommand = msgs.some(msg => {
     const mc = msg.message || {}
     const t = mc.conversation || mc.extendedTextMessage?.text || ''
-    return t && t.startsWith(global.prefix || '.')
+    if (!t) return false
+    try {
+      if (global.prefix instanceof RegExp) return global.prefix.test(t)
+      if (typeof global.prefix === 'string') return t.startsWith(global.prefix)
+      return t.startsWith('.')
+    } catch { return t.startsWith('.') }
   })
 
   if (isStartupGraceForHandler && !hasActualCommand) {
