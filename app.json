@@ -1,88 +1,144 @@
 {
-  "name": "Silva MD Bot",
-  "description": "Silva MD Bot is a powerful, multi-functional WhatsApp bot designed for moderation, automation, media tools, and smart AI features.",
-  "logo": "https://i.imgur.com/d3kxS7M.jpg",
-  "keywords": [
-    "silva-bot",
-    "whatsapp-bot",
-    "baileys-md",
-    "multi-device",
-    "silva-md"
-  ],
-  "repository": "https://github.com/SilvaTechB/silva-md-bot",
-  "website": "https://github.com/SilvaTechB",
+  "name": "silva-md",
+  "description": "Javascript WhatsApp bot made by Silva.",
+  "keywords": ["silva-md", "whatsapp", "baileys", "bot"],
+  "success_url": "/",
+  "stack": "heroku-24",
   "env": {
     "SESSION_ID": {
-      "description": "WhatsApp session ID (format: Silva~base64data). Get from session generator.",
+      "description": "Put the session-id here.",
       "required": true,
       "value": ""
     },
-    "BOTNAME": {
-      "description": "Display name for the bot",
+    "ALIVE_IMG": {
+      "description": "Paste your image URL here.",
       "required": false,
-      "value": "Silva MD Bot"
+      "value": "https://files.catbox.moe/5uli5p.jpeg"
     },
-    "MODE": {
-      "description": "Bot mode: public or private",
+    "LIVE_MSG": {
+      "description": "Paste your alive message here.",
       "required": false,
-      "value": "public"
+      "value": "> SILVA MD IS ACTIVE AND RUNNING ⚡"
+    },
+    "ANTIDELETE_PRIVATE": {
+      "description": "Restore deleted messages in private chat.",
+      "required": true,
+      "value": "true"
+    },
+    "ANTIDELETE_GROUP": {
+      "description": "Restore deleted messages in groups.",
+      "required": true,
+      "value": "true"
     },
     "PREFIX": {
-      "description": "Command prefix",
+      "description": "Bot command prefix.",
       "required": false,
       "value": "."
     },
-    "OWNERS": {
-      "description": "Owner phone numbers separated by semicolons",
+    "MODE": {
+      "description": "Bot mode: public, private, group, inbox.",
       "required": false,
-      "value": "254743706010"
+      "value": "public"
     },
-    "statusview": {
-      "description": "Auto-view WhatsApp statuses (true/false)",
+    "AUTO_STATUS_REACT": {
+      "description": "Enable auto status reactions.",
       "required": false,
       "value": "true"
     },
-    "autoRead": {
-      "description": "Auto-read incoming messages (true/false)",
+    "ALWAYS_ONLINE": {
+      "description": "Keep bot always online.",
       "required": false,
       "value": "false"
     },
-    "AUTO_STATUS_LIKE": {
-      "description": "Auto-like WhatsApp statuses (true/false)",
+    "AUTO_STATUS_SEEN": {
+      "description": "Enable auto status seen.",
+      "required": true,
+      "value": "true"
+    },
+    "AUTO_STATUS_REPLY": {
+      "description": "Enable auto status reply.",
+      "required": true,
+      "value": "false"
+    },
+    "AUTO_STATUS__MSG": {
+      "description": "Message for auto status reply.",
+      "required": true,
+      "value": "*👀 Seen by Silva MD ✅*"
+    },
+    "OWNER_NAME": {
+      "description": "Bot owner name.",
+      "required": false,
+      "value": "Silva MD"
+    },
+    "OWNER_NUMBER": {
+      "description": "Owner WhatsApp number.",
+      "required": false,
+      "value": "254700143167"
+    },
+    "BOT_NAME": {
+      "description": "Bot display name.",
+      "required": false,
+      "value": "✦ Silva ✦ MD ✦"
+    },
+    "ANTI_LINK": {
+      "description": "Enable anti-link feature in groups.",
+      "required": true,
+      "value": "true"
+    },
+    "ANTI_BAD": {
+      "description": "Enable anti-bad words feature.",
+      "required": false,
+      "value": "false"
+    },
+    "DESCRIPTION": {
+      "description": "Caption for menu and bot branding.",
+      "required": false,
+      "value": "*© ✦ Silva ✦ MD ✦*"
+    },
+    "DELETE_LINKS": {
+      "description": "Remove links from group without removing member.",
       "required": false,
       "value": "true"
     },
-    "AUTO_STATUS_LIKE_EMOJI": {
-      "description": "Emoji used for auto-liking statuses",
-      "required": false,
-      "value": "💚"
-    },
-    "Status_Saver": {
-      "description": "Save statuses to bot owner (true/false)",
+    "AUTO_RECORDING": {
+      "description": "Enable auto recording simulation.",
       "required": false,
       "value": "false"
     },
-    "STATUS_REPLY": {
-      "description": "Auto-reply to status posters (true/false)",
+    "AUTO_TYPING": {
+      "description": "Enable auto typing simulation.",
+      "required": false,
+      "value": "true"
+    },
+    "AUTO_REACT": {
+      "description": "Enable auto reactions for all messages.",
       "required": false,
       "value": "false"
     },
-    "STATUS_MSG": {
-      "description": "Custom reply message for status viewers",
+    "OWNER_REACT": {
+      "description": "React only to owner messages.",
       "required": false,
-      "value": "SILVA MD SUCCESSFULLY VIEWED YOUR STATUS"
-    }
-  },
-  "formation": {
-    "web": {
-      "quantity": 1,
-      "size": "free"
+      "value": "false"
+    },
+    "CUSTOM_REACT": {
+      "description": "Enable custom reactions.",
+      "required": false,
+      "value": "false"
+    },
+    "CUSTOM_REACT_EMOJIS": {
+      "description": "Custom emojis for reactions.",
+      "required": false,
+      "value": "💝,💖,💗,❤️‍🔥,❤️‍🩹,❤️,🩷,🧡,💛,💚,💙,🩵,💜,🤎,🖤,🩶,🤍"
+    },
+    "READ_MESSAGE": {
+      "description": "Enable automatic message read receipts.",
+      "required": false,
+      "value": "false"
     }
   },
   "buildpacks": [
     {
-      "url": "heroku/nodejs"
+      "url": "https://github.com/heroku/heroku-buildpack-nodejs.git"
     }
-  ],
-  "stack": "heroku-22"
+  ]
 }

@@ -1,0 +1,943 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Silva MD — Admin Dashboard</title>
+
+  <!-- Inter font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Allowed external libs: axios, chart.js, moment.js -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/min/moment.min.js"></script>
+
+  <meta name="color-scheme" content="dark light">
+  <style>
+    :root{
+      --primary: #6366f1; /* Indigo */
+      --secondary: #10b981; /* Emerald */
+      --accent: #f59e0b; /* Amber */
+      --error: #ef4444; /* Red */
+      --bg-dark: #0f1724; /* slate-900-ish */
+      --card-dark: rgba(255,255,255,0.04);
+      --glass-blur: 12px;
+      --glass-saturation: 120%;
+      --radius: 14px;
+      --glass-border: rgba(255,255,255,0.06);
+      --glass-border-2: rgba(255,255,255,0.02);
+      --text: #e6eef8;
+      --muted: #9aa7c0;
+      --glass-shadow: 0 6px 20px rgba(2,6,23,0.6);
+      font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    /* Light mode overrides */
+    :root[data-theme='light']{
+      --bg-dark: #f8fafc;
+      --card-dark: rgba(2,6,23,0.02);
+      --text: #0f1724;
+      --muted: #475569;
+      --glass-border: rgba(15,23,36,0.06);
+      --glass-border-2: rgba(15,23,36,0.03);
+      --glass-shadow: 0 8px 30px rgba(15,23,36,0.06);
+    }
+
+    html,body{
+      height:100%;
+      margin:0;
+      background: linear-gradient(180deg, rgba(99,102,241,0.06) 0%, transparent 25%), var(--bg-dark);
+      color: var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      transition: background 350ms ease, color 350ms ease;
+    }
+
+    /* Layout container */
+    .app {
+      max-width: 1200px;
+      margin: 28px auto;
+      padding: 20px;
+    }
+
+    header.app-header {
+      display:flex;
+      gap:16px;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:20px;
+    }
+
+    .brand {
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+
+    .logo {
+      width:56px;
+      height:56px;
+      border-radius:12px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow: var(--glass-shadow);
+      backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+      border:1px solid var(--glass-border);
+    }
+
+    .logo svg { filter: drop-shadow(0 3px 8px rgba(0,0,0,0.35)); }
+
+    .title {
+      display:flex;
+      flex-direction:column;
+      line-height:1;
+    }
+
+    .title h1 {
+      margin:0;
+      font-size:20px;
+      font-weight:700;
+      letter-spacing:-0.3px;
+      /* gradient text */
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .title p { margin:0; font-size:13px; color:var(--muted); }
+
+    .controls {
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+
+    .theme-toggle {
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+      border-radius:999px;
+      border:1px solid var(--glass-border);
+      cursor:pointer;
+      transition:transform .18s ease, box-shadow .18s ease;
+      backdrop-filter: blur(8px) saturate(120%);
+    }
+    .theme-toggle:active { transform:scale(.98); }
+    .theme-toggle svg { width:18px; height:18px; }
+
+    /* Grid layout */
+    .grid {
+      display:grid;
+      gap:16px;
+      grid-template-columns: repeat(12, 1fr);
+    }
+
+    /* Cards */
+    .card {
+      grid-column: span 12;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.00));
+      border-radius: var(--radius);
+      padding:16px;
+      border:1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+      transition: transform .18s ease, box-shadow .18s ease, border-color .2s ease;
+    }
+
+    .card:hover { transform: translateY(-6px); border-color: var(--glass-border-2); }
+
+    /* Stats overview row */
+    .stats {
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .stat {
+      flex:1 1 200px;
+      min-width: 160px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      padding:14px;
+      border-radius:12px;
+      border:1px solid var(--glass-border-2);
+      display:flex;
+      align-items:center;
+      gap:12px;
+      transition: transform .18s ease;
+    }
+
+    .stat .icon {
+      width:44px;height:44px;border-radius:10px;
+      display:flex;align-items:center;justify-content:center;
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent);
+      border:1px solid var(--glass-border-2);
+    }
+
+    .stat .meta { flex:1; }
+    .stat .meta .label { font-size:12px; color:var(--muted); }
+    .stat .meta .value { font-weight:700; font-size:18px; margin-top:4px; }
+
+    .indicator {
+      display:flex;
+      align-items:center;
+      gap:6px;
+      font-weight:600;
+      font-size:13px;
+    }
+    .indicator.up { color: var(--secondary); }
+    .indicator.down { color: var(--error); }
+
+    /* Two-column split: chart + dev info */
+    .col-left { grid-column: span 8; }
+    .col-right { grid-column: span 4; }
+
+    /* Plugin list grid */
+    .plugins-grid {
+      display:grid;
+      gap:12px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      margin-top:8px;
+    }
+
+    .plugin-card {
+      padding:12px;
+      border-radius:12px;
+      border:1px solid var(--glass-border-2);
+      transition: transform .14s ease, box-shadow .14s ease;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+    }
+    .plugin-card:hover { transform: translateY(-6px); }
+
+    .plugin-card .name { font-weight:600; font-size:14px; }
+    .plugin-card .desc { color:var(--muted); font-size:13px; min-height:36px; }
+
+    /* developer card */
+    .dev {
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      flex-direction:column;
+    }
+    .dev-top { display:flex; gap:12px; align-items:center; }
+    .avatar {
+      width:72px;height:72px;border-radius:14px; overflow:hidden; flex:0 0 72px;
+      border:1px solid var(--glass-border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+    }
+    .dev .name { font-size:16px; font-weight:700; }
+    .dev .bio { color:var(--muted); font-size:13px; }
+
+    .dev-stats { display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
+    .dev-stat {
+      padding:8px 10px;
+      border-radius:10px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
+      border:1px solid var(--glass-border-2);
+      font-weight:600; font-size:13px;
+    }
+
+    /* small UI bits */
+    .muted { color:var(--muted); font-size:13px; }
+    .link { text-decoration:none; color:var(--primary); font-weight:600; display:inline-flex; align-items:center; gap:8px; }
+    .small { font-size:12px; color:var(--muted); }
+
+    /* spinner */
+    .spinner {
+      width:22px;height:22px;border-radius:50%;
+      border:3px solid rgba(255,255,255,0.08);
+      border-top-color: var(--primary);
+      animation:spin 900ms linear infinite;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    /* responsive */
+    @media (max-width: 900px){
+      .col-left { grid-column: span 12; }
+      .col-right { grid-column: span 12; }
+      header.app-header { flex-direction:column; align-items:stretch; gap:12px; }
+      .app { padding:12px; margin:12px; }
+    }
+
+    /* accessibility focus */
+    .theme-toggle:focus, .link:focus {
+      outline:3px solid rgba(99,102,241,0.18);
+      outline-offset:3px;
+    }
+
+    /* error message */
+    .error {
+      padding:10px 12px;
+      background: linear-gradient(90deg, rgba(239,68,68,0.09), rgba(255,255,255,0.01));
+      color:var(--error);
+      border-radius:10px;
+      border:1px solid rgba(239,68,68,0.12);
+      font-weight:600;
+    }
+
+    footer { margin-top:20px; color:var(--muted); font-size:13px; text-align:center; }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <header class="app-header" role="banner" aria-label="Silva MD dashboard header">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <!-- minimal bot icon -->
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="4" width="20" height="14" rx="3" fill="url(#g)"/>
+            <circle cx="8.8" cy="11" r="1.6" fill="#fff"/>
+            <circle cx="15.2" cy="11" r="1.6" fill="#fff"/>
+            <defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#10b981"/></linearGradient></defs>
+          </svg>
+        </div>
+        <div class="title">
+          <h1>Silva MD</h1>
+          <p>Advanced modular WhatsApp bot</p>
+        </div>
+      </div>
+
+      <div class="controls" role="group" aria-label="Theme and controls">
+        <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+          <svg id="themeIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.2"/>
+          </svg>
+          <span class="small">Theme</span>
+        </button>
+
+        <a class="link" id="githubLink" href="https://github.com/SilvaTechB/silva-md-bot" target="_blank" rel="noopener noreferrer" title="Open repo on GitHub">
+          <!-- Github icon -->
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 .5C5.648.5.5 5.648.5 12c0 5.079 3.293 9.387 7.868 10.909.575.106.784-.249.784-.554 0-.273-.01-1-.016-1.957-3.2.696-3.876-1.542-3.876-1.542-.523-1.33-1.277-1.684-1.277-1.684-1.044-.714.08-.699.08-.699 1.155.082 1.763 1.187 1.763 1.187 1.026 1.757 2.693 1.25 3.35.957.104-.744.402-1.25.732-1.538-2.555-.29-5.242-1.278-5.242-5.688 0-1.256.448-2.281 1.184-3.086-.119-.29-.513-1.46.113-3.043 0 0 .966-.31 3.162 1.18.917-.255 1.9-.382 2.877-.387.977.005 1.96.132 2.878.387 2.196-1.49 3.161-1.18 3.161-1.18.628 1.584.234 2.754.115 3.044.738.805 1.183 1.83 1.183 3.086 0 4.421-2.693 5.394-5.257 5.676.413.355.781 1.053.781 2.123 0 1.533-.014 2.768-.014 3.144 0 .31.206.667.789.553C20.707 21.385 24 17.077 24 12c0-6.352-5.148-11.5-12-11.5z"/>
+          </svg>
+          <span class="small">GitHub</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- Main grid -->
+    <main>
+      <section class="grid" aria-live="polite">
+        <!-- Stats row -->
+        <div class="card" style="grid-column: span 12;">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+            <div>
+              <h3 style="margin:0 0 6px 0;">Overview</h3>
+              <div class="small muted">Real-time repository & plugin statistics</div>
+            </div>
+            <div id="lastUpdated" class="small muted" aria-hidden="true">—</div>
+          </div>
+
+          <div style="margin-top:14px;" class="stats" id="statsRow">
+            <!-- stat cards injected by JS -->
+            <div class="stat" aria-hidden="true">
+              <div class="icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </div>
+              <div class="meta">
+                <div class="label">Total plugins</div>
+                <div class="value" id="pluginsCount"><span class="spinner"></span></div>
+              </div>
+              <div id="pluginsChange" class="indicator small">—</div>
+            </div>
+
+            <div class="stat" aria-hidden="true">
+              <div class="icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2l3 7h7l-5.5 4.2L20 22l-8-5-8 5 1.5-8.8L0 9h7l3-7z" fill="currentColor"/></svg>
+              </div>
+              <div class="meta">
+                <div class="label">Stars</div>
+                <div class="value" id="starsCount"><span class="spinner"></span></div>
+              </div>
+              <div id="starsChange" class="indicator small">—</div>
+            </div>
+
+            <div class="stat" aria-hidden="true">
+              <div class="icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 12h6l3 8 3-16 3 8h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="meta">
+                <div class="label">Forks</div>
+                <div class="value" id="forksCount"><span class="spinner"></span></div>
+              </div>
+              <div id="forksChange" class="indicator small">—</div>
+            </div>
+
+            <div class="stat" aria-hidden="true">
+              <div class="icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 11h-2v4h2v-4zm0-6h-2v4h2V7z" fill="currentColor"/></svg>
+              </div>
+              <div class="meta">
+                <div class="label">Open issues</div>
+                <div class="value" id="issuesCount"><span class="spinner"></span></div>
+              </div>
+              <div id="issuesChange" class="indicator small">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart + Dev info -->
+        <div class="card col-left">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+            <div>
+              <h3 style="margin:0 0 6px 0;">Repository Activity</h3>
+              <div class="small muted">Commits per week (last 12 weeks)</div>
+            </div>
+            <div id="chartControls" class="small muted">
+              <span id="chartStatus"><span class="spinner"></span> loading</span>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;">
+            <canvas id="commitsChart" style="max-height:320px; width:100%;"></canvas>
+          </div>
+        </div>
+
+        <aside class="card col-right" aria-labelledby="devInfoHeading">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <h3 id="devInfoHeading" style="margin:0 0 6px 0;">Developer</h3>
+              <div class="small muted">SilvaTechB</div>
+            </div>
+            <div id="devAction" class="small muted">—</div>
+          </div>
+
+          <div class="dev" style="margin-top:10px;">
+            <div class="dev-top">
+              <div class="avatar" id="devAvatar" aria-hidden="true">
+                <!-- avatar injected -->
+              </div>
+              <div style="flex:1;">
+                <div class="name" id="devName">—</div>
+                <div class="bio" id="devBio">Loading developer info…</div>
+                <div class="dev-stats" id="devStats" style="margin-top:10px;">
+                  <div class="dev-stat" id="devFollowers"><span class="spinner"></span></div>
+                  <div class="dev-stat" id="devRepos"><span class="spinner"></span></div>
+                  <div class="dev-stat" id="devCommits"><span class="spinner"></span></div>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:12px; display:flex; gap:8px; align-items:center;">
+              <a id="devProfile" class="link" href="https://github.com/SilvaTechB" target="_blank" rel="noopener noreferrer">
+                View profile
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M14 3l7 7-11 11-7-7L14 3zM14 3h7v7"/></svg>
+              </a>
+              <div id="devError" style="flex:1;"></div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Plugins list -->
+        <div class="card" style="grid-column: span 12;">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <h3 style="margin:0;">Plugins</h3>
+            <div class="small muted">Fetched from /plugins directory</div>
+          </div>
+
+          <div id="pluginsArea" style="margin-top:12px;">
+            <div id="pluginsLoading" style="display:block;">
+              <div style="display:flex; gap:10px; align-items:center;">
+                <div class="spinner" aria-hidden="true"></div>
+                <div class="muted">Loading plugins…</div>
+              </div>
+            </div>
+
+            <div id="pluginsGrid" class="plugins-grid" aria-live="polite" style="margin-top:10px;"></div>
+
+            <div id="pluginsError" style="margin-top:10px;"></div>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        Silva MD dashboard • Auto-refresh every 5 minutes • Data from GitHub API
+      </footer>
+    </main>
+  </div>
+
+  <script>
+  /*****************************************************************
+   * Silva MD Dashboard
+   *
+   * Single-file dashboard that fetches data from:
+   *  - Repo: https://github.com/SilvaTechB/silva-md-bot
+   *  - User: https://github.com/SilvaTechB
+   *  - Contents: plugins directory
+   *
+   * Notes:
+   *  - If you expect many requests or want to avoid rate limits, add a
+   *    personal GitHub token below. Keep tokens secret and server-side in production.
+   *****************************************************************/
+
+  (function(){
+    'use strict';
+
+    // CONFIG
+    const OWNER = 'SilvaTechB';
+    const REPO = 'silva-md-bot';
+    const PLUGINS_PATH = 'plugins';
+
+    // Optional: add a GitHub token here (RECOMMENDED for many requests). If left empty, unauthenticated requests are used.
+    // IMPORTANT: Never push a real token into public code. For production, proxy requests via a server that injects token.
+    const GITHUB_TOKEN = ''; // <-- paste token here if you want (not recommended in public)
+
+    // API helpers
+    const api = axios.create({
+      baseURL: 'https://api.github.com',
+      headers: GITHUB_TOKEN ? { Authorization: 'token ' + GITHUB_TOKEN } : undefined,
+      timeout: 15000
+    });
+
+    // DOM nodes
+    const pluginsCountEl = document.getElementById('pluginsCount');
+    const starsCountEl = document.getElementById('starsCount');
+    const forksCountEl = document.getElementById('forksCount');
+    const issuesCountEl = document.getElementById('issuesCount');
+    const pluginsGrid = document.getElementById('pluginsGrid');
+    const pluginsLoading = document.getElementById('pluginsLoading');
+    const pluginsError = document.getElementById('pluginsError');
+    const lastUpdatedEl = document.getElementById('lastUpdated');
+
+    const devAvatar = document.getElementById('devAvatar');
+    const devName = document.getElementById('devName');
+    const devBio = document.getElementById('devBio');
+    const devFollowers = document.getElementById('devFollowers');
+    const devRepos = document.getElementById('devRepos');
+    const devCommits = document.getElementById('devCommits');
+    const devError = document.getElementById('devError');
+
+    const chartStatus = document.getElementById('chartStatus');
+    const chartCtx = document.getElementById('commitsChart').getContext('2d');
+
+    // UI state
+    let commitsChart = null;
+    const REFRESH_MS = 5 * 60 * 1000; // 5 minutes
+    let autoRefreshTimer = null;
+
+    // store last values to show ▲/▼
+    const storageKey = 'silva_dashboard_prev';
+    const prev = JSON.parse(localStorage.getItem(storageKey) || '{}');
+
+    // THEME: detect system preference and local override
+    const root = document.documentElement;
+    const themeToggleBtn = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+
+    function applyTheme(theme){
+      root.setAttribute('data-theme', theme);
+      localStorage.setItem('silva_theme', theme);
+      // switch icon (sun/moon simplified)
+      if (theme === 'light') {
+        themeIcon.innerHTML = '<path d="M6.76 4.84l-1.8-1.79-1.41 1.41 1.8 1.79 1.41-1.41zM1 13h3v-2H1v2zm9-9h2V1h-2v3zm7.45 1.46l1.41-1.41-1.79-1.8-1.41 1.41 1.79 1.8zM20 11v2h3v-2h-3zM12 7a5 5 0 100 10 5 5 0 000-10z"/>';
+      } else {
+        themeIcon.innerHTML = '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
+      }
+    }
+
+    // init theme
+    (function initTheme(){
+      const saved = localStorage.getItem('silva_theme');
+      if (saved) { applyTheme(saved); }
+      else {
+        // system preference
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        applyTheme(prefersDark ? 'dark' : 'light');
+      }
+    })();
+
+    themeToggleBtn.addEventListener('click', () => {
+      const current = root.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+      applyTheme(current === 'light' ? 'dark' : 'light');
+    });
+
+    /* ----------------------
+       Utility helpers
+    ----------------------*/
+    function formatNumber(n){
+      if (n === null || n === undefined) return '—';
+      return n.toLocaleString();
+    }
+
+    function showChange(elId, current, prevVal){
+      const el = document.getElementById(elId);
+      if (!el) return;
+      if (prevVal === undefined || prevVal === null) {
+        el.innerHTML = '<span class="small muted">—</span>';
+        return;
+      }
+
+      const diff = current - prevVal;
+      const pct = prevVal ? Math.round((diff / prevVal) * 100) : null;
+      if (diff === 0) {
+        el.innerHTML = '<span class="small muted">—</span>';
+      } else if (diff > 0){
+        el.innerHTML = `<span class="indicator up">▲ ${formatNumber(diff)} ${pct!==null?`(${pct}%)`:''}</span>`;
+      } else {
+        el.innerHTML = `<span class="indicator down">▼ ${formatNumber(Math.abs(diff))} ${pct!==null?`(${Math.abs(pct)}%)`:''}</span>`;
+      }
+    }
+
+    function friendlyError(targetEl, message){
+      targetEl.innerHTML = '<div class="error" role="alert">' + message + '</div>';
+    }
+
+    function clearError(targetEl){
+      targetEl.innerHTML = '';
+    }
+
+    /* ----------------------
+       Fetching functions
+    ----------------------*/
+
+    // Repo basic info: stars, forks, open_issues_count
+    async function fetchRepoInfo(){
+      const targetErr = document.getElementById('pluginsError'); // generic area for repo errors
+      try {
+        const res = await api.get(`/repos/${OWNER}/${REPO}`);
+        const data = res.data;
+        // update DOM
+        const stars = data.stargazers_count || 0;
+        const forks = data.forks_count || 0;
+        const issues = data.open_issues_count || 0;
+
+        // save previous snapshot to localStorage
+        const prevSnap = prev.repo || {};
+        showCountAndIndicator('starsCount', stars, 'starsChange', prevSnap.stars);
+        showCountAndIndicator('forksCount', forks, 'forksChange', prevSnap.forks);
+        showCountAndIndicator('issuesCount', issues, 'issuesChange', prevSnap.issues);
+
+        prev.repo = { stars, forks, issues };
+        persistPrev();
+
+        clearError(targetErr);
+        return data;
+      } catch (err) {
+        console.error('fetchRepoInfo error', err);
+        friendlyError(targetErr, 'Failed to load repository info. Possibly rate limited by GitHub API.');
+        // show fallback lighter UI
+        document.getElementById('starsCount').textContent = '—';
+        document.getElementById('forksCount').textContent = '—';
+        document.getElementById('issuesCount').textContent = '—';
+      }
+    }
+
+    function showCountAndIndicator(countElId, value, changeElId, prevValue){
+      document.getElementById(countElId).textContent = formatNumber(value);
+      showChange(changeElId, value, prevValue);
+    }
+
+    // Plugins list (contents API)
+    async function fetchPlugins(){
+      pluginsLoading.style.display = 'block';
+      pluginsGrid.innerHTML = '';
+      pluginsError.innerHTML = '';
+
+      try {
+        // List contents of plugins directory
+        const res = await api.get(`/repos/${OWNER}/${REPO}/contents/${PLUGINS_PATH}`);
+        const files = res.data || [];
+        // filter for directories or files depending on structure; we assume each plugin is a file or folder
+        const plugins = files.map(f => ({
+          name: f.name.replace(/\.(js|ts|mjs)$/, ''), // remove common extensions
+          path: f.path,
+          type: f.type,
+          html_url: f.html_url
+        }));
+
+        // Update count + indicator
+        showCountAndIndicator('pluginsCount', plugins.length, 'pluginsChange', (prev.plugins && prev.plugins.count) || 0);
+        prev.plugins = { count: plugins.length };
+        persistPrev();
+
+        // render plugin cards
+        pluginsGrid.innerHTML = '';
+        plugins.forEach(p => {
+          const card = document.createElement('article');
+          card.className = 'plugin-card';
+          card.setAttribute('role','article');
+          card.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div class="name">${toTitleCase(p.name)}</div>
+              <div style="font-size:12px; color:var(--muted)">${p.type}</div>
+            </div>
+            <div class="desc">No description available — placeholder. Edit plugin files in <code>/${PLUGINS_PATH}</code>.</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:auto;">
+              <a href="${p.html_url}" target="_blank" rel="noopener noreferrer" class="link small">Open</a>
+              <div class="small muted">${p.path}</div>
+            </div>
+          `;
+          pluginsGrid.appendChild(card);
+        });
+
+        pluginsLoading.style.display = 'none';
+        clearError(pluginsError);
+        return plugins;
+      } catch (err) {
+        console.error('fetchPlugins error', err);
+        pluginsLoading.style.display = 'none';
+        friendlyError(pluginsError, 'Failed to load plugins list. Directory might be empty or API rate-limited.');
+      }
+    }
+
+    // Developer info
+    async function fetchDeveloper(){
+      const userErr = devError;
+      try {
+        const res = await api.get(`/users/${OWNER}`);
+        const d = res.data;
+        devAvatar.innerHTML = `<img src="${d.avatar_url}" alt="${d.login}" style="width:100%;height:100%;object-fit:cover">`;
+        devName.textContent = d.name || d.login;
+        devBio.textContent = d.bio || 'No bio available';
+        devFollowers.textContent = 'Followers: ' + formatNumber(d.followers || 0);
+        devRepos.textContent = 'Public repos: ' + formatNumber(d.public_repos || 0);
+
+        // For commits, we'll calculate commits for the repo (not total across all repos).
+        const commitsCount = await getRepoCommitCount();
+        devCommits.textContent = 'Repo commits: ' + formatNumber(commitsCount || 0);
+
+        clearError(userErr);
+        return d;
+      } catch (err) {
+        console.error('fetchDeveloper error', err);
+        friendlyError(userErr, 'Failed to load developer info.');
+        devName.textContent = '—';
+        devBio.textContent = '—';
+      }
+    }
+
+    // Commit counts: There is /stats/commit_activity which returns weekly commits for the repo for the last 52 weeks.
+    // Note: This endpoint can return 202 if GitHub is generating stats. We handle that and fallback to a slower method (counting commits via the commits API for last 12 weeks).
+    async function fetchCommitActivity(lastWeeks = 12){
+      chartStatus.innerHTML = '<span class="spinner"></span> loading';
+      try {
+        const res = await api.get(`/repos/${OWNER}/${REPO}/stats/commit_activity`);
+        if (res.status === 202 || !Array.isArray(res.data)) {
+          // stats are being generated; fallback
+          console.warn('Commit activity endpoint returned 202 or non-array — falling back');
+          return await fetchCommitActivityFallback(lastWeeks);
+        } else {
+          const weekly = res.data; // array of 52 objects: {week: unix, total: n, days:[..]}
+          const last = weekly.slice(-lastWeeks);
+          // map to {weekLabel, total}
+          return last.map(w => ({ week: moment.unix(w.week).format('MMM D'), total: w.total }));
+        }
+      } catch (err) {
+        console.warn('fetchCommitActivity error', err);
+        // fallback
+        return await fetchCommitActivityFallback(lastWeeks);
+      }
+    }
+
+    // fallback: use commits API over date range for lastWeeks. This can be more expensive / paginated, so we collect counts grouped by week.
+    async function fetchCommitActivityFallback(lastWeeks = 12){
+      try {
+        const weeks = [];
+        const now = moment();
+        for (let i = lastWeeks - 1; i >= 0; i--){
+          const start = now.clone().startOf('isoWeek').subtract(i, 'weeks');
+          const end = start.clone().endOf('isoWeek');
+          weeks.push({ start: start.toISOString(), end: end.toISOString(), label: start.format('MMM D') });
+        }
+        // For each week, run a commits list request with since & until
+        const promises = weeks.map(w => api.get(`/repos/${OWNER}/${REPO}/commits`, { params: { since: w.start, until: w.end, per_page: 1 } })
+          .then(r => {
+            // GitHub will return Link header if more pages exist; best guess: count via headers 'link' is not reliable here.
+            // Instead we'll use the 'x-total-count' isn't present either. So a robust approach is to request per_page=1 and inspect 'link' header to estimate pages.
+            const link = r.headers.link || '';
+            if (!link) {
+              // only results in first page; simple count = length of returned data
+              return r.data.length;
+            } else {
+              // Try to parse last page from link header
+              const match = link.match(/&page=(\d+)>; rel="last"/);
+              if (match) return Number(match[1]);
+              return r.data.length;
+            }
+          }).catch(e=>{
+            return 0;
+          })
+        );
+        const counts = await Promise.all(promises);
+        return weeks.map((w,i) => ({ week: w.label, total: counts[i] }));
+      } catch (err) {
+        console.error('fallback commit activity failed', err);
+        // return dummy zero series
+        const now = moment();
+        const out = [];
+        for (let i = lastWeeks - 1; i >= 0; i--){
+          out.push({ week: now.clone().startOf('isoWeek').subtract(i,'weeks').format('MMM D'), total: 0 });
+        }
+        return out;
+      }
+    }
+
+    // total commits for the repo (sum of week totals from /stats/commit_activity or fallback)
+    async function getRepoCommitCount(){
+      try {
+        const arr = await fetchCommitActivity(52); // try full 52 for total
+        const total = (arr || []).reduce((s, it) => s + (it.total || 0), 0);
+        return total;
+      } catch (err) {
+        console.error('getRepoCommitCount error', err);
+        return null;
+      }
+    }
+
+    /* ----------------------
+       Rendering / Chart
+    ----------------------*/
+
+    function renderCommitChart(series){
+      // series: array of {week,label or week, total}
+      const labels = series.map(s => s.week);
+      const data = series.map(s => s.total);
+
+      if (commitsChart) {
+        commitsChart.data.labels = labels;
+        commitsChart.data.datasets[0].data = data;
+        commitsChart.update();
+      } else {
+        commitsChart = new Chart(chartCtx, {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [{
+              label: 'Commits',
+              data,
+              tension: 0.36,
+              fill: true,
+              backgroundColor: gradientFill(chartCtx),
+              borderColor: getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#6366f1',
+              pointRadius: 3,
+              borderWidth: 2,
+              pointHoverRadius: 5,
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: {
+                grid: { display: false },
+                ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--muted') }
+              },
+              y: {
+                beginAtZero: true,
+                ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--muted') },
+                grid: { color: 'rgba(255,255,255,0.03)' }
+              }
+            },
+            plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } }
+          }
+        });
+      }
+    }
+
+    function gradientFill(ctx){
+      const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+      const primary = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#6366f1';
+      gradient.addColorStop(0, hexToRgba(primary, 0.18));
+      gradient.addColorStop(1, hexToRgba('#000000', 0.02));
+      return gradient;
+    }
+
+    function hexToRgba(hex, alpha){
+      // hex like #rrggbb
+      const c = hex.replace('#','');
+      const r = parseInt(c.substring(0,2),16);
+      const g = parseInt(c.substring(2,4),16);
+      const b = parseInt(c.substring(4,6),16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    /* ----------------------
+       Top-level refresh routine
+    ----------------------*/
+    async function refreshAll(){
+      const start = new Date();
+      // Indicate last update time
+      lastUpdatedEl.textContent = 'Updating…';
+      // Kick off parallel fetches
+      await Promise.allSettled([
+        fetchRepoInfo(),
+        fetchPlugins(),
+        fetchDeveloper()
+      ]);
+
+      // commits + chart - need to compute separately then render
+      try {
+        const commitSeries = await fetchCommitActivity(12);
+        renderCommitChart(commitSeries);
+        chartStatus.innerHTML = 'Updated';
+      } catch (err){
+        chartStatus.innerHTML = '<span class="small muted">No activity data</span>';
+      }
+
+      lastUpdatedEl.textContent = 'Updated ' + moment().format('LLL');
+    }
+
+    // persist prev snapshot to localStorage
+    function persistPrev(){
+      localStorage.setItem(storageKey, JSON.stringify(prev));
+    }
+
+    /* ----------------------
+       Small helpers
+    ----------------------*/
+    function toTitleCase(str){
+      return str.replace(/[-_.]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    }
+
+    /* ----------------------
+       Initial run + auto refresh
+    ----------------------*/
+    (async function init(){
+      // create a basic, accessible skeleton first
+      // show small spinners until data loaded
+      document.getElementById('starsCount').innerHTML = '<span class="spinner"></span>';
+      document.getElementById('forksCount').innerHTML = '<span class="spinner"></span>';
+      document.getElementById('issuesCount').innerHTML = '<span class="spinner"></span>';
+      pluginsCountEl.innerHTML = '<span class="spinner"></span>';
+      devFollowers.innerHTML = '<span class="spinner"></span>';
+      devRepos.innerHTML = '<span class="spinner"></span>';
+      devCommits.innerHTML = '<span class="spinner"></span>';
+
+      // Render an empty chart to reserve space
+      renderCommitChart(Array.from({length:12}).map((_,i)=>({ week: '-', total: 0 })));
+
+      // do first refresh
+      await refreshAll();
+
+      // set up periodic refresh
+      if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+      autoRefreshTimer = setInterval(refreshAll, REFRESH_MS);
+    })();
+
+    /* ----------------------
+       Accessibility: keyboard support for theme toggle
+    ----------------------*/
+    themeToggleBtn.tabIndex = 0;
+    themeToggleBtn.addEventListener('keyup', e => { if(e.key === 'Enter' || e.key === ' ') themeToggleBtn.click(); });
+
+    /* ----------------------
+       Keep code clean: handle unload
+    ----------------------*/
+    window.addEventListener('beforeunload', () => {
+      persistPrev();
+      if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+    });
+
+  })();
+  </script>
+</body>
+</html>

@@ -1,133 +1,108 @@
 # Silva MD Bot
 
-## Overview
-Silva MD Bot is a multi-functional WhatsApp bot built with Node.js and the Baileys library. It provides moderation, automation, media tools, and AI-powered features for WhatsApp groups and individual chats.
+A modular WhatsApp bot built with Baileys (multi-device), featuring an admin dashboard web interface.
 
-## Project Architecture
-- **silva.js** - Main entry point. Starts Express server on port 5000, serves modern landing page, and spawns the bot process
-- **sylivanus.js** - Core bot logic. Handles WhatsApp connection, message processing, plugin loading, and database management
-- **handler.js** - Message handler that processes incoming messages and routes them to plugins
-- **config.js** - Bot configuration (owner numbers, API keys, bot settings)
-- **lib/makesession.js** - Session loader. Parses `Silva~<compressed_base64>` format, decompresses gzip, writes creds.json
-- **silvaxlab/** - Plugin commands directory (232+ plugins)
-- **lib/** - Utility libraries (scrapers, converters, database adapters, etc.)
-- **session/** - WhatsApp session credentials storage
-- **jusorts/** - Static assets served by Express (landing page, images)
-- **media/** - Media files (audio, images)
+## Architecture
 
-## Key Dependencies
-- `@whiskeysockets/baileys` - WhatsApp Web API (uses buffered event system with `conn.ev.process()`)
-- `express` - Web server for landing page
-- `pino` - Logging
-- `chalk` - Terminal colors
-- `figlet` - ASCII art banners
-- `node-cache` - Caching
-- `zlib` (built-in) - Session decompression
+- **Runtime**: Node.js 20
+- **Entry point**: `silva.js`
+- **Web dashboard**: `smm/silva.html` — served via Express at port 5000
+- **Plugins**: `plugins/` directory — loaded dynamically on start
+- **Config**: `config.js` reads from `config.env` (if present) or environment variables
+- **Session storage**: `session/` directory (multi-file auth state)
 
-## Session Format
-- SESSION_ID format: `Silva~<base64_gzip_compressed_creds>`
-- The `lib/makesession.js` module handles parsing, decompressing, and saving session credentials
-- When no SESSION_ID is set, QR code prints directly in the terminal for scanning
+## Key Components
+
+| File/Dir         | Purpose                                         |
+|------------------|-------------------------------------------------|
+| `silva.js`       | Main entry — connects to WhatsApp, runs Express |
+| `handler.js`     | Message handler & command dispatcher            |
+| `config.js`      | Config reader (env vars / config.env)           |
+| `plugins/`       | Individual feature plugins (commands)           |
+| `lib/`           | Shared utilities and functions                  |
+| `utils/`         | Delay, safeSend, warmupGroup helpers            |
+| `smm/silva.html` | Admin dashboard (served as static file)         |
 
 ## Environment Variables
-- `SESSION_ID` - WhatsApp session ID (format: Silva~base64data, get from session generator)
-- `BOTNAME` - Bot display name
-- `MODE` - Bot mode (public/private)
-- `PREFIX` - Command prefix (default: .)
-- `PORT` - Server port (default: 5000)
-- `statusview` - Auto-view WhatsApp statuses (must be exactly "true" to enable)
-- `autoRead` - Auto-read incoming messages (must be exactly "true" to enable)
-- `AUTO_STATUS_LIKE` - Auto-like WhatsApp statuses (must be exactly "true" to enable)
-- `AUTO_STATUS_LIKE_EMOJI` - Emoji used for status likes (default: heart)
-- `Status_Saver` - Save statuses to bot owner (must be exactly "true" to enable)
-- `STATUS_REPLY` - Auto-reply to status posters (must be exactly "true" to enable)
-- `STATUS_MSG` - Custom reply message for status viewers
 
-## Running the Bot
-The bot runs via `node silva.js` which:
-1. Starts Express server on port 5000 with modern landing page
-2. Spawns `sylivanus.js` as a child process
-3. sylivanus.js loads session from SESSION_ID (Silva~ compressed format) or starts QR mode
-4. QR code prints in terminal for WhatsApp pairing (no web QR page)
-5. Loads all plugins from silvaxlab/ directory
+See `sample.env` for the full list. Key ones:
 
-## Security
-- The bot includes a security check that verifies the package.json author name is "SILVA"
-- Unauthorized copies will not start
+- `SESSION_ID` — WhatsApp session (required). Format: `Silva~<base64-gzip>`
+- `OWNER_NUMBER` — Bot owner's WhatsApp number
+- `PREFIX` — Command prefix (default `.`)
+- `MODE` — `public`, `private`, or `both`
+- `PORT` — HTTP server port (set to `5000` for Replit)
 
-## Baileys Event System (CRITICAL)
-- Baileys uses an internal event buffering system (`makeEventBuffer` in Utils/event-buffer.js)
-- When the bot is already authenticated, socket.js calls `ev.buffer()` on startup to buffer events during initial sync
-- The buffer is only flushed when the `CB:ib,,offline` event fires (offline notifications handled)
-- **MUST use `ev.process(handler)` pattern** - this hooks into the aggregate 'event' emitter which fires on buffer flush
-- **DO NOT use `ev.on('messages.upsert', handler)`** - individual event listeners miss buffered events
-- `ev.process()` returns an unsubscribe function that should be stored and called before re-registering
-- `registerEventHandlers()` function in sylivanus.js sets up all event listeners via `ev.process()`
-- On reconnect, the old process handler is unsubscribed (not `removeAllListeners` which destroys internal dispatch)
-- The emit interceptor uses `_silvaPatched` flag to prevent stacking on reconnection
-- Handler methods (conn.handler, conn.pollUpdate, etc.) are bound via `reloadHandler()` after initial import
+## Workflow
 
-## Stability Features
-- **Handler timeout**: Plugin execution is wrapped in a 60-second timeout to prevent hanging
-- **Watchdog**: Heartbeat monitor every 60s checks if handler is bound, rebinds automatically if missing
-- **Emit interceptor guard**: `_silvaPatched` flag prevents emit wrapper from stacking on reconnection
-- **processedMsgIds cleared on reconnect**: Prevents missing messages after reconnection
-- **Handler auto-rebind**: If handler becomes null while connected, it's automatically rebound
-- **Memory management**: Automatic cache clearing when heap exceeds 300MB
-- **Error boundaries**: All event handlers wrapped in try/catch to prevent one error from breaking others
+- **Command**: `node silva.js`
+- **Port**: 5000 (Express web dashboard)
+- **Output type**: webview
 
-## Recent Changes
-- 2026-02-19: Fixed view once plugins and added group status plugin
-  - Fixed Antiviewonce.js: proper stream-to-buffer conversion, safe field access, sends to bot owner
-  - Fixed tools-readviewonce.js: handles viewOnceV2/V2Extension, proper media unwrapping, download fallbacks
-  - Added gp-togstatus.js: post text/image/video/audio as group status (commands: .togstatus, .swgc, .groupstatus)
-  - Improved vcf.js: uses conn.getName() for proper display names, WhatsApp-compatible vCard format with waid field
-- 2026-02-19: Added global contextInfo forwarding to all bot messages
-  - All messages sent by the bot now appear forwarded from "Silva Tech Nexus" newsletter
-  - Wrapped both sendMessage and relayMessage in lib/simple.js to inject contextInfo globally
-  - Added auto-react (🔥) to all messages posted in channel 120363200367779016@newsletter
-  - Further log cleanup: silenced reactionMessage, empty messages, newsletter/lid messages
-- 2026-02-19: Fixed handler timeout causing bot to stop responding
-  - Newsletter/lid messages were going through all 256 plugins, causing crashes and hangs
-  - Added early return in handler.js to skip newsletter (@newsletter) and lid (@lid) messages
-  - Fixed `\${format(e)}` bug in error reporting (was showing literal text instead of error details)
-- 2026-02-19: Major log noise reduction
-  - Removed verbose message boxes (RAW-EMIT, DEBUG-HANDLER) - replaced with single-line [MSG] format
-  - Silenced status broadcast messages and protocolMessage from logs
-  - Made heartbeat conditional (only logs when connected, high memory, or handler missing)
-  - Silenced newsletter follow errors and self-test logs
-  - Removed duplicate QR/IPC messages from parent process (silva.js)
-  - Fixed duplicate bot instances: removed restart-on-exit handler, added 5s delay before restart
-  - Fixed welcome message showing "undefined" name - now falls back to "Boss"
-  - Fixed senderName crash in handler.js after debug log cleanup
-- 2026-02-19: Fixed autoread bug - was reading messages even when autoRead was set to "false"
-  - Root cause: `if (process.env.autoRead)` is truthy for ANY non-empty string including "false"
-  - Fix: Changed to strict `=== 'true'` comparison in both handler.js and sylivanus.js
-  - Same fix applied to statusview env variable
-- 2026-02-19: Major stability improvements to prevent bot from stopping responding
-  - Added 60s timeout on handler execution to prevent plugin hangs from blocking all messages
-  - Fixed emit interceptor stacking with `_silvaPatched` guard flag
-  - Added watchdog that auto-rebinds handler if it becomes null while connected
-  - Added handler auto-rebind on connection open
-  - Clear processedMsgIds on reconnect to prevent missing messages
-  - Wrapped all event handlers in try/catch for isolation
-  - Enhanced heartbeat with memory, message count, and last message time tracking
-- 2026-02-19: Cleaned up project - removed Docker, Heroku, Render, Koyeb deployment files
-  - Deleted: docker-compose.yml, heroku.yml, Procfile, render.yaml, CNAME, koyeb.js, server.js
-  - Deleted: app.json, auth_info.json, talkdrove.json, sample.env, silva.html
-  - Deleted: CODE_OF_CONDUCT.md, CONTRIBUTING.md, SECURITY.md, CODEOWNERS
-  - Added .gitignore for node_modules, session, temp, .cache, .env
-- 2026-02-18: Switched from `ev.on()` to `ev.process()` pattern to fix message delivery
-- 2026-02-18: Fixed reconnection to use unsubscribe pattern
-- 2026-02-18: Fixed endless reconnection loop
-- 2026-02-18: Removed all database dependencies - bot uses in-memory storage only
+## Deployment
 
-## Known Issues
-- console.log output is buffered/lost in child process context - use process.stdout.write for critical logs
+- **Target**: VM (always-running — maintains WhatsApp connection)
+- **Run**: `node silva.js`
 
-## User Preferences
-- Project uses ES modules (type: "module" in package.json)
-- Node.js 20+ required
-- QR code should print in terminal, not on web page
-- Landing page should show useful bot info (features, commands, stats)
-- User wants maximum stability - bot should recover from any error and keep responding
+## Plugin System
+
+All 31 plugins use a unified shape:
+```js
+{ commands, description, permission, group, private, run(sock, message, args, ctx) }
+```
+
+**Permission tiers:**
+- `public` — any user
+- `admin` — group admins + owner
+- `owner` — bot owner only
+
+**ctx object keys:** `sock, conn, m, message, sender, jid, chat, isGroup, isAdmin, isBotAdmin, isOwner, args, text, prefix, groupMetadata, contextInfo, mentionedJid, safeSend, reply`
+
+## Installed Plugins (33)
+
+| Plugin | Commands | Permission |
+|--------|----------|------------|
+| afk | afk, back | owner |
+| anticall | anticall | owner |
+| antidelete | antidelete, antidel | owner |
+| antidemote | antidemote | admin |
+| apk | apk, apkdl, getapk | public |
+| autoreply | autoreply, ar | admin |
+| blocklist | blocklist, listblock | owner |
+| call | call, support, ss | public |
+| catbox | tourl, imgtourl, imgurl, geturl, upload | public |
+| facebook | facebook, fb, fbdl | public |
+| getpp | spp, profile, getpp | public |
+| gitclone | gitclone | public |
+| hello | hello | public |
+| instagram | instagram, igdl, ig, insta | public |
+| menu | menu, help, list | public |
+| music | play | public |
+| repo | repo, repository, github | public |
+| shazam | shazam, identify, song | public |
+| silva-ai | ai, gpt, chatgpt | public |
+| silva-getjid | getjid, jid | public |
+| silva-owner | owner, creator | public |
+| silva-ping | ping | public |
+| silva-shorturl | shorten | public |
+| silva-uptime | uptime, runtime | public |
+| statussave | save, nitumie, statussave | public |
+| sticker | sticker, s | public |
+| test | test, botdemo, features | public |
+| testhandler | testhandler | owner |
+| tiktok | tiktok, tt, ttdl, tiktokdl | public |
+| viewonce | vv, antivv, avv, viewonce, open, openphoto, openvideo, vvphoto | owner |
+| virus | scanurl, urlscan, checksafe | public |
+| weather | weather, climate, mosam | public |
+| yt | yt, youtube | public |
+
+## Notes
+
+- The bot requires a `SESSION_ID` secret to connect to WhatsApp. Without it, the web dashboard still runs but the bot won't connect.
+- Session data is stored in the `session/` directory.
+- Baileys: `@whiskeysockets/baileys@6.7.21` — direct stable release (no alias)
+- `config.OWNER_NUMBER` is set dynamically on `connection.update → open` from `sock.user.id` — no need to hardcode it.
+- `handler.js` exports: `handleMessages, safeSend, setupConnectionHandlers, PERM, plugins`
+- Anti-delete (`messages.update` + `messages.delete`) always forwards recovered/edited messages to owner JID only.
+- Anti-demote: `group-participants.update` listener re-promotes demoted admins in groups tracked by `global.antiDemoteGroups` (Set).
+- AFK auto-reply fires before prefix check for non-owner messages; owner messages bypass it so `.back` always works.
