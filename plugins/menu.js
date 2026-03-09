@@ -4,17 +4,76 @@ const fs     = require('fs');
 const path   = require('path');
 const config = require('../config');
 
+const REPO    = 'https://github.com/SilvaTechB/silva-md-v4';
+const WEBSITE = 'https://silvatech.co.ke';
+
 const CATEGORIES = [
-    { icon: '⬇️',  name: 'Downloaders',   cmds: ['yt', 'tiktok', 'instagram', 'facebook', 'apk'] },
-    { icon: '🎵',  name: 'Music',          cmds: ['play', 'shazam'] },
-    { icon: '🤖',  name: 'AI & Tools',    cmds: ['ai', 'shorten', 'gitclone', 'scanurl', 'tourl'] },
-    { icon: '🖼️',  name: 'Media',          cmds: ['sticker', 'vv'] },
-    { icon: '🛡️',  name: 'Group Tools',   cmds: ['antidemote', 'antidelete', 'antilink', 'afk', 'autoreply', 'anticall', 'blocklist', 'antidemote'] },
-    { icon: '📰',  name: 'Newsletter',     cmds: ['newsletter', 'followchannel', 'unfollowchannel', 'channelinfo'] },
-    { icon: '📊',  name: 'Status',         cmds: ['save'] },
-    { icon: 'ℹ️',  name: 'Info & Misc',    cmds: ['ping', 'uptime', 'owner', 'weather', 'getjid', 'spp', 'repo'] },
-    { icon: '🎮',  name: 'Fun',            cmds: ['hello', 'test'] },
-    { icon: '📞',  name: 'Calls',          cmds: ['call'] },
+    {
+        icon: '⬇️',
+        name: 'Downloaders',
+        desc: 'Download from any platform',
+        cmds: ['yt', 'tiktok', 'instagram', 'facebook', 'apk']
+    },
+    {
+        icon: '🎵',
+        name: 'Music & Lyrics',
+        desc: 'Search, download & find lyrics',
+        cmds: ['play', 'shazam', 'lyrics']
+    },
+    {
+        icon: '🤖',
+        name: 'AI & Tools',
+        desc: 'Smart utilities & AI power',
+        cmds: ['ai', 'imagine', 'translate', 'define', 'tts', 'calc', 'qrcode', 'base64', 'shorten', 'gitclone']
+    },
+    {
+        icon: '🌍',
+        name: 'Search & Info',
+        desc: 'Wikipedia, country, IP & more',
+        cmds: ['wiki', 'country', 'ip', 'currency', 'time', 'weather', 'numberfact']
+    },
+    {
+        icon: '🖼️',
+        name: 'Media & Stickers',
+        desc: 'Stickers, view-once & media',
+        cmds: ['sticker', 'vv']
+    },
+    {
+        icon: '😄',
+        name: 'Fun & Entertainment',
+        desc: 'Jokes, riddles, facts & games',
+        cmds: ['joke', 'fact', 'riddle', 'meme', 'quote', 'advice', 'compliment', 'flip', 'bible', 'hello']
+    },
+    {
+        icon: '🔒',
+        name: 'Privacy & Encoding',
+        desc: 'Password, morse & encoding tools',
+        cmds: ['password', 'morse', 'base64']
+    },
+    {
+        icon: '🛡️',
+        name: 'Group Safety',
+        desc: 'Moderation & protection',
+        cmds: ['antidemote', 'antidelete', 'antilink', 'afk', 'autoreply', 'anticall', 'blocklist']
+    },
+    {
+        icon: '📰',
+        name: 'Channels',
+        desc: 'Newsletter management',
+        cmds: ['newsletter', 'followchannel', 'unfollowchannel', 'channelinfo']
+    },
+    {
+        icon: '📊',
+        name: 'Status',
+        desc: 'Status & story tools',
+        cmds: ['save']
+    },
+    {
+        icon: 'ℹ️',
+        name: 'Info & Misc',
+        desc: 'Bot info & utilities',
+        cmds: ['ping', 'uptime', 'owner', 'getjid', 'spp', 'repo', 'antivv']
+    },
 ];
 
 module.exports = {
@@ -38,56 +97,72 @@ module.exports = {
             timeZone: 'Africa/Nairobi'
         });
 
-        const botNum  = `+${(config.OWNER_NUMBER || '').replace(/\D/g, '')}`;
-        const botName = config.BOT_NAME || 'Silva MD';
-        const pfx     = prefix;
+        const botName  = config.BOT_NAME || 'Silva MD';
+        const botNum   = `+${(config.OWNER_NUMBER || '').replace(/\D/g, '')}`;
+        const mode     = (config.MODE || 'public').toUpperCase();
+        const pfx      = prefix;
+        const modeEmoji = mode === 'PUBLIC' ? '🟢' : '🔒';
 
         // ── Build category blocks ──────────────────────────────────────────
         const catBlocks = [];
-        for (const { icon, name, cmds } of CATEGORIES) {
+        for (const { icon, name, desc, cmds } of CATEGORIES) {
             const found = [...new Set(cmds.filter(c => allCmds.has(c)))];
             if (!found.length) continue;
             found.forEach(c => assigned.add(c));
 
-            const rows = found.map(c => `│  ${icon} \`${pfx}${c}\``).join('\n');
+            const rows = found.map(c => `│  ◈ \`${pfx}${c}\``).join('\n');
             catBlocks.push(
-                `╭──「 ${icon} *${name}* 」\n${rows}\n╰──────────────────`
+                `╭─「 ${icon} *${name}* 」─\n` +
+                `│ _${desc}_\n` +
+                `│\n` +
+                `${rows}\n` +
+                `╰────────────────────`
             );
         }
 
         // ── Overflow bucket ────────────────────────────────────────────────
         const rest = [...allCmds].filter(c => !assigned.has(c) && !['menu','help','list'].includes(c));
         if (rest.length) {
-            const rows = rest.map(c => `│  🔧 \`${pfx}${c}\``).join('\n');
-            catBlocks.push(`╭──「 🔧 *Other* 」\n${rows}\n╰──────────────────`);
+            const rows = rest.map(c => `│  ◈ \`${pfx}${c}\``).join('\n');
+            catBlocks.push(
+                `╭─「 🔧 *Other* 」─\n│ _Extra commands_\n│\n${rows}\n╰────────────────────`
+            );
         }
 
-        // ── Assemble full text ─────────────────────────────────────────────
+        // ── Header ────────────────────────────────────────────────────────
         const header = [
-            `┏━━━━━━━━━━━━━━━━━━━━━━━━┓`,
-            `┃   ⚡ *${botName.toUpperCase()} COMMANDS*   ┃`,
-            `┗━━━━━━━━━━━━━━━━━━━━━━━━┛`,
+            `╔═══════════════════════════╗`,
+            `║  ⚡  *${botName.toUpperCase()}*  ⚡  ║`,
+            `║   *The Ultimate WA Bot*   ║`,
+            `╚═══════════════════════════╝`,
             ``,
-            `🤖 *Bot:* ${botName}`,
-            `📱 *Number:* ${botNum}`,
-            `🔑 *Prefix:* \`${pfx}\``,
-            `📦 *Plugins:* ${plugins.length}`,
-            `🕐 *Time:* ${now}`,
+            `┌─────────────────────────────`,
+            `│ 🤖 *Bot:*      ${botName}`,
+            `│ 📱 *Number:*   ${botNum}`,
+            `│ 🔑 *Prefix:*   \`${pfx}\``,
+            `│ ${modeEmoji} *Mode:*     ${mode}`,
+            `│ 📦 *Plugins:*  ${plugins.length} loaded`,
+            `│ 🕐 *Time:*     ${now}`,
+            `└─────────────────────────────`,
             ``,
-            `━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+            `✦ ✦ ✦  *C O M M A N D S*  ✦ ✦ ✦`,
+            ``,
         ].join('\n');
 
+        // ── Footer ────────────────────────────────────────────────────────
         const footer = [
             ``,
-            `━━━━━━━━━━━━━━━━━━━━━━━━━━`,
-            `💬 _Type \`${pfx}help <command>\` for details_`,
-            `🌐 _silvatech.co.ke_`,
-            `📢 _Follow our newsletter for updates!_`,
+            `┌─────────────────────────────`,
+            `│ 💡 *Usage:* \`${pfx}help <command>\``,
+            `│ 🌐 *Web:*   ${WEBSITE}`,
+            `│ 📂 *Repo:*  ${REPO}`,
+            `└─────────────────────────────`,
+            ``,
+            `> ⚡ _Powered by Silva Tech Inc_`,
         ].join('\n');
 
-        const fullText = `${header}\n\n${catBlocks.join('\n\n')}\n${footer}`;
+        const fullText = `${header}${catBlocks.join('\n\n')}\n${footer}`;
 
-        // ── Send with bot image ────────────────────────────────────────────
         const imgUrl = config.ALIVE_IMG || 'https://files.catbox.moe/5uli5p.jpeg';
         try {
             await sock.sendMessage(jid, {
@@ -96,17 +171,16 @@ module.exports = {
                 contextInfo: {
                     ...contextInfo,
                     externalAdReply: {
-                        title:               `${botName} — Command List`,
-                        body:                `${plugins.length} plugins • Prefix: ${pfx}`,
+                        title:               `${botName} — Command Menu`,
+                        body:                `${plugins.length} plugins  •  Prefix: ${pfx}  •  ${mode} mode`,
                         thumbnailUrl:        imgUrl,
-                        sourceUrl:           'https://silvatech.co.ke',
+                        sourceUrl:           WEBSITE,
                         mediaType:           1,
                         renderLargerThumbnail: false
                     }
                 }
             }, { quoted: message });
         } catch {
-            // Fallback to plain text if image fails
             await sock.sendMessage(jid, {
                 text: fullText,
                 contextInfo
