@@ -279,6 +279,7 @@ async function handleMessages(sock, message) {
         const ownerNum = jidToNum(config.OWNER_NUMBER || '');
         const botNum   = jidToNum(global.botNum || '');
         const fromNum  = jidToNum(from);
+        console.log(`[OWNER_DEBUG] fromMe=${message.key.fromMe} from="${from}" fromNum="${fromNum}" ownerNum="${ownerNum}" botNum="${botNum}"`);
         const isOwner  = message.key.fromMe
             || fromNum === ownerNum
             || sameNumber(fromNum, ownerNum)
