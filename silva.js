@@ -293,8 +293,17 @@ async function sendWelcomeMessage(sock) {
     try {
         // Always send to bare owner JID (strip device suffix :X if present)
         const ownerJid = `${config.OWNER_NUMBER.replace(/\D/g, '')}@s.whatsapp.net`;
-        await sock.sendMessage(ownerJid, { text: welcomeMsg, contextInfo: globalContextInfo });
+        const sent = await sock.sendMessage(ownerJid, { text: welcomeMsg, contextInfo: globalContextInfo });
         logMessage('SUCCESS', 'Welcome message sent to owner.');
+
+        // Auto-delete after 20 seconds
+        if (sent?.key) {
+            setTimeout(async () => {
+                try {
+                    await sock.sendMessage(ownerJid, { delete: sent.key });
+                } catch { /* ignore if already deleted */ }
+            }, 20_000);
+        }
     } catch (e) {
         logMessage('WARN', `Welcome message failed: ${e.message}`);
     }
