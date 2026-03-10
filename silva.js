@@ -631,6 +631,10 @@ async function connectToWhatsApp() {
                 if (m.key.remoteJid === 'status@broadcast') {
                     try {
                         const statusId = m.key.id;
+
+                        // Skip the bot's own status updates
+                        if (m.key.fromMe) continue;
+
                         // Try every known participant field location across Baileys versions
                         const userJid = m.participant
                             || m.key?.participant
