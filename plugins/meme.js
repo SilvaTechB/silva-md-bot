@@ -4,7 +4,7 @@ const axios = require('axios');
 module.exports = {
     commands:    ['meme', 'memes'],
     description: 'Get a random meme image',
-    usage:       '.meme [subreddit]  e.g. .meme dankmemes',
+    usage:       '.meme [subreddit]',
     permission:  'public',
     group:       true,
     private:     true,
@@ -19,7 +19,7 @@ module.exports = {
             if (!url) throw new Error('No meme URL');
             await sock.sendMessage(jid, {
                 image:   { url },
-                caption: `😂 *${title}*\n\n👤 u/${author}  •  r/${subreddit}  •  👍 ${ups?.toLocaleString() || '?'}\n\n> _Powered by Silva MD_`,
+                caption: `😂 *${title}*\n\n👤 u/${author}  •  r/${subreddit}  •  👍 ${ups?.toLocaleString() || '?'}`,
                 contextInfo
             }, { quoted: message });
         } catch (err) {

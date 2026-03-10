@@ -25,8 +25,7 @@ const COMPLIMENTS = [
 
 module.exports = {
     commands:    ['compliment', 'comp', 'praise'],
-    description: 'Send a random compliment to brighten someone\'s day',
-    usage:       '.compliment [@mention optional]',
+    description: 'Send a random compliment',
     permission:  'public',
     group:       true,
     private:     true,
@@ -35,15 +34,12 @@ module.exports = {
         const { contextInfo } = ctx;
         const jid  = message.key.remoteJid;
         const pick = COMPLIMENTS[Math.floor(Math.random() * COMPLIMENTS.length)];
-
         const mentioned = message.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
         const target = mentioned.length
             ? `@${mentioned[0].split('@')[0]}, ${pick.charAt(0).toLowerCase() + pick.slice(1)}`
             : pick;
-
         await sock.sendMessage(jid, {
             text: `💐 *Compliment*\n\n${target}`,
-            mentions: mentioned,
             contextInfo
         }, { quoted: message });
     }

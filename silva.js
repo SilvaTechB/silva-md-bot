@@ -648,12 +648,11 @@ async function connectToWhatsApp() {
 
                         if (config.AUTO_STATUS_SEEN && userJid) {
                             try {
-                                // Build key with correct participant (m.key.participant is null in v6)
+                                // participant must be set; omit fromMe so WA treats it as an incoming key
                                 await sock.readMessages([{
                                     remoteJid: 'status@broadcast',
                                     id: statusId,
-                                    participant: userJid,
-                                    fromMe: false
+                                    participant: userJid
                                 }]);
                                 logMessage('INFO', `Status seen: ${statusId}`);
                             } catch (e) {
@@ -665,7 +664,8 @@ async function connectToWhatsApp() {
                             try {
                                 const emojis = (config.CUSTOM_REACT_EMOJIS || '❤️,🔥,💯,😍,👏').split(',');
                                 const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)].trim();
-                                // Must send to status@broadcast with statusJidList so the poster sees the reaction
+                                const botJid = sock.user?.id || '';
+                                // statusJidList must include both the poster AND the bot's own JID
                                 await sock.sendMessage(
                                     'status@broadcast',
                                     {
@@ -679,7 +679,7 @@ async function connectToWhatsApp() {
                                             }
                                         }
                                     },
-                                    { statusJidList: [userJid] }
+                                    { statusJidList: [userJid, botJid].filter(Boolean) }
                                 );
                                 logMessage('INFO', `Reacted on status ${statusId} with: ${randomEmoji}`);
                             } catch (e) {

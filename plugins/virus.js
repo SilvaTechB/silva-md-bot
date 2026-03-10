@@ -1,6 +1,7 @@
 'use strict';
 
 const axios  = require('axios');
+
 const VT_KEY = '23e62ab81fe1c82d865f39fc674dead42b1ae2b3079fffebf96be5b19aebcf47';
 
 module.exports = {
@@ -70,9 +71,7 @@ module.exports = {
 ✔️ Harmless: ${stats.harmless}
 ⚠️ Suspicious: ${stats.suspicious}
 ❌ Malicious: ${stats.malicious}
-❓ Undetected: ${stats.undetected}
-
-_Powered by VirusTotal_`,
+❓ Undetected: ${stats.undetected}`,
                 contextInfo
             }, { quoted: message });
         } catch (err) {

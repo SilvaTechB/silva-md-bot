@@ -39,9 +39,5 @@ module.exports = {
             }
         }, { quoted: message });
 
-        await sock.sendMessage(sender, {
-            text: `*👑 Silva MD Bot Owner Info:*\n\n📛 Name: ${ownerName}\n📞 Number: wa.me/${ownerNumber}\n🌐 Website: https://silvatechinc.com\n✨ _Powered by Silva Tech Inc_`,
-            contextInfo
-        }, { quoted: message });
     }
 };

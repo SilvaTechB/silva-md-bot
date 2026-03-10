@@ -6,7 +6,12 @@ module.exports = {
     permission:  'public',
     group:       true,
     private:     true,
-    run: async (sock, message, args, { reply }) => {
-        await reply(`✅ Hello! Args received: ${args.join(', ') || 'none'}`);
+    run: async (sock, message, args, ctx) => {
+        const { contextInfo } = ctx;
+        const jid = message.key.remoteJid;
+        await sock.sendMessage(jid, {
+            text: `✅ *Hello!*\n\nArgs received: ${args.join(', ') || 'none'}`,
+            contextInfo
+        }, { quoted: message });
     }
 };

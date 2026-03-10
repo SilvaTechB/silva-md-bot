@@ -43,7 +43,7 @@ module.exports = {
 
         if (cmdText === 'back') {
             if (!afkActive) {
-                await safeSend({ text: '✅ AFK mode is not currently active.', contextInfo }, { quoted: message });
+                await sock.sendMessage(message.key.remoteJid, { text: '✅ AFK mode is not currently active.', contextInfo }, { quoted: message });
                 return;
             }
             const duration = formatDuration(Date.now() - afkSince);

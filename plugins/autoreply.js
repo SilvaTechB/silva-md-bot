@@ -2,7 +2,6 @@
 
 const fs   = require('fs');
 const path = require('path');
-
 const AUTO_REPLY_PATH = path.join(__dirname, '../auto-reply-settings.json');
 
 const DEFAULT_SETTINGS = {
@@ -69,11 +68,13 @@ module.exports = {
             return sock.sendMessage(sender, {
                 text:
 `🤖 *Auto-Reply Status*
-• System: ${settings.enabled ? 'ENABLED' : 'DISABLED'}
+• System: ${settings.enabled ? '✅ ENABLED' : '❌ DISABLED'}
 • Ignored groups: ${settings.ignoredGroups.length}
 • Total patterns: ${total}
 
-Usage: .autoreply [on|off|ignore|add <pattern> <reply>|list]`,
+*Usage:*
+• \`.autoreply on\` — enable
+• \`.autoreply off\` — disable`,
                 contextInfo
             }, { quoted: message });
         }

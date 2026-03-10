@@ -1,7 +1,6 @@
 'use strict';
 
 const config = require('../config');
-
 module.exports = {
     commands:    ['antidelete', 'antidel'],
     description: 'Toggle anti-delete — recovers deleted and edited messages and forwards them to you',

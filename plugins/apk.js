@@ -43,16 +43,7 @@ module.exports = {
                 document: { url: app.file.path_alt },
                 fileName: `${app.name}.apk`,
                 mimetype: 'application/vnd.android.package-archive',
-                caption:
-`📱 *APK Downloader*
-
-🔍 *Name:* ${app.name}
-📦 *Package:* ${app.package}
-📊 *Size:* ${sizeMB} MB
-🔄 *Updated:* ${app.updated}
-👨‍💻 *Developer:* ${app.developer?.name || 'Unknown'}
-
-_Powered by Silva MD_`,
+                caption:  `📱 *${app.name}* — ${sizeMB} MB`,
                 contextInfo
             }, { quoted: message });
         } catch (err) {

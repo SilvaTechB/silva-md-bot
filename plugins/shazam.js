@@ -12,7 +12,8 @@ module.exports = {
     group:       true,
     private:     true,
 
-    run: async (sock, message, args, { jid, sender, contextInfo, safeSend }) => {
+    run: async (sock, message, args, ctx) => {
+        const { jid, sender, contextInfo, safeSend } = ctx;
         const quoted = message.message?.extendedTextMessage?.contextInfo?.quotedMessage;
         if (!quoted) {
             return safeSend({

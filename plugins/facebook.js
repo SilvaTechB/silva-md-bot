@@ -41,7 +41,7 @@ module.exports = {
 
             await sock.sendMessage(sender, {
                 video:   { url: videoUrl },
-                caption: `🦋 *Facebook Video Downloaded*\n\n📌 *Title:* ${title}\n\n_Powered by Silva MD_`,
+                caption: `🦋 *Facebook*  •  📌 ${title}`,
                 contextInfo: {
                     ...contextInfo,
                     externalAdReply: {

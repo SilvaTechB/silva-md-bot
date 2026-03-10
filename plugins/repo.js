@@ -3,7 +3,7 @@
 const axios  = require('axios');
 const moment = require('moment-timezone');
 
-const REPO_URL    = 'https://github.com/SilvaTechB/silva-md-bot';
+const REPO_URL    = 'https://github.com/SilvaTechB/silva-md-v4';
 const WEBSITE_URL = 'https://silvatech.co.ke';
 const WA_CHANNEL  = 'https://whatsapp.com/channel/0029VaksrRh6GcGnT0J05n0j';
 const SUPPORT_URL = 'https://chat.whatsapp.com/GzCZZxVnAHMINWdPQkGwJR';
@@ -22,7 +22,7 @@ module.exports = {
         let data = null;
         try {
             const res = await axios.get(
-                'https://api.github.com/repos/SilvaTechB/silva-md-bot',
+                'https://api.github.com/repos/SilvaTechB/silva-md-v4',
                 { timeout: 10000 }
             );
             data = res.data;
@@ -39,10 +39,9 @@ module.exports = {
               `📜 *License:* ${data.license?.name || 'MIT'}\n` +
               `⚠️ *Open Issues:* ${data.open_issues}\n` +
               `🕒 *Updated:* ${moment(data.updated_at).fromNow()}\n\n` +
-            `https://github.com/SilvaTechB/silva-md-bot\n\n` +
               `⚡ _Powered by Silva Tech Inc_`
             : `*✨ SILVA MD — REPOSITORY*\n\n` +
-              `📦 *Repo:* silva-md-bot\n` +
+              `📦 *Repo:* silva-md-v4\n` +
               `💻 *Language:* JavaScript\n` +
               `📜 *License:* MIT\n\n` +
               `⚡ _Powered by Silva Tech Inc_`;

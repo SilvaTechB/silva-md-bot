@@ -1,5 +1,4 @@
 const config = require('../config');
-
 if (!global.antilinkGroups) global.antilinkGroups = new Set();
 
 module.exports = {

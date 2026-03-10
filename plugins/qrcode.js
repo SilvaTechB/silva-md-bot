@@ -2,6 +2,7 @@
 
 const axios = require('axios');
 
+
 module.exports = {
     commands:    ['qrcode', 'qr'],
     description: 'Generate a QR code for any text or URL',
@@ -31,10 +32,7 @@ module.exports = {
 
             await sock.sendMessage(jid, {
                 image:   buffer,
-                caption:
-                    `✅ *QR Code Generated*\n\n` +
-                    `📝 *Content:* ${content.length > 80 ? content.slice(0, 77) + '...' : content}\n\n` +
-                    `> _Scan with any QR reader_`,
+                caption: `✅ *QR Code Generated*\n\n📝 *Content:* ${content.length > 80 ? content.slice(0, 77) + '...' : content}`,
                 contextInfo
             }, { quoted: message });
 

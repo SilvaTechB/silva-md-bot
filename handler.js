@@ -255,7 +255,7 @@ async function handleMessages(sock, message) {
         // ── Resolve owner ─────────────────────────────────────────────────────
         // fromMe = owner is using their own device as the bot
         const ownerNum  = (config.OWNER_NUMBER || '').replace(/\D/g, '');
-        const fromNum   = from.replace(/\D/g, '').replace(/:.*$/, '');
+        const fromNum   = from.replace(/:[^@]+/, '').replace(/\D/g, '');
         const isOwner   = message.key.fromMe || fromNum === ownerNum;
 
         // ── Resolve group admin status ────────────────────────────────────────
@@ -266,9 +266,9 @@ async function handleMessages(sock, message) {
         if (isGroup) {
             groupMetadata = await getCachedGroupMetadata(sock, jid);
             if (groupMetadata?.participants) {
-                const botNum = (sock.user?.id || '').replace(/\D/g, '').replace(/:.*$/, '');
+                const botNum = (sock.user?.id || '').replace(/:[^@]+/, '').replace(/\D/g, '');
                 for (const p of groupMetadata.participants) {
-                    const pNum = p.id.replace(/\D/g, '').replace(/:.*$/, '');
+                    const pNum = p.id.replace(/:[^@]+/, '').replace(/\D/g, '');
                     const role = p.admin;
                     if (pNum === fromNum)  isAdmin    = role === 'admin' || role === 'superadmin';
                     if (pNum === botNum)   isBotAdmin = role === 'admin' || role === 'superadmin';

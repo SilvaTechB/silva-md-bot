@@ -1,5 +1,6 @@
 'use strict';
 
+
 const THUMB = 'https://files.catbox.moe/5uli5p.jpeg';
 
 module.exports = {
@@ -30,16 +31,7 @@ module.exports = {
             await sock.sendMessage(sender, {
                 image:   { url: THUMB },
                 caption,
-                contextInfo: {
-                    ...contextInfo,
-                    externalAdReply: {
-                        title:               'Silva MD JID Tool',
-                        body:                'Fetch and manage WhatsApp JIDs',
-                        thumbnailUrl:        THUMB,
-                        mediaType:           1,
-                        renderLargerThumbnail: false
-                    }
-                }
+                contextInfo
             }, { quoted: message });
         } catch (err) {
             console.error('[GetJID]', err.message);

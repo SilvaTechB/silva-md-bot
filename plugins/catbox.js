@@ -68,13 +68,7 @@ module.exports = {
                 : 'File';
 
             await sock.sendMessage(sender, {
-                text:
-`⬆️ *${mediaLabel} Uploaded Successfully*
-
-📦 *Size:* ${sizeStr}
-🔗 *URL:* ${mediaUrl}
-
-_Powered by Catbox.moe_`,
+                text: `⬆️ *${mediaLabel} Uploaded*\n\n📦 *Size:* ${sizeStr}\n🔗 *URL:* ${mediaUrl}`,
                 contextInfo
             }, { quoted: message });
         } catch (err) {

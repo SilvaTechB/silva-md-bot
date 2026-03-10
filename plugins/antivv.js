@@ -2,6 +2,7 @@
 
 const config = require('../config');
 
+
 if (typeof global.antivvEnabled === 'undefined') {
     global.antivvEnabled = config.ANTIVV !== false;
 }
@@ -33,12 +34,9 @@ module.exports = {
 
         await sock.sendMessage(jid, { react: { text: state ? '👁️' : '🙈', key: message.key } });
         await sock.sendMessage(jid, {
-            text:
-                `${icon} *Anti-ViewOnce ${label}*\n\n` +
-                `${state
-                    ? '👁️ All view-once messages will now be automatically revealed and forwarded to the owner.'
-                    : '🙈 Automatic view-once reveal is now off. Use *.antivv on* to enable it again.'
-                }`,
+            text: `${icon} *Anti-ViewOnce ${label}*\n\n${state
+                ? '👁️ All view-once messages will be automatically revealed and forwarded to the owner.'
+                : '🙈 Automatic view-once reveal is now off.'}`,
             contextInfo
         }, { quoted: message });
     }

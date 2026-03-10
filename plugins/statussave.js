@@ -1,5 +1,7 @@
 'use strict';
 
+
+
 module.exports = {
     commands:    ['save', 'nitumie', 'statussave'],
     description: 'Save a WhatsApp status (reply to a status with this command)',
@@ -48,10 +50,6 @@ module.exports = {
                 }
             }, { quoted: message });
 
-            await sock.sendMessage(sender, {
-                text: '✅ Status saved successfully!',
-                contextInfo
-            }, { quoted: message });
         } catch (err) {
             console.error('[StatusSave]', err.message);
             await sock.sendMessage(sender, {

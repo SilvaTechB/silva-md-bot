@@ -2,6 +2,7 @@
 
 const axios = require('axios');
 
+
 module.exports = {
     commands:    ['shorten'],
     description: 'Shorten a URL using TinyURL',
@@ -18,7 +19,7 @@ module.exports = {
         try {
             const res = await axios.get(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(args[0])}`);
             await sock.sendMessage(sender, {
-                text: `✅ Shortened URL:\n${res.data}`,
+                text: `🔗 *Shortened URL*\n\n${res.data}`,
                 contextInfo
             }, { quoted: message });
         } catch {

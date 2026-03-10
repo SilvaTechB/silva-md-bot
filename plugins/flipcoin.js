@@ -10,21 +10,18 @@ module.exports = {
 
     run: async (sock, message, args, ctx) => {
         const { contextInfo } = ctx;
-        const jid     = message.key.remoteJid;
-        const cmd     = (message.key?.id && ctx?.command) || args[-1] || 'flip';
-        const rawCmd  = ctx?.command || 'flip';
+        const jid    = message.key.remoteJid;
+        const rawCmd = ctx?.command || 'flip';
 
         if (rawCmd === 'flip' || rawCmd === 'coin') {
             const result = Math.random() < 0.5 ? 'HEADS 🪙' : 'TAILS 💿';
             return sock.sendMessage(jid, {
-                text: `🪙 *Coin Flip*\n\n${result}!`,
+                text: `🪙 *Coin Flip Result*\n\n${result}!`,
                 contextInfo
             }, { quoted: message });
         }
 
-        // dice / roll
-        let sides = 6;
-        let count = 1;
+        let sides = 6, count = 1;
         const rollArg = args[0] || '';
         if (rollArg.toLowerCase().includes('d')) {
             const parts = rollArg.toLowerCase().split('d');
@@ -33,17 +30,10 @@ module.exports = {
         } else if (!isNaN(parseInt(rollArg))) {
             sides = Math.min(Math.max(parseInt(rollArg), 2), 100);
         }
-
-        const rolls = Array.from({ length: count }, () => Math.floor(Math.random() * sides) + 1);
-        const total = rolls.reduce((a, b) => a + b, 0);
-        const rollStr = rolls.join(', ');
-
+        const rolls  = Array.from({ length: count }, () => Math.floor(Math.random() * sides) + 1);
+        const total  = rolls.reduce((a, b) => a + b, 0);
         await sock.sendMessage(jid, {
-            text:
-                `🎲 *Dice Roll* (${count}d${sides})\n\n` +
-                `🎰 *Rolls:* ${rollStr}\n` +
-                (count > 1 ? `➕ *Total:* ${total}\n` : '') +
-                `\n> _Powered by Silva MD_`,
+            text: `🎲 *Dice Roll* (${count}d${sides})\n\n🎰 *Rolls:* ${rolls.join(', ')}${count > 1 ? `\n➕ *Total:* ${total}` : ''}`,
             contextInfo
         }, { quoted: message });
     }

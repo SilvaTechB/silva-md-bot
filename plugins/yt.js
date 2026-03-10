@@ -2,6 +2,7 @@
 
 const ytdl = require('ytdl-core');
 
+
 module.exports = {
     commands:    ['yt', 'youtube'],
     description: 'Download a YouTube video',
@@ -25,21 +26,8 @@ module.exports = {
                 video:   { url: format.url },
                 caption:
 `▶️ *${details.title}*
-
-👤 Channel: ${details.author.name}
-⏱ Duration: ${Math.floor(details.lengthSeconds / 60)}m ${details.lengthSeconds % 60}s
-📊 Views: ${Number(details.viewCount).toLocaleString()}`,
-                contextInfo: {
-                    ...contextInfo,
-                    externalAdReply: {
-                        title:               details.title,
-                        body:                details.author.name,
-                        thumbnailUrl:        details.thumbnails[0]?.url,
-                        sourceUrl:           url,
-                        mediaType:           1,
-                        renderLargerThumbnail: true
-                    }
-                }
+👤 ${details.author.name}  •  ⏱ ${Math.floor(details.lengthSeconds / 60)}m ${details.lengthSeconds % 60}s`,
+                contextInfo
             }, { quoted: message });
         } catch (err) {
             console.error('[YT]', err.message);

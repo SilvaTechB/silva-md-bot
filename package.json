@@ -47,6 +47,7 @@
     "formdata-node": "^5.0.0",
     "fs": "*",
     "g-i-s": "^2.1.6",
+    "gifted-btns": "^1.0.2",
     "google-it": "^1.6.4",
     "got": "^14.4.7",
     "heroku-client": "^3.1.0",

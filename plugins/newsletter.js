@@ -1,5 +1,4 @@
 const config = require('../config');
-
 const followedThisSession = new Set();
 
 module.exports = {

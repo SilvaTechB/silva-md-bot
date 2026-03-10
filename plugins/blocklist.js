@@ -1,5 +1,7 @@
 'use strict';
 
+
+
 module.exports = {
     commands:    ['blocklist', 'listblock'],
     description: 'Show the bot\'s blocked numbers list — owner only',
@@ -26,19 +28,7 @@ module.exports = {
             }
             txt += '└───────────';
 
-            await sock.sendMessage(sender, {
-                text: txt,
-                mentions,
-                contextInfo: {
-                    ...contextInfo,
-                    externalAdReply: {
-                        title:        'Silva MD Blocklist',
-                        body:         'Blocked contacts',
-                        thumbnailUrl: 'https://files.catbox.moe/5uli5p.jpeg',
-                        mediaType:    1
-                    }
-                }
-            }, { quoted: message });
+            await sock.sendMessage(sender, { text: txt, contextInfo }, { quoted: message });
         } catch (err) {
             console.error('[Blocklist]', err.message);
             await sock.sendMessage(sender, {

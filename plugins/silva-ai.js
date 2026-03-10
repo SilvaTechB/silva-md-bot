@@ -1,7 +1,6 @@
 'use strict';
 
 const axios = require('axios');
-
 const AI_APIS = [
     q => `https://lance-frank-asta.onrender.com/api/gpt?q=${encodeURIComponent(q)}`,
     q => `https://vapis.my.id/api/openai?q=${encodeURIComponent(q)}`

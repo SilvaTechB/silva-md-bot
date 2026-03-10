@@ -2,6 +2,7 @@
 
 const { performance } = require('perf_hooks');
 
+
 module.exports = {
     commands:    ['ping'],
     description: 'Check bot response time and uptime',

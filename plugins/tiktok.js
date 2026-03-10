@@ -78,16 +78,10 @@ module.exports = {
             const stat = fs.statSync(tempPath);
             if (stat.size < 1024) throw new Error('Downloaded file is too small');
 
+            const videoCaption = `🎵 *TikTok*  •  👤 ${result.author?.nickname || result.author?.name || 'Unknown'}  •  ❤️ ${result.likes ?? 'N/A'}`;
             await sock.sendMessage(sender, {
                 video:   fs.readFileSync(tempPath),
-                caption:
-`🎵 *TikTok Video*
-
-👤 *Author:* ${result.author?.nickname || result.author?.name || 'Unknown'}
-❤️ *Likes:* ${result.likes ?? 'N/A'}
-🔗 ${url}
-
-_Downloaded via Silva MD_`,
+                caption: videoCaption,
                 contextInfo
             }, { quoted: message });
         } finally {

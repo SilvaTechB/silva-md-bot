@@ -1,5 +1,6 @@
 'use strict';
 
+
 const GH_REGEX = /(?:https|git)(?::\/\/|@)github\.com[\/:]([^\/:]+)\/(.+)/i;
 
 module.exports = {
@@ -42,18 +43,8 @@ module.exports = {
                 document: { url },
                 fileName: filename,
                 mimetype: 'application/zip',
-                caption:  `✅ *${user}/${cleanRepo}*\n_Downloaded via Silva MD_`,
-                contextInfo: {
-                    ...contextInfo,
-                    externalAdReply: {
-                        title:               'GitHub Clone',
-                        body:                'Powered by Silva MD',
-                        thumbnailUrl:        'https://files.catbox.moe/5uli5p.jpeg',
-                        sourceUrl:           `https://github.com/${user}/${cleanRepo}`,
-                        mediaType:           1,
-                        renderLargerThumbnail: true
-                    }
-                }
+                caption:  `📦 *${user}/${cleanRepo}*\n_Downloaded via Silva MD_`,
+                contextInfo
             }, { quoted: message });
         } catch (err) {
             console.error('[GitClone]', err.message);

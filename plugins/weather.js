@@ -45,17 +45,7 @@ module.exports = {
 🌤️ ${data.weather[0].description.charAt(0).toUpperCase() + data.weather[0].description.slice(1)}
 
 _Powered by Silva MD_`,
-                contextInfo: {
-                    ...contextInfo,
-                    externalAdReply: {
-                        title:               'Silva MD Weather',
-                        body:                'Accurate weather information',
-                        thumbnailUrl:        'https://files.catbox.moe/5uli5p.jpeg',
-                        sourceUrl:           `https://openweathermap.org/city/${data.id}`,
-                        mediaType:           1,
-                        renderLargerThumbnail: true
-                    }
-                }
+                contextInfo
             }, { quoted: message });
         } catch (err) {
             console.error('[Weather]', err.message);
