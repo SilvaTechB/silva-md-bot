@@ -14,13 +14,13 @@ module.exports = {
     private:     false,
 
     run: async (sock, message, args, ctx) => {
-        const { jid, isAdmin, contextInfo } = ctx;
+        const { jid, isAdmin, contextInfo, theme } = ctx;
 
         const rawCmd = (message.message?.extendedTextMessage?.text
             || message.message?.conversation || '').trim().split(/\s+/)[0].replace(/^\./, '').toLowerCase();
 
         if (!isAdmin) {
-            return sock.sendMessage(jid, { text: '⛔ Only admins can configure welcome messages.', contextInfo }, { quoted: message });
+            return sock.sendMessage(jid, { text: theme.admin || '⛔ Only admins can configure welcome messages.', contextInfo }, { quoted: message });
         }
 
         const settings = groupSettings.get(jid) || { welcome: false, goodbye: false, customWelcome: '', customGoodbye: '' };

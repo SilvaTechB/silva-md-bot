@@ -9,7 +9,7 @@ module.exports = {
     private:     false,
 
     run: async (sock, message, args, ctx) => {
-        const { jid, isAdmin, isBotAdmin, contextInfo, mentionedJid } = ctx;
+        const { jid, isAdmin, isBotAdmin, contextInfo, mentionedJid, theme } = ctx;
         const cmd = (message.key?.fromMe ? args[-1] : undefined) || ctx.text?.split(' ')[0]?.replace(/^\./, '');
 
         // Determine action from the command used
@@ -19,10 +19,10 @@ module.exports = {
         const isPromote = /^\.?(promote|admin)$/i.test(rawCmd);
 
         if (!isAdmin) {
-            return sock.sendMessage(jid, { text: '⛔ Only admins can use this command.', contextInfo }, { quoted: message });
+            return sock.sendMessage(jid, { text: theme.admin || '⛔ Only admins can use this command.', contextInfo }, { quoted: message });
         }
         if (!isBotAdmin) {
-            return sock.sendMessage(jid, { text: '⛔ I need to be an admin to promote/demote members.', contextInfo }, { quoted: message });
+            return sock.sendMessage(jid, { text: theme.botAdmin || '⛔ I need to be an admin to promote/demote members.', contextInfo }, { quoted: message });
         }
 
         const targets = [];

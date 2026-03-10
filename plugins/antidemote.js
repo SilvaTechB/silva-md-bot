@@ -12,12 +12,12 @@ module.exports = {
     private:     false,
 
     run: async (sock, message, args, ctx) => {
-        const { jid, safeSend, contextInfo, isBotAdmin } = ctx;
+        const { jid, safeSend, contextInfo, isBotAdmin, theme } = ctx;
         const action = (args[0] || '').toLowerCase();
 
         if (!isBotAdmin) {
             await safeSend({
-                text: '⚠️ *Anti-Demote* requires the bot to be a group admin first.',
+                text: theme.botAdmin || '⚠️ *Anti-Demote* requires the bot to be a group admin first.',
                 contextInfo
             }, { quoted: message });
             return;

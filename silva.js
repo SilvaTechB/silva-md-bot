@@ -682,98 +682,53 @@ async function connectToWhatsApp() {
                 if (m.key.remoteJid === 'status@broadcast') {
                     try {
                         const statusId = m.key.id;
+                        const userJid  = m.key.participant;
 
-                        // Skip the bot's own status updates
+                        // Skip bot's own statuses and statuses delivered before bot stabilises
                         if (m.key.fromMe) continue;
-
-                        // Try every known participant field location across Baileys versions
-                        const rawUserJid = m.participant
-                            || m.key?.participant
-                            || m.message?.participant
-                            || null;
-
-                        // Skip old statuses delivered at startup (first 25 s)
                         if (process.uptime() < 25) continue;
-                        if (!rawUserJid) {
+                        if (!userJid) {
                             logMessage('WARN', `Status skipped — no participant for ${statusId}`);
                             continue;
                         }
 
-                        // Always use the clean bare JID (strip device suffix)
-                        const userJid = jidNormalizedUser(rawUserJid);
-
-                        logMessage('EVENT', `Status from ${userJid}: ${statusId}`);
+                        logMessage('EVENT', `Status update from ${userJid}: ${statusId}`);
 
                         const { inner, msgType } = unwrapStatus(m);
 
-                        // Runtime flags override config — set via .autoview / .autolike commands
+                        // Runtime flags (.autoview / .autolike) override config defaults
                         const flagSeen  = global.autoStatusFlags?.seen;
                         const flagReact = global.autoStatusFlags?.react;
-                        const doSeen    = flagSeen  !== null && flagSeen  !== undefined ? flagSeen  : config.AUTO_STATUS_SEEN;
-                        const doReact   = flagReact !== null && flagReact !== undefined ? flagReact : config.AUTO_STATUS_REACT;
-
-                        // Retry helper — attempts the action up to maxTries times with
-                        // exponential back-off so transient WhatsApp server errors don't
-                        // cause a status to be silently skipped.
-                        async function mandatory(label, action, maxTries = 3) {
-                            for (let attempt = 1; attempt <= maxTries; attempt++) {
-                                try {
-                                    await action();
-                                    logMessage('INFO', `${label} ✓ (attempt ${attempt})`);
-                                    return true;
-                                } catch (e) {
-                                    if (attempt < maxTries) {
-                                        await new Promise(r => setTimeout(r, attempt * 1500));
-                                    } else {
-                                        logMessage('WARN', `${label} failed after ${maxTries} attempts: ${e.message}`);
-                                    }
-                                }
-                            }
-                            return false;
-                        }
+                        const doSeen    = flagSeen  != null ? flagSeen  : config.AUTO_STATUS_SEEN;
+                        const doReact   = flagReact != null ? flagReact : config.AUTO_STATUS_REACT;
 
                         if (doSeen) {
-                            await mandatory(`Status seen [${statusId}]`, async () => {
-                                // Dual-method: readMessages + sendReceipts together guarantee
-                                // the poster sees a view tick on both old and new WhatsApp builds.
-                                await sock.readMessages([{
-                                    remoteJid:   'status@broadcast',
-                                    id:           statusId,
-                                    participant:  userJid
-                                }]);
-                                await sock.sendReceipts([{
-                                    remoteJid:   'status@broadcast',
-                                    id:           statusId,
-                                    participant:  userJid,
-                                    fromMe:       false
-                                }], 'read');
-                            });
+                            try {
+                                await sock.readMessages([m.key]);
+                                logMessage('INFO', `Status seen: ${statusId}`);
+                            } catch (e) {
+                                logMessage('WARN', `Status seen failed: ${e.message}`);
+                            }
                         }
 
                         if (doReact) {
-                            // Small delay after seen so WhatsApp orders events correctly
-                            if (doSeen) await new Promise(r => setTimeout(r, 500));
-
-                            const emojis = (config.CUSTOM_REACT_EMOJIS || '❤️,🔥,💯,😍,👏').split(',');
-                            const emoji  = emojis[Math.floor(Math.random() * emojis.length)].trim();
-
-                            await mandatory(`Status react [${emoji}→${statusId}]`, async () => {
-                                await sock.sendMessage(
-                                    'status@broadcast',
-                                    {
-                                        react: {
-                                            text: emoji,
-                                            key:  {
-                                                remoteJid:   'status@broadcast',
-                                                id:          statusId,
-                                                participant: userJid,
-                                                fromMe:      false
-                                            }
+                            try {
+                                const emojis = (config.CUSTOM_REACT_EMOJIS || '❤️,🔥,💯,😍,👏').split(',');
+                                const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)].trim();
+                                await sock.sendMessage(userJid, {
+                                    react: {
+                                        text: randomEmoji,
+                                        key: {
+                                            remoteJid: 'status@broadcast',
+                                            id: statusId,
+                                            participant: userJid
                                         }
-                                    },
-                                    { statusJidList: [userJid] }
-                                );
-                            });
+                                    }
+                                });
+                                logMessage('INFO', `Reacted on status ${statusId} with: ${randomEmoji}`);
+                            } catch (e) {
+                                logMessage('WARN', `Status reaction failed: ${e.message}`);
+                            }
                         }
 
                         if (config.AUTO_STATUS_REPLY) {

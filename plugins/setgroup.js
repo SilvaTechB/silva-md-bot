@@ -9,7 +9,7 @@ module.exports = {
     private:     false,
 
     run: async (sock, message, args, ctx) => {
-        const { jid, isAdmin, isBotAdmin, contextInfo } = ctx;
+        const { jid, isAdmin, isBotAdmin, contextInfo, theme } = ctx;
 
         const rawCmd = (message.message?.extendedTextMessage?.text
             || message.message?.conversation || '').trim().split(/\s+/)[0].replace(/^\./, '');
@@ -17,10 +17,10 @@ module.exports = {
         const isName = /^(setname|groupname)$/i.test(rawCmd);
 
         if (!isAdmin) {
-            return sock.sendMessage(jid, { text: '⛔ Only admins can change group settings.', contextInfo }, { quoted: message });
+            return sock.sendMessage(jid, { text: theme.admin || '⛔ Only admins can change group settings.', contextInfo }, { quoted: message });
         }
         if (!isBotAdmin) {
-            return sock.sendMessage(jid, { text: '⛔ I need to be an admin to edit group info.', contextInfo }, { quoted: message });
+            return sock.sendMessage(jid, { text: theme.botAdmin || '⛔ I need to be an admin to edit group info.', contextInfo }, { quoted: message });
         }
 
         const value = args.join(' ').trim();

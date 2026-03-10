@@ -9,18 +9,18 @@ module.exports = {
     private:     false,
 
     run: async (sock, message, args, ctx) => {
-        const { groupMetadata, jid, isAdmin, isBotAdmin, contextInfo } = ctx;
+        const { groupMetadata, jid, isAdmin, isBotAdmin, contextInfo, theme } = ctx;
 
         if (!isAdmin && !message.key.fromMe) {
             return sock.sendMessage(jid, {
-                text: '⛔ Only group admins can use this command.',
+                text: theme.admin || '⛔ Only group admins can use this command.',
                 contextInfo
             }, { quoted: message });
         }
 
         if (!isBotAdmin) {
             return sock.sendMessage(jid, {
-                text: '⛔ I need to be an admin to tag all members.',
+                text: theme.botAdmin || '⛔ I need to be an admin to tag all members.',
                 contextInfo
             }, { quoted: message });
         }

@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const config = require('./config');
-const { getStr } = require('./lib/theme');
+const { getStr, getActiveTheme } = require('./lib/theme');
 
 let isJidGroup, areJidsSameUser, jidNormalizedUser;
 try {
@@ -371,7 +371,9 @@ async function handleMessages(sock, message) {
             contextInfo:   isGroup ? {} : GLOBAL_CONTEXT_INFO,
             mentionedJid:  msg.extendedTextMessage?.contextInfo?.mentionedJid || [],
             safeSend:      (content, opts) => safeSend(sock, jid, content, opts),
-            reply:         (replyText) => safeSend(sock, jid, { text: replyText }, { quoted: message })
+            reply:         (replyText) => safeSend(sock, jid, { text: replyText }, { quoted: message }),
+            theme:         getActiveTheme()?.global || {},
+            getStr,
         };
 
         // ── Ban gate — banned users cannot trigger any command (owner always exempt) ──
