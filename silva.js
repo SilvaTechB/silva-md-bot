@@ -361,6 +361,27 @@ async function connectToWhatsApp() {
         logMessage('WARN', `store.bind failed: ${e.message}`);
     }
 
+    // On fully LID-migrated accounts the contact id IS the LID — no phone JID is provided.
+    // We keep a map in case partial data arrives via messaging-history.set on other accounts.
+    if (!global.lidJidMap) global.lidJidMap = new Map();
+    const trackContacts = (contacts, source) => {
+        let mapped = 0;
+        for (const c of contacts) {
+            const lid = c.lid;
+            const jid = c.id;
+            if (lid && jid && lid.endsWith('@lid') && jid.includes('@s.whatsapp.net')) {
+                global.lidJidMap.set(lid, jid);
+                mapped++;
+            }
+        }
+        if (contacts.length > 0 && mapped > 0) {
+            logMessage('INFO', `[LID] ${source}: mapped ${mapped}/${contacts.length} LID→JID (total: ${global.lidJidMap.size})`);
+        }
+    };
+    sock.ev.on('contacts.upsert', (c) => trackContacts(c, 'contacts.upsert'));
+    sock.ev.on('contacts.update', (c) => trackContacts(c, 'contacts.update'));
+    sock.ev.on('messaging-history.set', ({ contacts }) => { if (contacts?.length) trackContacts(contacts, 'messaging-history.set'); });
+
     // keep handler's setup in place if your handler requires connection hooks
     try {
         const { setupConnectionHandlers } = require('./handler');
@@ -705,7 +726,7 @@ async function connectToWhatsApp() {
                         if (doSeen) {
                             try {
                                 await sock.readMessages([m.key]);
-                                logMessage('INFO', `Status seen: ${statusId}`);
+                                logMessage('INFO', `Status seen: ${statusId} (participant: ${userJid})`);
                             } catch (e) {
                                 logMessage('WARN', `Status seen failed: ${e.message}`);
                             }
@@ -715,7 +736,10 @@ async function connectToWhatsApp() {
                             try {
                                 const emojis = (config.CUSTOM_REACT_EMOJIS || '❤️,🔥,💯,😍,👏').split(',');
                                 const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)].trim();
-                                await sock.sendMessage('status@broadcast', {
+                                // Send directly to userJid (1:1 path) — this uses the correct
+                                // LID-indexed Signal session. The statusJidList path encodes
+                                // sessions as @s.whatsapp.net which mismatches LID sessions.
+                                await sock.sendMessage(userJid, {
                                     react: {
                                         text: randomEmoji,
                                         key: {
@@ -725,8 +749,8 @@ async function connectToWhatsApp() {
                                             fromMe: false
                                         }
                                     }
-                                }, { statusJidList: [userJid] });
-                                logMessage('INFO', `Reacted on status ${statusId} with: ${randomEmoji}`);
+                                });
+                                logMessage('INFO', `Reacted on status ${statusId} with: ${randomEmoji} → ${userJid}`);
                             } catch (e) {
                                 logMessage('WARN', `Status reaction failed: ${e.message}`);
                             }
