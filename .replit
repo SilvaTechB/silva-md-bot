@@ -1,4 +1,4 @@
-modules = ["nodejs-20", "web", "nix", "python-3.11"]
+modules = ["nodejs-20", "web", "nix"]
 [agent]
 expertMode = true
 integrations = ["github:1.0.0"]
@@ -22,14 +22,21 @@ args = "Start application"
 name = "Start application"
 author = "agent"
 
+[workflows.workflow.metadata]
+outputType = "console"
+
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "node silva.js"
-waitForPort = 5000
-
-[workflows.workflow.metadata]
-outputType = "webview"
 
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[[ports]]
+localPort = 25680
+externalPort = 3000
+
+[[ports]]
+localPort = 3000
+externalPort = 3000
