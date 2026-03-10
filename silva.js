@@ -366,12 +366,17 @@ async function connectToWhatsApp() {
         } else if (connection === 'open') {
             logMessage('SUCCESS', '✅ Connected to WhatsApp');
 
-            // Store bot JID and bot's own number globally
+            // Store bot JID, phone number, and LID globally.
+            // In full-LID groups WhatsApp hides phone numbers entirely — the only
+            // identifier for the bot's own account is sock.user.lid, so we store
+            // it here to use as the definitive owner check in handler.js.
             global.botJid = sock.user.id;
             const rawNum = sock.user.id.includes(':')
                 ? sock.user.id.split(':')[0]
                 : sock.user.id.split('@')[0];
             global.botNum = rawNum;
+            global.botLid = sock.user.lid || '';  // e.g. "271476913610986@lid"
+            logMessage('INFO', `Bot LID: ${global.botLid || '(none)'}`);
 
             // Only fall back to the bot's own number when OWNER_NUMBER is not
             // explicitly configured — preserves the real owner's number when the

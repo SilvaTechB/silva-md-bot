@@ -270,41 +270,82 @@ async function handleMessages(sock, message) {
 
         console.log(`[HANDLER] cmd=${command}${resolvedCommand !== command ? `→${resolvedCommand}` : ''} jid=${jid} from=${from}`);
 
-        // ── Resolve owner ─────────────────────────────────────────────────────
-        // fromMe    = command came from the bot's own linked device
-        // ownerNum  = the explicitly configured owner number (OWNER_NUMBER env var)
-        // botNum    = the bot's own WhatsApp number (set in silva.js on connect)
-        // We check all three so self-bot, separate-account, and multi-device setups
-        // all work correctly without requiring any extra configuration.
-        const ownerNum = jidToNum(config.OWNER_NUMBER || '');
-        const botNum   = jidToNum(global.botNum || '');
-        const fromNum  = jidToNum(from);
-        console.log(`[OWNER_DEBUG] fromMe=${message.key.fromMe} from="${from}" fromNum="${fromNum}" ownerNum="${ownerNum}" botNum="${botNum}"`);
-        const isOwner  = message.key.fromMe
-            || fromNum === ownerNum
-            || sameNumber(fromNum, ownerNum)
-            || (botNum && (fromNum === botNum || sameNumber(fromNum, botNum)));
-
-        // ── Resolve group admin status ────────────────────────────────────────
-        let isAdmin    = false;
-        let isBotAdmin = false;
+        // ── Fetch group metadata FIRST — needed for LID resolution ────────────
+        // Modern WhatsApp sends group messages with a @lid (privacy/account ID)
+        // instead of a phone number. We must look up the LID in the participants
+        // list to find the sender's real phone JID before doing any comparisons.
+        let isAdmin       = false;
+        let isBotAdmin    = false;
         let groupMetadata = null;
 
         if (isGroup) {
             groupMetadata = await getCachedGroupMetadata(sock, jid);
-            if (groupMetadata?.participants) {
-                const botJid = sock.user?.id || '';
-                for (const p of groupMetadata.participants) {
-                    const role   = p.admin;
-                    const isAdm  = role === 'admin' || role === 'superadmin';
-                    // Primary: proper JID comparison (handles device suffixes)
-                    if (areJidsSameUser(p.id, from))   isAdmin    = isAdm;
-                    if (areJidsSameUser(p.id, botJid)) isBotAdmin = isAdm;
-                    // Fallback: phone-number comparison (handles LID JIDs & format mismatches)
-                    const pNum = jidToNum(p.id);
-                    if (pNum && sameNumber(pNum, fromNum))                    isAdmin    = isAdm;
-                    if (pNum && sameNumber(pNum, jidToNum(botJid))) isBotAdmin = isAdm;
+        }
+
+        // ── Resolve sender phone (handle @lid format) ─────────────────────────
+        const isLid = typeof from === 'string' && from.endsWith('@lid');
+        let resolvedFrom = from; // will be the real phone JID if LID is resolved
+
+        if (isLid && groupMetadata?.participants) {
+            for (const p of groupMetadata.participants) {
+                // Baileys 6.x stores the account LID in p.lid when available
+                const pLid = p.lid || '';
+                if (pLid && (pLid === from || jidNormalizedUser(pLid) === jidNormalizedUser(from))) {
+                    resolvedFrom = p.id; // swap LID for real phone JID
+                    break;
                 }
+            }
+        }
+
+        const fromNum = jidToNum(resolvedFrom);
+
+        // ── Resolve owner / bot phone numbers ─────────────────────────────────
+        // Pull directly from process.env first so stale config objects can't
+        // cause a false empty result, then fall through to config and global.
+        const ownerRaw  = (process.env.OWNER_NUMBER || '').trim()
+            || (typeof config.OWNER_NUMBER === 'string' ? config.OWNER_NUMBER.trim() : '')
+            || (global.botNum || '');
+        const ownerNum  = ownerRaw.replace(/\D/g, '');
+        const botNum    = (global.botNum || '').replace(/\D/g, '');
+
+        // In full-LID groups WhatsApp never exposes phone numbers — the only
+        // identifier is the account LID.  If the sender's LID matches the bot's
+        // own LID they are the same WhatsApp account → owner.
+        // Both sides must be normalised (strip :deviceSuffix) before comparing.
+        const botLid     = jidNormalizedUser(global.botLid || '');
+        const fromNorm   = jidNormalizedUser(from);
+
+        const isOwner = message.key.fromMe
+            || (botLid && fromNorm === botLid)
+            || (botLid && jidNormalizedUser(resolvedFrom) === botLid)
+            || (fromNum && ownerNum && (fromNum === ownerNum || sameNumber(fromNum, ownerNum)))
+            || (fromNum && botNum   && (fromNum === botNum   || sameNumber(fromNum, botNum)));
+
+        // ── Resolve group admin status ────────────────────────────────────────
+        if (isGroup && groupMetadata?.participants) {
+            const botJid     = sock.user?.id || '';
+            const botPhone   = botNum;
+
+            for (const p of groupMetadata.participants) {
+                const role = p.admin;
+                const isAdm = role === 'admin' || role === 'superadmin';
+                const pPhone = (p.id || '').split('@')[0].replace(/\D/g, '');
+                const pLid   = p.lid || '';
+
+                // Is this participant the sender?
+                const isSender =
+                    areJidsSameUser(p.id, resolvedFrom) ||
+                    (pLid && (pLid === from || jidNormalizedUser(pLid) === jidNormalizedUser(from))) ||
+                    (pPhone && fromNum && sameNumber(pPhone, fromNum));
+
+                // Is this participant the bot?
+                const isBot =
+                    areJidsSameUser(p.id, botJid) ||
+                    (botLid && (jidNormalizedUser(p.id) === botLid || (pLid && jidNormalizedUser(pLid) === botLid))) ||
+                    (botPhone && pPhone && sameNumber(pPhone, botPhone));
+
+                if (isSender) isAdmin    = isAdm;
+                if (isBot)    isBotAdmin = isAdm;
             }
         }
 
