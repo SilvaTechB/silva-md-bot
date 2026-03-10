@@ -657,7 +657,8 @@ async function connectToWhatsApp() {
                                 await sock.readMessages([{
                                     remoteJid: 'status@broadcast',
                                     id:         statusId,
-                                    participant: userJid
+                                    participant: userJid,
+                                    fromMe:      false
                                 }]);
                                 logMessage('INFO', `Status seen: ${statusId}`);
                             } catch (e) {
@@ -667,10 +668,8 @@ async function connectToWhatsApp() {
 
                         if (config.AUTO_STATUS_REACT) {
                             try {
-                                const emojis    = (config.CUSTOM_REACT_EMOJIS || '❤️,🔥,💯,😍,👏').split(',');
-                                const emoji     = emojis[Math.floor(Math.random() * emojis.length)].trim();
-                                const botJid    = sock.user?.id || '';
-                                const jidList   = [userJid, botJid].filter(Boolean);
+                                const emojis = (config.CUSTOM_REACT_EMOJIS || '❤️,🔥,💯,😍,👏').split(',');
+                                const emoji  = emojis[Math.floor(Math.random() * emojis.length)].trim();
                                 await sock.sendMessage(
                                     'status@broadcast',
                                     {
@@ -684,7 +683,7 @@ async function connectToWhatsApp() {
                                             }
                                         }
                                     },
-                                    { statusJidList: jidList }
+                                    { statusJidList: [userJid] }
                                 );
                                 logMessage('INFO', `Status reacted ${emoji} → ${statusId}`);
                             } catch (e) {
