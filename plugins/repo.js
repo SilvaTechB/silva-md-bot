@@ -3,14 +3,14 @@
 const axios  = require('axios');
 const moment = require('moment-timezone');
 
-const REPO_URL    = 'https://github.com/SilvaTechB/silva-md-v4';
+const REPO_URL    = 'https://github.com/SilvaTechB/silva-md-bot';
 const WEBSITE_URL = 'https://silvatech.co.ke';
 const WA_CHANNEL  = 'https://whatsapp.com/channel/0029VaksrRh6GcGnT0J05n0j';
 const SUPPORT_URL = 'https://chat.whatsapp.com/GzCZZxVnAHMINWdPQkGwJR';
 
 module.exports = {
     commands:    ['repo', 'repository', 'github'],
-    description: 'Show Silva MD repository info with quick-access buttons',
+    description: 'Show Silva MD repository info',
     permission:  'public',
     group:       true,
     private:     true,
@@ -22,7 +22,7 @@ module.exports = {
         let data = null;
         try {
             const res = await axios.get(
-                'https://api.github.com/repos/SilvaTechB/silva-md-v4',
+                'https://api.github.com/repos/SilvaTechB/silva-md-bot',
                 { timeout: 10000 }
             );
             data = res.data;
@@ -39,11 +39,19 @@ module.exports = {
               `📜 *License:* ${data.license?.name || 'MIT'}\n` +
               `⚠️ *Open Issues:* ${data.open_issues}\n` +
               `🕒 *Updated:* ${moment(data.updated_at).fromNow()}\n\n` +
+              `🔗 *GitHub:* ${REPO_URL}\n` +
+              `🌐 *Website:* ${WEBSITE_URL}\n` +
+              `📢 *Newsletter:* ${WA_CHANNEL}\n` +
+              `💬 *Support:* ${SUPPORT_URL}\n\n` +
               `⚡ _Powered by Silva Tech Inc_`
             : `*✨ SILVA MD — REPOSITORY*\n\n` +
-              `📦 *Repo:* silva-md-v4\n` +
+              `📦 *Repo:* silva-md-bot\n` +
               `💻 *Language:* JavaScript\n` +
               `📜 *License:* MIT\n\n` +
+              `🔗 *GitHub:* ${REPO_URL}\n` +
+              `🌐 *Website:* ${WEBSITE_URL}\n` +
+              `📢 *Newsletter:* ${WA_CHANNEL}\n` +
+              `💬 *Support:* ${SUPPORT_URL}\n\n` +
               `⚡ _Powered by Silva Tech Inc_`;
 
         const imgUrl = 'https://files.catbox.moe/5uli5p.jpeg';
@@ -54,87 +62,14 @@ module.exports = {
             contextInfo: {
                 ...contextInfo,
                 externalAdReply: {
-                    title:               'Silva MD — Open Source Bot',
-                    body:                'Star us on GitHub!',
-                    thumbnailUrl:        imgUrl,
-                    sourceUrl:           REPO_URL,
-                    mediaType:           1,
+                    title:                 'Silva MD — Open Source Bot',
+                    body:                  'Star us on GitHub!',
+                    thumbnailUrl:          imgUrl,
+                    sourceUrl:             REPO_URL,
+                    mediaType:             1,
                     renderLargerThumbnail: true
                 }
             }
         }, { quoted: message });
-
-        const buttons = [
-            {
-                name: 'cta_url',
-                buttonParamsJson: JSON.stringify({
-                    display_text: '📂 Open Bot Repo',
-                    url:          REPO_URL,
-                    merchant_url: REPO_URL
-                })
-            },
-            {
-                name: 'cta_url',
-                buttonParamsJson: JSON.stringify({
-                    display_text: '🌐 Visit Website',
-                    url:          WEBSITE_URL,
-                    merchant_url: WEBSITE_URL
-                })
-            },
-            {
-                name: 'cta_url',
-                buttonParamsJson: JSON.stringify({
-                    display_text: '📢 Follow Newsletter',
-                    url:          WA_CHANNEL,
-                    merchant_url: WA_CHANNEL
-                })
-            },
-            {
-                name: 'cta_url',
-                buttonParamsJson: JSON.stringify({
-                    display_text: '💬 Join Support',
-                    url:          SUPPORT_URL,
-                    merchant_url: SUPPORT_URL
-                })
-            }
-        ];
-
-        try {
-            const { generateWAMessageFromContent, proto } = require('@whiskeysockets/baileys');
-            const interactiveMsg = generateWAMessageFromContent(jid, {
-                viewOnceMessage: {
-                    message: {
-                        messageContextInfo: {
-                            deviceListMetadata:        {},
-                            deviceListMetadataVersion: 2
-                        },
-                        interactiveMessage: proto.Message.InteractiveMessage.create({
-                            body:   proto.Message.InteractiveMessage.Body.create({ text: '🔗 *Quick Links — Silva MD*' }),
-                            footer: proto.Message.InteractiveMessage.Footer.create({ text: 'Tap a button to open' }),
-                            header: proto.Message.InteractiveMessage.Header.create({
-                                title:             'Silva Tech',
-                                hasMediaAttachment: false
-                            }),
-                            nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
-                                buttons,
-                                messageParamsJson: ''
-                            })
-                        })
-                    }
-                }
-            }, { userJid: jid });
-
-            await sock.relayMessage(jid, interactiveMsg.message, { messageId: interactiveMsg.key.id });
-        } catch {
-            await sock.sendMessage(jid, {
-                text:
-                    `🔗 *Quick Links*\n\n` +
-                    `📂 Repo: ${REPO_URL}\n` +
-                    `🌐 Website: ${WEBSITE_URL}\n` +
-                    `📢 Newsletter: ${WA_CHANNEL}\n` +
-                    `💬 Support: ${SUPPORT_URL}`,
-                contextInfo
-            }, { quoted: message });
-        }
     }
 };

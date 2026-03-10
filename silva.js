@@ -626,32 +626,33 @@ async function connectToWhatsApp() {
         try {
             if (!Array.isArray(messages) || messages.length === 0) return;
 
-            if (type && !['notify', 'append'].includes(type)) {
-                return;
-            }
-
             for (const m of messages) {
-                // ---- STATUS handling (status@broadcast)
+                // ---- STATUS handling (status@broadcast) — runs regardless of upsert type
                 if (m.key.remoteJid === 'status@broadcast') {
                     try {
                         const statusId = m.key.id;
-                        // participant lives at m.participant (top-level) in v6; key.participant is null
-                        const userJid = m.participant || m.key.participant;
+                        // Try every known participant field location across Baileys versions
+                        const userJid = m.participant
+                            || m.key?.participant
+                            || m.message?.participant
+                            || null;
 
-                        // Skip historical statuses delivered at startup (within first 25 seconds)
-                        const uptimeSec = process.uptime();
-                        if (uptimeSec < 25) continue;
+                        // Skip old statuses delivered at startup (first 25 s)
+                        if (process.uptime() < 25) continue;
+                        if (!userJid) {
+                            logMessage('WARN', `Status skipped — no participant for ${statusId}`);
+                            continue;
+                        }
 
-                        logMessage('EVENT', `Status update from ${userJid}: ${statusId}`);
+                        logMessage('EVENT', `Status from ${userJid}: ${statusId}`);
 
                         const { inner, msgType } = unwrapStatus(m);
 
-                        if (config.AUTO_STATUS_SEEN && userJid) {
+                        if (config.AUTO_STATUS_SEEN) {
                             try {
-                                // participant must be set; omit fromMe so WA treats it as an incoming key
                                 await sock.readMessages([{
                                     remoteJid: 'status@broadcast',
-                                    id: statusId,
+                                    id:         statusId,
                                     participant: userJid
                                 }]);
                                 logMessage('INFO', `Status seen: ${statusId}`);
@@ -660,30 +661,30 @@ async function connectToWhatsApp() {
                             }
                         }
 
-                        if (config.AUTO_STATUS_REACT && userJid) {
+                        if (config.AUTO_STATUS_REACT) {
                             try {
-                                const emojis = (config.CUSTOM_REACT_EMOJIS || '❤️,🔥,💯,😍,👏').split(',');
-                                const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)].trim();
-                                const botJid = sock.user?.id || '';
-                                // statusJidList must include both the poster AND the bot's own JID
+                                const emojis    = (config.CUSTOM_REACT_EMOJIS || '❤️,🔥,💯,😍,👏').split(',');
+                                const emoji     = emojis[Math.floor(Math.random() * emojis.length)].trim();
+                                const botJid    = sock.user?.id || '';
+                                const jidList   = [userJid, botJid].filter(Boolean);
                                 await sock.sendMessage(
                                     'status@broadcast',
                                     {
                                         react: {
-                                            text: randomEmoji,
-                                            key: {
-                                                remoteJid: 'status@broadcast',
-                                                id: statusId,
+                                            text: emoji,
+                                            key:  {
+                                                remoteJid:   'status@broadcast',
+                                                id:          statusId,
                                                 participant: userJid,
-                                                fromMe: false
+                                                fromMe:      false
                                             }
                                         }
                                     },
-                                    { statusJidList: [userJid, botJid].filter(Boolean) }
+                                    { statusJidList: jidList }
                                 );
-                                logMessage('INFO', `Reacted on status ${statusId} with: ${randomEmoji}`);
+                                logMessage('INFO', `Status reacted ${emoji} → ${statusId}`);
                             } catch (e) {
-                                logMessage('WARN', `Status reaction failed: ${e.message}`);
+                                logMessage('WARN', `Status react failed: ${e.message}`);
                             }
                         }
 
@@ -744,6 +745,9 @@ async function connectToWhatsApp() {
                     // continue to next message in the upsert array
                     continue;
                 }
+
+                // For non-status messages only process notify/append upsert types
+                if (type && !['notify', 'append'].includes(type)) continue;
 
                 // ---- For other messages: newsletter / broadcast / group / private commands
                 if (!m.message) continue;
