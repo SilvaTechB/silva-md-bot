@@ -1,12 +1,10 @@
 'use strict';
 
-const fs     = require('fs');
-const path   = require('path');
-const config = require('../config');
-const moment = require('moment-timezone');
-
-// Baileys proto + ID helpers — imported at module level for reuse
-const baileys           = require('@whiskeysockets/baileys');
+const fs      = require('fs');
+const path    = require('path');
+const config  = require('../config');
+const moment  = require('moment-timezone');
+const baileys = require('@whiskeysockets/baileys');
 const { proto, generateMessageIDV2 } = baileys;
 
 const REPO    = 'https://github.com/SilvaTechB/silva-md-v4';
@@ -15,96 +13,38 @@ const TZ      = 'Africa/Nairobi';
 
 // ── Category definitions ─────────────────────────────────────────────────────
 const CATEGORIES = [
-    {
-        icon: '⬇️',
-        name: 'Downloaders',
-        cmds: ['yt', 'tiktok', 'instagram', 'facebook', 'apk', 'catbox']
-    },
-    {
-        icon: '🎵',
-        name: 'Music & Audio',
-        cmds: ['play', 'shazam', 'lyrics', 'toaudio']
-    },
-    {
-        icon: '🤖',
-        name: 'AI & Intelligence',
-        cmds: ['ai', 'imagine', 'translate', 'define', 'tts', 'calc', 'shorten', 'gitclone', 'anime', 'manga']
-    },
-    {
-        icon: '🌍',
-        name: 'Search & Info',
-        cmds: ['wiki', 'country', 'ip', 'currency', 'time', 'weather', 'numberfact']
-    },
-    {
-        icon: '🖼️',
-        name: 'Media & Stickers',
-        cmds: ['sticker', 'vv', 'ascii', 'qrcode', 'react']
-    },
-    {
-        icon: '👥',
-        name: 'Group Management',
-        cmds: ['kick', 'promote', 'demote', 'ban', 'unban', 'banlist', 'tagall', 'hidetag', 'poll', 'lock', 'unlock', 'link', 'revoke', 'setname', 'setdesc', 'broadcast']
-    },
-    {
-        icon: '👋',
-        name: 'Welcome & Events',
-        cmds: ['welcome', 'goodbye', 'setwelcome', 'setgoodbye']
-    },
-    {
-        icon: '🛡️',
-        name: 'Protection',
-        cmds: ['antidemote', 'antidelete', 'antilink', 'anticall', 'antivv', 'autoreply', 'blocklist', 'afk']
-    },
-    {
-        icon: '😄',
-        name: 'Fun & Entertainment',
-        cmds: ['joke', 'fact', 'riddle', 'meme', 'quote', 'advice', 'compliment', 'flip', 'bible', 'hello']
-    },
-    {
-        icon: '🔒',
-        name: 'Privacy & Utilities',
-        cmds: ['password', 'morse', 'base64', 'tempmail', 'virus', 'eval']
-    },
-    {
-        icon: '📊',
-        name: 'Status & Profile',
-        cmds: ['save', 'spp', 'presence', 'autojoin']
-    },
-    {
-        icon: '📰',
-        name: 'Channels',
-        cmds: ['newsletter', 'followchannel', 'unfollowchannel', 'channelinfo']
-    },
-    {
-        icon: 'ℹ️',
-        name: 'Bot Info',
-        cmds: ['ping', 'uptime', 'owner', 'getjid', 'repo', 'remind']
-    },
+    { icon: '⬇️',  name: 'Downloaders',        cmds: ['yt','tiktok','instagram','facebook','apk','catbox'] },
+    { icon: '🎵',  name: 'Music & Audio',       cmds: ['play','shazam','lyrics','toaudio'] },
+    { icon: '🤖',  name: 'AI & Intelligence',   cmds: ['ai','imagine','translate','define','tts','calc','shorten','gitclone','anime','manga'] },
+    { icon: '🌍',  name: 'Search & Info',       cmds: ['wiki','country','ip','currency','time','weather','numberfact'] },
+    { icon: '🖼️', name: 'Media & Stickers',    cmds: ['sticker','vv','ascii','qrcode','react'] },
+    { icon: '👥',  name: 'Group Management',    cmds: ['kick','promote','demote','ban','unban','banlist','tagall','hidetag','poll','lock','unlock','link','revoke','setname','setdesc','broadcast'] },
+    { icon: '👋',  name: 'Welcome & Events',    cmds: ['welcome','goodbye','setwelcome','setgoodbye'] },
+    { icon: '🛡️', name: 'Protection',          cmds: ['antidemote','antidelete','antilink','anticall','antivv','autoreply','blocklist','afk'] },
+    { icon: '😄',  name: 'Fun & Entertainment', cmds: ['joke','fact','riddle','meme','quote','advice','compliment','flip','bible','hello'] },
+    { icon: '🔒',  name: 'Privacy & Utilities', cmds: ['password','morse','base64','tempmail','virus','eval'] },
+    { icon: '📊',  name: 'Status & Profile',    cmds: ['save','spp','presence','autojoin'] },
+    { icon: '📰',  name: 'Channels',            cmds: ['newsletter','followchannel','unfollowchannel','channelinfo'] },
+    { icon: 'ℹ️', name: 'Bot Info',            cmds: ['ping','uptime','owner','getjid','repo','remind'] },
 ];
 
-// ── Box-drawing helpers ──────────────────────────────────────────────────────
 function box(title, lines) {
-    const body   = lines.map(l => `│  ${l}`).join('\n');
-    return `╭─「 ${title} 」\n${body}\n╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄`;
+    return `╭─「 ${title} 」\n${lines.map(l => `│  ${l}`).join('\n')}\n╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄`;
 }
 
-// ── Build the full menu text ──────────────────────────────────────────────────
-function buildMenuText(plugins, prefix, botName, ownerNum, mode) {
+function buildMenuText(plugins, pfx, botName, ownerNum, mode) {
     const allCmds  = new Set(plugins.flatMap(p => p.commands || []));
     const assigned = new Set();
-    const pfx      = prefix || '.';
     const modeEmoji = mode === 'PUBLIC' ? '🟢' : mode === 'PRIVATE' ? '🔒' : '🔵';
-    const now      = moment().tz(TZ);
+    const now = moment().tz(TZ);
 
     const header = [
         ``,
         `✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦`,
-        ``,
         `  ⚡ *${botName.toUpperCase()}* ⚡`,
         `  _The Ultimate WhatsApp Bot_`,
-        ``,
         `✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦`,
-        ``,
+        ``
     ].join('\n');
 
     const infoPanel = box(`📋 Bot Status`, [
@@ -126,37 +66,78 @@ function buildMenuText(plugins, prefix, botName, ownerNum, mode) {
     }
 
     const rest = [...allCmds].filter(c => !assigned.has(c) && !['menu','help','list'].includes(c));
-    if (rest.length) {
-        catBlocks.push(box(`🔧 Other`, rest.map(c => `◈  \`${pfx}${c}\``)));
-    }
+    if (rest.length) catBlocks.push(box(`🔧 Other`, rest.map(c => `◈  \`${pfx}${c}\``)));
 
     const footer = [
         ``,
         `╭┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄╮`,
-        `│  💡 \`${pfx}help <command>\`   │`,
+        `│  💡 \`${pfx}help <cmd>\`     │`,
+        `│  🌐 ${WEBSITE}  │`,
         `╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄╯`,
         ``,
-        `  🌐 ${WEBSITE}`,
-        `  📂 ${REPO}`,
-        ``,
-        `> ⚡ _Powered by *Silva Tech Inc* © ${now.year()}_`,
+        `> ⚡ _Powered by *Silva Tech Inc* © ${now.year()}_`
     ].join('\n');
 
     return `${header}${infoPanel}\n\n${catBlocks.join('\n\n')}\n${footer}`;
 }
 
-// ── Send as BCall (call-ended appearance) ────────────────────────────────────
-async function sendAsCallLog(sock, jid, text) {
-    const inner = proto.Message.BCallMessage.create({
-        caption:   text,
-        mediaType: 1,                           // 1 = AUDIO → voice call style
-        sessionId: 'silva_' + Date.now()
+// ── Send call log then menu text quoting it ───────────────────────────────────
+async function sendCallLogMenu(sock, jid, menuText, imgUrl) {
+    const CallOutcome = proto.Message.CallLogMessage.CallOutcome;
+    const callMsgId   = generateMessageIDV2(sock.user?.id);
+    const botJid      = sock.user?.id || '';
+
+    // Step 1: send a real MISSED-VOICE-CALL log bubble
+    const callContent = proto.Message.fromObject({
+        callLogMesssage: {
+            isVideo:      false,
+            callOutcome:  CallOutcome.MISSED,   // 1 — "Missed voice call"
+            durationSecs: 0,
+            callType:     0                     // REGULAR
+        }
     });
 
-    const msgContent = { bcallMessage: inner };
-    const msgId      = generateMessageIDV2(sock.user?.id);
+    await sock.relayMessage(jid, callContent, { messageId: callMsgId });
 
-    await sock.relayMessage(jid, msgContent, { messageId: msgId });
+    // Brief pause so the call bubble lands before the menu
+    await new Promise(r => setTimeout(r, 400));
+
+    // Step 2: send the menu as a reply quoting the call log bubble
+    const quotedCallContent = {
+        callLogMesssage: {
+            isVideo:      false,
+            callOutcome:  CallOutcome.MISSED,
+            durationSecs: 0,
+            callType:     0
+        }
+    };
+
+    const quotedCtx = {
+        stanzaId:       callMsgId,
+        participant:    botJid,
+        quotedMessage:  quotedCallContent,
+        externalAdReply: {
+            title:                 `Silva MD — Command Menu`,
+            body:                  `Tap to view all commands`,
+            thumbnailUrl:          imgUrl,
+            sourceUrl:             WEBSITE,
+            mediaType:             1,
+            renderLargerThumbnail: false
+        }
+    };
+
+    try {
+        await sock.sendMessage(jid, {
+            image:       { url: imgUrl },
+            caption:     menuText,
+            contextInfo: quotedCtx
+        });
+    } catch {
+        await sock.sendMessage(jid, {
+            text:        menuText,
+            contextInfo: quotedCtx
+        });
+    }
 }
 
 module.exports = {
@@ -177,18 +158,18 @@ module.exports = {
         const pfx      = prefix || '.';
         const imgUrl   = config.ALIVE_IMG  || 'https://files.catbox.moe/5uli5p.jpeg';
 
-        const fullText = buildMenuText(plugins, pfx, botName, ownerNum, mode);
+        const menuText = buildMenuText(plugins, pfx, botName, ownerNum, mode);
 
-        // ── Primary: send as call-log style (BCallMessage) ──────────────────
+        // ── Primary: call log bubble → menu reply ──────────────────────────────
         try {
-            await sendAsCallLog(sock, jid, fullText);
+            await sendCallLogMenu(sock, jid, menuText, imgUrl);
             return;
-        } catch (callErr) {
-            console.error('[Menu] BCallMessage failed:', callErr.message);
+        } catch (err) {
+            console.error('[Menu] callLogMesssage send failed:', err.message);
         }
 
-        // ── Fallback 1: image with caption + rich card ───────────────────────
-        const richCtx = {
+        // ── Fallback: image + caption with rich card ───────────────────────────
+        const fallbackCtx = {
             ...contextInfo,
             externalAdReply: {
                 title:                 `${botName} — Official Command Menu`,
@@ -203,17 +184,15 @@ module.exports = {
         try {
             await sock.sendMessage(jid, {
                 image:       { url: imgUrl },
-                caption:     fullText,
-                contextInfo: richCtx
+                caption:     menuText,
+                contextInfo: fallbackCtx
             }, { quoted: message });
         } catch {
-            // ── Fallback 2: plain text ────────────────────────────────────────
-            await sock.sendMessage(jid, { text: fullText, contextInfo }, { quoted: message });
+            await sock.sendMessage(jid, { text: menuText, contextInfo }, { quoted: message });
         }
     }
 };
 
-// ── Plugin loader ─────────────────────────────────────────────────────────────
 function loadPlugins() {
     const dir = path.join(__dirname);
     const out = [];
