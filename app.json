@@ -73,7 +73,7 @@
     "OWNER_NUMBER": {
       "description": "Owner WhatsApp number.",
       "required": false,
-      "value": "254700143167"
+      "value": ""
     },
     "BOT_NAME": {
       "description": "Bot display name.",
@@ -134,6 +134,11 @@
       "description": "Enable automatic message read receipts.",
       "required": false,
       "value": "false"
+    },
+    "THEME": {
+      "description": "Bot theme/character voice. Options: silva, adam, ayanokoji, edith, friday, genos, gideon, gojo, goku, luffy, naruto, nezuko, parker, secktor, suhail, zerotwo, itachi, batman, thanos",
+      "required": false,
+      "value": "silva"
     }
   },
   "buildpacks": [

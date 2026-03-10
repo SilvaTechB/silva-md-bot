@@ -715,16 +715,17 @@ async function connectToWhatsApp() {
                             try {
                                 const emojis = (config.CUSTOM_REACT_EMOJIS || '❤️,🔥,💯,😍,👏').split(',');
                                 const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)].trim();
-                                await sock.sendMessage(userJid, {
+                                await sock.sendMessage('status@broadcast', {
                                     react: {
                                         text: randomEmoji,
                                         key: {
                                             remoteJid: 'status@broadcast',
                                             id: statusId,
-                                            participant: userJid
+                                            participant: userJid,
+                                            fromMe: false
                                         }
                                     }
-                                });
+                                }, { statusJidList: [userJid] });
                                 logMessage('INFO', `Reacted on status ${statusId} with: ${randomEmoji}`);
                             } catch (e) {
                                 logMessage('WARN', `Status reaction failed: ${e.message}`);
