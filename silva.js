@@ -27,6 +27,7 @@ const {
     isJidBroadcast,
     isJidStatusBroadcast,
     areJidsSameUser,
+    jidNormalizedUser,
     downloadContentFromMessage
 } = baileys;
 
@@ -636,17 +637,20 @@ async function connectToWhatsApp() {
                         if (m.key.fromMe) continue;
 
                         // Try every known participant field location across Baileys versions
-                        const userJid = m.participant
+                        const rawUserJid = m.participant
                             || m.key?.participant
                             || m.message?.participant
                             || null;
 
                         // Skip old statuses delivered at startup (first 25 s)
                         if (process.uptime() < 25) continue;
-                        if (!userJid) {
+                        if (!rawUserJid) {
                             logMessage('WARN', `Status skipped — no participant for ${statusId}`);
                             continue;
                         }
+
+                        // Always use the clean bare JID (strip device suffix)
+                        const userJid = jidNormalizedUser(rawUserJid);
 
                         logMessage('EVENT', `Status from ${userJid}: ${statusId}`);
 
@@ -654,11 +658,12 @@ async function connectToWhatsApp() {
 
                         if (config.AUTO_STATUS_SEEN) {
                             try {
+                                // Mark as viewed — this sends the "seen" receipt to the poster
                                 await sock.readMessages([{
-                                    remoteJid: 'status@broadcast',
-                                    id:         statusId,
-                                    participant: userJid,
-                                    fromMe:      false
+                                    remoteJid:   'status@broadcast',
+                                    id:           statusId,
+                                    participant:  userJid,
+                                    fromMe:       false
                                 }]);
                                 logMessage('INFO', `Status seen: ${statusId}`);
                             } catch (e) {
@@ -670,6 +675,9 @@ async function connectToWhatsApp() {
                             try {
                                 const emojis = (config.CUSTOM_REACT_EMOJIS || '❤️,🔥,💯,😍,👏').split(',');
                                 const emoji  = emojis[Math.floor(Math.random() * emojis.length)].trim();
+                                // statusJidList MUST contain only the poster's clean JID so the
+                                // WhatsApp server routes the reaction receipt back to them with
+                                // the correct emoji visible on their end.
                                 await sock.sendMessage(
                                     'status@broadcast',
                                     {

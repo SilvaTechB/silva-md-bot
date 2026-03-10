@@ -4,11 +4,29 @@ const fs = require('fs');
 const path = require('path');
 const config = require('./config');
 
-let isJidGroup;
+let isJidGroup, areJidsSameUser, jidNormalizedUser;
 try {
-    ({ isJidGroup } = require('@whiskeysockets/baileys'));
+    ({ isJidGroup, areJidsSameUser, jidNormalizedUser } = require('@whiskeysockets/baileys'));
 } catch {
-    isJidGroup = (jid) => typeof jid === 'string' && jid.endsWith('@g.us');
+    isJidGroup       = (jid) => typeof jid === 'string' && jid.endsWith('@g.us');
+    jidNormalizedUser = (jid) => (jid || '').replace(/:[^@]+@/, '@');
+    areJidsSameUser  = (a, b) => jidNormalizedUser(a) === jidNormalizedUser(b);
+}
+
+// Extract the bare phone-number string from any JID format
+function jidToNum(jid) {
+    if (!jid) return '';
+    return jidNormalizedUser(jid).split('@')[0].replace(/\D/g, '');
+}
+
+// True when two phone numbers refer to the same subscriber.
+// Handles missing country codes by comparing the last 9 significant digits.
+function sameNumber(a, b) {
+    if (!a || !b) return false;
+    if (a === b) return true;
+    const minLen = Math.min(a.length, b.length);
+    const tail   = Math.min(minLen, 9);
+    return tail >= 6 && a.slice(-tail) === b.slice(-tail);
 }
 
 // ─── Permission constants ────────────────────────────────────────────────────
@@ -253,10 +271,11 @@ async function handleMessages(sock, message) {
         console.log(`[HANDLER] cmd=${command}${resolvedCommand !== command ? `→${resolvedCommand}` : ''} jid=${jid} from=${from}`);
 
         // ── Resolve owner ─────────────────────────────────────────────────────
-        // fromMe = owner is using their own device as the bot
-        const ownerNum  = (config.OWNER_NUMBER || '').replace(/\D/g, '');
-        const fromNum   = from.replace(/:[^@]+/, '').replace(/\D/g, '');
-        const isOwner   = message.key.fromMe || fromNum === ownerNum;
+        // fromMe  = command came from the bot's own linked device
+        // number  = compare last 9 digits so country-code variations still match
+        const ownerNum = jidToNum(config.OWNER_NUMBER || '');
+        const fromNum  = jidToNum(from);
+        const isOwner  = message.key.fromMe || fromNum === ownerNum || sameNumber(fromNum, ownerNum);
 
         // ── Resolve group admin status ────────────────────────────────────────
         let isAdmin    = false;
@@ -266,12 +285,17 @@ async function handleMessages(sock, message) {
         if (isGroup) {
             groupMetadata = await getCachedGroupMetadata(sock, jid);
             if (groupMetadata?.participants) {
-                const botNum = (sock.user?.id || '').replace(/:[^@]+/, '').replace(/\D/g, '');
+                const botJid = sock.user?.id || '';
                 for (const p of groupMetadata.participants) {
-                    const pNum = p.id.replace(/:[^@]+/, '').replace(/\D/g, '');
-                    const role = p.admin;
-                    if (pNum === fromNum)  isAdmin    = role === 'admin' || role === 'superadmin';
-                    if (pNum === botNum)   isBotAdmin = role === 'admin' || role === 'superadmin';
+                    const role   = p.admin;
+                    const isAdm  = role === 'admin' || role === 'superadmin';
+                    // Primary: proper JID comparison (handles device suffixes)
+                    if (areJidsSameUser(p.id, from))   isAdmin    = isAdm;
+                    if (areJidsSameUser(p.id, botJid)) isBotAdmin = isAdm;
+                    // Fallback: phone-number comparison (handles LID JIDs & format mismatches)
+                    const pNum = jidToNum(p.id);
+                    if (pNum && sameNumber(pNum, fromNum))                    isAdmin    = isAdm;
+                    if (pNum && sameNumber(pNum, jidToNum(botJid))) isBotAdmin = isAdm;
                 }
             }
         }
