@@ -58,11 +58,19 @@ All 31 plugins use a unified shape:
 
 **ctx object keys:** `sock, conn, m, message, sender, jid, chat, isGroup, isAdmin, isBotAdmin, isOwner, args, text, prefix, groupMetadata, contextInfo, mentionedJid, safeSend, reply`
 
-## Installed Plugins (41)
+## Installed Plugins (49)
 
 | Plugin | Commands | Permission |
 |--------|----------|------------|
 | afk | afk, back | owner |
+| anime | anime, animesearch, manga | public |
+| ascii | ascii, figlet, art, textart | public |
+| ban | ban, unban, banlist | admin |
+| broadcast | broadcast, bc | owner |
+| eval | eval, exec, run | owner |
+| react | react, reaction, emoji | public |
+| tempmail | tempmail, tmpmail, fakemail, disposable | public |
+| toaudio | toaudio, tomp3, tovn, audio | public |
 | anticall | anticall | owner |
 | antidelete | antidelete, antidel | owner |
 | antidemote | antidemote | admin |

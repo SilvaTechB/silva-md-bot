@@ -373,6 +373,14 @@ async function handleMessages(sock, message) {
             reply:         (replyText) => safeSend(sock, jid, { text: replyText }, { quoted: message })
         };
 
+        // ── Ban gate — banned users cannot trigger any command (owner always exempt) ──
+        if (!isOwner && global.bannedUsers?.size) {
+            const senderNorm = jidNormalizedUser(from);
+            if (global.bannedUsers.has(from) || global.bannedUsers.has(senderNorm) || global.bannedUsers.has(resolvedFrom)) {
+                return await safeSend(sock, jid, { text: '⛔ You have been banned from using bot commands.' }, { quoted: message });
+            }
+        }
+
         // ── Dispatch ──────────────────────────────────────────────────────────
         const RECORDING_CMDS = new Set(['play', 'song', 'sticker', 's', 'tiktok', 'tt', 'ttdl', 'tiktokdl', 'youtube', 'yt', 'instagram', 'igdl', 'ig', 'insta', 'facebook', 'fb', 'fbdl']);
 
