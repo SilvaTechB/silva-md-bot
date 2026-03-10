@@ -706,31 +706,58 @@ async function connectToWhatsApp() {
 
                         const { inner, msgType } = unwrapStatus(m);
 
-                        if (config.AUTO_STATUS_SEEN) {
-                            try {
-                                // Use sendReceipts with explicit 'read' type so the poster
-                                // always sees the view — readMessages() silently downgrades
-                                // to 'read-self' when the account has read-receipts disabled,
-                                // which means the poster never gets notified.
+                        // Runtime flags override config — set via .autoview / .autolike commands
+                        const flagSeen  = global.autoStatusFlags?.seen;
+                        const flagReact = global.autoStatusFlags?.react;
+                        const doSeen    = flagSeen  !== null && flagSeen  !== undefined ? flagSeen  : config.AUTO_STATUS_SEEN;
+                        const doReact   = flagReact !== null && flagReact !== undefined ? flagReact : config.AUTO_STATUS_REACT;
+
+                        // Retry helper — attempts the action up to maxTries times with
+                        // exponential back-off so transient WhatsApp server errors don't
+                        // cause a status to be silently skipped.
+                        async function mandatory(label, action, maxTries = 3) {
+                            for (let attempt = 1; attempt <= maxTries; attempt++) {
+                                try {
+                                    await action();
+                                    logMessage('INFO', `${label} ✓ (attempt ${attempt})`);
+                                    return true;
+                                } catch (e) {
+                                    if (attempt < maxTries) {
+                                        await new Promise(r => setTimeout(r, attempt * 1500));
+                                    } else {
+                                        logMessage('WARN', `${label} failed after ${maxTries} attempts: ${e.message}`);
+                                    }
+                                }
+                            }
+                            return false;
+                        }
+
+                        if (doSeen) {
+                            await mandatory(`Status seen [${statusId}]`, async () => {
+                                // Dual-method: readMessages + sendReceipts together guarantee
+                                // the poster sees a view tick on both old and new WhatsApp builds.
+                                await sock.readMessages([{
+                                    remoteJid:   'status@broadcast',
+                                    id:           statusId,
+                                    participant:  userJid
+                                }]);
                                 await sock.sendReceipts([{
                                     remoteJid:   'status@broadcast',
                                     id:           statusId,
                                     participant:  userJid,
                                     fromMe:       false
                                 }], 'read');
-                                logMessage('INFO', `Status seen: ${statusId}`);
-                            } catch (e) {
-                                logMessage('WARN', `Status seen failed: ${e.message}`);
-                            }
+                            });
                         }
 
-                        if (config.AUTO_STATUS_REACT) {
-                            try {
-                                const emojis = (config.CUSTOM_REACT_EMOJIS || '❤️,🔥,💯,😍,👏').split(',');
-                                const emoji  = emojis[Math.floor(Math.random() * emojis.length)].trim();
-                                // statusJidList MUST contain only the poster's clean JID so the
-                                // WhatsApp server routes the reaction receipt back to them with
-                                // the correct emoji visible on their end.
+                        if (doReact) {
+                            // Small delay after seen so WhatsApp orders events correctly
+                            if (doSeen) await new Promise(r => setTimeout(r, 500));
+
+                            const emojis = (config.CUSTOM_REACT_EMOJIS || '❤️,🔥,💯,😍,👏').split(',');
+                            const emoji  = emojis[Math.floor(Math.random() * emojis.length)].trim();
+
+                            await mandatory(`Status react [${emoji}→${statusId}]`, async () => {
                                 await sock.sendMessage(
                                     'status@broadcast',
                                     {
@@ -746,10 +773,7 @@ async function connectToWhatsApp() {
                                     },
                                     { statusJidList: [userJid] }
                                 );
-                                logMessage('INFO', `Status reacted ${emoji} → ${statusId}`);
-                            } catch (e) {
-                                logMessage('WARN', `Status react failed: ${e.message}`);
-                            }
+                            });
                         }
 
                         if (config.AUTO_STATUS_REPLY) {
