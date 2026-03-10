@@ -28,7 +28,9 @@ const {
     isJidStatusBroadcast,
     areJidsSameUser,
     jidNormalizedUser,
-    downloadContentFromMessage
+    downloadContentFromMessage,
+    proto,
+    generateMessageIDV2
 } = baileys;
 
 // Minimal in-memory message store (makeInMemoryStore was removed in gifted-baileys)
@@ -294,15 +296,19 @@ async function sendWelcomeMessage(sock) {
         // Always send to bare owner JID (strip device suffix :X if present)
         const ownerJid = `${config.OWNER_NUMBER.replace(/\D/g, '')}@s.whatsapp.net`;
 
-        // Enable 20-second disappearing messages so the welcome vanishes silently
-        // (no "This message was deleted" tombstone)
-        await sock.sendMessage(ownerJid, { disappearingMessagesInChat: 20 });
+        // For private chats, disappearing messages must be enabled via a raw
+        // EPHEMERAL_SETTING protocol message (sendMessage's disappearingMessagesInChat
+        // shorthand only works for groups). relayMessage lets us send it directly.
+        const ephemeralOn  = { protocolMessage: { type: proto.Message.ProtocolMessage.Type.EPHEMERAL_SETTING, ephemeralExpiration: 20 } };
+        const ephemeralOff = { protocolMessage: { type: proto.Message.ProtocolMessage.Type.EPHEMERAL_SETTING, ephemeralExpiration: 0  } };
+
+        await sock.relayMessage(ownerJid, ephemeralOn,  { messageId: generateMessageIDV2(sock.user?.id) });
         await sock.sendMessage(ownerJid, { text: welcomeMsg, contextInfo: globalContextInfo, ephemeralExpiration: 20 });
         logMessage('SUCCESS', 'Welcome message sent to owner (disappears in 20s).');
 
-        // Turn disappearing messages back off after the message has expired
+        // Turn disappearing messages back off after the welcome has expired
         setTimeout(async () => {
-            try { await sock.sendMessage(ownerJid, { disappearingMessagesInChat: 0 }); } catch { /* ok */ }
+            try { await sock.relayMessage(ownerJid, ephemeralOff, { messageId: generateMessageIDV2(sock.user?.id) }); } catch { /* ok */ }
         }, 25_000);
     } catch (e) {
         logMessage('WARN', `Welcome message failed: ${e.message}`);
