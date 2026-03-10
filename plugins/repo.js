@@ -39,7 +39,7 @@ module.exports = {
               `📜 *License:* ${data.license?.name || 'MIT'}\n` +
               `⚠️ *Open Issues:* ${data.open_issues}\n` +
               `🕒 *Updated:* ${moment(data.updated_at).fromNow()}\n\n` +
-            `https://github.com/SilvaTechB/silva-md-bot` +
+            `https://github.com/SilvaTechB/silva-md-bot\n\n` +
               `⚡ _Powered by Silva Tech Inc_`
             : `*✨ SILVA MD — REPOSITORY*\n\n` +
               `📦 *Repo:* silva-md-bot\n` +
