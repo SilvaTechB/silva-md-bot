@@ -583,24 +583,45 @@ async function connectToWhatsApp() {
         }
     });
 
-    // ✅ Anti-Demote: kick anyone who demotes a group admin
+    // ✅ Group participant events: anti-demote, welcome, goodbye
     sock.ev.on('group-participants.update', async ({ id, participants, action }) => {
         try {
-            if (action !== 'demote') return;
-            if (!global.antiDemoteGroups?.has(id)) return;
+            // --- Anti-Demote ---
+            if (action === 'demote' && global.antiDemoteGroups?.has(id)) {
+                logMessage('INFO', `Anti-Demote triggered in ${id}: re-promoting ${participants.join(', ')}`);
+                await sock.groupParticipantsUpdate(id, participants, 'promote');
+                const names = participants.map(p => `@${p.split('@')[0]}`).join(', ');
+                await sock.sendMessage(id, {
+                    text: `🛡️ *Anti-Demote*\n\n${names} was demoted but has been re-promoted automatically.`,
+                    mentions: participants
+                });
+            }
 
-            // Re-promote the demoted admin and remove the demoter is tricky — instead we kick the demoter
-            // The demoter is NOT in `participants` (those are the ones being demoted)
-            // We just re-promote the demoted admins and notify
-            logMessage('INFO', `Anti-Demote triggered in ${id}: re-promoting ${participants.join(', ')}`);
-            await sock.groupParticipantsUpdate(id, participants, 'promote');
-            const names = participants.map(p => `@${p.split('@')[0]}`).join(', ');
-            await sock.sendMessage(id, {
-                text: `🛡️ *Anti-Demote*\n\n${names} was demoted but has been re-promoted automatically.`,
-                mentions: participants
-            });
+            // --- Welcome / Goodbye ---
+            const ws = global.welcomeSettings?.get(id);
+            if (!ws) return;
+
+            if (action === 'add' && ws.welcome) {
+                for (const p of participants) {
+                    const name = p.split('@')[0];
+                    const text = ws.customWelcome
+                        ? ws.customWelcome.replace(/\{name\}/gi, `@${name}`)
+                        : `👋 Welcome to the group, @${name}! Glad to have you here. 🎉`;
+                    await sock.sendMessage(id, { text, mentions: [p] });
+                }
+            }
+
+            if ((action === 'remove' || action === 'leave') && ws.goodbye) {
+                for (const p of participants) {
+                    const name = p.split('@')[0];
+                    const text = ws.customGoodbye
+                        ? ws.customGoodbye.replace(/\{name\}/gi, `@${name}`)
+                        : `👋 Goodbye @${name}, take care! We'll miss you.`;
+                    await sock.sendMessage(id, { text, mentions: [p] });
+                }
+            }
         } catch (err) {
-            logMessage('WARN', `Anti-Demote error: ${err.message}`);
+            logMessage('WARN', `Group-participants event error: ${err.message}`);
         }
     });
 

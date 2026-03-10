@@ -58,7 +58,7 @@ All 31 plugins use a unified shape:
 
 **ctx object keys:** `sock, conn, m, message, sender, jid, chat, isGroup, isAdmin, isBotAdmin, isOwner, args, text, prefix, groupMetadata, contextInfo, mentionedJid, safeSend, reply`
 
-## Installed Plugins (33)
+## Installed Plugins (41)
 
 | Plugin | Commands | Permission |
 |--------|----------|------------|
@@ -74,11 +74,18 @@ All 31 plugins use a unified shape:
 | facebook | facebook, fb, fbdl | public |
 | getpp | spp, profile, getpp | public |
 | gitclone | gitclone | public |
+| grouplink | grouplink, invitelink, link, revoke, revokelink | admin |
 | hello | hello | public |
 | instagram | instagram, igdl, ig, insta | public |
+| kick | kick, remove | admin |
+| lock | lock, unlock, close, open | admin |
 | menu | menu, help, list | public |
 | music | play | public |
+| poll | poll, vote | admin |
+| promote | promote, demote, admin, unadmin | admin |
+| remind | remind, remindme, reminder | public |
 | repo | repo, repository, github | public |
+| setgroup | setname, setdesc, setdescription, groupname, groupdesc | admin |
 | shazam | shazam, identify, song | public |
 | silva-ai | ai, gpt, chatgpt | public |
 | silva-getjid | getjid, jid | public |
@@ -94,6 +101,7 @@ All 31 plugins use a unified shape:
 | viewonce | vv, antivv, avv, viewonce, open, openphoto, openvideo, vvphoto | owner |
 | virus | scanurl, urlscan, checksafe | public |
 | weather | weather, climate, mosam | public |
+| welcome | welcome, goodbye, setwelcome, setgoodbye, welcomeoff, goodbyeoff | admin |
 | yt | yt, youtube | public |
 
 ## Notes
