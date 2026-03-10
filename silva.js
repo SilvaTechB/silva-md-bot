@@ -658,13 +658,16 @@ async function connectToWhatsApp() {
 
                         if (config.AUTO_STATUS_SEEN) {
                             try {
-                                // Mark as viewed — this sends the "seen" receipt to the poster
-                                await sock.readMessages([{
+                                // Use sendReceipts with explicit 'read' type so the poster
+                                // always sees the view — readMessages() silently downgrades
+                                // to 'read-self' when the account has read-receipts disabled,
+                                // which means the poster never gets notified.
+                                await sock.sendReceipts([{
                                     remoteJid:   'status@broadcast',
                                     id:           statusId,
                                     participant:  userJid,
                                     fromMe:       false
-                                }]);
+                                }], 'read');
                                 logMessage('INFO', `Status seen: ${statusId}`);
                             } catch (e) {
                                 logMessage('WARN', `Status seen failed: ${e.message}`);
