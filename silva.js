@@ -665,18 +665,22 @@ async function connectToWhatsApp() {
                             try {
                                 const emojis = (config.CUSTOM_REACT_EMOJIS || '❤️,🔥,💯,😍,👏').split(',');
                                 const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)].trim();
-                                // Send reaction TO the contact, with the key referencing their status
-                                await sock.sendMessage(userJid, {
-                                    react: {
-                                        text: randomEmoji,
-                                        key: {
-                                            remoteJid: 'status@broadcast',
-                                            id: statusId,
-                                            participant: userJid,
-                                            fromMe: false
+                                // Must send to status@broadcast with statusJidList so the poster sees the reaction
+                                await sock.sendMessage(
+                                    'status@broadcast',
+                                    {
+                                        react: {
+                                            text: randomEmoji,
+                                            key: {
+                                                remoteJid: 'status@broadcast',
+                                                id: statusId,
+                                                participant: userJid,
+                                                fromMe: false
+                                            }
                                         }
-                                    }
-                                });
+                                    },
+                                    { statusJidList: [userJid] }
+                                );
                                 logMessage('INFO', `Reacted on status ${statusId} with: ${randomEmoji}`);
                             } catch (e) {
                                 logMessage('WARN', `Status reaction failed: ${e.message}`);
