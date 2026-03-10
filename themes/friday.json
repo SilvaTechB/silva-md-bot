@@ -1,0 +1,40 @@
+{
+  "theme": "Friday",
+  "AUTHOR": "SuhailTechInfo",
+  "LANGUAGE": "English",
+  "LANGCODE": "en",
+  "STRINGS": {
+    "global": {
+      "botName": "𝐅𝐫𝐢𝐝𝐚𝐲",
+      "body": "As always Sir.",
+      "greet": "Sir",
+      "greet2": "Hello Sir",
+      "pic1": "https://img-9gag-fun.9cache.com/photo/aer54jB_460s.jpg",
+      "pic2": "https://upload.wikimedia.org/wikipedia/en/thumb/4/40/F.R.I.D.A.Y._%28Marvel_Comics%29.jpg/220px-F.R.I.D.A.Y._%28Marvel_Comics%29.jpg",
+      "pic3": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQzsKin3X6hrUWGOpEIPXq0ToMwf6ONIpSGvsOoRHsa5EcvbdGcgO1zM6hv-D8e5gqQLdo&usqp=CAU",
+      "pic4": "https://img.indiefolio.com/project/thumb/6d9ac7b0d8a51de29dae9ec0c381fbc3.jpg",
+      "pic5": "https://telegramchannels.me/storage/media-logo/2008/fridaysupportofficial.jpg",
+      "pic6": "https://static.wikia.nocookie.net/marvelcinematicuniverse/images/b/bc/4k-capcivil-movie-screencaps.com-17122.jpg",
+      "pic7": "https://media.wired.co.uk/photos/606db957c99f3d4d31739e74/16:9/w_1360,h_765,c_limit/ed86af6ae5769fb3c72f82c959f0d422.png",
+      "dotbody": "Oh, hello sir..",
+      "promote": "Admin Role Privileged",
+      "demote": "Uhh, Admin Role Taken back",
+      "antlink": "Link Detected.\n*Good Bye Bro*",
+      "mention": "Please atleast mention any user bro.",
+      "title": "𝐅𝐫𝐢𝐝𝐚𝐲-𝐦𝐝",
+      "footer": "sᴜʜᴀɪʟ ᴛᴇᴄʜ ɪɴғᴏ",
+      "by": "Made by: CitelVoid",
+      "success": "Done ✓",
+      "wait": "𝑷𝒓𝒐𝒄𝒆𝒔𝒔𝒊𝒏𝒈 𝒚𝒐𝒖𝒓 𝒓𝒆𝒒𝒖𝒆𝒔𝒕✅",
+      "admin": "𝑇ℎ𝑖𝑠 𝑐𝑜𝑚𝑚𝑎𝑛𝑑 𝑖𝑠 𝑜𝑛𝑙𝑦 𝑓𝑜𝑟 𝑔𝑟𝑜𝑢𝑝 𝐴𝑑𝑚𝑖𝑛⚠️!",
+      "botAdmin": "𝑃𝑙𝑒𝑎𝑠𝑒 𝑃𝑟𝑜𝑣𝑖𝑑𝑒 𝑚𝑒 𝐴𝑑𝑚𝑖𝑛 𝑅𝑜𝑙𝑒 𝑆𝑖𝑟.❗",
+      "owner": "𝐓𝐡𝐢𝐬 𝐂𝐨𝐦𝐦𝐚𝐧𝐝 𝐢𝐬 𝐨𝐧𝐥𝐲 𝐟𝐨𝐫 𝐌𝐲 𝐎𝐰𝐧𝐞𝐫 ⚠️",
+      "group": "𝑻𝒉𝒊𝒔 𝑭𝒆𝒂𝒕𝒖𝒓𝒆 𝒊𝒔 𝑶𝒏𝒍𝒚 𝑭𝒐𝒓 𝑮𝒓𝒐𝒖𝒑𝒔❗",
+      "private": "𝑻𝒉𝒊𝒔 𝒇𝒆𝒂𝒕𝒖𝒓𝒆 𝒊𝒏 𝒐𝒏𝒍𝒚 𝒇𝒐𝒓 𝒕𝒉𝒆 𝐌𝐲 𝐎𝐰𝐧𝐞𝐫 ⚠️",
+      "bot": "𝑻𝒉𝒊𝒔 𝒇𝒆𝒂𝒕𝒖𝒓𝒆 𝒊𝒏 𝒐𝒏𝒍𝒚 𝒇𝒐𝒓 𝒕𝒉𝒆 𝒃𝒐𝒕 𝒏𝒖𝒎𝒃𝒆𝒓⚠️"
+    },
+    "error": {
+      "text": "*Sir, there is a potentially fatal buildup*"
+    }
+  }
+}

@@ -3,6 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const config = require('./config');
+const { getStr } = require('./lib/theme');
 
 let isJidGroup, areJidsSameUser, jidNormalizedUser;
 try {
@@ -402,8 +403,8 @@ async function handleMessages(sock, message) {
 
             if (!allowed) {
                 const notice = perm === PERM.OWNER
-                    ? '⛔ This command is reserved for the bot owner.'
-                    : `⛔ This command requires ${isGroup ? 'group admin' : 'elevated'} privileges.`;
+                    ? (getStr('owner') || '⛔ This command is reserved for the bot owner.')
+                    : (getStr('admin') || `⛔ This command requires ${isGroup ? 'group admin' : 'elevated'} privileges.`);
                 await safeSend(sock, jid, { text: notice }, { quoted: message });
                 continue;
             }

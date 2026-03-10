@@ -3,6 +3,7 @@
 const fs      = require('fs');
 const path    = require('path');
 const config  = require('../config');
+const { getStr, getActiveTheme } = require('../lib/theme');
 const moment  = require('moment-timezone');
 const baileys = require('@whiskeysockets/baileys');
 const { proto, generateMessageIDV2 } = baileys;
@@ -152,11 +153,11 @@ module.exports = {
         const jid = message.key.remoteJid;
 
         const plugins  = loadPlugins();
-        const botName  = config.BOT_NAME   || 'Silva MD';
+        const botName  = getStr('botName') || config.BOT_NAME || 'Silva MD';
         const ownerNum = `+${(config.OWNER_NUMBER || '').replace(/\D/g, '')}`;
         const mode     = (config.MODE || 'public').toUpperCase();
         const pfx      = prefix || '.';
-        const imgUrl   = config.ALIVE_IMG  || 'https://files.catbox.moe/5uli5p.jpeg';
+        const imgUrl   = getStr('pic1') || config.ALIVE_IMG || 'https://files.catbox.moe/5uli5p.jpeg';
 
         const menuText = buildMenuText(plugins, pfx, botName, ownerNum, mode);
 

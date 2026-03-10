@@ -1,0 +1,40 @@
+{
+  "theme": "Gojo",
+  "AUTHOR": "SALMAN AHMAD",
+  "LANGUAGE": "English",
+  "LANGCODE": "en",
+  "STRINGS": {
+    "global": {
+      "botName": "GOJO SATURO",
+      "body": "SUKAAMUNAA!!",
+      "greet": "Oi",
+      "greet2": "Hey Baka! I'm the strongest",
+      "pic1": "https://telegra.ph/file/1ee748eead4fe9efadd1e.jpg",
+      "pic2": "https://telegra.ph/file/8192328287664bf2caeb7.jpg",
+      "pic3": "https://i.ibb.co/7yh3nd6/images.jpg",
+      "pic4": "https://i.ibb.co/zGhQ4b3/20230812-161923.jpg",
+      "pic5": "https://telegra.ph/file/cf06946ae14195ff60ae9.jpg",
+      "pic6": "https://telegra.ph/file/05d06f59fcf4a4c86a732.jpg",
+      "pic7": "https://telegra.ph/file/775e4c3291b9f6d22879c.jpg",
+      "dotbody": "Yup. I am here.",
+      "promote": "A new worthy Cursed skill arrived",
+      "demote": "You are not Worthy",
+      "antlink": "Link Detected.\n*Good Bye Worthless Demon*",
+      "mention": "Please mention any user Baka!",
+      "title": "GOJO-MD",
+      "footer": "Baka! I'm Here!",
+      "by": "Made by: Xlicon Team",
+      "success": "Success ✓",
+      "wait": "𝑷𝒓𝒐𝒄𝒆𝒔𝒔𝒊𝒏𝒈 𝒚𝒐𝒖𝒓 𝒓𝒆𝒒𝒖𝒆𝒔𝒕✅",
+      "admin": "𝑇ℎ𝑖𝑠 𝑐𝑜𝑚𝑚𝑎𝑛𝑑 𝑖𝑠 𝑜𝑛𝑙𝑦 𝑓𝑜𝑟 𝑔𝑟𝑜𝑢𝑝 𝐴𝑑𝑚𝑖𝑛⚠️!",
+      "botAdmin": "𝑃𝑙𝑒𝑎𝑠𝑒 𝑃𝑟𝑜𝑣𝑖𝑑𝑒 𝑚𝑒 𝐴𝑑𝑚𝑖𝑛 𝑅𝑜𝑙𝑒 .❗",
+      "owner": "𝐓𝐡𝐢𝐬 𝐂𝐨𝐦𝐦𝐚𝐧𝐝 𝐢𝐬 𝐨𝐧𝐥𝐲 𝐟𝐨𝐫 𝐌𝐲 𝐎𝐰𝐧𝐞𝐫 ⚠️",
+      "group": "𝑻𝒉𝒊𝒔 𝑭𝒆𝒂𝒕𝒖𝒓𝒆 𝒊𝒔 𝑶𝒏𝒍𝒚 𝑭𝒐𝒓 𝑮𝒓𝒐𝒖𝒑𝒔❗",
+      "private": "𝑻𝒉𝒊𝒔 𝒇𝒆𝒂𝒕𝒖𝒓𝒆 𝒊𝒏 𝒐𝒏𝒍𝒚 𝒇𝒐𝒓 𝒕𝒉𝒆 𝐌𝐲 𝐎𝐰𝐧𝐞𝐫 ⚠️",
+      "bot": "𝑻𝒉𝒊𝒔 𝒇𝒆𝒂𝒕𝒖𝒓𝒆 𝒊𝒏 𝒐𝒏𝒍𝒚 𝒇𝒐𝒓 𝒕𝒉𝒆 𝒃𝒐𝒕 𝒏𝒖𝒎𝒃𝒆𝒓⚠️"
+    },
+    "error": {
+      "text": "Task Failed"
+    }
+  }
+}

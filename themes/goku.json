@@ -1,0 +1,40 @@
+{
+  "theme": "Goku",
+  "AUTHOR": "SamPandey001",
+  "LANGUAGE": "English",
+  "LANGCODE": "en",
+  "STRINGS": {
+    "global": {
+      "botName": "𝐆𝐨𝐤𝐮",
+      "body": "𝑊ℎ𝑎𝑡𝑠𝑎𝑝𝑝 𝐵𝑜𝑡",
+      "greet": "Hi, There",
+      "greet2": "Buddy",
+      "pic1": "https://wallpapercave.com/dwp1x/wp9172946.jpg",
+      "pic2": "https://wallpapercave.com/dwp1x/wp9173073.jpg",
+      "pic3": "https://wallpapercave.com/dwp1x/wp9172847.jpg",
+      "pic4": "https://wallpapercave.com/dwp1x/wp10557889.jpg",
+      "pic5": "https://wallpapercave.com/dwp1x/wp9064806.jpg",
+      "pic6": "https://wallpapercave.com/dwp1x/wp6523299.jpg",
+      "pic7": "https://i.pinimg.com/236x/6e/88/0b/6e880bb9a1aa39af9902826e2f156e29.jpg",
+      "dotbody": "Stop me if you can.",
+      "promote": "A new worthy Saiyen arrived",
+      "demote": "You are not Worthy like i imagined",
+      "antlink": "Link Detected.\n*Good Bye Worthless saiyan*",
+      "mention": "Please mention any user Onii-Chan",
+      "title": "𝐆𝐨𝐤𝐮-𝐦𝐝",
+      "footer": "𝐒𝐨𝐧-𝐆𝐨𝐤𝐮",
+      "by": "Made by: CitelVoid",
+      "success": "Success ✓",
+      "wait": "𝑷𝒓𝒐𝒄𝒆𝒔𝒔𝒊𝒏𝒈 𝒚𝒐𝒖𝒓 𝒓𝒆𝒒𝒖𝒆𝒔𝒕✅",
+      "admin": "𝑇ℎ𝑖𝑠 𝑐𝑜𝑚𝑚𝑎𝑛𝑑 𝑖𝑠 𝑜𝑛𝑙𝑦 𝑓𝑜𝑟 𝑔𝑟𝑜𝑢𝑝 𝐴𝑑𝑚𝑖𝑛⚠️!",
+      "botAdmin": "𝑃𝑙𝑒𝑎𝑠𝑒 𝑃𝑟𝑜𝑣𝑖𝑑𝑒 𝑚𝑒 𝐴𝑑𝑚𝑖𝑛 𝑅𝑜𝑙𝑒 .❗",
+      "owner": "𝐓𝐡𝐢𝐬 𝐂𝐨𝐦𝐦𝐚𝐧𝐝 𝐢𝐬 𝐨𝐧𝐥𝐲 𝐟𝐨𝐫 𝐌𝐲 𝐎𝐰𝐧𝐞𝐫 ⚠️",
+      "group": "𝑻𝒉𝒊𝒔 𝑭𝒆𝒂𝒕𝒖𝒓𝒆 𝒊𝒔 𝑶𝒏𝒍𝒚 𝑭𝒐𝒓 𝑮𝒓𝒐𝒖𝒑𝒔❗",
+      "private": "𝑻𝒉𝒊𝒔 𝒇𝒆𝒂𝒕𝒖𝒓𝒆 𝒊𝒏 𝒐𝒏𝒍𝒚 𝒇𝒐𝒓 𝒕𝒉𝒆 𝐌𝐲 𝐎𝐰𝐧𝐞𝐫 ⚠️",
+      "bot": "𝑻𝒉𝒊𝒔 𝒇𝒆𝒂𝒕𝒖𝒓𝒆 𝒊𝒏 𝒐𝒏𝒍𝒚 𝒇𝒐𝒓 𝒕𝒉𝒆 𝒃𝒐𝒕 𝒏𝒖𝒎𝒃𝒆𝒓⚠️"
+    },
+    "error": {
+      "text": "Task Failed"
+    }
+  }
+}

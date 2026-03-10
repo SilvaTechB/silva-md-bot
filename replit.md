@@ -19,6 +19,8 @@ A modular WhatsApp bot built with Baileys (multi-device), featuring an admin das
 | `handler.js`     | Message handler & command dispatcher            |
 | `config.js`      | Config reader (env vars / config.env)           |
 | `plugins/`       | Individual feature plugins (commands)           |
+| `themes/`        | Theme JSON files (19 themes — silva default)    |
+| `lib/theme.js`   | Theme loader — `getStr()`, `setActiveTheme()`   |
 | `lib/`           | Shared utilities and functions                  |
 | `utils/`         | Delay, safeSend, warmupGroup helpers            |
 | `smm/silva.html` | Admin dashboard (served as static file)         |

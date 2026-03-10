@@ -1,0 +1,40 @@
+{
+  "theme": "Batman",
+  "AUTHOR": "SilvaTech",
+  "LANGUAGE": "English",
+  "LANGCODE": "en",
+  "STRINGS": {
+    "global": {
+      "botName": "𝐁𝐀𝐓𝐌𝐀𝐍",
+      "body": "𝐼 𝑎𝑚 𝑣𝑒𝑛𝑔𝑒𝑎𝑛𝑐𝑒.",
+      "greet": "Citizen",
+      "greet2": "Gotham needs you",
+      "pic1": "https://wallpapercave.com/wp/wp2018341.jpg",
+      "pic2": "https://wallpapercave.com/wp/wp2018347.jpg",
+      "pic3": "https://wallpapercave.com/wp/wp2018350.jpg",
+      "pic4": "https://wallpapercave.com/wp/wp2018346.jpg",
+      "pic5": "https://wallpapercave.com/wp/wp2018348.jpg",
+      "pic6": "https://wallpapercave.com/wp/wp2018342.jpg",
+      "pic7": "https://wallpapercave.com/wp/wp2018344.jpg",
+      "dotbody": "I am the night.",
+      "promote": "A new guardian of Gotham",
+      "demote": "You failed this city.",
+      "antlink": "Link Detected. *Criminals are a superstitious cowardly lot.*",
+      "mention": "Please mention a citizen",
+      "title": "𝐁𝐀𝐓𝐌𝐀𝐍-𝐦𝐝",
+      "footer": "𝐃𝐀𝐑𝐊 𝐊𝐍𝐈𝐆𝐇𝐓",
+      "by": "Made by: SilvaTech",
+      "success": "Mission accomplished ✓",
+      "wait": "𝑨𝒏𝒂𝒍𝒚𝒛𝒊𝒏𝒈 𝒓𝒆𝒒𝒖𝒆𝒔𝒕✅",
+      "admin": "𝐓𝐡𝐢𝐬 𝐜𝐨𝐦𝐦𝐚𝐧𝐝 𝐢𝐬 𝐨𝐧𝐥𝐲 𝐟𝐨𝐫 𝐆𝐨𝐭𝐡𝐚𝐦'𝐬 𝐠𝐮𝐚𝐫𝐝𝐢𝐚𝐧𝐬⚠️!",
+      "botAdmin": "𝐆𝐢𝐯𝐞 𝐦𝐞 𝐚𝐝𝐦𝐢𝐧 𝐚𝐜𝐜𝐞𝐬𝐬 𝐟𝐢𝐫𝐬𝐭.❗",
+      "owner": "𝐓𝐡𝐢𝐬 𝐜𝐨𝐦𝐦𝐚𝐧𝐝 𝐢𝐬 𝐨𝐧𝐥𝐲 𝐟𝐨𝐫 𝐁𝐚𝐭𝐦𝐚𝐧 ⚠️",
+      "group": "𝐓𝐡𝐢𝐬 𝐟𝐞𝐚𝐭𝐮𝐫𝐞 𝐢𝐬 𝐨𝐧𝐥𝐲 𝐟𝐨𝐫 𝐆𝐨𝐭𝐡𝐚𝐦 𝐠𝐫𝐨𝐮𝐩𝐬❗",
+      "private": "𝐓𝐡𝐢𝐬 𝐟𝐞𝐚𝐭𝐮𝐫𝐞 𝐢𝐬 𝐨𝐧𝐥𝐲 𝐟𝐨𝐫 𝐁𝐚𝐭𝐦𝐚𝐧 ⚠️",
+      "bot": "𝐓𝐡𝐢𝐬 𝐟𝐞𝐚𝐭𝐮𝐫𝐞 𝐢𝐬 𝐨𝐧𝐥𝐲 𝐟𝐨𝐫 𝐭𝐡𝐞 𝐛𝐨𝐭 𝐧𝐮𝐦𝐛𝐞𝐫⚠️"
+    },
+    "error": {
+      "text": "*The Batcomputer encountered an error.*"
+    }
+  }
+}
