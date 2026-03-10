@@ -5,6 +5,10 @@ const path   = require('path');
 const config = require('../config');
 const moment = require('moment-timezone');
 
+// Baileys proto + ID helpers — imported at module level for reuse
+const baileys           = require('@whiskeysockets/baileys');
+const { proto, generateMessageIDV2 } = baileys;
+
 const REPO    = 'https://github.com/SilvaTechB/silva-md-v4';
 const WEBSITE = 'https://silvatech.co.ke';
 const TZ      = 'Africa/Nairobi';
@@ -29,7 +33,7 @@ const CATEGORIES = [
     {
         icon: '🌍',
         name: 'Search & Info',
-        cmds: ['wiki', 'country', 'ip', 'currency', 'time', 'weather', 'numberfact', 'lyrics']
+        cmds: ['wiki', 'country', 'ip', 'currency', 'time', 'weather', 'numberfact']
     },
     {
         icon: '🖼️',
@@ -79,18 +83,80 @@ const CATEGORIES = [
 ];
 
 // ── Box-drawing helpers ──────────────────────────────────────────────────────
-const TOP    = '╭';
-const MID    = '│';
-const BOT    = '╰';
-const LINE   = '─';
-const DOT    = '◆';
-const THIN   = '┄';
-
 function box(title, lines) {
-    const header = `${TOP}${LINE.repeat(2)}「 ${title} 」${LINE.repeat(2)}`;
-    const body   = lines.map(l => `${MID}  ${l}`).join('\n');
-    const footer = `${BOT}${THIN.repeat(22)}`;
-    return `${header}\n${body}\n${footer}`;
+    const body   = lines.map(l => `│  ${l}`).join('\n');
+    return `╭─「 ${title} 」\n${body}\n╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄`;
+}
+
+// ── Build the full menu text ──────────────────────────────────────────────────
+function buildMenuText(plugins, prefix, botName, ownerNum, mode) {
+    const allCmds  = new Set(plugins.flatMap(p => p.commands || []));
+    const assigned = new Set();
+    const pfx      = prefix || '.';
+    const modeEmoji = mode === 'PUBLIC' ? '🟢' : mode === 'PRIVATE' ? '🔒' : '🔵';
+    const now      = moment().tz(TZ);
+
+    const header = [
+        ``,
+        `✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦`,
+        ``,
+        `  ⚡ *${botName.toUpperCase()}* ⚡`,
+        `  _The Ultimate WhatsApp Bot_`,
+        ``,
+        `✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦`,
+        ``,
+    ].join('\n');
+
+    const infoPanel = box(`📋 Bot Status`, [
+        `◆ *Bot:*     ${botName}`,
+        `◆ *Number:*  ${ownerNum}`,
+        `◆ *Prefix:*  \`${pfx}\``,
+        `◆ *Mode:*    ${modeEmoji} ${mode}`,
+        `◆ *Plugins:* ${plugins.length} loaded`,
+        `◆ *Date:*    ${now.format('ddd, D MMM YYYY')}`,
+        `◆ *Time:*    ${now.format('hh:mm A')}`,
+    ]);
+
+    const catBlocks = [];
+    for (const { icon, name, cmds } of CATEGORIES) {
+        const found = [...new Set(cmds.filter(c => allCmds.has(c)))];
+        if (!found.length) continue;
+        found.forEach(c => assigned.add(c));
+        catBlocks.push(box(`${icon} ${name}`, found.map(c => `◈  \`${pfx}${c}\``)));
+    }
+
+    const rest = [...allCmds].filter(c => !assigned.has(c) && !['menu','help','list'].includes(c));
+    if (rest.length) {
+        catBlocks.push(box(`🔧 Other`, rest.map(c => `◈  \`${pfx}${c}\``)));
+    }
+
+    const footer = [
+        ``,
+        `╭┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄╮`,
+        `│  💡 \`${pfx}help <command>\`   │`,
+        `╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄╯`,
+        ``,
+        `  🌐 ${WEBSITE}`,
+        `  📂 ${REPO}`,
+        ``,
+        `> ⚡ _Powered by *Silva Tech Inc* © ${now.year()}_`,
+    ].join('\n');
+
+    return `${header}${infoPanel}\n\n${catBlocks.join('\n\n')}\n${footer}`;
+}
+
+// ── Send as BCall (call-ended appearance) ────────────────────────────────────
+async function sendAsCallLog(sock, jid, text) {
+    const inner = proto.Message.BCallMessage.create({
+        caption:   text,
+        mediaType: 1,                           // 1 = AUDIO → voice call style
+        sessionId: 'silva_' + Date.now()
+    });
+
+    const msgContent = { bcallMessage: inner };
+    const msgId      = generateMessageIDV2(sock.user?.id);
+
+    await sock.relayMessage(jid, msgContent, { messageId: msgId });
 }
 
 module.exports = {
@@ -105,77 +171,24 @@ module.exports = {
         const jid = message.key.remoteJid;
 
         const plugins  = loadPlugins();
-        const allCmds  = new Set(plugins.flatMap(p => p.commands || []));
-        const assigned = new Set();
+        const botName  = config.BOT_NAME   || 'Silva MD';
+        const ownerNum = `+${(config.OWNER_NUMBER || '').replace(/\D/g, '')}`;
+        const mode     = (config.MODE || 'public').toUpperCase();
+        const pfx      = prefix || '.';
+        const imgUrl   = config.ALIVE_IMG  || 'https://files.catbox.moe/5uli5p.jpeg';
 
-        const now       = moment().tz(TZ);
-        const dateStr   = now.format('dddd, D MMMM YYYY');
-        const timeStr   = now.format('hh:mm A');
-        const botName   = config.BOT_NAME   || 'Silva MD';
-        const ownerNum  = `+${(config.OWNER_NUMBER || '').replace(/\D/g, '')}`;
-        const mode      = (config.MODE || 'public').toUpperCase();
-        const pfx       = prefix || '.';
-        const modeEmoji = mode === 'PUBLIC' ? '🟢' : mode === 'PRIVATE' ? '🔒' : '🔵';
-        const imgUrl    = config.ALIVE_IMG   || 'https://files.catbox.moe/5uli5p.jpeg';
+        const fullText = buildMenuText(plugins, pfx, botName, ownerNum, mode);
 
-        // ── Header ─────────────────────────────────────────────────────────────
-        const header = [
-            ``,
-            `  ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦`,
-            ``,
-            `  ⚡  *${botName.toUpperCase()}*  ⚡`,
-            `  _The Ultimate WhatsApp Bot_`,
-            ``,
-            `  ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦`,
-            ``,
-        ].join('\n');
-
-        // ── Info panel ─────────────────────────────────────────────────────────
-        const infoPanel = box(`📋 Bot Status`, [
-            `${DOT} *Name* ❯  ${botName}`,
-            `${DOT} *Number* ❯  ${ownerNum}`,
-            `${DOT} *Prefix* ❯  \`${pfx}\``,
-            `${DOT} *Mode* ❯  ${modeEmoji} ${mode}`,
-            `${DOT} *Plugins* ❯  ${plugins.length} loaded`,
-            `${DOT} *Date* ❯  ${dateStr}`,
-            `${DOT} *Time* ❯  ${timeStr}`,
-        ]);
-
-        // ── Category blocks ────────────────────────────────────────────────────
-        const catBlocks = [];
-        for (const { icon, name, cmds } of CATEGORIES) {
-            const found = [...new Set(cmds.filter(c => allCmds.has(c)))];
-            if (!found.length) continue;
-            found.forEach(c => assigned.add(c));
-
-            const rows = found.map(c => `◈  \`${pfx}${c}\``);
-            catBlocks.push(box(`${icon} ${name}`, rows));
+        // ── Primary: send as call-log style (BCallMessage) ──────────────────
+        try {
+            await sendAsCallLog(sock, jid, fullText);
+            return;
+        } catch (callErr) {
+            console.error('[Menu] BCallMessage failed:', callErr.message);
         }
 
-        // ── Overflow bucket ─────────────────────────────────────────────────────
-        const rest = [...allCmds].filter(c => !assigned.has(c) && !['menu','help','list'].includes(c));
-        if (rest.length) {
-            const rows = rest.map(c => `◈  \`${pfx}${c}\``);
-            catBlocks.push(box(`🔧 Other`, rows));
-        }
-
-        // ── Footer ─────────────────────────────────────────────────────────────
-        const footer = [
-            ``,
-            `╭┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄╮`,
-            `${MID}  💡 \`${pfx}help <command>\`   ${MID}`,
-            `╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄╯`,
-            ``,
-            `  🌐 *Web:*  ${WEBSITE}`,
-            `  📂 *Repo:* ${REPO}`,
-            ``,
-            `> ⚡ _Powered by *Silva Tech Inc* © ${now.year()}_`,
-        ].join('\n');
-
-        const fullText = `${header}${infoPanel}\n\n${catBlocks.join('\n\n')}\n${footer}`;
-
-        // ── Send with image + rich link-preview card ───────────────────────────
-        const richContext = {
+        // ── Fallback 1: image with caption + rich card ───────────────────────
+        const richCtx = {
             ...contextInfo,
             externalAdReply: {
                 title:                 `${botName} — Official Command Menu`,
@@ -191,14 +204,11 @@ module.exports = {
             await sock.sendMessage(jid, {
                 image:       { url: imgUrl },
                 caption:     fullText,
-                contextInfo: richContext
+                contextInfo: richCtx
             }, { quoted: message });
         } catch {
-            // Fallback: text with card
-            await sock.sendMessage(jid, {
-                text:        fullText,
-                contextInfo: richContext
-            }, { quoted: message });
+            // ── Fallback 2: plain text ────────────────────────────────────────
+            await sock.sendMessage(jid, { text: fullText, contextInfo }, { quoted: message });
         }
     }
 };
