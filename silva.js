@@ -366,13 +366,22 @@ async function connectToWhatsApp() {
         } else if (connection === 'open') {
             logMessage('SUCCESS', '✅ Connected to WhatsApp');
 
-            // Store bot JID and set owner number to the connected number
+            // Store bot JID and bot's own number globally
             global.botJid = sock.user.id;
             const rawNum = sock.user.id.includes(':')
                 ? sock.user.id.split(':')[0]
                 : sock.user.id.split('@')[0];
-            config.OWNER_NUMBER = rawNum;
-            logMessage('INFO', `Owner number set to: ${rawNum}`);
+            global.botNum = rawNum;
+
+            // Only fall back to the bot's own number when OWNER_NUMBER is not
+            // explicitly configured — preserves the real owner's number when the
+            // bot runs as a separate WhatsApp account.
+            if (!process.env.OWNER_NUMBER) {
+                config.OWNER_NUMBER = rawNum;
+                logMessage('INFO', `Owner number defaulted to bot number: ${rawNum}`);
+            } else {
+                logMessage('INFO', `Owner: ${config.OWNER_NUMBER} | Bot number: ${rawNum}`);
+            }
 
             // Update profile & send welcome
             await updateProfileStatus(sock);

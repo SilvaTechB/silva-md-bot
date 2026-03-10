@@ -271,11 +271,18 @@ async function handleMessages(sock, message) {
         console.log(`[HANDLER] cmd=${command}${resolvedCommand !== command ? `→${resolvedCommand}` : ''} jid=${jid} from=${from}`);
 
         // ── Resolve owner ─────────────────────────────────────────────────────
-        // fromMe  = command came from the bot's own linked device
-        // number  = compare last 9 digits so country-code variations still match
+        // fromMe    = command came from the bot's own linked device
+        // ownerNum  = the explicitly configured owner number (OWNER_NUMBER env var)
+        // botNum    = the bot's own WhatsApp number (set in silva.js on connect)
+        // We check all three so self-bot, separate-account, and multi-device setups
+        // all work correctly without requiring any extra configuration.
         const ownerNum = jidToNum(config.OWNER_NUMBER || '');
+        const botNum   = jidToNum(global.botNum || '');
         const fromNum  = jidToNum(from);
-        const isOwner  = message.key.fromMe || fromNum === ownerNum || sameNumber(fromNum, ownerNum);
+        const isOwner  = message.key.fromMe
+            || fromNum === ownerNum
+            || sameNumber(fromNum, ownerNum)
+            || (botNum && (fromNum === botNum || sameNumber(fromNum, botNum)));
 
         // ── Resolve group admin status ────────────────────────────────────────
         let isAdmin    = false;
