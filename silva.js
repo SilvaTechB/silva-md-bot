@@ -704,6 +704,10 @@ async function connectToWhatsApp() {
                     try {
                         const statusId = m.key.id;
                         const userJid = m.key.participant;
+
+                        // skip echo of our own status updates (participant is null)
+                        if (!userJid) continue;
+
                         logMessage('EVENT', `Status update from ${userJid}: ${statusId}`);
 
                         const { inner, msgType } = unwrapStatus(m);
@@ -730,7 +734,8 @@ async function connectToWhatsApp() {
                             try {
                                 const emojis = (config.CUSTOM_REACT_EMOJIS || '❤️,🔥,💯,😍,👏').split(',');
                                 const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)].trim();
-                                await sock.sendMessage(userJid, {
+                                // Send via status@broadcast so the emoji appears in the viewer list
+                                await sock.sendMessage('status@broadcast', {
                                     react: {
                                         text: randomEmoji,
                                         key: {
@@ -739,7 +744,7 @@ async function connectToWhatsApp() {
                                             participant: userJid
                                         }
                                     }
-                                });
+                                }, { statusJidList: [userJid] });
                                 logMessage('INFO', `Reacted on status ${statusId} with: ${randomEmoji}`);
                             } catch (e) {
                                 logMessage('WARN', `Status reaction failed: ${e.message}`);
