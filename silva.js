@@ -699,58 +699,39 @@ async function connectToWhatsApp() {
             if (!Array.isArray(messages) || messages.length === 0) return;
 
             for (const m of messages) {
-                // ---- STATUS handling (status@broadcast) — runs regardless of upsert type
+                // ---- STATUS handling (status@broadcast)
                 if (m.key.remoteJid === 'status@broadcast') {
                     try {
                         const statusId = m.key.id;
-                        const userJid  = m.key.participant;
-
-                        // Skip bot's own statuses and statuses delivered before bot stabilises
-                        if (m.key.fromMe) continue;
-                        if (process.uptime() < 25) continue;
-                        if (!userJid) {
-                            logMessage('WARN', `Status skipped — no participant for ${statusId}`);
-                            continue;
-                        }
-
+                        const userJid = m.key.participant;
                         logMessage('EVENT', `Status update from ${userJid}: ${statusId}`);
 
                         const { inner, msgType } = unwrapStatus(m);
 
-                        // Runtime flags (.autoview / .autolike) override config defaults
-                        const flagSeen  = global.autoStatusFlags?.seen;
-                        const flagReact = global.autoStatusFlags?.react;
-                        const doSeen    = flagSeen  != null ? flagSeen  : config.AUTO_STATUS_SEEN;
-                        const doReact   = flagReact != null ? flagReact : config.AUTO_STATUS_REACT;
-
-                        if (doSeen) {
+                        if (config.AUTO_STATUS_SEEN) {
                             try {
                                 await sock.readMessages([m.key]);
-                                logMessage('INFO', `Status seen: ${statusId} (participant: ${userJid})`);
+                                logMessage('INFO', `Status seen: ${statusId}`);
                             } catch (e) {
                                 logMessage('WARN', `Status seen failed: ${e.message}`);
                             }
                         }
 
-                        if (doReact) {
+                        if (config.AUTO_STATUS_REACT) {
                             try {
                                 const emojis = (config.CUSTOM_REACT_EMOJIS || '❤️,🔥,💯,😍,👏').split(',');
                                 const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)].trim();
-                                // Send directly to userJid (1:1 path) — this uses the correct
-                                // LID-indexed Signal session. The statusJidList path encodes
-                                // sessions as @s.whatsapp.net which mismatches LID sessions.
                                 await sock.sendMessage(userJid, {
                                     react: {
                                         text: randomEmoji,
                                         key: {
                                             remoteJid: 'status@broadcast',
                                             id: statusId,
-                                            participant: userJid,
-                                            fromMe: false
+                                            participant: userJid
                                         }
                                     }
                                 });
-                                logMessage('INFO', `Reacted on status ${statusId} with: ${randomEmoji} → ${userJid}`);
+                                logMessage('INFO', `Reacted on status ${statusId} with: ${randomEmoji}`);
                             } catch (e) {
                                 logMessage('WARN', `Status reaction failed: ${e.message}`);
                             }
@@ -790,7 +771,7 @@ async function connectToWhatsApp() {
                                         break;
                                     case 'extendedTextMessage':
                                         caption = `${statusHeader}\n\n${inner.extendedTextMessage?.text || ''}`;
-                                        await sock.sendMessage(`${config.OWNER_NUMBER.replace(/\D/g, '')}@s.whatsapp.net`, { text: caption });
+                                        await sock.sendMessage(sock.user.id, { text: caption });
                                         break;
                                     default:
                                         logMessage('WARN', `Unsupported status type: ${msgType}`);
