@@ -31,7 +31,9 @@
       "owner": "This command is Only for my Owner ⚠️",
       "group": "This feature is only for Group ❗",
       "private": "This feature is only for Private chats.⚠️",
-      "bot": "This feature is only for Bot Number.⚠️"
+      "bot": "This feature is only for Bot Number.⚠️",
+      "alive": "I have returned to full operational status.",
+      "aliveEmoji": "🌐"
     },
     "error": {
       "text": "Task Terminated"

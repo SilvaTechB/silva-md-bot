@@ -26,7 +26,7 @@ const CATEGORIES = [
     { icon: '🔒',  name: 'Privacy & Utilities', cmds: ['password','morse','base64','tempmail','virus','eval'] },
     { icon: '📊',  name: 'Status & Profile',    cmds: ['save','spp','presence','autojoin'] },
     { icon: '📰',  name: 'Channels',            cmds: ['newsletter','followchannel','unfollowchannel','channelinfo'] },
-    { icon: 'ℹ️', name: 'Bot Info',            cmds: ['ping','uptime','owner','getjid','repo','remind'] },
+    { icon: 'ℹ️', name: 'Bot Info',            cmds: ['alive','ping','uptime','owner','getjid','repo','remind'] },
 ];
 
 function box(title, lines) {

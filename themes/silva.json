@@ -31,7 +31,9 @@
       "owner": "⛔ This command is reserved for the bot owner.",
       "group": "❗ This feature is for groups only.",
       "private": "⚠️ This feature is for private chats only.",
-      "bot": "⚠️ This feature is for the bot number only."
+      "bot": "⚠️ This feature is for the bot number only.",
+      "alive": "System online. All functions nominal.",
+      "aliveEmoji": "⚡"
     },
     "error": {
       "text": "⚠️ An error occurred. Please try again."
