@@ -328,6 +328,9 @@ async function updateProfileStatus(sock) {
 
 // ✅ Connect to WhatsApp (main)
 async function connectToWhatsApp() {
+    // Per-connection dedup: ignore duplicate upserts for the same status ID
+    const seenStatusIds = new Set();
+
     // Use the session directory for multi-file auth state
     const { state, saveCreds } = await useMultiFileAuthState(sessionDir);
     const { version } = await fetchLatestBaileysVersion();
@@ -708,6 +711,10 @@ async function connectToWhatsApp() {
                         // skip echo of our own status updates (participant is null)
                         if (!userJid) continue;
 
+                        // deduplicate: skip if already handled this status this session
+                        if (seenStatusIds.has(statusId)) continue;
+                        seenStatusIds.add(statusId);
+
                         logMessage('EVENT', `Status update from ${userJid}: ${statusId}`);
 
                         const { inner, msgType } = unwrapStatus(m);
@@ -937,11 +944,19 @@ app.listen(port, () => {
 
 // ✅ Error handling
 process.on('uncaughtException', (err) => {
-    logMessage('CRITICAL', `Uncaught Exception: ${err.stack || err.message}`);
-    setTimeout(() => connectToWhatsApp(), 5000);
+    try {
+        logMessage('CRITICAL', `Uncaught Exception: ${err.stack || err.message}`);
+    } catch (_) {}
+    setTimeout(() => {
+        connectToWhatsApp().catch(e => {
+            try { logMessage('CRITICAL', `Reconnect failed: ${e.message}`); } catch (_) {}
+        });
+    }, 5000);
 });
 process.on('unhandledRejection', (reason, promise) => {
-    logMessage('CRITICAL', `Unhandled Rejection: ${reason} at ${promise}`);
+    try {
+        logMessage('WARN', `Unhandled Rejection: ${reason}`);
+    } catch (_) {}
 });
 
 // ✅ Boot Bot
