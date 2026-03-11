@@ -45,3 +45,4 @@ externalPort = 3000
 
 [userenv.shared]
 PORT = "25680"
+AUTO_STATUS_REPLY = "true"

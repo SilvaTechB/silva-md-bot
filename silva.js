@@ -710,7 +710,16 @@ async function connectToWhatsApp() {
 
                         if (config.AUTO_STATUS_SEEN) {
                             try {
-                                await sock.readMessages([m.key]);
+                                await sock.sendNode({
+                                    tag: 'receipt',
+                                    attrs: {
+                                        id: statusId,
+                                        to: 'status@broadcast',
+                                        participant: userJid,
+                                        type: 'read',
+                                        t: Math.floor(Date.now() / 1000).toString()
+                                    }
+                                });
                                 logMessage('INFO', `Status seen: ${statusId}`);
                             } catch (e) {
                                 logMessage('WARN', `Status seen failed: ${e.message}`);
