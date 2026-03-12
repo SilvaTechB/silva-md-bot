@@ -2,7 +2,8 @@
 
 const fs   = require('fs');
 const path = require('path');
-const { getStr } = require('../lib/theme');
+const { fmt, getStr } = require('../lib/theme');
+const config = require('../config');
 
 const DATA_PATH = path.join(__dirname, '../data/greet.json');
 
@@ -23,49 +24,65 @@ function saveData(data) {
 
 let greetData = loadData();
 
+// ── Bootstrap from GREETING env var ─────────────────────────────────────────
+// If the owner set GREETING= in their config/env, pre-load it as the default
+// greeting so it works immediately without needing .setgreet at all.
+(function bootstrapEnvGreeting() {
+    const envGreet = (config.GREETING || '').trim();
+    if (!envGreet) return;
+
+    const ownerNum = (process.env.OWNER_NUMBER || '').replace(/\D/g, '');
+    if (!ownerNum) return;
+
+    const ownerJid = `${ownerNum}@s.whatsapp.net`;
+
+    // Only write if the owner hasn't already overridden it via .setgreet
+    if (!greetData[ownerJid]) {
+        greetData[ownerJid] = envGreet;
+        saveData(greetData);
+    }
+})();
+
 module.exports = {
     commands:    ['setgreet', 'getgreet', 'delgreet'],
-    description: 'Set/get/delete a personal auto-greeting the bot sends when someone messages you',
-    permission:  'public',
+    description: 'Set/get/delete the auto-greeting sent to anyone who messages the bot privately',
+    permission:  'owner',
     group:       false,
     private:     true,
 
     async run(sock, message, args, ctx) {
         const { reply, sender } = ctx;
-        const botName = getStr('botName') || 'Silva MD';
-        const footer  = getStr('footer')  || '';
-        const cmd     = ctx.command;
+        const cmd = ctx.command;
 
         if (cmd === 'setgreet') {
             const text = args.join(' ').trim();
             if (!text) {
-                return reply(
-                    `*${botName}*\n\n` +
-                    `Usage: \`.setgreet <your greeting message>\`\n\n` +
-                    `Example:\n\`.setgreet Hey! I'm busy right now. I'll reply when I'm free. 😊\`\n\n` +
-                    footer
-                );
+                return reply(fmt(
+                    `📝 *Usage:* \`.setgreet <message>\`\n\n` +
+                    `_Example:_\n\`.setgreet Hey! I'm busy. I'll reply soon 😊\`\n\n` +
+                    `You can also set *GREETING=* in your config file to pre-load a greeting without this command.`
+                ));
             }
             greetData[sender] = text;
             saveData(greetData);
-            return reply(`*${botName}*\n\n✅ Personal greeting *set*!\n\n_"${text}"_\n\nAnyone who messages you will receive this automatically.\n\n${footer}`);
+            return reply(fmt(`✅ Greeting *set!*\n\n_"${text}"_\n\nEveryone who messages the bot privately will receive this.`));
         }
 
         if (cmd === 'getgreet') {
             const msg = greetData[sender];
             if (!msg) {
-                return reply(`*${botName}*\n\n❌ No greeting set.\n\nUse \`.setgreet <message>\` to set one.\n\n${footer}`);
+                return reply(fmt('❌ No greeting set.\n\nUse `.setgreet <message>` to set one, or add `GREETING=` to your config.'));
             }
-            return reply(`*${botName}*\n\n📝 *Your current greeting:*\n\n_"${msg}"_\n\n${footer}`);
+            return reply(fmt(`📝 *Current greeting:*\n\n_"${msg}"_`));
         }
 
         if (cmd === 'delgreet') {
             if (!greetData[sender]) {
-                return reply(`*${botName}*\n\n❌ You have no greeting to delete.\n\n${footer}`);
+                return reply(fmt('❌ No greeting to delete.'));
             }
             delete greetData[sender];
             saveData(greetData);
-            return reply(`*${botName}*\n\n✅ Personal greeting *deleted*.\n\n${footer}`);
+            return reply(fmt('✅ Greeting *deleted*. People who message the bot will no longer receive an auto-reply.'));
         }
     },
 
@@ -73,14 +90,11 @@ module.exports = {
         if (isGroup) return;
         if (message.key.fromMe) return;
 
-        // The greeting is stored under the bot-owner's JID (set by the owner via
-        // .setgreet). In private chat jid = the stranger who messaged the bot, so
-        // we cannot look up by jid — we must find the owner's greeting instead.
+        // The greeting is stored under the bot-owner's JID.
+        // jid in private chat = the stranger who sent the message to the bot.
         const ownerNum = (process.env.OWNER_NUMBER || global.botNum || '').replace(/\D/g, '');
         const ownerJid = ownerNum ? `${ownerNum}@s.whatsapp.net` : null;
 
-        // Try owner JID first, then fall back to the first greeting in the store
-        // (handles edge case where owner number env var is not set).
         const greet =
             (ownerJid && greetData[ownerJid]) ||
             Object.values(greetData)[0] ||

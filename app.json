@@ -129,6 +129,11 @@
       "description": "Enable verbose debug logging (true/false).",
       "required": false,
       "value": "false"
+    },
+    "GREETING": {
+      "description": "Auto-greeting message sent to anyone who DMs the bot. Leave blank to disable or use .setgreet command instead.",
+      "required": false,
+      "value": ""
     }
   },
   "buildpacks": [

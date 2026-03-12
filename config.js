@@ -34,4 +34,5 @@ module.exports = {
     ANTIVV:                toBool(process.env.ANTIVV,                 true),
     DEBUG:                 toBool(process.env.DEBUG,                 false),
     THEME:                 (process.env.THEME || 'silva').toLowerCase().trim(),
+    GREETING:              process.env.GREETING || '',
 };
