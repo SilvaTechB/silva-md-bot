@@ -158,7 +158,7 @@
 | **4** | Click **Deploy App** — wait ~2 minutes |
 | **5** | Go to **More → View Logs** and confirm you see `✅ Connected to WhatsApp` |
 
-> 💡 **Keep it awake for free:** Sign up at [UptimeRobot](https://uptimerobot.com) and ping your Heroku app URL every 5 minutes.
+> 💡 **RUNS 24/7 COSTS $ 1:** .
 
 </details>
 
