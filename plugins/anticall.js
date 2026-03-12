@@ -2,6 +2,7 @@
 
 const fs   = require('fs');
 const path = require('path');
+const { getStr } = require('../lib/theme');
 const SETTINGS_PATH = path.join(__dirname, '../anti-call-settings.json');
 
 const DEFAULT_SETTINGS = {
@@ -43,8 +44,8 @@ function initCallHandler(sock, ownerJid) {
                         contextInfo: {
                             externalAdReply: {
                                 title:        'Call Rejected',
-                                body:         'Silva MD Anti-Call',
-                                thumbnailUrl: 'https://files.catbox.moe/5uli5p.jpeg',
+                                body:         (getStr('botName') || 'Silva MD') + ' Anti-Call',
+                                thumbnailUrl: getStr('pic1') || 'https://files.catbox.moe/5uli5p.jpeg',
                                 mediaType:    1
                             }
                         }

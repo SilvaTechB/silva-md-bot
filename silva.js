@@ -719,7 +719,10 @@ async function connectToWhatsApp() {
 
                         const { inner, msgType } = unwrapStatus(m);
 
-                        if (config.AUTO_STATUS_SEEN) {
+                        const seenEnabled  = (global.autoStatusFlags?.seen  !== null && global.autoStatusFlags?.seen  !== undefined) ? global.autoStatusFlags.seen  : config.AUTO_STATUS_SEEN;
+                        const reactEnabled = (global.autoStatusFlags?.react !== null && global.autoStatusFlags?.react !== undefined) ? global.autoStatusFlags.react : config.AUTO_STATUS_REACT;
+
+                        if (seenEnabled) {
                             try {
                                 await sock.sendNode({
                                     tag: 'receipt',
@@ -737,7 +740,7 @@ async function connectToWhatsApp() {
                             }
                         }
 
-                        if (config.AUTO_STATUS_REACT) {
+                        if (reactEnabled) {
                             try {
                                 const emojis = (config.CUSTOM_REACT_EMOJIS || '❤️,🔥,💯,😍,👏').split(',');
                                 const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)].trim();

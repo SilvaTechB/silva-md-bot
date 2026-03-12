@@ -76,7 +76,7 @@ function buildMenuText(plugins, pfx, botName, ownerNum, mode) {
         `│  🌐 ${WEBSITE}  │`,
         `╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄╯`,
         ``,
-        `> ⚡ _Powered by *Silva Tech Inc* © ${now.year()}_`
+        `> ⚡ _${getStr('by') || 'Made by: SilvaTech'} © ${now.year()}_`
     ].join('\n');
 
     return `${header}${infoPanel}\n\n${catBlocks.join('\n\n')}\n${footer}`;
@@ -118,7 +118,7 @@ async function sendCallLogMenu(sock, jid, menuText, imgUrl) {
         participant:    botJid,
         quotedMessage:  quotedCallContent,
         externalAdReply: {
-            title:                 `Silva MD — Command Menu`,
+            title:                 `${getStr('botName') || 'Silva MD'} — Command Menu`,
             body:                  `Tap to view all commands`,
             thumbnailUrl:          imgUrl,
             sourceUrl:             WEBSITE,

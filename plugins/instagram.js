@@ -1,6 +1,7 @@
 'use strict';
 
-const axios = require('axios');
+const axios    = require('axios');
+const { getStr } = require('../lib/theme');
 
 module.exports = {
     commands:    ['instagram', 'igdl', 'ig', 'insta'],
@@ -52,13 +53,13 @@ module.exports = {
                 await sock.sendMessage(sender, {
                     [isVideo ? 'video' : 'image']: { url: mediaUrl },
                     caption: i === 0
-                        ? `📸 *Instagram Download*\n${items.length > 1 ? `_(1 of ${items.length} items)_` : ''}\n\n_Powered by Silva MD_`
+                        ? '📸 *Instagram Download*\n' + (items.length > 1 ? `_(1 of ${items.length} items)_\n` : '') + `\n_Powered by ${getStr('botName') || 'Silva MD'}_`
                         : `_(${i + 1} of ${items.length})_`,
                     contextInfo: {
                         ...contextInfo,
                         externalAdReply: {
                             title:               'Instagram',
-                            body:                'Powered by Silva MD',
+                            body:                'Powered by ' + (getStr('botName') || 'Silva MD'),
                             thumbnailUrl:        'https://files.catbox.moe/5uli5p.jpeg',
                             sourceUrl:           url,
                             mediaType:           1,

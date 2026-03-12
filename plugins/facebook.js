@@ -1,6 +1,7 @@
 'use strict';
 
-const axios = require('axios');
+const axios    = require('axios');
+const { getStr } = require('../lib/theme');
 
 module.exports = {
     commands:    ['facebook', 'fb', 'fbdl'],
@@ -46,7 +47,7 @@ module.exports = {
                     ...contextInfo,
                     externalAdReply: {
                         title:               'Facebook Downloader',
-                        body:                'Powered by Silva MD',
+                        body:                'Powered by ' + (getStr('botName') || 'Silva MD'),
                         thumbnailUrl:        'https://files.catbox.moe/5uli5p.jpeg',
                         sourceUrl:           url,
                         mediaType:           1,

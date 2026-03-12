@@ -1,6 +1,6 @@
 'use strict';
 
-
+const { getStr } = require('../lib/theme');
 const THUMB = 'https://files.catbox.moe/5uli5p.jpeg';
 
 module.exports = {
@@ -11,6 +11,8 @@ module.exports = {
     private:     true,
     run: async (sock, message, args, { sender, jid, contextInfo }) => {
         try {
+            const botName = getStr('botName') || 'Silva MD';
+            const pic     = getStr('pic1') || THUMB;
             const type = jid.endsWith('@g.us')
                 ? 'Group'
                 : jid.endsWith('@newsletter')
@@ -19,17 +21,17 @@ module.exports = {
 
             const caption =
 `┏━━━━━━━━━━━━━━━┓
-      ✦ *Silva MD JID Fetch* ✦
+      ✦ *${botName} JID Fetch* ✦
 ┗━━━━━━━━━━━━━━━┛
 
 🔹 *Chat JID:* \`${jid}\`
 🔹 *Your JID:* \`${sender}\`
 🔹 *Type:* ${type}
 
-✨ _Powered by Silva Tech Inc_`;
+✨ _Powered by ${botName}_`;
 
             await sock.sendMessage(sender, {
-                image:   { url: THUMB },
+                image:   { url: pic },
                 caption,
                 contextInfo
             }, { quoted: message });

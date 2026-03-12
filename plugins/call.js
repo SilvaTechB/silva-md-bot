@@ -1,14 +1,18 @@
 'use strict';
 
 const os = require('os');
+const { getStr } = require('../lib/theme');
 
 module.exports = {
     commands:    ['call', 'support', 'ss'],
-    description: 'Silva MD support panel',
+    description: 'Support panel',
     permission:  'public',
     group:       true,
     private:     true,
     run: async (sock, message, args, { sender, contextInfo }) => {
+        const botName = getStr('botName') || 'Silva MD';
+        const pic     = getStr('pic1') || 'https://files.catbox.moe/5uli5p.jpeg';
+
         const nairobiTime = new Date().toLocaleTimeString('en-KE', {
             hour: 'numeric', minute: 'numeric', hour12: true, timeZone: 'Africa/Nairobi'
         });
@@ -50,9 +54,9 @@ module.exports = {
         }
 
         await sock.sendMessage(sender, {
-            image:   { url: 'https://files.catbox.moe/5uli5p.jpeg' },
+            image:   { url: pic },
             caption:
-`『 *Silva MD Bot* 』
+`『 *${botName}* 』
 © 2025 *Silvatech Inc*
 
 ⏰ *${nairobiTime}*
@@ -65,9 +69,9 @@ module.exports = {
             contextInfo: {
                 ...contextInfo,
                 externalAdReply: {
-                    title:        'Silva Support',
+                    title:        `${botName} Support`,
                     body:         'Available 24/7',
-                    thumbnailUrl: 'https://files.catbox.moe/5uli5p.jpeg',
+                    thumbnailUrl: pic,
                     sourceUrl:    'https://wa.me/254700143167',
                     mediaType:    1
                 }

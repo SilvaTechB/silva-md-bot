@@ -1,7 +1,7 @@
 'use strict';
 
 const os = require('os');
-
+const { getStr } = require('../lib/theme');
 
 module.exports = {
     commands:    ['uptime', 'runtime'],
@@ -11,6 +11,9 @@ module.exports = {
     private:     true,
     run: async (sock, message, args, { sender, contextInfo }) => {
         try {
+            const botName = getStr('botName') || 'Silva MD';
+            const pic     = getStr('pic1') || 'https://files.catbox.moe/5uli5p.jpeg';
+
             const uptime  = process.uptime();
             const h = Math.floor(uptime / 3600);
             const m = Math.floor((uptime % 3600) / 60);
@@ -25,7 +28,7 @@ module.exports = {
 
             const caption =
 `┏━━━━━━━━━━━━━━━┓
-      ✦ *Silva MD Runtime* ✦
+      ✦ *${botName} Runtime* ✦
 ┗━━━━━━━━━━━━━━━┛
 
 🕒 *Uptime:* ${h}h ${m}m ${s}s
@@ -34,10 +37,10 @@ module.exports = {
 🏗 *Platform:* ${platform}
 🛠 *RAM:* ${freeMem} GB / ${totalMem} GB
 
-✨ _Powered by Silva Tech Inc_`;
+✨ _Powered by ${botName}_`;
 
             await sock.sendMessage(sender, {
-                image:   { url: 'https://files.catbox.moe/5uli5p.jpeg' },
+                image:   { url: pic },
                 caption,
                 contextInfo
             }, { quoted: message });

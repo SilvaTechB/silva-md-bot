@@ -1,6 +1,6 @@
 'use strict';
 
-
+const { getStr } = require('../lib/theme');
 const GH_REGEX = /(?:https|git)(?::\/\/|@)github\.com[\/:]([^\/:]+)\/(.+)/i;
 
 module.exports = {
@@ -43,7 +43,7 @@ module.exports = {
                 document: { url },
                 fileName: filename,
                 mimetype: 'application/zip',
-                caption:  `📦 *${user}/${cleanRepo}*\n_Downloaded via Silva MD_`,
+                caption:  `📦 *${user}/${cleanRepo}*\n_Downloaded via ${getStr('botName') || 'Silva MD'}_`,
                 contextInfo
             }, { quoted: message });
         } catch (err) {

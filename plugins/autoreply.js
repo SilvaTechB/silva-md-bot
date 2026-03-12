@@ -2,6 +2,7 @@
 
 const fs   = require('fs');
 const path = require('path');
+const { getStr } = require('../lib/theme');
 const AUTO_REPLY_PATH = path.join(__dirname, '../auto-reply-settings.json');
 
 const DEFAULT_SETTINGS = {
@@ -140,9 +141,9 @@ module.exports = {
                     contextInfo: {
                         ...contextInfo,
                         externalAdReply: {
-                            title:        'Silva MD Auto-Reply',
+                            title:        (getStr('botName') || 'Silva MD') + ' Auto-Reply',
                             body:         'Intelligent response system',
-                            thumbnailUrl: 'https://files.catbox.moe/5uli5p.jpeg',
+                            thumbnailUrl: getStr('pic1') || 'https://files.catbox.moe/5uli5p.jpeg',
                             mediaType:    1
                         }
                     }

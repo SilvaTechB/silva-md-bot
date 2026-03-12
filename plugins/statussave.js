@@ -1,5 +1,7 @@
 'use strict';
 
+const { getStr } = require('../lib/theme');
+
 
 
 module.exports = {
@@ -34,7 +36,7 @@ module.exports = {
             if (!buffer || buffer.length === 0) throw new Error('Empty media buffer');
 
             const caption = (isImage ? quoted.imageMessage : quoted.videoMessage).caption
-                || '📥 Status saved by Silva MD';
+                || ('📥 Status saved by ' + (getStr('botName') || 'Silva MD'));
 
             await sock.sendMessage(sender, {
                 [mediaType]: buffer,
@@ -43,8 +45,8 @@ module.exports = {
                     ...contextInfo,
                     externalAdReply: {
                         title:        'Status Saved',
-                        body:         'Silva MD Status Downloader',
-                        thumbnailUrl: 'https://files.catbox.moe/5uli5p.jpeg',
+                        body:         (getStr('botName') || 'Silva MD') + ' Status Downloader',
+                        thumbnailUrl: getStr('pic1') || 'https://files.catbox.moe/5uli5p.jpeg',
                         mediaType:    1
                     }
                 }

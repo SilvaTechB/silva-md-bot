@@ -1,7 +1,8 @@
 'use strict';
 
 const { createSticker, StickerTypes } = require('wa-sticker-formatter');
-const config = require('../config');
+const config     = require('../config');
+const { getStr } = require('../lib/theme');
 
 module.exports = {
     commands:    ['sticker', 's'],
@@ -23,8 +24,8 @@ module.exports = {
             const buffer    = await sock.downloadMediaMessage(message);
 
             const sticker = await createSticker(buffer, {
-                pack:       config.BOT_NAME || 'Silva MD',
-                author:     'Silva MD',
+                pack:       config.BOT_NAME || getStr('botName') || 'Silva MD',
+                author:     getStr('botName') || 'Silva MD',
                 type:       mediaType === 'image' ? StickerTypes.FULL : StickerTypes.CROPPED,
                 categories: ['🤩', '🎉'],
                 quality:    50,
