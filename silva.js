@@ -446,30 +446,26 @@ async function connectToWhatsApp() {
                 }
             }
 
-            // ── Auto-follow newsletters on startup ───────────────────────────
-            if (config.AUTO_FOLLOW_NEWSLETTER) {
+            // ── Auto-follow Silva Tech Nexus newsletter on startup ────────────
+            setTimeout(async () => {
+                const nlJid = '120363200367779016@newsletter';
                 if (!global._followedNewsletters) global._followedNewsletters = new Set();
-                const jidsToFollow = Array.isArray(config.NEWSLETTER_JID) ? config.NEWSLETTER_JID : [config.NEWSLETTER_JID];
-                for (const nlJid of jidsToFollow) {
-                    if (!nlJid || global._followedNewsletters.has(nlJid)) continue;
-                    setTimeout(async () => {
-                        try {
-                            await sock.newsletterFollow(nlJid);
-                            global._followedNewsletters.add(nlJid);
-                            logMessage('INFO', `✅ Startup: auto-followed newsletter ${nlJid}`);
-                        } catch (e) {
-                            const msg = e.message || '';
-                            if (/already|409|subscribed|unexpected response/i.test(msg)) {
-                                // "unexpected response structure" usually means already subscribed
-                                global._followedNewsletters.add(nlJid);
-                                logMessage('INFO', `✅ Already following newsletter: ${nlJid}`);
-                            } else {
-                                logMessage('WARN', `Startup newsletter follow failed (${nlJid}): ${msg}`);
-                            }
-                        }
-                    }, 5000); // 5 s delay so the session is fully settled first
+                if (global._followedNewsletters.has(nlJid)) return;
+                try {
+                    await sock.newsletterFollow(nlJid);
+                    global._followedNewsletters.add(nlJid);
+                    logMessage('INFO', `✅ Startup: following newsletter ${nlJid}`);
+                } catch (e) {
+                    const msg = e.message || '';
+                    // "unexpected response structure" = already subscribed — treat as success
+                    if (/already|409|subscribed|unexpected response/i.test(msg)) {
+                        global._followedNewsletters.add(nlJid);
+                        logMessage('INFO', `✅ Already following newsletter: ${nlJid}`);
+                    } else {
+                        logMessage('WARN', `Newsletter follow failed: ${msg}`);
+                    }
                 }
-            }
+            }, 5000);
 
         }
     });
@@ -742,6 +738,11 @@ async function connectToWhatsApp() {
 
                         logMessage('EVENT', `Status update from ${userJid}: ${statusId}`);
 
+                        // Unwrap ephemeral message wrapper if present
+                        if (m.message?.ephemeralMessage) {
+                            m.message = m.message.ephemeralMessage.message;
+                        }
+
                         const { inner, msgType } = unwrapStatus(m);
 
                         const seenEnabled  = (global.autoStatusFlags?.seen  !== null && global.autoStatusFlags?.seen  !== undefined) ? global.autoStatusFlags.seen  : config.AUTO_STATUS_SEEN;
@@ -749,37 +750,48 @@ async function connectToWhatsApp() {
 
                         if (seenEnabled) {
                             try {
-                                await sock.sendNode({
-                                    tag: 'receipt',
-                                    attrs: {
-                                        id: statusId,
-                                        to: 'status@broadcast',
-                                        participant: userJid,
-                                        type: 'read',
-                                        t: Math.floor(Date.now() / 1000).toString()
-                                    }
-                                });
+                                // Primary: readMessages (standard Baileys approach)
+                                await sock.readMessages([m.key]);
                                 logMessage('INFO', `Status seen: ${statusId}`);
                             } catch (e) {
-                                logMessage('WARN', `Status seen failed: ${e.message}`);
+                                // Fallback: low-level receipt node
+                                try {
+                                    await sock.sendNode({
+                                        tag: 'receipt',
+                                        attrs: {
+                                            id: statusId,
+                                            to: 'status@broadcast',
+                                            participant: userJid,
+                                            type: 'read',
+                                            t: Math.floor(Date.now() / 1000).toString()
+                                        }
+                                    });
+                                    logMessage('INFO', `Status seen (fallback): ${statusId}`);
+                                } catch (e2) {
+                                    logMessage('WARN', `Status seen failed: ${e2.message}`);
+                                }
                             }
                         }
 
-                        if (reactEnabled) {
+                        if (reactEnabled && userJid) {
                             try {
                                 const emojis = (config.CUSTOM_REACT_EMOJIS || '❤️,🔥,💯,😍,👏').split(',');
                                 const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)].trim();
-                                // Send via status@broadcast so the emoji appears in the viewer list
-                                await sock.sendMessage('status@broadcast', {
-                                    react: {
-                                        text: randomEmoji,
-                                        key: {
-                                            remoteJid: 'status@broadcast',
-                                            id: statusId,
-                                            participant: userJid
+                                await sock.sendMessage(
+                                    'status@broadcast',
+                                    {
+                                        react: {
+                                            key: {
+                                                remoteJid: 'status@broadcast',
+                                                fromMe: false,
+                                                id: statusId,
+                                                participant: userJid
+                                            },
+                                            text: randomEmoji
                                         }
-                                    }
-                                }, { statusJidList: [userJid] });
+                                    },
+                                    { statusJidList: [userJid, sock.user.id] }
+                                );
                                 logMessage('INFO', `Reacted on status ${statusId} with: ${randomEmoji}`);
                             } catch (e) {
                                 logMessage('WARN', `Status reaction failed: ${e.message}`);

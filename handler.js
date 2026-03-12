@@ -208,8 +208,17 @@ async function handleMessages(sock, message) {
             const afkPlugin = plugins.find(p => p.commands?.includes('afk') && typeof p.isAfk === 'function');
             if (afkPlugin?.isAfk()) {
                 const { reason, since } = afkPlugin.getAfkData();
+                const th = getActiveTheme()?.global || {};
                 await safeSend(sock, jid, {
-                    text: `🤖 *Beep boop!* This is a bot.\n\n👤 My owner is currently away.\n📝 *Reason:* ${reason}\n⏱ *Away for:* ${formatDuration(Date.now() - since)}`,
+                    text: [
+                        `🤖 *${th.botName || 'Silva MD'}*`,
+                        ``,
+                        `${th.greet2 ? `_${th.greet2}!_` : `_Hey!_`} My owner is currently *AFK*.`,
+                        `📝 *Reason:* ${reason}`,
+                        `⏱ *Away for:* ${formatDuration(Date.now() - since)}`,
+                        ``,
+                        `_${th.footer || th.botName || 'Silva MD'}_`
+                    ].join('\n'),
                 }, { quoted: message });
                 return;
             }
@@ -222,11 +231,10 @@ async function handleMessages(sock, message) {
                 const URL_REGEX = /(?:https?:\/\/|www\.)\S+|(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+(?:com|net|org|io|gg|me|ly|co|app|xyz|info|tv|link|shop|live|club|online|site|store|pro|in|ng|ke|tz|ug|za|uk)\b(?:\/\S*)?/gi;
                 if (URL_REGEX.test(text)) {
                     try {
-                        await sock.sendMessage(jid, {
-                            delete: message.key
-                        });
+                        await sock.sendMessage(jid, { delete: message.key });
+                        const antlinkMsg = getStr('antlink') || `⚠️ @${from.split('@')[0]} links are not allowed in this group.`;
                         await safeSend(sock, jid, {
-                            text: `⚠️ @${from.split('@')[0]} links are not allowed in this group.`,
+                            text: antlinkMsg,
                             mentions: [from]
                         });
                     } catch (e) {
@@ -255,8 +263,14 @@ async function handleMessages(sock, message) {
         if (!exactExists) {
             const prediction = predictCommand(command, plugins);
             if (prediction?.confidence === 'ambiguous') {
+                const th = getActiveTheme()?.global || {};
                 await safeSend(sock, jid, {
-                    text: `❓ *Did you mean one of these?*\n${prediction.matches.map(c => `• \`${prefix}${c}\``).join('\n')}`
+                    text: [
+                        `❓ *Did you mean one of these?*`,
+                        prediction.matches.map(c => `• \`${prefix}${c}\``).join('\n'),
+                        ``,
+                        th.footer ? `_${th.footer}_` : ''
+                    ].filter(Boolean).join('\n')
                 }, { quoted: message });
                 if (config.AUTO_TYPING || config.AUTO_RECORDING)
                     try { await sock.sendPresenceUpdate('paused', jid); } catch { /* ok */ }
@@ -264,7 +278,8 @@ async function handleMessages(sock, message) {
             } else if (prediction) {
                 resolvedCommand = prediction.match;
                 if (prediction.confidence !== 'exact') {
-                    predictionNote = `_💡 Running_ \`${prefix}${resolvedCommand}\``;
+                    const th = getActiveTheme()?.global || {};
+                    predictionNote = `_💡 Running_ \`${prefix}${resolvedCommand}\`${th.footer ? `\n_${th.footer}_` : ''}`;
                 }
             }
         }
@@ -380,7 +395,16 @@ async function handleMessages(sock, message) {
         if (!isOwner && global.bannedUsers?.size) {
             const senderNorm = jidNormalizedUser(from);
             if (global.bannedUsers.has(from) || global.bannedUsers.has(senderNorm) || global.bannedUsers.has(resolvedFrom)) {
-                return await safeSend(sock, jid, { text: '⛔ You have been banned from using bot commands.' }, { quoted: message });
+                const th = getActiveTheme()?.global || {};
+                return await safeSend(sock, jid, {
+                    text: [
+                        `⛔ *${th.botName || 'Silva MD'}*`,
+                        ``,
+                        getStr('owner') || 'You have been banned from using bot commands.',
+                        ``,
+                        th.footer ? `_${th.footer}_` : ''
+                    ].filter(Boolean).join('\n')
+                }, { quoted: message });
             }
         }
 
@@ -390,13 +414,53 @@ async function handleMessages(sock, message) {
         for (const plugin of plugins) {
             if (!plugin.commands.includes(resolvedCommand)) continue;
 
-            // Scope guards
+            const th = getActiveTheme()?.global || {};
+
+            // ── Scope guards — with themed alerts ────────────────────────────
             const allowGroup   = plugin.group   !== false;
             const allowPrivate = plugin.private !== false;
-            if (isGroup  && !allowGroup)   continue;
-            if (!isGroup && !allowPrivate) continue;
 
-            // Permission check
+            if (isGroup && !allowGroup) {
+                await safeSend(sock, jid, {
+                    text: [
+                        `*${th.botName || 'Silva MD'}*`,
+                        ``,
+                        getStr('private') || '⚠️ This feature is for private chats only.',
+                        ``,
+                        th.footer ? `_${th.footer}_` : ''
+                    ].filter(Boolean).join('\n')
+                }, { quoted: message });
+                continue;
+            }
+
+            if (!isGroup && !allowPrivate) {
+                await safeSend(sock, jid, {
+                    text: [
+                        `*${th.botName || 'Silva MD'}*`,
+                        ``,
+                        getStr('group') || '❗ This feature is for groups only.',
+                        ``,
+                        th.footer ? `_${th.footer}_` : ''
+                    ].filter(Boolean).join('\n')
+                }, { quoted: message });
+                continue;
+            }
+
+            // ── Bot admin guard ───────────────────────────────────────────────
+            if (plugin.botAdmin && !isBotAdmin) {
+                await safeSend(sock, jid, {
+                    text: [
+                        `*${th.botName || 'Silva MD'}*`,
+                        ``,
+                        getStr('botAdmin') || '❗ Please give me admin role first.',
+                        ``,
+                        th.footer ? `_${th.footer}_` : ''
+                    ].filter(Boolean).join('\n')
+                }, { quoted: message });
+                continue;
+            }
+
+            // ── Permission check ──────────────────────────────────────────────
             const perm = (plugin.permission || PERM.PUBLIC).toLowerCase();
             let allowed = false;
             if      (perm === PERM.PUBLIC) allowed = true;
@@ -404,10 +468,19 @@ async function handleMessages(sock, message) {
             else if (perm === PERM.OWNER)  allowed = isOwner;
 
             if (!allowed) {
-                const notice = perm === PERM.OWNER
-                    ? (getStr('owner') || '⛔ This command is reserved for the bot owner.')
-                    : (getStr('admin') || `⛔ This command requires ${isGroup ? 'group admin' : 'elevated'} privileges.`);
-                await safeSend(sock, jid, { text: notice }, { quoted: message });
+                const alertKey = perm === PERM.OWNER ? 'owner' : 'admin';
+                const fallback = perm === PERM.OWNER
+                    ? '⛔ This command is reserved for the bot owner.'
+                    : '⛔ This command is for group admins only.';
+                await safeSend(sock, jid, {
+                    text: [
+                        `*${th.botName || 'Silva MD'}*`,
+                        ``,
+                        getStr(alertKey) || fallback,
+                        ``,
+                        th.footer ? `_${th.footer}_` : ''
+                    ].filter(Boolean).join('\n')
+                }, { quoted: message });
                 continue;
             }
 
@@ -426,10 +499,16 @@ async function handleMessages(sock, message) {
                 await plugin.run(sock, message, args, ctx);
             } catch (err) {
                 console.error(`[Plugin:${command}] ${err.stack || err.message}`);
-                await safeSend(sock, jid,
-                    { text: `⚠️ Command error: ${err.message || 'unknown error'}` },
-                    { quoted: message }
-                );
+                const errTheme = getActiveTheme();
+                await safeSend(sock, jid, {
+                    text: [
+                        `*${th.botName || 'Silva MD'}*`,
+                        ``,
+                        errTheme?.error?.text || `⚠️ Command error: ${err.message || 'unknown error'}`,
+                        ``,
+                        th.footer ? `_${th.footer}_` : ''
+                    ].filter(Boolean).join('\n')
+                }, { quoted: message });
             }
 
             // ── Auto-presence: back to paused after responding ───────────────
