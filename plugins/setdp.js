@@ -1,5 +1,5 @@
 'use strict';
-const { downloadContentFromMessage, jidNormalizedUser } = require('@whiskeysockets/baileys');
+const { downloadContentFromMessage } = require('@whiskeysockets/baileys');
 const sharp = require('sharp');
 const { fmt } = require('../lib/theme');
 
@@ -10,24 +10,24 @@ async function toBuffer(msgObj, type) {
     return buf;
 }
 
-// Resize image to full phone-screen resolution (1080×1920, 9:16)
-// fit: 'cover' → zooms/fills the frame edge-to-edge, no black bars
-// Then we pass { width: 1080, height: 1920 } as custom dimensions to
-// updateProfilePicture so Baileys' internal generateProfilePicture
-// re-encodes the same 1080×1920 image without shrinking it to 640×640.
-async function toFullScreen(inputBuffer) {
+// Pre-process to exactly 640×640 at high quality using cover (fills edge-to-edge).
+// Passing a ready 640×640 buffer means Baileys' internal generateProfilePicture
+// just re-encodes the same size — no further cropping or shrinking happens.
+// WhatsApp only accepts square profile pictures, so this is the maximum quality
+// that reliably gets accepted.
+async function prepareDP(inputBuffer) {
     return sharp(inputBuffer)
-        .resize(1080, 1920, {
-            fit:      'cover',        // fill entire frame, zoom/crop minimally
-            position: 'centre'        // keep the centre of the image visible
+        .resize(640, 640, {
+            fit:      'cover',    // zoom/fill — no black bars, no empty space
+            position: 'centre'    // keep the most important part (centre) visible
         })
-        .jpeg({ quality: 92 })
-        .toBuffer();
+        .jpeg({ quality: 90 })   // Baileys defaults to 50% — we pre-encode at 90%
+        .toBuffer();              // so the uploaded DP is visibly sharper
 }
 
 module.exports = {
     commands:    ['setdp', 'setpp', 'setpfp', 'changdp', 'updatedp'],
-    description: "Set the bot's full-screen profile picture (1080×1920, fills phone screen)",
+    description: "Set the bot's full profile picture — fills the circle edge-to-edge",
     usage:       '.setdp  (attach an image, or reply to one)',
     permission:  'owner',
     group:       false,
@@ -39,7 +39,7 @@ module.exports = {
 
         const msg = message.message;
 
-        // Resolve image — direct, quoted reply, or view-once
+        // Resolve image — direct attachment, quoted reply, or view-once
         const directImg = msg?.imageMessage;
         const quotedImg = msg?.extendedTextMessage?.contextInfo?.quotedMessage?.imageMessage;
         const voImg     = msg?.viewOnceMessageV2?.message?.imageMessage
@@ -49,11 +49,11 @@ module.exports = {
 
         if (!imageObj) {
             return reply(
-                `📸 *Set Full-Screen Bot DP*\n\n` +
+                `📸 *Set Bot DP*\n\n` +
                 `*How to use:*\n` +
                 `• Send an image with caption \`.setdp\`\n` +
                 `• *or* reply to any image with \`.setdp\`\n\n` +
-                `_Image will be set at 1080×1920 — fills the entire phone screen when tapped._`
+                `_Image fills the profile circle edge-to-edge — no bars, no empty space._`
             );
         }
 
@@ -65,22 +65,12 @@ module.exports = {
                 return reply('❌ Could not download the image. Try sending it again directly.');
             }
 
-            // Scale to full phone screen — bypasses Baileys' 640×640 default
-            const fullScreen = await toFullScreen(raw);
+            // Pre-process to a crisp 640×640 cover fill
+            const processed = await prepareDP(raw);
 
-            // Pass custom dimensions so generateProfilePicture re-encodes
-            // the 1080×1920 buffer at the same size instead of shrinking it
-            await sock.updateProfilePicture(
-                sock.user.id,
-                fullScreen,
-                { width: 1080, height: 1920 }
-            );
+            await sock.updateProfilePicture(sock.user.id, processed);
 
-            return reply(
-                `✅ *Profile picture updated!*\n\n` +
-                `📐 Resolution: 1080×1920 (full phone screen)\n` +
-                `_When someone taps your DP it fills their entire screen._`
-            );
+            return reply('✅ *Profile picture updated!*\n\n_Image fills the circle completely — no bars._');
 
         } catch (e) {
             console.error('[SetDP]', e.message);
@@ -88,8 +78,8 @@ module.exports = {
             if (e.message?.includes('not-authorized') || e.message?.includes('forbidden')) {
                 return reply('❌ *Not authorized* — WhatsApp blocked the request.\n\nMake sure your bot account allows profile picture changes.');
             }
-            if (e.message?.includes('too large') || e.message?.includes('413')) {
-                return reply('❌ Image too large. Please use an image under 2 MB.');
+            if (e.message?.includes('not-acceptable')) {
+                return reply('❌ *Image rejected by WhatsApp.*\n\nTry sending a clearer JPG or PNG image and use `.setdp` again.');
             }
 
             return reply(`❌ Failed to set DP: ${e.message}`);
