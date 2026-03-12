@@ -196,7 +196,8 @@ async function handleMessages(sock, message) {
 
         // ── Auto-presence: fire instantly on every incoming message ──────────
         if (!message.key.fromMe && (config.AUTO_TYPING || config.AUTO_RECORDING)) {
-            try { await sock.sendPresenceUpdate('composing', jid); } catch { /* non-fatal */ }
+            const presenceType = config.AUTO_RECORDING ? 'recording' : 'composing';
+            try { await sock.sendPresenceUpdate(presenceType, jid); } catch { /* non-fatal */ }
         }
 
         const isGroup = isJidGroup(jid);
@@ -266,7 +267,15 @@ async function handleMessages(sock, message) {
 
         if (!text.startsWith(prefix)) {
             if (!message.key.fromMe && (config.AUTO_TYPING || config.AUTO_RECORDING)) {
-                try { await sock.sendPresenceUpdate('paused', jid); } catch { /* non-fatal */ }
+                // Keep the typing/recording indicator visible for 2 seconds so the
+                // other person can actually see it before it disappears.
+                // (Without this delay, composing + paused fire within microseconds
+                // of each other and the indicator is invisible.)
+                const presenceType = config.AUTO_RECORDING ? 'recording' : 'composing';
+                try { await sock.sendPresenceUpdate(presenceType, jid); } catch { /* ok */ }
+                setTimeout(async () => {
+                    try { await sock.sendPresenceUpdate('paused', jid); } catch { /* ok */ }
+                }, 2000);
             }
             return;
         }
