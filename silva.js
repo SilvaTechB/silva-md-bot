@@ -727,6 +727,9 @@ async function connectToWhatsApp() {
         try {
             if (!Array.isArray(messages) || messages.length === 0) return;
 
+            // Early log — always visible in cloud logs so we can see messages arriving
+            logMessage('INFO', `⬇ upsert type=${type} n=${messages.length} from=${messages[0]?.key?.remoteJid}`);
+
             // ── STATUS BATCH HANDLER ─────────────────────────────────────────────
             // Collect every new status from this batch first, then process all at once
             // so no status is ever missed and there are zero artificial delays.

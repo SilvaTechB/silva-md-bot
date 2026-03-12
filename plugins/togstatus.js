@@ -2,15 +2,18 @@
 const crypto = require('crypto');
 const { PassThrough } = require('stream');
 const ffmpeg = require('fluent-ffmpeg');
-const baileys = require('@whiskeysockets/baileys');
-const { downloadContentFromMessage, generateWAMessageContent, generateWAMessageFromContent } = baileys;
+const {
+    downloadContentFromMessage,
+    generateWAMessageContent,
+    generateWAMessageFromContent
+} = require('@whiskeysockets/baileys');
 const { fmt } = require('../lib/theme');
 
 const COLORS = {
     blue:   '#34B7F1', green:  '#25D366', yellow: '#FFD700',
     orange: '#FF8C00', red:    '#FF3B30', purple: '#9C27B0',
     gray:   '#9E9E9E', black:  '#000000', white:  '#FFFFFF',
-    cyan:   '#00BCD4'
+    cyan:   '#00BCD4', pink:   '#E91E8C'
 };
 
 async function dlBuffer(msgObj, type) {
@@ -20,7 +23,7 @@ async function dlBuffer(msgObj, type) {
     return buf;
 }
 
-async function toVN(buffer) {
+function toVN(buffer) {
     return new Promise((resolve, reject) => {
         const input = new PassThrough();
         const output = new PassThrough();
@@ -39,7 +42,7 @@ async function toVN(buffer) {
     });
 }
 
-async function generateWaveform(buffer, bars = 64) {
+function generateWaveform(buffer, bars = 64) {
     return new Promise((resolve, reject) => {
         const input = new PassThrough();
         input.end(buffer);
@@ -54,11 +57,11 @@ async function generateWaveform(buffer, bars = 64) {
                 const samples = raw.length / 2;
                 const amps = [];
                 for (let i = 0; i < samples; i++) amps.push(Math.abs(raw.readInt16LE(i * 2)) / 32768);
-                const size = Math.floor(amps.length / bars);
+                const size = Math.max(1, Math.floor(amps.length / bars));
                 const avg = Array.from({ length: bars }, (_, i) =>
                     amps.slice(i * size, (i + 1) * size).reduce((a, b) => a + b, 0) / size
                 );
-                const max = Math.max(...avg);
+                const max = Math.max(...avg) || 1;
                 resolve(Buffer.from(avg.map(v => Math.floor((v / max) * 100))).toString('base64'));
             })
             .pipe()
@@ -66,6 +69,7 @@ async function generateWaveform(buffer, bars = 64) {
     });
 }
 
+// Send content as a group status (story) using groupStatusMessage (FutureProofMessage wrapper)
 async function sendGroupStatus(sock, jid, content) {
     const { backgroundColor } = content;
     delete content.backgroundColor;
@@ -76,11 +80,13 @@ async function sendGroupStatus(sock, jid, content) {
     });
 
     const secret = crypto.randomBytes(32);
+
+    // This Baileys fork uses groupStatusMessage (FutureProofMessage) — not V2
     const msg = generateWAMessageFromContent(
         jid,
         {
             messageContextInfo: { messageSecret: secret },
-            groupStatusMessageV2: {
+            groupStatusMessage: {
                 message: {
                     ...inside,
                     messageContextInfo: { messageSecret: secret }
@@ -96,9 +102,9 @@ async function sendGroupStatus(sock, jid, content) {
 
 module.exports = {
     commands:    ['togstatus', 'swgc', 'poststatus'],
-    description: 'Post a text/image/video/audio status to the group or a target group via link',
-    usage:       '.togstatus caption|color   OR   Reply to media with .togstatus caption||group_link',
-    permission:  'admin',
+    description: 'Post a text/image/video/audio as a group status (story)',
+    usage:       '.togstatus caption|color  OR  reply to media with .togstatus',
+    permission:  'owner',   // only bot owner can post group status
     group:       true,
 
     run: async (sock, message, args, ctx) => {
@@ -108,9 +114,13 @@ module.exports = {
         try {
             const msg    = message.message;
             const quoted = msg?.extendedTextMessage?.contextInfo?.quotedMessage;
-            const text   = args.join(' ');
 
-            let [caption, color, groupUrl] = (text || '').split('|').map(v => v?.trim());
+            // Support full piped string from args or ctx.text
+            const rawText = ctx.text
+                ? ctx.text.replace(/^[.!#/\\]?\w+\s*/,'').trim()
+                : args.join(' ');
+
+            let [caption, color, groupUrl] = rawText.split('|').map(v => v?.trim() || '');
 
             let targetGroupId = jid;
 
@@ -119,7 +129,7 @@ module.exports = {
                     const code = groupUrl.split('/').pop().split('?')[0];
                     const info = await sock.groupGetInviteInfo(code);
                     targetGroupId = info.id;
-                    await reply(`🎯 Target group: *${info.subject}*`);
+                    await reply(`🎯 Targeting group: *${info.subject}*`);
                 } catch {
                     return reply('❌ Invalid group link or bot is not in that group.');
                 }
@@ -131,14 +141,15 @@ module.exports = {
                     return reply(
                         `📢 *Group Status Usage*\n\n` +
                         `*.togstatus caption|color*\n` +
-                        `*.togstatus |blue*  ← color only\n` +
-                        `*Reply to image/video/audio* then *.togstatus caption*\n\n` +
+                        `*.togstatus |green*  ← color only\n` +
+                        `*Reply to image/video/audio* then *.togstatus caption*\n` +
+                        `*.togstatus caption||group_invite_link*\n\n` +
                         `🎨 *Colors:*\n${Object.keys(COLORS).join(', ')}`
                     );
                 }
 
                 await sendGroupStatus(sock, targetGroupId, {
-                    text: caption,
+                    text:            caption,
                     backgroundColor: COLORS[color?.toLowerCase()] || COLORS.blue
                 });
                 return reply('✅ Text status posted to group!');
@@ -161,13 +172,22 @@ module.exports = {
             // ── AUDIO STATUS ─────────────────────────────────────────────────────
             if (quoted.audioMessage) {
                 const buf = await dlBuffer(quoted.audioMessage, 'audio');
-                const [vn, waveform] = await Promise.all([toVN(buf), generateWaveform(buf)]);
-                await sendGroupStatus(sock, targetGroupId, {
-                    audio:    vn,
-                    mimetype: 'audio/ogg; codecs=opus',
-                    ptt:      true,
-                    waveform
-                });
+                try {
+                    const [vn, waveform] = await Promise.all([toVN(buf), generateWaveform(buf)]);
+                    await sendGroupStatus(sock, targetGroupId, {
+                        audio:    vn,
+                        mimetype: 'audio/ogg; codecs=opus',
+                        ptt:      true,
+                        waveform
+                    });
+                } catch {
+                    // ffmpeg not available — send raw audio without waveform
+                    await sendGroupStatus(sock, targetGroupId, {
+                        audio:    buf,
+                        mimetype: quoted.audioMessage.mimetype || 'audio/ogg',
+                        ptt:      quoted.audioMessage.ptt || false
+                    });
+                }
                 return reply('✅ Audio status posted to group!');
             }
 
@@ -175,7 +195,11 @@ module.exports = {
 
         } catch (err) {
             console.error('[togstatus]', err.message);
-            return sock.sendMessage(jid, { text: fmt(`❌ Status error: ${err.message}`), contextInfo }, { quoted: message });
+            return sock.sendMessage(
+                ctx.jid,
+                { text: fmt(`❌ Group status error: ${err.message}`) },
+                { quoted: message }
+            );
         }
     }
 };
