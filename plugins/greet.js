@@ -69,18 +69,27 @@ module.exports = {
         }
     },
 
-    onMessage: async (sock, message, text, { jid, sender, isGroup }) => {
+    onMessage: async (sock, message, text, { jid, isGroup }) => {
         if (isGroup) return;
         if (message.key.fromMe) return;
 
-        const greet = greetData[jid];
+        // The greeting is stored under the bot-owner's JID (set by the owner via
+        // .setgreet). In private chat jid = the stranger who messaged the bot, so
+        // we cannot look up by jid — we must find the owner's greeting instead.
+        const ownerNum = (process.env.OWNER_NUMBER || global.botNum || '').replace(/\D/g, '');
+        const ownerJid = ownerNum ? `${ownerNum}@s.whatsapp.net` : null;
+
+        // Try owner JID first, then fall back to the first greeting in the store
+        // (handles edge case where owner number env var is not set).
+        const greet =
+            (ownerJid && greetData[ownerJid]) ||
+            Object.values(greetData)[0] ||
+            null;
+
         if (!greet) return;
 
-        const senderJid = message.key.remoteJid;
-        if (senderJid === jid) return;
-
         try {
-            await sock.sendMessage(senderJid, { text: greet }, { quoted: message });
+            await sock.sendMessage(jid, { text: greet }, { quoted: message });
         } catch { /* ignore */ }
     }
 };

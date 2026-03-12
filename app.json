@@ -10,6 +10,41 @@
       "required": true,
       "value": ""
     },
+    "PREFIX": {
+      "description": "Bot command prefix.",
+      "required": false,
+      "value": "."
+    },
+    "MODE": {
+      "description": "Bot mode: public, private, group, inbox.",
+      "required": false,
+      "value": "public"
+    },
+    "BOT_NAME": {
+      "description": "Bot display name.",
+      "required": false,
+      "value": "✦ Silva ✦ MD ✦"
+    },
+    "OWNER_NUMBER": {
+      "description": "Owner WhatsApp number (digits only, with country code e.g. 254712345678).",
+      "required": true,
+      "value": ""
+    },
+    "OWNER_NAME": {
+      "description": "Bot owner name.",
+      "required": false,
+      "value": "Silva MD"
+    },
+    "DESCRIPTION": {
+      "description": "Caption for menu and bot branding.",
+      "required": false,
+      "value": "*© ✦ Silva ✦ MD ✦*"
+    },
+    "THEME": {
+      "description": "Bot theme/character voice. Options: silva, adam, ayanokoji, edith, friday, genos, gideon, gojo, goku, luffy, naruto, nezuko, parker, secktor, suhail, zerotwo, itachi, batman, thanos",
+      "required": false,
+      "value": "silva"
+    },
     "ALIVE_IMG": {
       "description": "Paste your image URL here.",
       "required": false,
@@ -22,123 +57,78 @@
     },
     "ANTIDELETE_PRIVATE": {
       "description": "Restore deleted messages in private chat.",
-      "required": true,
+      "required": false,
       "value": "true"
     },
     "ANTIDELETE_GROUP": {
       "description": "Restore deleted messages in groups.",
-      "required": true,
-      "value": "true"
-    },
-    "PREFIX": {
-      "description": "Bot command prefix.",
-      "required": false,
-      "value": "."
-    },
-    "MODE": {
-      "description": "Bot mode: public, private, group, inbox.",
-      "required": false,
-      "value": "public"
-    },
-    "AUTO_STATUS_REACT": {
-      "description": "Enable auto status reactions.",
       "required": false,
       "value": "true"
     },
-    "ALWAYS_ONLINE": {
-      "description": "Keep bot always online.",
+    "ANTILINK": {
+      "description": "Enable anti-link feature globally in all groups.",
       "required": false,
       "value": "false"
     },
+    "ANTIVV": {
+      "description": "Auto-open view-once messages sent to the bot.",
+      "required": false,
+      "value": "true"
+    },
     "AUTO_STATUS_SEEN": {
-      "description": "Enable auto status seen.",
-      "required": true,
+      "description": "Auto-view all status updates.",
+      "required": false,
+      "value": "true"
+    },
+    "AUTO_STATUS_REACT": {
+      "description": "Auto-react to status updates.",
+      "required": false,
       "value": "true"
     },
     "AUTO_STATUS_REPLY": {
-      "description": "Enable auto status reply.",
-      "required": true,
+      "description": "Auto-reply to status updates.",
+      "required": false,
       "value": "false"
     },
-    "AUTO_STATUS__MSG": {
-      "description": "Message for auto status reply.",
-      "required": true,
+    "AUTO_STATUS_MSG": {
+      "description": "Message sent as auto status reply.",
+      "required": false,
       "value": "*👀 Seen by Silva MD ✅*"
     },
-    "OWNER_NAME": {
-      "description": "Bot owner name.",
-      "required": false,
-      "value": "Silva MD"
-    },
-    "OWNER_NUMBER": {
-      "description": "Owner WhatsApp number.",
-      "required": false,
-      "value": ""
-    },
-    "BOT_NAME": {
-      "description": "Bot display name.",
-      "required": false,
-      "value": "✦ Silva ✦ MD ✦"
-    },
-    "ANTI_LINK": {
-      "description": "Enable anti-link feature in groups.",
-      "required": true,
-      "value": "true"
-    },
-    "ANTI_BAD": {
-      "description": "Enable anti-bad words feature.",
-      "required": false,
-      "value": "false"
-    },
-    "DESCRIPTION": {
-      "description": "Caption for menu and bot branding.",
-      "required": false,
-      "value": "*© ✦ Silva ✦ MD ✦*"
-    },
-    "DELETE_LINKS": {
-      "description": "Remove links from group without removing member.",
+    "AUTO_REACT_NEWSLETTER": {
+      "description": "Auto-react to newsletter/channel messages.",
       "required": false,
       "value": "true"
     },
-    "AUTO_RECORDING": {
-      "description": "Enable auto recording simulation.",
+    "CUSTOM_REACT_EMOJIS": {
+      "description": "Comma-separated emojis used for random status reactions.",
+      "required": false,
+      "value": "💝,💖,💗,❤️‍🔥,❤️‍🩹,❤️,🩷,🧡,💛,💚,💙,🩵,💜,🤎,🖤,🩶,🤍"
+    },
+    "ALWAYS_ONLINE": {
+      "description": "Keep bot always shown as online.",
       "required": false,
       "value": "false"
     },
     "AUTO_TYPING": {
-      "description": "Enable auto typing simulation.",
+      "description": "Show typing indicator while processing commands.",
       "required": false,
       "value": "true"
     },
-    "AUTO_REACT": {
-      "description": "Enable auto reactions for all messages.",
+    "AUTO_RECORDING": {
+      "description": "Show recording indicator for media commands.",
       "required": false,
       "value": "false"
-    },
-    "OWNER_REACT": {
-      "description": "React only to owner messages.",
-      "required": false,
-      "value": "false"
-    },
-    "CUSTOM_REACT": {
-      "description": "Enable custom reactions.",
-      "required": false,
-      "value": "false"
-    },
-    "CUSTOM_REACT_EMOJIS": {
-      "description": "Custom emojis for reactions.",
-      "required": false,
-      "value": "💝,💖,💗,❤️‍🔥,❤️‍🩹,❤️,🩷,🧡,💛,💚,💙,🩵,💜,🤎,🖤,🩶,🤍"
     },
     "READ_MESSAGE": {
-      "description": "Enable automatic message read receipts.",
+      "description": "Auto-read (blue tick) all incoming messages.",
       "required": false,
       "value": "false"
     },
-    "THEME": {
-      "description": "Bot theme/character voice. Options: silva, adam, ayanokoji, edith, friday, genos, gideon, gojo, goku, luffy, naruto, nezuko, parker, secktor, suhail, zerotwo, itachi, batman, thanos",
+    "DEBUG": {
+      "description": "Enable verbose debug logging (true/false).",
       "required": false,
-      "value": "silva"
+      "value": "false"
     }
   },
   "buildpacks": [

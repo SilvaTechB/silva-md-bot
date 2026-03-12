@@ -228,7 +228,7 @@ function generateConfigTable() {
         { name: 'AUTO_STATUS_REACT', value: config.AUTO_STATUS_REACT },
         { name: 'AUTO_STATUS_REPLY', value: config.AUTO_STATUS_REPLY },
         { name: 'AUTO_REACT_NEWSLETTER', value: config.AUTO_REACT_NEWSLETTER },
-        { name: 'ANTI_LINK', value: config.ANTI_LINK },
+        { name: 'ANTILINK', value: config.ANTILINK },
         { name: 'ALWAYS_ONLINE', value: config.ALWAYS_ONLINE },
         { name: 'GROUP_COMMANDS', value: config.GROUP_COMMANDS }
     ];
