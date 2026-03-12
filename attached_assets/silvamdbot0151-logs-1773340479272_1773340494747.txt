@@ -1,0 +1,161 @@
+2026-03-12T18:30:55.648438+00:00 app[web.1]: [AutoUpdate] ✅ 24-hour update checker scheduled.
+2026-03-12T18:30:55.648486+00:00 app[web.1]: [2026-03-12T18:30:55.648Z] [INFO] Bot LID: 271476913610986:6@lid
+2026-03-12T18:30:55.648561+00:00 app[web.1]: [2026-03-12T18:30:55.648Z] [INFO] Owner: 254701513650 | Bot number: 254701513650
+2026-03-12T18:30:55.941931+00:00 app[web.1]: [2026-03-12T18:30:55.941Z] [SUCCESS] ✅ Bio updated: ✨ ✦ Silva ✦ MD ✦ ✦ Online ✦ Thursday, 12 March 2026 ✦
+2026-03-12T18:30:56.562638+00:00 app[web.1]: [2026-03-12T18:30:56.562Z] [SUCCESS] Welcome message sent to owner (disappears in 20s).
+2026-03-12T18:30:57.160348+00:00 app[web.1]: [2026-03-12T18:30:57.160Z] [INFO] Auto-joined group: GAR1gGUUicpDltiSTJ3hQW
+2026-03-12T18:31:02.318292+00:00 app[web.1]: [2026-03-12T18:31:02.318Z] [INFO] ✅ Startup: following newsletter 120363200367779016@newsletter
+2026-03-12T18:33:31.927321+00:00 heroku[web.1]: State changed from up to down
+2026-03-12T18:33:32.692878+00:00 heroku[web.1]: Stopping all processes with SIGTERM
+2026-03-12T18:33:32.772114+00:00 heroku[web.1]: Process exited with status 143
+2026-03-12T18:33:45.981650+00:00 heroku[web.1]: Starting process with command `node silva.js`
+2026-03-12T18:33:46.801639+00:00 app[web.1]: [32m✅ Passed the Silva security check.[0m
+2026-03-12T18:33:47.119220+00:00 app[web.1]: [Plugin] Loaded: advice.js (advice, tip)
+2026-03-12T18:33:47.119547+00:00 app[web.1]: [Plugin] Loaded: afk.js (afk, back)
+2026-03-12T18:33:47.133752+00:00 app[web.1]: [Plugin] Loaded: alive.js (alive, bot, botinfo)
+2026-03-12T18:33:47.134263+00:00 app[web.1]: [Plugin] Loaded: anime.js (anime, animesearch, manga)
+2026-03-12T18:33:47.134791+00:00 app[web.1]: [Plugin] Loaded: anticall.js (anticall)
+2026-03-12T18:33:47.135016+00:00 app[web.1]: [Plugin] Loaded: antidelete.js (antidelete, antidel)
+2026-03-12T18:33:47.135227+00:00 app[web.1]: [Plugin] Loaded: antidemote.js (antidemote)
+2026-03-12T18:33:47.135665+00:00 app[web.1]: [Plugin] Loaded: antifake.js (antifake)
+2026-03-12T18:33:47.136086+00:00 app[web.1]: [Plugin] Loaded: antigm.js (antigm)
+2026-03-12T18:33:47.136393+00:00 app[web.1]: [Plugin] Loaded: antilink.js (antilink)
+2026-03-12T18:33:47.136648+00:00 app[web.1]: [Plugin] Loaded: antivv.js (antivv, avv)
+2026-03-12T18:33:47.136977+00:00 app[web.1]: [Plugin] Loaded: apk.js (apk, apkdl, getapk)
+2026-03-12T18:33:47.138923+00:00 app[web.1]: [Plugin] Loaded: ascii.js (ascii, figlet, art, textart)
+2026-03-12T18:33:47.139153+00:00 app[web.1]: [Plugin] Loaded: autojoin.js (autojoin)
+2026-03-12T18:33:47.139608+00:00 app[web.1]: [Plugin] Loaded: autoreply.js (autoreply, ar)
+2026-03-12T18:33:47.139880+00:00 app[web.1]: [Plugin] Loaded: autostatus.js (autoview, autolike, autoreact, autostatus, statusconfig)
+2026-03-12T18:33:47.140216+00:00 app[web.1]: [Plugin] Loaded: autoupdate.js (checkupdate, autoupdate, update)
+2026-03-12T18:33:47.140460+00:00 app[web.1]: [Plugin] Loaded: ban.js (ban, unban, banlist)
+2026-03-12T18:33:47.140654+00:00 app[web.1]: [Plugin] Loaded: base64.js (base64, b64)
+2026-03-12T18:33:47.140989+00:00 app[web.1]: [Plugin] Loaded: bible.js (bible, verse, scripture)
+2026-03-12T18:33:47.141181+00:00 app[web.1]: [Plugin] Loaded: blocklist.js (blocklist, listblock)
+2026-03-12T18:33:47.141353+00:00 app[web.1]: [Plugin] Loaded: broadcast.js (broadcast, bc)
+2026-03-12T18:33:47.141517+00:00 app[web.1]: [Plugin] Loaded: calc.js (calc, calculate, math)
+2026-03-12T18:33:47.141723+00:00 app[web.1]: [Plugin] Loaded: call.js (call, support)
+2026-03-12T18:33:47.142072+00:00 app[web.1]: [Plugin] Loaded: catbox.js (tourl, imgtourl, imgurl, geturl, upload)
+2026-03-12T18:33:47.142476+00:00 app[web.1]: [Plugin] Loaded: color.js (color, colour, hex, colorinfo)
+2026-03-12T18:33:47.142676+00:00 app[web.1]: [Plugin] Loaded: compliment.js (compliment, comp, praise)
+2026-03-12T18:33:47.142959+00:00 app[web.1]: [Plugin] Loaded: country.js (country, countryinfo)
+2026-03-12T18:33:47.143350+00:00 app[web.1]: [Plugin] Loaded: crypto.js (crypto, coin, price, btc, eth, doge)
+2026-03-12T18:33:47.143616+00:00 app[web.1]: [Plugin] Loaded: currency.js (currency, convert, rate)
+2026-03-12T18:33:47.143898+00:00 app[web.1]: [Plugin] Loaded: define.js (define, dict, meaning, definition)
+2026-03-12T18:33:47.144196+00:00 app[web.1]: [Plugin] Loaded: dictionary.js (dictionary, wordinfo, fulldict)
+2026-03-12T18:33:47.144406+00:00 app[web.1]: [Plugin] Loaded: dmall.js (dmall, dmmembers, msgall)
+2026-03-12T18:33:47.144757+00:00 app[web.1]: [Plugin] Loaded: eval.js (eval, exec, run)
+2026-03-12T18:33:47.145082+00:00 app[web.1]: [Plugin] Loaded: facebook.js (facebook, fb, fbdl)
+2026-03-12T18:33:47.145335+00:00 app[web.1]: [Plugin] Loaded: fact.js (fact, facts, funfact)
+2026-03-12T18:33:47.145642+00:00 app[web.1]: [Plugin] Loaded: fetch.js (fetch, webfetch, geturl, readurl)
+2026-03-12T18:33:47.145895+00:00 app[web.1]: [Plugin] Loaded: flipcoin.js (flip, coin, dice, roll)
+2026-03-12T18:33:47.146123+00:00 app[web.1]: [Plugin] Loaded: getpp.js (spp, profile, getpp)
+2026-03-12T18:33:47.146400+00:00 app[web.1]: [Plugin] Loaded: gitclone.js (gitclone)
+2026-03-12T18:33:47.146769+00:00 app[web.1]: [Plugin] Loaded: github.js (github, gh, gituser, gitrepo)
+2026-03-12T18:33:47.147167+00:00 app[web.1]: [Plugin] Loaded: greet.js (setgreet, getgreet, delgreet, greeton, greetoff)
+2026-03-12T18:33:47.147350+00:00 app[web.1]: [Plugin] Loaded: grouplink.js (grouplink, invitelink, link, revoke, revokelink)
+2026-03-12T18:33:47.147569+00:00 app[web.1]: [Plugin] Loaded: groupstatus.js (groupstatus, ginfo, groupinfo, grpinfo, gstatus)
+2026-03-12T18:33:47.147698+00:00 app[web.1]: [Plugin] Loaded: hello.js (hello)
+2026-03-12T18:33:47.147862+00:00 app[web.1]: [Plugin] Loaded: hidetag.js (hidetag, htag, stag, silenttag)
+2026-03-12T18:33:47.148088+00:00 app[web.1]: [Plugin] Loaded: imagine.js (imagine, generate, aiimage, img)
+2026-03-12T18:33:47.148396+00:00 app[web.1]: [Plugin] Loaded: instagram.js (instagram, igdl, ig, insta)
+2026-03-12T18:33:47.148681+00:00 app[web.1]: [Plugin] Loaded: intro.js (intro, setintro, myintro, delintro, introlist)
+2026-03-12T18:33:47.149010+00:00 app[web.1]: [Plugin] Loaded: ip.js (ip, iplookup, ipinfo)
+2026-03-12T18:33:47.149270+00:00 app[web.1]: [Plugin] Loaded: joke.js (joke, jokes)
+2026-03-12T18:33:47.149499+00:00 app[web.1]: [Plugin] Loaded: kick.js (kick, remove)
+2026-03-12T18:33:47.149678+00:00 app[web.1]: [Plugin] Loaded: lock.js (lock, unlock, close, open)
+2026-03-12T18:33:47.149922+00:00 app[web.1]: [Plugin] Loaded: lyrics.js (lyrics, lyric)
+2026-03-12T18:33:47.150139+00:00 app[web.1]: [Plugin] Loaded: meme.js (meme, memes)
+2026-03-12T18:33:47.150630+00:00 app[web.1]: [Plugin] Loaded: menu.js (menu, help, list)
+2026-03-12T18:33:47.151036+00:00 app[web.1]: [Plugin] Loaded: morse.js (morse, morseencode, morsedecode)
+2026-03-12T18:33:47.151433+00:00 app[web.1]: [Plugin] Loaded: movie.js (movie, film, imdb, series)
+2026-03-12T18:33:47.156857+00:00 app[web.1]: [Plugin] Loaded: music.js (play, music)
+2026-03-12T18:33:47.157245+00:00 app[web.1]: [Plugin] Loaded: news.js (news, headlines, latestnews, breaking)
+2026-03-12T18:33:47.157584+00:00 app[web.1]: [Plugin] Loaded: newsletter.js (newsletter, followchannel, unfollowchannel, channelinfo, mutechannel, unmutechannel)
+2026-03-12T18:33:47.157922+00:00 app[web.1]: [Plugin] Loaded: npm.js (npm, npmpkg, package, pkg)
+2026-03-12T18:33:47.158227+00:00 app[web.1]: [Plugin] Loaded: numberfact.js (numberfact, numfact, number)
+2026-03-12T18:33:47.158417+00:00 app[web.1]: [Plugin] Loaded: password.js (password, passwd, genpass)
+2026-03-12T18:33:47.158613+00:00 app[web.1]: [Plugin] Loaded: poll.js (poll, vote)
+2026-03-12T18:33:47.158894+00:00 app[web.1]: [Plugin] Loaded: presence.js (presence, typing, recording, busy, online, offline)
+2026-03-12T18:33:47.159110+00:00 app[web.1]: [Plugin] Loaded: promote.js (promote, demote, admin, unadmin)
+2026-03-12T18:33:47.159361+00:00 app[web.1]: [Plugin] Loaded: qrcode.js (qrcode, qr)
+2026-03-12T18:33:47.159585+00:00 app[web.1]: [Plugin] Loaded: quote.js (quote, inspire, motivation)
+2026-03-12T18:33:47.159776+00:00 app[web.1]: [Plugin] Loaded: react.js (react, reaction, emoji)
+2026-03-12T18:33:47.160005+00:00 app[web.1]: [Plugin] Loaded: remind.js (remind, remindme, reminder)
+2026-03-12T18:33:47.160298+00:00 app[web.1]: [Plugin] Loaded: repo.js (repo, repository, github)
+2026-03-12T18:33:47.160628+00:00 app[web.1]: [Plugin] Loaded: riddle.js (riddle, answer)
+2026-03-12T18:33:47.160990+00:00 app[web.1]: [Plugin] Loaded: screenshot.js (ss, screenshot, webshot, capture)
+2026-03-12T18:33:47.252949+00:00 app[web.1]: [Plugin] Loaded: setdp.js (setdp, setpp, setpfp, changdp, updatedp)
+2026-03-12T18:33:47.253251+00:00 app[web.1]: [Plugin] Loaded: setgroup.js (setname, setdesc, setdescription, groupname, groupdesc)
+2026-03-12T18:33:47.253604+00:00 app[web.1]: [Plugin] Loaded: settings.js (settings, config, botsettings)
+2026-03-12T18:33:47.254033+00:00 app[web.1]: [Plugin] Loaded: shazam.js (shazam, identify, song)
+2026-03-12T18:33:47.254383+00:00 app[web.1]: [Plugin] Loaded: silva-ai.js (ai, gpt, chatgpt)
+2026-03-12T18:33:47.254790+00:00 app[web.1]: [Plugin] Loaded: silva-getjid.js (getjid, jid)
+2026-03-12T18:33:47.255009+00:00 app[web.1]: [Plugin] Loaded: silva-owner.js (owner, creator)
+2026-03-12T18:33:47.255239+00:00 app[web.1]: [Plugin] Loaded: silva-ping.js (ping)
+2026-03-12T18:33:47.255550+00:00 app[web.1]: [Plugin] Loaded: silva-shorturl.js (shorten)
+2026-03-12T18:33:47.255831+00:00 app[web.1]: [Plugin] Loaded: silva-uptime.js (uptime, runtime)
+2026-03-12T18:33:47.256082+00:00 app[web.1]: [Plugin] Loaded: statussave.js (save, nitumie, statussave)
+2026-03-12T18:33:47.582300+00:00 heroku[web.1]: State changed from starting to up
+2026-03-12T18:33:47.461157+00:00 app[web.1]: [Plugin] Loaded: sticker.js (sticker, s)
+2026-03-12T18:33:47.461389+00:00 app[web.1]: [Plugin] Loaded: tagall.js (tagall, mentionall, pingall)
+2026-03-12T18:33:47.469744+00:00 app[web.1]: [Plugin] Loaded: tempmail.js (tempmail, tmpmail, fakemail, disposable)
+2026-03-12T18:33:47.469922+00:00 app[web.1]: [Plugin] Loaded: testhandler.js (testhandler)
+2026-03-12T18:33:47.470175+00:00 app[web.1]: [Plugin] Loaded: theme.js (theme, themes, settheme)
+2026-03-12T18:33:47.470558+00:00 app[web.1]: [Plugin] Loaded: tiktok.js (tiktok, tt, ttdl, tiktokdl)
+2026-03-12T18:33:47.470770+00:00 app[web.1]: [Plugin] Loaded: time.js (time, clock, timezone)
+2026-03-12T18:33:47.471023+00:00 app[web.1]: [Plugin] Loaded: toaudio.js (toaudio, tomp3, tovn, audio)
+2026-03-12T18:33:47.471455+00:00 app[web.1]: [Plugin] Loaded: togstatus.js (togstatus, swgc, poststatus)
+2026-03-12T18:33:47.471707+00:00 app[web.1]: [Plugin] Loaded: translate.js (translate, tr)
+2026-03-12T18:33:47.471978+00:00 app[web.1]: [Plugin] Loaded: tts.js (tts, speak, voice)
+2026-03-12T18:33:47.472265+00:00 app[web.1]: [Plugin] Loaded: urban.js (urban, ud, slang, urbandict)
+2026-03-12T18:33:47.472523+00:00 app[web.1]: [Plugin] Loaded: userinfo.js (userinfo, whoami, whois, me)
+2026-03-12T18:33:47.472768+00:00 app[web.1]: [Plugin] Loaded: viewonce.js (vv, viewonce, open, openphoto, openvideo, vvphoto)
+2026-03-12T18:33:47.473037+00:00 app[web.1]: [Plugin] Loaded: virus.js (scanurl, urlscan, checksafe)
+2026-03-12T18:33:47.473381+00:00 app[web.1]: [Plugin] Loaded: warn.js (warn, unwarn, warnreset, warnlist)
+2026-03-12T18:33:47.473677+00:00 app[web.1]: [Plugin] Loaded: weather.js (weather, climate, mosam)
+2026-03-12T18:33:47.473963+00:00 app[web.1]: [Plugin] Loaded: welcome.js (welcome, goodbye, setwelcome, setgoodbye, welcomeoff, goodbyeoff)
+2026-03-12T18:33:47.474226+00:00 app[web.1]: [Plugin] Loaded: wikipedia.js (wiki, wikipedia, search)
+2026-03-12T18:33:47.479896+00:00 app[web.1]: [Plugin] Loaded: yt.js (yt, youtube)
+2026-03-12T18:33:47.479900+00:00 app[web.1]: [Plugin] 105 plugins loaded
+2026-03-12T18:33:47.489329+00:00 app[web.1]: [2026-03-12T18:33:47.489Z] [INFO] ✅ Loaded 105 plugins
+2026-03-12T18:33:47.492211+00:00 app[web.1]: [2026-03-12T18:33:47.492Z] [INFO] Booting Silva MD Bot...
+2026-03-12T18:33:47.493275+00:00 app[web.1]: [2026-03-12T18:33:47.493Z] [SUCCESS] ✅ ɴᴇᴡ ꜱᴇꜱꜱɪᴏɴ ʟᴏᴀᴅᴇᴅ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ
+2026-03-12T18:33:47.493630+00:00 app[web.1]: [2026-03-12T18:33:47.493Z] [INFO] 🌐 Server running on port 21971
+2026-03-12T18:33:47.493743+00:00 app[web.1]: [2026-03-12T18:33:47.493Z] [INFO] 📊 Dashboard available at http://localhost:21971
+2026-03-12T18:33:47.908446+00:00 app[web.1]: [Handler] WhatsApp connection open.
+2026-03-12T18:33:47.908476+00:00 app[web.1]: [2026-03-12T18:33:47.908Z] [SUCCESS] ✅ Connected to WhatsApp
+2026-03-12T18:33:47.908666+00:00 app[web.1]: [AutoUpdate] ✅ 24-hour update checker scheduled.
+2026-03-12T18:33:47.908716+00:00 app[web.1]: [2026-03-12T18:33:47.908Z] [INFO] Bot LID: 271476913610986:6@lid
+2026-03-12T18:33:47.908808+00:00 app[web.1]: [2026-03-12T18:33:47.908Z] [INFO] Owner: 254701513650 | Bot number: 254701513650
+2026-03-12T18:33:48.076818+00:00 app[web.1]: [2026-03-12T18:33:48.076Z] [SUCCESS] ✅ Bio updated: 💫 ✦ Silva ✦ MD ✦ Operational ✦ Thursday, 12 March 2026 ✦
+2026-03-12T18:33:48.346667+00:00 app[web.1]: [2026-03-12T18:33:48.346Z] [SUCCESS] Welcome message sent to owner (disappears in 20s).
+2026-03-12T18:33:48.906555+00:00 app[web.1]: [2026-03-12T18:33:48.906Z] [INFO] Auto-joined group: GAR1gGUUicpDltiSTJ3hQW
+2026-03-12T18:33:53.982725+00:00 app[web.1]: [2026-03-12T18:33:53.982Z] [INFO] ✅ Startup: following newsletter 120363200367779016@newsletter
+2026-03-12T18:34:12.886063+00:00 app[web.1]: Closing open session in favor of incoming prekey bundle
+2026-03-12T18:34:12.886705+00:00 app[web.1]: Closing session: SessionEntry {
+2026-03-12T18:34:12.886705+00:00 app[web.1]:   _chains: {
+2026-03-12T18:34:12.886706+00:00 app[web.1]:     'BZGU9KTTivw1ol8dAwkf19ZR8SU/mmSuIm2T5RvmB4ka': { chainKey: [Object], chainType: 2, messageKeys: {} },
+2026-03-12T18:34:12.886706+00:00 app[web.1]:     'BRtRB/gXnY7it9c3k2s0G3A0i+ensLcYIpDwnQdInC8W': { chainKey: [Object], chainType: 1, messageKeys: {} }
+2026-03-12T18:34:12.886706+00:00 app[web.1]:   },
+2026-03-12T18:34:12.886706+00:00 app[web.1]:   registrationId: 395251691,
+2026-03-12T18:34:12.886707+00:00 app[web.1]:   currentRatchet: {
+2026-03-12T18:34:12.886707+00:00 app[web.1]:     ephemeralKeyPair: {
+2026-03-12T18:34:12.886707+00:00 app[web.1]:       pubKey: <Buffer 05 1b 51 07 f8 17 9d 8e e2 b7 d7 37 93 6b 34 1b 70 34 8b e7 a7 b0 b7 18 22 90 f0 9d 07 48 9c 2f 16>,
+2026-03-12T18:34:12.886707+00:00 app[web.1]:       privKey: <Buffer 58 4d ac b3 a1 9b 2c 67 ca 19 c7 df ac 94 ae 02 dd 7b f4 db 8b a1 f7 f3 71 70 e5 dc f4 e2 ba 45>
+2026-03-12T18:34:12.886708+00:00 app[web.1]:     },
+2026-03-12T18:34:12.886708+00:00 app[web.1]:     lastRemoteEphemeralKey: <Buffer 05 91 94 f4 a4 d3 8a fc 35 a2 5f 1d 03 09 1f d7 d6 51 f1 25 3f 9a 64 ae 22 6d 93 e5 1b e6 07 89 1a>,
+2026-03-12T18:34:12.886708+00:00 app[web.1]:     previousCounter: 0,
+2026-03-12T18:34:12.886709+00:00 app[web.1]:     rootKey: <Buffer e7 ea 5f 1d e0 0f c7 23 03 11 9a 5a f9 42 ca 59 a0 3d f6 2d 95 02 e3 aa 56 d0 40 97 93 50 45 00>
+2026-03-12T18:34:12.886709+00:00 app[web.1]:   },
+2026-03-12T18:34:12.886709+00:00 app[web.1]:   indexInfo: {
+2026-03-12T18:34:12.886709+00:00 app[web.1]:     baseKey: <Buffer 05 76 02 5a 02 e9 cf f1 27 87 fb e0 21 9f b2 94 b8 0e cf cc aa e5 dd eb 4d 4b 35 75 11 5f 82 e0 45>,
+2026-03-12T18:34:12.886709+00:00 app[web.1]:     baseKeyType: 2,
+2026-03-12T18:34:12.886709+00:00 app[web.1]:     closed: -1,
+2026-03-12T18:34:12.886709+00:00 app[web.1]:     used: 1773340452457,
+2026-03-12T18:34:12.886710+00:00 app[web.1]:     created: 1773340452457,
+2026-03-12T18:34:12.886710+00:00 app[web.1]:     remoteIdentityKey: <Buffer 05 3b de fe f2 5a 17 e0 07 9b dd de c7 35 b1 29 52 90 fc ba cd d1 9c ee 60 36 f9 43 23 ff f3 bb 56>
+2026-03-12T18:34:12.886710+00:00 app[web.1]:   }
+2026-03-12T18:34:12.886710+00:00 app[web.1]: }
+2026-03-12T18:33:31.782839+00:00 app[api]: Scaled to web@0:Basic by user silvamdbot@gmail.com
+2026-03-12T18:33:37.537018+00:00 app[api]: Scaled to web@1:Basic by user silvamdbot@gmail.com
+2026-03-12T18:33:41.109316+00:00 app[api]: Log session created by user silvamdbot@gmail.com
