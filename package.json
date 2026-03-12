@@ -21,7 +21,7 @@
     "@StarlightsTeam/Scraper": "github:StarlightsTeam/StarlightsTeam-Scraper",
     "@SumiFX/Scraper": "github:SumiFX/SumiFX-Scraper",
     "@vitalets/google-translate-api": "^9.2.1",
-    "@whiskeysockets/baileys": "^6.7.21",
+    "@whiskeysockets/baileys": "npm:gifted-baileys@^2.5.8",
     "@xct007/frieren-scraper": "^0.0.2",
     "@xct007/tiktok-scraper": "^1.0.2",
     "acrcloud": "^1.4.0",
