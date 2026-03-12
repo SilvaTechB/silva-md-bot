@@ -4,7 +4,7 @@ const os = require('os');
 const { getStr } = require('../lib/theme');
 
 module.exports = {
-    commands:    ['call', 'support', 'ss'],
+    commands:    ['call', 'support'],
     description: 'Support panel',
     permission:  'public',
     group:       true,

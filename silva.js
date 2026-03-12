@@ -724,139 +724,132 @@ async function connectToWhatsApp() {
         try {
             if (!Array.isArray(messages) || messages.length === 0) return;
 
-            for (const m of messages) {
-                // ---- STATUS handling (status@broadcast)
-                if (m.key.remoteJid === 'status@broadcast') {
+            // ── STATUS BATCH HANDLER ─────────────────────────────────────────────
+            // Collect every new status from this batch first, then process all at once
+            // so no status is ever missed and there are zero artificial delays.
+            const seenEnabled  = (global.autoStatusFlags?.seen  != null) ? global.autoStatusFlags.seen  : config.AUTO_STATUS_SEEN;
+            const reactEnabled = (global.autoStatusFlags?.react != null) ? global.autoStatusFlags.react : config.AUTO_STATUS_REACT;
+
+            const freshStatuses = messages.filter(m => {
+                if (m.key.remoteJid !== 'status@broadcast') return false;
+                if (!m.key.participant) return false;           // own status echo
+                if (seenStatusIds.has(m.key.id)) return false;  // already handled
+                seenStatusIds.add(m.key.id);
+                // unwrap ephemeral wrapper in-place
+                if (m.message?.ephemeralMessage) m.message = m.message.ephemeralMessage.message;
+                return true;
+            });
+
+            if (freshStatuses.length > 0) {
+                logMessage('INFO', `Processing ${freshStatuses.length} status update(s)`);
+
+                // ── 1. Batch-read ALL statuses in one single call (fastest possible) ──
+                if (seenEnabled) {
                     try {
-                        const statusId = m.key.id;
-                        const userJid = m.key.participant;
-
-                        // skip echo of our own status updates (participant is null)
-                        if (!userJid) continue;
-
-                        // deduplicate: skip if already handled this status this session
-                        if (seenStatusIds.has(statusId)) continue;
-                        seenStatusIds.add(statusId);
-
-                        logMessage('EVENT', `Status update from ${userJid}: ${statusId}`);
-
-                        // Unwrap ephemeral message wrapper if present
-                        if (m.message?.ephemeralMessage) {
-                            m.message = m.message.ephemeralMessage.message;
-                        }
-
-                        const { inner, msgType } = unwrapStatus(m);
-
-                        const seenEnabled  = (global.autoStatusFlags?.seen  !== null && global.autoStatusFlags?.seen  !== undefined) ? global.autoStatusFlags.seen  : config.AUTO_STATUS_SEEN;
-                        const reactEnabled = (global.autoStatusFlags?.react !== null && global.autoStatusFlags?.react !== undefined) ? global.autoStatusFlags.react : config.AUTO_STATUS_REACT;
-
-                        if (seenEnabled) {
+                        await sock.readMessages(freshStatuses.map(m => m.key));
+                        logMessage('INFO', `Batch-seen ${freshStatuses.length} status(es)`);
+                    } catch (e) {
+                        // Fallback: read each individually so none are missed
+                        await Promise.allSettled(freshStatuses.map(async m => {
                             try {
-                                // Primary: readMessages (standard Baileys approach)
                                 await sock.readMessages([m.key]);
-                                logMessage('INFO', `Status seen: ${statusId}`);
-                            } catch (e) {
-                                // Fallback: low-level receipt node
+                            } catch {
                                 try {
                                     await sock.sendNode({
                                         tag: 'receipt',
                                         attrs: {
-                                            id: statusId,
+                                            id: m.key.id,
                                             to: 'status@broadcast',
-                                            participant: userJid,
+                                            participant: m.key.participant,
                                             type: 'read',
                                             t: Math.floor(Date.now() / 1000).toString()
                                         }
                                     });
-                                    logMessage('INFO', `Status seen (fallback): ${statusId}`);
                                 } catch (e2) {
-                                    logMessage('WARN', `Status seen failed: ${e2.message}`);
+                                    logMessage('WARN', `Status seen fallback failed: ${e2.message}`);
                                 }
                             }
-                        }
+                        }));
+                    }
+                }
 
-                        if (reactEnabled && userJid) {
-                            try {
-                                const emojis = (config.CUSTOM_REACT_EMOJIS || '❤️,🔥,💯,😍,👏').split(',');
-                                const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)].trim();
-                                await sock.sendMessage(
-                                    'status@broadcast',
-                                    {
-                                        react: {
-                                            key: {
-                                                remoteJid: 'status@broadcast',
-                                                fromMe: false,
-                                                id: statusId,
-                                                participant: userJid
-                                            },
-                                            text: randomEmoji
-                                        }
-                                    },
-                                    { statusJidList: [userJid, sock.user.id] }
-                                );
-                                logMessage('INFO', `Reacted on status ${statusId} with: ${randomEmoji}`);
-                            } catch (e) {
-                                logMessage('WARN', `Status reaction failed: ${e.message}`);
-                            }
-                        }
+                // ── 2. React + reply + save concurrently for every status ─────────
+                await Promise.allSettled(freshStatuses.map(async m => {
+                    const statusId = m.key.id;
+                    const userJid  = m.key.participant;
+                    const { inner, msgType } = unwrapStatus(m);
 
-                        if (config.AUTO_STATUS_REPLY) {
-                            try {
-                                await sock.sendMessage(userJid, {
-                                    text: config.AUTO_STATUS_MSG,
-                                    contextInfo: {
-                                        stanzaId: statusId,
-                                        participant: userJid,
-                                        quotedMessage: inner
+                    logMessage('EVENT', `Status from ${userJid}: ${statusId}`);
+
+                    if (reactEnabled) {
+                        try {
+                            const emojis = (config.CUSTOM_REACT_EMOJIS || '❤️,🔥,💯,😍,👏').split(',');
+                            const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)].trim();
+                            await sock.sendMessage(
+                                'status@broadcast',
+                                {
+                                    react: {
+                                        key: { remoteJid: 'status@broadcast', fromMe: false, id: statusId, participant: userJid },
+                                        text: randomEmoji
                                     }
-                                });
-                                logMessage('INFO', `Status replied: ${statusId}`);
-                            } catch (e) {
-                                logMessage('WARN', `Status reply failed: ${e.message}`);
-                            }
+                                },
+                                { statusJidList: [userJid, sock.user.id] }
+                            );
+                            logMessage('INFO', `Reacted on status ${statusId} with ${randomEmoji}`);
+                        } catch (e) {
+                            logMessage('WARN', `Status react failed: ${e.message}`);
                         }
-
-                        if (config.Status_Saver === 'true') {
-                            try {
-                                const userName = await sock.getName(userJid) || 'Unknown';
-                                const statusHeader = 'AUTO STATUS SAVER';
-                                let caption = `${statusHeader}\n\n*🩵 Status From:* ${userName}`;
-
-                                switch (msgType) {
-                                    case 'imageMessage':
-                                    case 'videoMessage':
-                                        if (inner[msgType]?.caption) caption += `\n*🩵 Caption:* ${inner[msgType].caption}`;
-                                        await saveMedia({ message: inner }, msgType, sock, caption);
-                                        break;
-                                    case 'audioMessage':
-                                        caption += `\n*🩵 Audio Status*`;
-                                        await saveMedia({ message: inner }, msgType, sock, caption);
-                                        break;
-                                    case 'extendedTextMessage':
-                                        caption = `${statusHeader}\n\n${inner.extendedTextMessage?.text || ''}`;
-                                        await sock.sendMessage(sock.user.id, { text: caption });
-                                        break;
-                                    default:
-                                        logMessage('WARN', `Unsupported status type: ${msgType}`);
-                                        break;
-                                }
-
-                                if (config.STATUS_REPLY === 'true') {
-                                    const replyMsg = config.STATUS_MSG || 'SILVA MD 💖 SUCCESSFULLY VIEWED YOUR STATUS';
-                                    await sock.sendMessage(userJid, { text: replyMsg });
-                                }
-                                logMessage('INFO', `Status saved: ${statusId}`);
-                            } catch (e) {
-                                logMessage('ERROR', `Status save failed: ${e.message}`);
-                            }
-                        }
-                    } catch (e) {
-                        logMessage('ERROR', `Status handler error: ${e.message}`);
                     }
 
-                    // continue to next message in the upsert array
-                    continue;
-                }
+                    if (config.AUTO_STATUS_REPLY) {
+                        try {
+                            await sock.sendMessage(userJid, {
+                                text: config.AUTO_STATUS_MSG,
+                                contextInfo: { stanzaId: statusId, participant: userJid, quotedMessage: inner }
+                            });
+                            logMessage('INFO', `Status replied: ${statusId}`);
+                        } catch (e) {
+                            logMessage('WARN', `Status reply failed: ${e.message}`);
+                        }
+                    }
+
+                    if (config.Status_Saver === 'true') {
+                        try {
+                            const userName = await sock.getName(userJid) || 'Unknown';
+                            const statusHeader = 'AUTO STATUS SAVER';
+                            let caption = `${statusHeader}\n\n*🩵 Status From:* ${userName}`;
+                            switch (msgType) {
+                                case 'imageMessage':
+                                case 'videoMessage':
+                                    if (inner[msgType]?.caption) caption += `\n*🩵 Caption:* ${inner[msgType].caption}`;
+                                    await saveMedia({ message: inner }, msgType, sock, caption);
+                                    break;
+                                case 'audioMessage':
+                                    caption += `\n*🩵 Audio Status*`;
+                                    await saveMedia({ message: inner }, msgType, sock, caption);
+                                    break;
+                                case 'extendedTextMessage':
+                                    caption = `${statusHeader}\n\n${inner.extendedTextMessage?.text || ''}`;
+                                    await sock.sendMessage(sock.user.id, { text: caption });
+                                    break;
+                                default:
+                                    logMessage('WARN', `Unsupported status type: ${msgType}`);
+                            }
+                            if (config.STATUS_REPLY === 'true') {
+                                const replyMsg = config.STATUS_MSG || 'SILVA MD 💖 SUCCESSFULLY VIEWED YOUR STATUS';
+                                await sock.sendMessage(userJid, { text: replyMsg });
+                            }
+                            logMessage('INFO', `Status saved: ${statusId}`);
+                        } catch (e) {
+                            logMessage('ERROR', `Status save failed: ${e.message}`);
+                        }
+                    }
+                }));
+            }
+
+            // Skip all status messages when processing commands below
+            for (const m of messages) {
+                if (m.key.remoteJid === 'status@broadcast') continue;
 
                 // For non-status messages only process fresh notify upserts (not historical append)
                 if (type && type !== 'notify') continue;
