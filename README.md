@@ -27,163 +27,338 @@
 
 ---
 
-## ⚡ Deploy First — Pick Your Platform
+## ⚡ Deploy Silva MD Bot
 
-> **Step 1 — Get your Session ID:**  [![Get Session](https://img.shields.io/badge/GET_SESSION_ID-1e293b?style=for-the-badge&logo=whatsapp&logoColor=25D366)](https://silva-session-selector.vercel.app/)
->
-> **Step 2 — Choose a platform below and follow the guide:**
+<div align="center">
+
+### Before you deploy — get your Session ID first
+
+<a href="https://silva-session-selector.vercel.app/">
+  <img src="https://img.shields.io/badge/🔐 GET SESSION ID-Click Here to Generate-25D366?style=for-the-badge&labelColor=075E54&color=25D366" alt="Get Session ID" height="38">
+</a>
+&nbsp;&nbsp;
+<a href="https://github.com/SilvaTechB/silva-md-bot/fork">
+  <img src="https://img.shields.io/badge/🍴 FORK REPO-Fork on GitHub-0d1117?style=for-the-badge&labelColor=161b22&color=6f42c1" alt="Fork Repo" height="38">
+</a>
+
+<br><br>
+
+### Choose your hosting platform
+
+<table>
+<tr>
+<td align="center" width="180">
+
+<a href="https://silva-md-fork-checker.vercel.app/">
+  <img src="https://img.shields.io/badge/HEROKU-Deploy-430098?style=for-the-badge&logo=heroku&logoColor=white&labelColor=430098" height="36" alt="Deploy on Heroku">
+</a>
+
+**🟣 Heroku**<br>
+<sub>Best for 24/7 uptime</sub><br>
+<sub>⭐ Recommended</sub>
+
+</td>
+<td align="center" width="180">
+
+<a href="https://railway.app">
+  <img src="https://img.shields.io/badge/RAILWAY-Deploy-0B0D0E?style=for-the-badge&logo=railway&logoColor=white&labelColor=0B0D0E" height="36" alt="Deploy on Railway">
+</a>
+
+**🚂 Railway**<br>
+<sub>$5 free credits/month</sub><br>
+<sub>No sleep on free tier</sub>
+
+</td>
+<td align="center" width="180">
+
+<a href="https://app.koyeb.com">
+  <img src="https://img.shields.io/badge/KOYEB-Deploy-121212?style=for-the-badge&logo=koyeb&logoColor=white&labelColor=121212" height="36" alt="Deploy on Koyeb">
+</a>
+
+**🟡 Koyeb**<br>
+<sub>Zero cold-starts</sub><br>
+<sub>Always-on free tier</sub>
+
+</td>
+</tr>
+<tr>
+<td align="center" width="180">
+
+<a href="https://replit.com">
+  <img src="https://img.shields.io/badge/REPLIT-Deploy-F26207?style=for-the-badge&logo=replit&logoColor=white&labelColor=F26207" height="36" alt="Deploy on Replit">
+</a>
+
+**🟠 Replit**<br>
+<sub>Browser-based IDE</sub><br>
+<sub>Edit code live</sub>
+
+</td>
+<td align="center" width="180">
+
+<a href="https://host.talkdrove.com/share-bot/49">
+  <img src="https://img.shields.io/badge/TALKDROVE-Deploy-2196F3?style=for-the-badge&logo=whatsapp&logoColor=white&labelColor=2196F3" height="36" alt="Deploy on Talkdrove">
+</a>
+
+**🔵 Talkdrove**<br>
+<sub>No coding needed</sub><br>
+<sub>One-click deploy</sub>
+
+</td>
+<td align="center" width="180">
+
+<a href="#-local--self-hosted">
+  <img src="https://img.shields.io/badge/LOCAL-Self_Host-22272e?style=for-the-badge&logo=gnubash&logoColor=white&labelColor=22272e" height="36" alt="Self Host">
+</a>
+
+**💻 Local / VPS**<br>
+<sub>Full control</sub><br>
+<sub>Custom plugins</sub>
+
+</td>
+</tr>
+</table>
+
+</div>
+
+> 📖 **Click the platform name below to see step-by-step instructions**
 
 ---
 
 <details>
-<summary><b>🟣 Heroku — Recommended for 24/7 uptime</b></summary>
+<summary>
+<a href="https://silva-md-fork-checker.vercel.app/">
+<img src="https://img.shields.io/badge/HEROKU-430098?style=flat-square&logo=heroku&logoColor=white" alt="Heroku">
+</a>
+&nbsp;<b>Heroku</b> &nbsp;—&nbsp; <i>Recommended · 24/7 uptime · Auto-restart on crash</i>
+</summary>
 
 <br>
 
-> Heroku keeps your bot alive around the clock with zero manual management.
+<div align="center">
 
-**Requirements:** Free Heroku account · GitHub account
+<a href="https://silva-md-fork-checker.vercel.app/">
+  <img src="https://img.shields.io/badge/▶ Deploy to Heroku-430098?style=for-the-badge&logo=heroku&logoColor=white" height="36">
+</a>
+&nbsp;
+<a href="https://github.com/SilvaTechB/silva-md-bot/fork">
+  <img src="https://img.shields.io/badge/🍴 Fork First-161b22?style=for-the-badge&logo=github&logoColor=white" height="36">
+</a>
 
-1. **Fork** the repository — [![Fork](https://img.shields.io/badge/FORK_REPO-0d1117?style=for-the-badge&logo=github&logoColor=white)](https://github.com/SilvaTechB/silva-md-bot/fork)
-2. Go to [silva-md-fork-checker.vercel.app](https://silva-md-fork-checker.vercel.app/) and click **Deploy to Heroku**
-3. Fill in the environment variables on the Heroku setup screen:
-   - `SESSION_ID` — paste the session ID you got from the session generator
-   - `OWNER_NUMBER` — your WhatsApp number with country code (e.g. `254712345678`)
-   - `BOT_NAME` — whatever you want to call your bot
-4. Click **Deploy App** and wait ~2 minutes
-5. Go to **More → View Logs** to confirm the bot connected
-6. Your bot is live ✅
+</div>
 
-**Keeping it awake:** Use [UptimeRobot](https://uptimerobot.com) to ping your Heroku URL every 5 minutes on a free dyno.
+<br>
+
+**Requirements:** Heroku account (free) · GitHub account
+
+| Step | Action |
+|:----:|--------|
+| **1** | [Fork the repo](https://github.com/SilvaTechB/silva-md-bot/fork) to your GitHub account |
+| **2** | Open [silva-md-fork-checker.vercel.app](https://silva-md-fork-checker.vercel.app/) and click **Deploy to Heroku** |
+| **3** | Fill in `SESSION_ID`, `OWNER_NUMBER`, `BOT_NAME` on the Heroku setup screen |
+| **4** | Click **Deploy App** — wait ~2 minutes |
+| **5** | Go to **More → View Logs** and confirm you see `✅ Connected to WhatsApp` |
+
+> 💡 **Keep it awake for free:** Sign up at [UptimeRobot](https://uptimerobot.com) and ping your Heroku app URL every 5 minutes.
 
 </details>
 
 ---
 
 <details>
-<summary><b>🚂 Railway — Fast deploy, generous free tier</b></summary>
+<summary>
+<a href="https://railway.app">
+<img src="https://img.shields.io/badge/RAILWAY-0B0D0E?style=flat-square&logo=railway&logoColor=white" alt="Railway">
+</a>
+&nbsp;<b>Railway</b> &nbsp;—&nbsp; <i>$5 free credits/month · No sleep · Fast build</i>
+</summary>
 
 <br>
 
-> Railway gives you $5 free credits monthly — enough for 24/7 bot hosting.
+<div align="center">
 
-1. **Fork** the repo: [![Fork](https://img.shields.io/badge/FORK_REPO-0d1117?style=for-the-badge&logo=github&logoColor=white)](https://github.com/SilvaTechB/silva-md-bot/fork)
-2. Go to [railway.app](https://railway.app) → **New Project → Deploy from GitHub repo**
-3. Select your forked `silva-md-bot` repo
-4. Click **Variables** → Add the following:
+<a href="https://railway.app/new">
+  <img src="https://img.shields.io/badge/▶ Open Railway-0B0D0E?style=for-the-badge&logo=railway&logoColor=white" height="36">
+</a>
+&nbsp;
+<a href="https://github.com/SilvaTechB/silva-md-bot/fork">
+  <img src="https://img.shields.io/badge/🍴 Fork First-161b22?style=for-the-badge&logo=github&logoColor=white" height="36">
+</a>
 
-   | Variable | Value |
-   |----------|-------|
-   | `SESSION_ID` | Your session ID |
-   | `OWNER_NUMBER` | Your number e.g. `254712345678` |
-   | `BOT_NAME` | Your bot's name |
-   | `PREFIX` | `.` (or your preferred prefix) |
+</div>
 
-5. Railway will auto-detect Node.js and deploy — watch the build logs
-6. Once deployed, check logs for `✅ Connected to WhatsApp` ✅
+<br>
+
+| Step | Action |
+|:----:|--------|
+| **1** | [Fork the repo](https://github.com/SilvaTechB/silva-md-bot/fork) to your GitHub account |
+| **2** | Go to [railway.app](https://railway.app) → **New Project → Deploy from GitHub** |
+| **3** | Select your forked `silva-md-bot` repo |
+| **4** | Open the **Variables** tab and add the keys below |
+| **5** | Railway auto-detects Node.js — watch the build logs |
+| **6** | Look for `✅ Connected to WhatsApp` in the deploy logs |
+
+**Required variables:**
+
+| Variable | Value |
+|----------|-------|
+| `SESSION_ID` | Your session ID from the generator |
+| `OWNER_NUMBER` | Your number e.g. `254712345678` |
+| `BOT_NAME` | Your bot's display name |
+| `PREFIX` | `.` (default) |
 
 </details>
 
 ---
 
 <details>
-<summary><b>🟡 Koyeb — Zero cold-start free hosting</b></summary>
+<summary>
+<a href="https://app.koyeb.com">
+<img src="https://img.shields.io/badge/KOYEB-121212?style=flat-square&logo=koyeb&logoColor=white" alt="Koyeb">
+</a>
+&nbsp;<b>Koyeb</b> &nbsp;—&nbsp; <i>Always-on free tier · Zero cold-starts · Global edge</i>
+</summary>
 
 <br>
 
-> Koyeb's free tier keeps your bot running without sleeping.
+<div align="center">
 
-1. **Fork** the repo: [![Fork](https://img.shields.io/badge/FORK_REPO-0d1117?style=for-the-badge&logo=github&logoColor=white)](https://github.com/SilvaTechB/silva-md-bot/fork)
-2. Go to [app.koyeb.com](https://app.koyeb.com) → **Create App → GitHub**
-3. Select your fork, set **Run command** to `node silva.js`
-4. Under **Environment Variables**, add:
-   - `SESSION_ID`, `OWNER_NUMBER`, `BOT_NAME`
-5. Set **Region** to whichever is closest to you
-6. Click **Deploy** — takes about 3 minutes
-7. Check the **Logs** tab for the connected message ✅
+<a href="https://app.koyeb.com">
+  <img src="https://img.shields.io/badge/▶ Open Koyeb-121212?style=for-the-badge&logo=koyeb&logoColor=white" height="36">
+</a>
+&nbsp;
+<a href="https://github.com/SilvaTechB/silva-md-bot/fork">
+  <img src="https://img.shields.io/badge/🍴 Fork First-161b22?style=for-the-badge&logo=github&logoColor=white" height="36">
+</a>
+
+</div>
+
+<br>
+
+| Step | Action |
+|:----:|--------|
+| **1** | [Fork the repo](https://github.com/SilvaTechB/silva-md-bot/fork) to your GitHub account |
+| **2** | Go to [app.koyeb.com](https://app.koyeb.com) → **Create App → GitHub** |
+| **3** | Select your fork · Set **Run command** to `node silva.js` |
+| **4** | Add `SESSION_ID`, `OWNER_NUMBER`, `BOT_NAME` under **Environment Variables** |
+| **5** | Pick the region closest to you → click **Deploy** (~3 min) |
+| **6** | Check the **Logs** tab for the connected confirmation |
 
 </details>
 
 ---
 
 <details>
-<summary><b>🟠 Replit — Deploy directly in your browser</b></summary>
+<summary>
+<a href="https://replit.com">
+<img src="https://img.shields.io/badge/REPLIT-F26207?style=flat-square&logo=replit&logoColor=white" alt="Replit">
+</a>
+&nbsp;<b>Replit</b> &nbsp;—&nbsp; <i>Browser IDE · Edit code live · Deployments for 24/7</i>
+</summary>
 
 <br>
 
-> Perfect if you want to see and edit the code while it runs.
+<div align="center">
 
-1. Open this Repl or fork it in Replit
-2. Go to **Tools → Secrets** and add:
+<a href="https://replit.com">
+  <img src="https://img.shields.io/badge/▶ Open Replit-F26207?style=for-the-badge&logo=replit&logoColor=white" height="36">
+</a>
 
-   | Secret | Value |
-   |--------|-------|
-   | `SESSION_ID` | Your session ID |
-   | `OWNER_NUMBER` | Your number e.g. `254712345678` |
-   | `BOT_NAME` | Your bot's name |
+</div>
 
-3. Click the **Run** button — the workflow `node silva.js` starts automatically
-4. Watch the Console for `✅ Connected to WhatsApp`
-5. To keep it online 24/7, use **Replit Deployments** (Always-On) ✅
+<br>
+
+| Step | Action |
+|:----:|--------|
+| **1** | Open or fork this project in Replit |
+| **2** | Go to **Tools → Secrets** (the lock icon in the sidebar) |
+| **3** | Add `SESSION_ID`, `OWNER_NUMBER`, `BOT_NAME` as secrets |
+| **4** | Hit the **Run** button — `node silva.js` starts automatically |
+| **5** | Watch the Console for `✅ Connected to WhatsApp` |
+| **6** | For 24/7 uptime, enable **Replit Deployments → Always On** |
 
 </details>
 
 ---
 
 <details>
-<summary><b>🔵 Talkdrove — One-click community hosting</b></summary>
+<summary>
+<a href="https://host.talkdrove.com/share-bot/49">
+<img src="https://img.shields.io/badge/TALKDROVE-2196F3?style=flat-square&logo=whatsapp&logoColor=white" alt="Talkdrove">
+</a>
+&nbsp;<b>Talkdrove</b> &nbsp;—&nbsp; <i>No coding needed · One-click · Beginner friendly</i>
+</summary>
 
 <br>
 
-> Easiest option — no GitHub or coding knowledge needed.
+<div align="center">
 
-1. Visit the Talkdrove bot page: [![Talkdrove](https://img.shields.io/badge/OPEN_TALKDROVE-2196F3?style=for-the-badge&logo=whatsapp&logoColor=white)](https://host.talkdrove.com/share-bot/49)
-2. Click **Host This Bot**
-3. Enter your `SESSION_ID` and `OWNER_NUMBER`
-4. Click **Deploy** — the bot goes live instantly ✅
+<a href="https://host.talkdrove.com/share-bot/49">
+  <img src="https://img.shields.io/badge/▶ Open Talkdrove-2196F3?style=for-the-badge&logo=whatsapp&logoColor=white" height="36">
+</a>
+
+</div>
+
+<br>
+
+| Step | Action |
+|:----:|--------|
+| **1** | Click the button above to open the Silva MD bot page on Talkdrove |
+| **2** | Click **Host This Bot** |
+| **3** | Enter your `SESSION_ID` and `OWNER_NUMBER` |
+| **4** | Click **Deploy** — your bot goes live instantly ✅ |
+
+> No GitHub account or terminal required. Perfect for first-time bot owners.
 
 </details>
 
 ---
 
-<details>
-<summary><b>💻 Local / Self-Hosted — Run on your own machine or VPS</b></summary>
+<details id="-local--self-hosted">
+<summary>
+<img src="https://img.shields.io/badge/LOCAL%20%2F%20VPS-22272e?style=flat-square&logo=gnubash&logoColor=white" alt="Local">
+&nbsp;<b>Local / Self-Hosted</b> &nbsp;—&nbsp; <i>Full control · Custom plugins · Developer mode</i>
+</summary>
 
 <br>
 
-> Best for full control, custom plugins, and development.
+<div align="center">
 
-**Requirements:** Node.js 18+ · Git · FFmpeg (optional, for media features)
+<a href="https://github.com/SilvaTechB/silva-md-bot">
+  <img src="https://img.shields.io/badge/View Source on GitHub-161b22?style=for-the-badge&logo=github&logoColor=white" height="36">
+</a>
+
+</div>
+
+<br>
+
+**Requirements:** Node.js 18+ &nbsp;·&nbsp; Git &nbsp;·&nbsp; FFmpeg *(optional — needed for media conversion)*
 
 ```bash
-# 1. Clone the repository
+# Clone the repository
 git clone https://github.com/SilvaTechB/silva-md-bot.git
 cd silva-md-bot
 
-# 2. Install dependencies
+# Install dependencies
 npm install
 
-# 3. Create your config file
+# Add your config
 cp config.env.example config.env
-# Edit config.env and fill in your SESSION_ID, OWNER_NUMBER, etc.
+# Open config.env and fill in SESSION_ID, OWNER_NUMBER, etc.
 
-# 4. Start the bot
+# Start the bot
 node silva.js
 ```
 
-**With PM2 (keeps it running after you close the terminal):**
+**Keep it running 24/7 with PM2:**
 ```bash
 npm install -g pm2
 pm2 start silva.js --name silva-md
-pm2 save
-pm2 startup
+pm2 save && pm2 startup
 ```
 
-**To update later:**
+**Update to the latest version:**
 ```bash
-git pull
-npm install
-pm2 restart silva-md
+git pull && npm install && pm2 restart silva-md
 ```
 
 </details>
