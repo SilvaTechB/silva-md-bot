@@ -34,18 +34,20 @@ module.exports = {
         const theme    = config.THEME  || 'silva';
         const mode     = config.MODE   || 'both';
 
-        const greetSet = !!(config.GREETING || '').trim() || (() => {
-            try {
-                const fs   = require('fs');
-                const path = require('path');
-                const dp   = path.join(__dirname, '../data/greet.json');
-                if (fs.existsSync(dp)) {
-                    const d = JSON.parse(fs.readFileSync(dp, 'utf8'));
-                    return Object.keys(d).length > 0;
-                }
-            } catch { /* ignore */ }
-            return false;
-        })();
+        let greetText    = false;
+        let greetEnabled = false;
+        try {
+            const gp = require('path').join(__dirname, '../data/greet.json');
+            if (require('fs').existsSync(gp)) {
+                const gd = JSON.parse(require('fs').readFileSync(gp, 'utf8'));
+                greetText    = !!(gd['__text__'] || (config.GREETING || '').trim());
+                greetEnabled = gd['__enabled__'] !== false && greetText;
+            } else {
+                greetText    = !!(config.GREETING || '').trim();
+                greetEnabled = greetText;
+            }
+        } catch { /* ignore */ }
+        const greetSet = greetText;
 
         const lines = [
             `⚙️ *Bot Settings*`,
@@ -78,8 +80,8 @@ module.exports = {
             `  ${tick(config.AUTO_REACT_NEWSLETTER)}  Auto React Newsletter`,
             ``,
             `👋 *Greeting*`,
-            `  ${tick(greetSet)}  Auto-Greeting when messaged`,
-            `  ${greetSet ? `Use \`${prefix}getgreet\` to see it` : `Set with \`${prefix}setgreet <msg>\` or GREETING= in config`}`,
+            `  ${tick(greetEnabled)}  Auto-Greeting *${greetEnabled ? 'ON' : (greetSet ? 'OFF (paused)' : 'OFF')}* — once per day`,
+            `  ${greetSet ? `Use \`${prefix}getgreet\` to view • \`${prefix}greeton\`/\`${prefix}greetoff\` to toggle` : `Set with \`${prefix}setgreet <msg>\` or GREETING= in config`}`,
             ``,
             `📌 *Change settings*`,
             `  Edit your \`config.env\` / Replit Secrets,`,
