@@ -112,6 +112,16 @@ function loadPlugins() {
 
 loadPlugins();
 
+// Called once after the WhatsApp socket is open — fires onLoad(sock) for any plugin that defines it
+function initPlugins(sock) {
+    for (const plugin of plugins) {
+        if (typeof plugin.onLoad === 'function') {
+            try { plugin.onLoad(sock); }
+            catch (e) { console.error(`[Plugin onLoad] ${plugin.commands?.[0]}: ${e.message}`); }
+        }
+    }
+}
+
 // ─── Connection handlers ─────────────────────────────────────────────────────
 function setupConnectionHandlers(sock) {
     bindGroupCacheInvalidation(sock);
@@ -550,4 +560,4 @@ async function handleMessages(sock, message) {
     }
 }
 
-module.exports = { handleMessages, safeSend, setupConnectionHandlers, PERM, plugins };
+module.exports = { handleMessages, safeSend, setupConnectionHandlers, initPlugins, PERM, plugins };

@@ -65,7 +65,7 @@ const os = require('os');
 const zlib = require('zlib'); // Added for session decompression
 const express = require('express');
 const P = require('pino');
-const { handleMessages } = require('./handler');
+const { handleMessages, initPlugins } = require('./handler');
 const config = require('./config.js');
 if (typeof global.antivvEnabled === 'undefined') global.antivvEnabled = config.ANTIVV !== false;
 const store = makeInMemoryStore({ logger: P({ level: 'silent' }) });
@@ -406,6 +406,9 @@ async function connectToWhatsApp() {
             }
         } else if (connection === 'open') {
             logMessage('SUCCESS', '✅ Connected to WhatsApp');
+
+            // Fire onLoad(sock) for any plugin that defines it (e.g. autoupdate 24h checker)
+            try { initPlugins(sock); } catch (e) { logMessage('WARN', `initPlugins: ${e.message}`); }
 
             // Store bot JID, phone number, and LID globally.
             // In full-LID groups WhatsApp hides phone numbers entirely — the only
@@ -836,8 +839,10 @@ async function connectToWhatsApp() {
             for (const m of messages) {
                 if (m.key.remoteJid === 'status@broadcast') continue;
 
-                // For non-status messages only process fresh notify upserts (not historical append)
-                if (type && type !== 'notify') continue;
+                // For non-status messages only process fresh notify upserts (not historical append).
+                // EXCEPTION: always process fromMe messages (owner commands sent from their own device
+                // arrive as type:'append' not type:'notify' — blocking them silences all self-commands).
+                if (type && type !== 'notify' && !m.key.fromMe) continue;
 
                 // Skip messages older than 30 seconds to avoid re-processing on reconnect
                 const msgTs = (m.messageTimestamp || 0) * 1000;

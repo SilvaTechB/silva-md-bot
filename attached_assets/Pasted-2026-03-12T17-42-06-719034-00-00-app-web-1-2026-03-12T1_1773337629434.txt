@@ -1,0 +1,259 @@
+2026-03-12T17:42:06.719034+00:00 app[web.1]: [2026-03-12T17:42:06.718Z] [INFO] 📊 Dashboard available at http://localhost:49645
+2026-03-12T17:42:06.804177+00:00 heroku[web.1]: State changed from starting to up
+2026-03-12T17:42:07.841642+00:00 app[web.1]: [Handler] WhatsApp connection open.
+2026-03-12T17:42:07.841655+00:00 app[web.1]: [2026-03-12T17:42:07.839Z] [SUCCESS] ✅ Connected to WhatsApp
+2026-03-12T17:42:07.841659+00:00 app[web.1]: [2026-03-12T17:42:07.839Z] [INFO] Bot LID: 271476913610986:6@lid
+2026-03-12T17:42:07.841659+00:00 app[web.1]: [2026-03-12T17:42:07.839Z] [INFO] Owner: 254701513650 | Bot number: 254701513650
+2026-03-12T17:42:08.187606+00:00 app[web.1]: [2026-03-12T17:42:08.187Z] [SUCCESS] ✅ Bio updated: 💫 ✦ Silva ✦ MD ✦ Operational ✦ Thursday, 12 March 2026 ✦
+2026-03-12T17:42:09.530886+00:00 app[web.1]: [2026-03-12T17:42:09.530Z] [SUCCESS] Welcome message sent to owner (disappears in 20s).
+2026-03-12T17:42:10.677382+00:00 app[web.1]: [2026-03-12T17:42:10.677Z] [INFO] Auto-joined group: GAR1gGUUicpDltiSTJ3hQW
+2026-03-12T17:42:16.112908+00:00 app[web.1]: [2026-03-12T17:42:16.112Z] [INFO] ✅ Startup: following newsletter 120363200367779016@newsletter
+2026-03-12T17:42:57.437919+00:00 app[web.1]: Closing open session in favor of incoming prekey bundle
+2026-03-12T17:42:57.438880+00:00 app[web.1]: Closing session: SessionEntry {
+2026-03-12T17:42:57.438881+00:00 app[web.1]:   _chains: {
+2026-03-12T17:42:57.438892+00:00 app[web.1]:     'BeuYzOmXarYQgasafRwmuMEEi1uK+F+oFYS8f4WZBHp3': { chainKey: [Object], chainType: 2, messageKeys: {} },
+2026-03-12T17:42:57.438893+00:00 app[web.1]:     'BbB6P6lfLMm+erEmNwN8FToF3LWGJUpAGikUpPWDTNgm': { chainKey: [Object], chainType: 1, messageKeys: {} }
+2026-03-12T17:42:57.438893+00:00 app[web.1]:   },
+2026-03-12T17:42:57.438893+00:00 app[web.1]:   registrationId: 432063123,
+2026-03-12T17:42:57.438894+00:00 app[web.1]:   currentRatchet: {
+2026-03-12T17:42:57.438894+00:00 app[web.1]:     ephemeralKeyPair: {
+2026-03-12T17:42:57.438900+00:00 app[web.1]:       pubKey: <Buffer 05 b0 7a 3f a9 5f 2c c9 be 7a b1 26 37 03 7c 15 3a 05 dc b5 86 25 4a 40 1a 29 14 a4 f5 83 4c d8 26>,
+2026-03-12T17:42:57.438900+00:00 app[web.1]:       privKey: <Buffer 90 c7 6c fa 60 f7 0a 27 4d 8e 26 44 e4 0e f3 82 69 07 72 94 a1 12 2d 0d 4a e3 f6 31 bb 41 73 41>
+2026-03-12T17:42:57.438900+00:00 app[web.1]:     },
+2026-03-12T17:42:57.438901+00:00 app[web.1]:     lastRemoteEphemeralKey: <Buffer 05 eb 98 cc e9 97 6a b6 10 81 ab 1a 7d 1c 26 b8 c1 04 8b 5b 8a f8 5f a8 15 84 bc 7f 85 99 04 7a 77>,
+2026-03-12T17:42:57.438901+00:00 app[web.1]:     previousCounter: 0,
+2026-03-12T17:42:57.438902+00:00 app[web.1]:     rootKey: <Buffer eb c2 9a 18 67 69 63 8c df 1f 42 70 b1 7b d9 64 fc c8 0f 1b 1c ee 9d c8 54 9f 28 dc 62 67 f5 c4>
+2026-03-12T17:42:57.438902+00:00 app[web.1]:   },
+2026-03-12T17:42:57.438902+00:00 app[web.1]:   indexInfo: {
+2026-03-12T17:42:57.438902+00:00 app[web.1]:     baseKey: <Buffer 05 72 8e 63 fd af 0e f1 fb a4 a4 8b ee 5c ab ba 23 1a 46 2f 15 07 49 b0 d9 1b 45 1f 99 d2 75 b4 2a>,
+2026-03-12T17:42:57.438902+00:00 app[web.1]:     baseKeyType: 2,
+2026-03-12T17:42:57.438903+00:00 app[web.1]:     closed: -1,
+2026-03-12T17:42:57.438903+00:00 app[web.1]:     used: 1773337377018,
+2026-03-12T17:42:57.438903+00:00 app[web.1]:     created: 1773337377018,
+2026-03-12T17:42:57.438903+00:00 app[web.1]:     remoteIdentityKey: <Buffer 05 37 90 2b 58 d5 f9 fa c3 dd 1d 3a 1f 09 b0 5e a2 5e 15 87 9d 75 df 28 d1 33 85 75 6e 7f b2 93 29>
+2026-03-12T17:42:57.438904+00:00 app[web.1]:   }
+2026-03-12T17:42:57.438904+00:00 app[web.1]: }
+2026-03-12T17:41:53.314862+00:00 app[api]: Deploy by user silvamdbot@gmail.com
+2026-03-12T17:41:53.314862+00:00 app[api]: Release v5 created by user silvamdbot@gmail.com
+2026-03-12T17:41:53.326544+00:00 app[api]: Scaled to web@1:Basic by user silvamdbot@gmail.com
+2026-03-12T17:42:23.000000+00:00 app[api]: Build succeeded
+2026-03-12T17:42:54.951109+00:00 app[api]: Log session created by user silvamdbot@gmail.com
+2026-03-12T17:45:17.521422+00:00 app[web.1]: Failed to decrypt message with any known session...
+2026-03-12T17:45:17.521789+00:00 app[web.1]: Session error:Error: Bad MAC Error: Bad MAC
+2026-03-12T17:45:17.521791+00:00 app[web.1]:     at Object.verifyMAC (/app/node_modules/libsignal/src/crypto.js:87:15)
+2026-03-12T17:45:17.521792+00:00 app[web.1]:     at SessionCipher.doDecryptWhisperMessage (/app/node_modules/libsignal/src/session_cipher.js:250:16)
+2026-03-12T17:45:17.521793+00:00 app[web.1]:     at async SessionCipher.decryptWithSessions (/app/node_modules/libsignal/src/session_cipher.js:147:29)
+2026-03-12T17:45:17.521793+00:00 app[web.1]:     at async 271476913610986.0 [as awaitable] (/app/node_modules/libsignal/src/session_cipher.js:171:28)
+2026-03-12T17:45:17.521794+00:00 app[web.1]:     at async _asyncQueueExecutor (/app/node_modules/libsignal/src/queue_job.js:20:29)
+2026-03-12T17:45:17.521886+00:00 app[web.1]: Session error:Error: Bad MAC Error: Bad MAC
+2026-03-12T17:45:17.521886+00:00 app[web.1]:     at Object.verifyMAC (/app/node_modules/libsignal/src/crypto.js:87:15)
+2026-03-12T17:45:17.521886+00:00 app[web.1]:     at SessionCipher.doDecryptWhisperMessage (/app/node_modules/libsignal/src/session_cipher.js:250:16)
+2026-03-12T17:45:17.521887+00:00 app[web.1]:     at async SessionCipher.decryptWithSessions (/app/node_modules/libsignal/src/session_cipher.js:147:29)
+2026-03-12T17:45:17.521887+00:00 app[web.1]:     at async 271476913610986.0 [as awaitable] (/app/node_modules/libsignal/src/session_cipher.js:171:28)
+2026-03-12T17:45:17.521887+00:00 app[web.1]:     at async _asyncQueueExecutor (/app/node_modules/libsignal/src/queue_job.js:20:29)
+2026-03-12T17:45:18.063651+00:00 heroku[web.1]: Restarting
+2026-03-12T17:45:18.119708+00:00 heroku[web.1]: State changed from up to starting
+2026-03-12T17:45:18.309994+00:00 app[web.1]: Closing open session in favor of incoming prekey bundle
+2026-03-12T17:45:18.310008+00:00 app[web.1]: Closing session: SessionEntry {
+2026-03-12T17:45:18.310009+00:00 app[web.1]:   _chains: {
+2026-03-12T17:45:18.310009+00:00 app[web.1]:     'BSTDZYIx4mIVKF+RGspyNrUu45vF+Ug/6geDegdI4dQk': { chainKey: [Object], chainType: 2, messageKeys: {} },
+2026-03-12T17:45:18.310010+00:00 app[web.1]:     Bf0ISCMwaCA9eLYmNKRZ8W5Rm3fMB80wCkrHSVCkwiUz: { chainKey: [Object], chainType: 1, messageKeys: {} }
+2026-03-12T17:45:18.310010+00:00 app[web.1]:   },
+2026-03-12T17:45:18.310011+00:00 app[web.1]:   registrationId: 395251691,
+2026-03-12T17:45:18.310011+00:00 app[web.1]:   currentRatchet: {
+2026-03-12T17:45:18.310012+00:00 app[web.1]:     ephemeralKeyPair: {
+2026-03-12T17:45:18.310012+00:00 app[web.1]:       pubKey: <Buffer 05 fd 08 48 23 30 68 20 3d 78 b6 26 34 a4 59 f1 6e 51 9b 77 cc 07 cd 30 0a 4a c7 49 50 a4 c2 25 33>,
+2026-03-12T17:45:18.310012+00:00 app[web.1]:       privKey: <Buffer 30 b2 7a 89 28 b3 1e 53 e9 1b 3d 0e 73 ab b7 63 10 a9 6e c6 ad fb 76 25 c8 b5 5e ac 2f fe 62 41>
+2026-03-12T17:45:18.310013+00:00 app[web.1]:     },
+2026-03-12T17:45:18.310018+00:00 app[web.1]:     lastRemoteEphemeralKey: <Buffer 05 24 c3 65 82 31 e2 62 15 28 5f 91 1a ca 72 36 b5 2e e3 9b c5 f9 48 3f ea 07 83 7a 07 48 e1 d4 24>,
+2026-03-12T17:45:18.310019+00:00 app[web.1]:     previousCounter: 0,
+2026-03-12T17:45:18.310019+00:00 app[web.1]:     rootKey: <Buffer 22 de 98 cf 48 60 2d 3b 1c ef 7f 7e d6 67 05 0b ab f7 88 41 42 fe 81 9a a1 3f 97 fb e5 56 02 93>
+2026-03-12T17:45:18.310019+00:00 app[web.1]:   },
+2026-03-12T17:45:18.310019+00:00 app[web.1]:   indexInfo: {
+2026-03-12T17:45:18.310020+00:00 app[web.1]:     baseKey: <Buffer 05 ab 18 68 cf 46 6b e4 95 8d b4 23 6c 29 16 dc 15 1c a9 39 b3 ac 37 2f 4e 02 74 0e 36 51 50 9f 25>,
+2026-03-12T17:45:18.310020+00:00 app[web.1]:     baseKeyType: 2,
+2026-03-12T17:45:18.310021+00:00 app[web.1]:     closed: -1,
+2026-03-12T17:45:18.310021+00:00 app[web.1]:     used: 1773337517815,
+2026-03-12T17:45:18.310021+00:00 app[web.1]:     created: 1773337517815,
+2026-03-12T17:45:18.310022+00:00 app[web.1]:     remoteIdentityKey: <Buffer 05 3b de fe f2 5a 17 e0 07 9b dd de c7 35 b1 29 52 90 fc ba cd d1 9c ee 60 36 f9 43 23 ff f3 bb 56>
+2026-03-12T17:45:18.310022+00:00 app[web.1]:   }
+2026-03-12T17:45:18.310022+00:00 app[web.1]: }
+2026-03-12T17:45:19.205887+00:00 heroku[web.1]: Stopping all processes with SIGTERM
+2026-03-12T17:45:19.323330+00:00 heroku[web.1]: Process exited with status 143
+2026-03-12T17:45:26.426077+00:00 heroku[web.1]: Starting process with command `node silva.js`
+2026-03-12T17:45:27.129664+00:00 app[web.1]: [32m✅ Passed the Silva security check.[0m
+2026-03-12T17:45:27.418322+00:00 app[web.1]: [Plugin] Loaded: advice.js (advice, tip)
+2026-03-12T17:45:27.418700+00:00 app[web.1]: [Plugin] Loaded: afk.js (afk, back)
+2026-03-12T17:45:27.431830+00:00 app[web.1]: [Plugin] Loaded: alive.js (alive, bot, botinfo)
+2026-03-12T17:45:27.432279+00:00 app[web.1]: [Plugin] Loaded: anime.js (anime, animesearch, manga)
+2026-03-12T17:45:27.432759+00:00 app[web.1]: [Plugin] Loaded: anticall.js (anticall)
+2026-03-12T17:45:27.432998+00:00 app[web.1]: [Plugin] Loaded: antidelete.js (antidelete, antidel)
+2026-03-12T17:45:27.433221+00:00 app[web.1]: [Plugin] Loaded: antidemote.js (antidemote)
+2026-03-12T17:45:27.433659+00:00 app[web.1]: [Plugin] Loaded: antifake.js (antifake)
+2026-03-12T17:45:27.434067+00:00 app[web.1]: [Plugin] Loaded: antigm.js (antigm)
+2026-03-12T17:45:27.434362+00:00 app[web.1]: [Plugin] Loaded: antilink.js (antilink)
+2026-03-12T17:45:27.434629+00:00 app[web.1]: [Plugin] Loaded: antivv.js (antivv, avv)
+2026-03-12T17:45:27.434938+00:00 app[web.1]: [Plugin] Loaded: apk.js (apk, apkdl, getapk)
+2026-03-12T17:45:27.436836+00:00 app[web.1]: [Plugin] Loaded: ascii.js (ascii, figlet, art, textart)
+2026-03-12T17:45:27.437078+00:00 app[web.1]: [Plugin] Loaded: autojoin.js (autojoin)
+2026-03-12T17:45:27.437537+00:00 app[web.1]: [Plugin] Loaded: autoreply.js (autoreply, ar)
+2026-03-12T17:45:27.437829+00:00 app[web.1]: [Plugin] Loaded: autostatus.js (autoview, autolike, autoreact, autostatus, statusconfig)
+2026-03-12T17:45:27.438098+00:00 app[web.1]: [Plugin] Loaded: ban.js (ban, unban, banlist)
+2026-03-12T17:45:27.438287+00:00 app[web.1]: [Plugin] Loaded: base64.js (base64, b64)
+2026-03-12T17:45:27.438583+00:00 app[web.1]: [Plugin] Loaded: bible.js (bible, verse, scripture)
+2026-03-12T17:45:27.438769+00:00 app[web.1]: [Plugin] Loaded: blocklist.js (blocklist, listblock)
+2026-03-12T17:45:27.438991+00:00 app[web.1]: [Plugin] Loaded: broadcast.js (broadcast, bc)
+2026-03-12T17:45:27.439167+00:00 app[web.1]: [Plugin] Loaded: calc.js (calc, calculate, math)
+2026-03-12T17:45:27.439388+00:00 app[web.1]: [Plugin] Loaded: call.js (call, support)
+2026-03-12T17:45:27.439737+00:00 app[web.1]: [Plugin] Loaded: catbox.js (tourl, imgtourl, imgurl, geturl, upload)
+2026-03-12T17:45:27.440114+00:00 app[web.1]: [Plugin] Loaded: color.js (color, colour, hex, colorinfo)
+2026-03-12T17:45:27.440334+00:00 app[web.1]: [Plugin] Loaded: compliment.js (compliment, comp, praise)
+2026-03-12T17:45:27.440612+00:00 app[web.1]: [Plugin] Loaded: country.js (country, countryinfo)
+2026-03-12T17:45:27.440991+00:00 app[web.1]: [Plugin] Loaded: crypto.js (crypto, coin, price, btc, eth, doge)
+2026-03-12T17:45:27.441253+00:00 app[web.1]: [Plugin] Loaded: currency.js (currency, convert, rate)
+2026-03-12T17:45:27.441524+00:00 app[web.1]: [Plugin] Loaded: define.js (define, dict, meaning, definition)
+2026-03-12T17:45:27.441833+00:00 app[web.1]: [Plugin] Loaded: dictionary.js (dictionary, wordinfo, fulldict)
+2026-03-12T17:45:27.442042+00:00 app[web.1]: [Plugin] Loaded: dmall.js (dmall, dmmembers, msgall)
+2026-03-12T17:45:27.442360+00:00 app[web.1]: [Plugin] Loaded: eval.js (eval, exec, run)
+2026-03-12T17:45:27.442708+00:00 app[web.1]: [Plugin] Loaded: facebook.js (facebook, fb, fbdl)
+2026-03-12T17:45:27.442964+00:00 app[web.1]: [Plugin] Loaded: fact.js (fact, facts, funfact)
+2026-03-12T17:45:27.443257+00:00 app[web.1]: [Plugin] Loaded: fetch.js (fetch, webfetch, geturl, readurl)
+2026-03-12T17:45:27.443458+00:00 app[web.1]: [Plugin] Loaded: flipcoin.js (flip, coin, dice, roll)
+2026-03-12T17:45:27.443627+00:00 app[web.1]: [Plugin] Loaded: getpp.js (spp, profile, getpp)
+2026-03-12T17:45:27.443839+00:00 app[web.1]: [Plugin] Loaded: gitclone.js (gitclone)
+2026-03-12T17:45:27.444206+00:00 app[web.1]: [Plugin] Loaded: github.js (github, gh, gituser, gitrepo)
+2026-03-12T17:45:27.444633+00:00 app[web.1]: [Plugin] Loaded: greet.js (setgreet, getgreet, delgreet, greeton, greetoff)
+2026-03-12T17:45:27.444834+00:00 app[web.1]: [Plugin] Loaded: grouplink.js (grouplink, invitelink, link, revoke, revokelink)
+2026-03-12T17:45:27.445074+00:00 app[web.1]: [Plugin] Loaded: groupstatus.js (groupstatus, ginfo, groupinfo, grpinfo, gstatus)
+2026-03-12T17:45:27.445220+00:00 app[web.1]: [Plugin] Loaded: hello.js (hello)
+2026-03-12T17:45:27.445401+00:00 app[web.1]: [Plugin] Loaded: hidetag.js (hidetag, htag, stag, silenttag)
+2026-03-12T17:45:27.445657+00:00 app[web.1]: [Plugin] Loaded: imagine.js (imagine, generate, aiimage, img)
+2026-03-12T17:45:27.445964+00:00 app[web.1]: [Plugin] Loaded: instagram.js (instagram, igdl, ig, insta)
+2026-03-12T17:45:27.446254+00:00 app[web.1]: [Plugin] Loaded: intro.js (intro, setintro, myintro, delintro, introlist)
+2026-03-12T17:45:27.446557+00:00 app[web.1]: [Plugin] Loaded: ip.js (ip, iplookup, ipinfo)
+2026-03-12T17:45:27.446841+00:00 app[web.1]: [Plugin] Loaded: joke.js (joke, jokes)
+2026-03-12T17:45:27.447059+00:00 app[web.1]: [Plugin] Loaded: kick.js (kick, remove)
+2026-03-12T17:45:27.447240+00:00 app[web.1]: [Plugin] Loaded: lock.js (lock, unlock, close, open)
+2026-03-12T17:45:27.447478+00:00 app[web.1]: [Plugin] Loaded: lyrics.js (lyrics, lyric)
+2026-03-12T17:45:27.447706+00:00 app[web.1]: [Plugin] Loaded: meme.js (meme, memes)
+2026-03-12T17:45:27.448211+00:00 app[web.1]: [Plugin] Loaded: menu.js (menu, help, list)
+2026-03-12T17:45:27.448661+00:00 app[web.1]: [Plugin] Loaded: morse.js (morse, morseencode, morsedecode)
+2026-03-12T17:45:27.449015+00:00 app[web.1]: [Plugin] Loaded: movie.js (movie, film, imdb, series)
+2026-03-12T17:45:27.453952+00:00 app[web.1]: [Plugin] Loaded: music.js (play, music)
+2026-03-12T17:45:27.454320+00:00 app[web.1]: [Plugin] Loaded: news.js (news, headlines, latestnews, breaking)
+2026-03-12T17:45:27.454642+00:00 app[web.1]: [Plugin] Loaded: newsletter.js (newsletter, followchannel, unfollowchannel, channelinfo, mutechannel, unmutechannel)
+2026-03-12T17:45:27.454948+00:00 app[web.1]: [Plugin] Loaded: npm.js (npm, npmpkg, package, pkg)
+2026-03-12T17:45:27.455175+00:00 app[web.1]: [Plugin] Loaded: numberfact.js (numberfact, numfact, number)
+2026-03-12T17:45:27.455348+00:00 app[web.1]: [Plugin] Loaded: password.js (password, passwd, genpass)
+2026-03-12T17:45:27.455526+00:00 app[web.1]: [Plugin] Loaded: poll.js (poll, vote)
+2026-03-12T17:45:27.455727+00:00 app[web.1]: [Plugin] Loaded: presence.js (presence, typing, recording, busy, online, offline)
+2026-03-12T17:45:27.455969+00:00 app[web.1]: [Plugin] Loaded: promote.js (promote, demote, admin, unadmin)
+2026-03-12T17:45:27.456208+00:00 app[web.1]: [Plugin] Loaded: qrcode.js (qrcode, qr)
+2026-03-12T17:45:27.456465+00:00 app[web.1]: [Plugin] Loaded: quote.js (quote, inspire, motivation)
+2026-03-12T17:45:27.456615+00:00 app[web.1]: [Plugin] Loaded: react.js (react, reaction, emoji)
+2026-03-12T17:45:27.456813+00:00 app[web.1]: [Plugin] Loaded: remind.js (remind, remindme, reminder)
+2026-03-12T17:45:27.457087+00:00 app[web.1]: [Plugin] Loaded: repo.js (repo, repository, github)
+2026-03-12T17:45:27.457358+00:00 app[web.1]: [Plugin] Loaded: riddle.js (riddle, answer)
+2026-03-12T17:45:27.457619+00:00 app[web.1]: [Plugin] Loaded: screenshot.js (ss, screenshot, webshot, capture)
+2026-03-12T17:45:27.458225+00:00 app[web.1]: [Plugin] Error loading setdp.js: Error: Cannot find module 'sharp'
+2026-03-12T17:45:27.458226+00:00 app[web.1]: Require stack:
+2026-03-12T17:45:27.458227+00:00 app[web.1]: - /app/plugins/setdp.js
+2026-03-12T17:45:27.458227+00:00 app[web.1]: - /app/handler.js
+2026-03-12T17:45:27.458227+00:00 app[web.1]: - /app/silva.js
+2026-03-12T17:45:27.458228+00:00 app[web.1]:     at Module._resolveFilename (node:internal/modules/cjs/loader:1456:15)
+2026-03-12T17:45:27.458228+00:00 app[web.1]:     at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+2026-03-12T17:45:27.458228+00:00 app[web.1]:     at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+2026-03-12T17:45:27.458229+00:00 app[web.1]:     at Module._load (node:internal/modules/cjs/loader:1242:25)
+2026-03-12T17:45:27.458229+00:00 app[web.1]:     at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+2026-03-12T17:45:27.458229+00:00 app[web.1]:     at Module.require (node:internal/modules/cjs/loader:1556:12)
+2026-03-12T17:45:27.458229+00:00 app[web.1]:     at require (node:internal/modules/helpers:152:16)
+2026-03-12T17:45:27.458230+00:00 app[web.1]:     at Object.<anonymous> (/app/plugins/setdp.js:3:15)
+2026-03-12T17:45:27.458230+00:00 app[web.1]:     at Module._compile (node:internal/modules/cjs/loader:1812:14)
+2026-03-12T17:45:27.458230+00:00 app[web.1]:     at Object..js (node:internal/modules/cjs/loader:1943:10)
+2026-03-12T17:45:27.458567+00:00 app[web.1]: [Plugin] Loaded: setgroup.js (setname, setdesc, setdescription, groupname, groupdesc)
+2026-03-12T17:45:27.458838+00:00 app[web.1]: [Plugin] Loaded: settings.js (settings, config, botsettings)
+2026-03-12T17:45:27.459158+00:00 app[web.1]: [Plugin] Loaded: shazam.js (shazam, identify, song)
+2026-03-12T17:45:27.459421+00:00 app[web.1]: [Plugin] Loaded: silva-ai.js (ai, gpt, chatgpt)
+2026-03-12T17:45:27.459619+00:00 app[web.1]: [Plugin] Loaded: silva-getjid.js (getjid, jid)
+2026-03-12T17:45:27.459825+00:00 app[web.1]: [Plugin] Loaded: silva-owner.js (owner, creator)
+2026-03-12T17:45:27.460003+00:00 app[web.1]: [Plugin] Loaded: silva-ping.js (ping)
+2026-03-12T17:45:27.460232+00:00 app[web.1]: [Plugin] Loaded: silva-shorturl.js (shorten)
+2026-03-12T17:45:27.460445+00:00 app[web.1]: [Plugin] Loaded: silva-uptime.js (uptime, runtime)
+2026-03-12T17:45:27.460642+00:00 app[web.1]: [Plugin] Loaded: statussave.js (save, nitumie, statussave)
+2026-03-12T17:45:27.677244+00:00 app[web.1]: [Plugin] Loaded: sticker.js (sticker, s)
+2026-03-12T17:45:27.677487+00:00 app[web.1]: [Plugin] Loaded: tagall.js (tagall, mentionall, pingall)
+2026-03-12T17:45:27.684967+00:00 app[web.1]: [Plugin] Loaded: tempmail.js (tempmail, tmpmail, fakemail, disposable)
+2026-03-12T17:45:27.685140+00:00 app[web.1]: [Plugin] Loaded: testhandler.js (testhandler)
+2026-03-12T17:45:27.685407+00:00 app[web.1]: [Plugin] Loaded: theme.js (theme, themes, settheme)
+2026-03-12T17:45:27.685797+00:00 app[web.1]: [Plugin] Loaded: tiktok.js (tiktok, tt, ttdl, tiktokdl)
+2026-03-12T17:45:27.686024+00:00 app[web.1]: [Plugin] Loaded: time.js (time, clock, timezone)
+2026-03-12T17:45:27.686282+00:00 app[web.1]: [Plugin] Loaded: toaudio.js (toaudio, tomp3, tovn, audio)
+2026-03-12T17:45:27.686588+00:00 app[web.1]: [Plugin] Loaded: translate.js (translate, tr)
+2026-03-12T17:45:27.686842+00:00 app[web.1]: [Plugin] Loaded: tts.js (tts, speak, voice)
+2026-03-12T17:45:27.687094+00:00 app[web.1]: [Plugin] Loaded: urban.js (urban, ud, slang, urbandict)
+2026-03-12T17:45:27.687499+00:00 app[web.1]: [Plugin] Loaded: userinfo.js (userinfo, whoami, whois, me)
+2026-03-12T17:45:27.687736+00:00 app[web.1]: [Plugin] Loaded: viewonce.js (vv, viewonce, open, openphoto, openvideo, vvphoto)
+2026-03-12T17:45:27.688015+00:00 app[web.1]: [Plugin] Loaded: virus.js (scanurl, urlscan, checksafe)
+2026-03-12T17:45:27.688368+00:00 app[web.1]: [Plugin] Loaded: warn.js (warn, unwarn, warnreset, warnlist)
+2026-03-12T17:45:27.688636+00:00 app[web.1]: [Plugin] Loaded: weather.js (weather, climate, mosam)
+2026-03-12T17:45:27.688907+00:00 app[web.1]: [Plugin] Loaded: welcome.js (welcome, goodbye, setwelcome, setgoodbye, welcomeoff, goodbyeoff)
+2026-03-12T17:45:27.689172+00:00 app[web.1]: [Plugin] Loaded: wikipedia.js (wiki, wikipedia, search)
+2026-03-12T17:45:27.694619+00:00 app[web.1]: [Plugin] Loaded: yt.js (yt, youtube)
+2026-03-12T17:45:27.694633+00:00 app[web.1]: [Plugin] 102 plugins loaded
+2026-03-12T17:45:27.702020+00:00 app[web.1]: [2026-03-12T17:45:27.701Z] [ERROR] Failed loading plugin setdp.js: Cannot find module 'sharp'
+2026-03-12T17:45:27.702021+00:00 app[web.1]: Require stack:
+2026-03-12T17:45:27.702021+00:00 app[web.1]: - /app/plugins/setdp.js
+2026-03-12T17:45:27.702022+00:00 app[web.1]: - /app/silva.js
+2026-03-12T17:45:27.704187+00:00 app[web.1]: [2026-03-12T17:45:27.704Z] [INFO] ✅ Loaded 102 plugins
+2026-03-12T17:45:27.707092+00:00 app[web.1]: [2026-03-12T17:45:27.707Z] [INFO] Booting Silva MD Bot...
+2026-03-12T17:45:27.708237+00:00 app[web.1]: [2026-03-12T17:45:27.708Z] [SUCCESS] ✅ ɴᴇᴡ ꜱᴇꜱꜱɪᴏɴ ʟᴏᴀᴅᴇᴅ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ
+2026-03-12T17:45:27.708603+00:00 app[web.1]: [2026-03-12T17:45:27.708Z] [INFO] 🌐 Server running on port 14523
+2026-03-12T17:45:27.708708+00:00 app[web.1]: [2026-03-12T17:45:27.708Z] [INFO] 📊 Dashboard available at http://localhost:14523
+2026-03-12T17:45:28.074429+00:00 heroku[web.1]: State changed from starting to up
+2026-03-12T17:45:28.499252+00:00 app[web.1]: [Handler] WhatsApp connection open.
+2026-03-12T17:45:28.499284+00:00 app[web.1]: [2026-03-12T17:45:28.499Z] [SUCCESS] ✅ Connected to WhatsApp
+2026-03-12T17:45:28.499377+00:00 app[web.1]: [2026-03-12T17:45:28.499Z] [INFO] Bot LID: 271476913610986:6@lid
+2026-03-12T17:45:28.499430+00:00 app[web.1]: [2026-03-12T17:45:28.499Z] [INFO] Owner: 254701513650 | Bot number: 254701513650
+2026-03-12T17:45:28.678183+00:00 app[web.1]: [2026-03-12T17:45:28.678Z] [SUCCESS] ✅ Bio updated: ✨ ✦ Silva ✦ MD ✦ ✦ Online ✦ Thursday, 12 March 2026 ✦
+2026-03-12T17:45:28.804715+00:00 app[web.1]: [2026-03-12T17:45:28.804Z] [SUCCESS] Welcome message sent to owner (disappears in 20s).
+2026-03-12T17:45:29.221052+00:00 app[web.1]: [2026-03-12T17:45:29.221Z] [INFO] Auto-joined group: GAR1gGUUicpDltiSTJ3hQW
+2026-03-12T17:45:34.424064+00:00 app[web.1]: [2026-03-12T17:45:34.423Z] [INFO] ✅ Startup: following newsletter 120363200367779016@newsletter
+2026-03-12T17:46:13.945959+00:00 app[web.1]: Failed to decrypt message with any known session...
+2026-03-12T17:46:13.946088+00:00 app[web.1]: Session error:Error: Bad MAC Error: Bad MAC
+2026-03-12T17:46:13.946088+00:00 app[web.1]:     at Object.verifyMAC (/app/node_modules/libsignal/src/crypto.js:87:15)
+2026-03-12T17:46:13.946089+00:00 app[web.1]:     at SessionCipher.doDecryptWhisperMessage (/app/node_modules/libsignal/src/session_cipher.js:250:16)
+2026-03-12T17:46:13.946089+00:00 app[web.1]:     at async SessionCipher.decryptWithSessions (/app/node_modules/libsignal/src/session_cipher.js:147:29)
+2026-03-12T17:46:13.946089+00:00 app[web.1]:     at async 271476913610986.0 [as awaitable] (/app/node_modules/libsignal/src/session_cipher.js:171:28)
+2026-03-12T17:46:13.946089+00:00 app[web.1]:     at async _asyncQueueExecutor (/app/node_modules/libsignal/src/queue_job.js:20:29)
+2026-03-12T17:46:19.663887+00:00 app[web.1]: Failed to decrypt message with any known session...
+2026-03-12T17:46:19.663953+00:00 app[web.1]: Session error:Error: Bad MAC Error: Bad MAC
+2026-03-12T17:46:19.663953+00:00 app[web.1]:     at Object.verifyMAC (/app/node_modules/libsignal/src/crypto.js:87:15)
+2026-03-12T17:46:19.663954+00:00 app[web.1]:     at SessionCipher.doDecryptWhisperMessage (/app/node_modules/libsignal/src/session_cipher.js:250:16)
+2026-03-12T17:46:19.663954+00:00 app[web.1]:     at async SessionCipher.decryptWithSessions (/app/node_modules/libsignal/src/session_cipher.js:147:29)
+2026-03-12T17:46:19.663954+00:00 app[web.1]:     at async 271476913610986.0 [as awaitable] (/app/node_modules/libsignal/src/session_cipher.js:171:28)
+2026-03-12T17:46:19.663955+00:00 app[web.1]:     at async _asyncQueueExecutor (/app/node_modules/libsignal/src/queue_job.js:20:29)
+2026-03-12T17:46:20.322440+00:00 app[web.1]: Closing open session in favor of incoming prekey bundle
+2026-03-12T17:46:20.322981+00:00 app[web.1]: Closing session: SessionEntry {
+2026-03-12T17:46:20.322982+00:00 app[web.1]:   _chains: {
+2026-03-12T17:46:20.322982+00:00 app[web.1]:     BdukWt5UDjxir3gjlorFVjVzFJ5XaJMJc4Kh2LLtm1tY: { chainKey: [Object], chainType: 2, messageKeys: {} },
+2026-03-12T17:46:20.322982+00:00 app[web.1]:     BVTaEPAyThuaxEIGhndiIh5jC96PhLerK6iGDcY641Av: { chainKey: [Object], chainType: 1, messageKeys: {} }
+2026-03-12T17:46:20.322982+00:00 app[web.1]:   },
+2026-03-12T17:46:20.322983+00:00 app[web.1]:   registrationId: 432063123,
+2026-03-12T17:46:20.322983+00:00 app[web.1]:   currentRatchet: {
+2026-03-12T17:46:20.322983+00:00 app[web.1]:     ephemeralKeyPair: {
+2026-03-12T17:46:20.322984+00:00 app[web.1]:       pubKey: <Buffer 05 54 da 10 f0 32 4e 1b 9a c4 42 06 86 77 62 22 1e 63 0b de 8f 84 b7 ab 2b a8 86 0d c6 3a e3 50 2f>,
+2026-03-12T17:46:20.322984+00:00 app[web.1]:       privKey: <Buffer 68 c6 f9 df 2d ba fe c9 dd b6 41 af 89 81 72 51 b1 0d 6a 2d 27 fb a4 38 39 0a d9 96 da 8f 50 7d>
+2026-03-12T17:46:20.322984+00:00 app[web.1]:     },
+2026-03-12T17:46:20.322984+00:00 app[web.1]:     lastRemoteEphemeralKey: <Buffer 05 db a4 5a de 54 0e 3c 62 af 78 23 96 8a c5 56 35 73 14 9e 57 68 93 09 73 82 a1 d8 b2 ed 9b 5b 58>,
+2026-03-12T17:46:20.322984+00:00 app[web.1]:     previousCounter: 0,
+2026-03-12T17:46:20.322985+00:00 app[web.1]:     rootKey: <Buffer 50 41 02 ae fe 66 a1 0d 7b e6 4f 86 de 6a 9a ac 1c 4a 98 28 b8 07 11 ee e9 e8 10 3a 11 91 5e 06>
+2026-03-12T17:46:20.322985+00:00 app[web.1]:   },
+2026-03-12T17:46:20.322985+00:00 app[web.1]:   indexInfo: {
+2026-03-12T17:46:20.322985+00:00 app[web.1]:     baseKey: <Buffer 05 57 ea 99 3e 72 25 9b 29 69 64 24 a6 18 d7 09 0e 45 5f e4 1c dc 49 50 e4 07 39 9e a6 c8 fc 3f 5b>,
+2026-03-12T17:46:20.322985+00:00 app[web.1]:     baseKeyType: 2,
+2026-03-12T17:46:20.322985+00:00 app[web.1]:     closed: -1,
+2026-03-12T17:46:20.322985+00:00 app[web.1]:     used: 1773337547688,
+2026-03-12T17:46:20.322986+00:00 app[web.1]:     created: 1773337547688,
+2026-03-12T17:46:20.322986+00:00 app[web.1]:     remoteIdentityKey: <Buffer 05 37 90 2b 58 d5 f9 fa c3 dd 1d 3a 1f 09 b0 5e a2 5e 15 87 9d 75 df 28 d1 33 85 75 6e 7f b2 93 29>
+2026-03-12T17:46:20.322986+00:00 app[web.1]:   }
+2026-03-12T17:46:20.322986+00:00 app[web.1]: }
