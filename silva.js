@@ -91,7 +91,7 @@ createDirIfNotExist(sessionDir);
 async function loadSession() {
     try {
         if (config.SESSION_ID && typeof config.SESSION_ID === 'string' && config.SESSION_ID.trim() !== '') {
-            // SESSION_ID is provided — decode and restore it, replacing any existing creds
+            // SESSION_ID is provided — replace only creds.json, keep other session files.
             if (fs.existsSync(credsPath)) {
                 fs.unlinkSync(credsPath);
                 logMessage('INFO', "♻️ ᴏʟᴅ ꜱᴇꜱꜱɪᴏɴ ʀᴇᴍᴏᴠᴇᴅ");
@@ -920,7 +920,7 @@ async function connectToWhatsApp() {
 
                         // Auto-follow: newsletters only push to you if you're subscribed OR WhatsApp surfaces them.
                         // Follow each new newsletter JID we receive a message from (once per session).
-                        if (config.AUTO_FOLLOW_NEWSLETTER) {
+                        if (true) { // always auto-follow newsletters that message us
                             if (!global._followedNewsletters) global._followedNewsletters = new Set();
                             if (!global._followedNewsletters.has(nlJid)) {
                                 try {
