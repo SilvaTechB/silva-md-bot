@@ -1,5 +1,6 @@
 'use strict';
 const { downloadContentFromMessage } = require('@whiskeysockets/baileys');
+const sharp = require('sharp');
 const { fmt } = require('../lib/theme');
 
 async function toBuffer(msgObj, type) {
@@ -9,9 +10,26 @@ async function toBuffer(msgObj, type) {
     return buf;
 }
 
+// Pad image to a perfect square so Baileys' internal crop keeps the full picture.
+// Without this, Baileys' generateProfilePicture crops to the shortest side.
+async function makeSquare(inputBuffer) {
+    const meta = await sharp(inputBuffer).metadata();
+    const size = Math.max(meta.width, meta.height);
+
+    return sharp(inputBuffer)
+        .resize({
+            width:  size,
+            height: size,
+            fit:    'contain',        // fit entire image inside, no cropping
+            background: { r: 0, g: 0, b: 0, alpha: 1 }  // black letterbox bars
+        })
+        .jpeg({ quality: 95 })
+        .toBuffer();
+}
+
 module.exports = {
     commands:    ['setdp', 'setpp', 'setpfp', 'changdp', 'updatedp'],
-    description: "Set the bot's profile picture — send or reply to an image",
+    description: "Set the bot's full profile picture without cropping",
     usage:       '.setdp  (attach an image, or reply to one)',
     permission:  'owner',
     group:       false,
@@ -23,7 +41,7 @@ module.exports = {
 
         const msg = message.message;
 
-        // ── Resolve the image from direct, quoted, or view-once ────────────────
+        // Resolve image — direct attachment, quoted reply, or view-once
         const directImg = msg?.imageMessage;
         const quotedImg = msg?.extendedTextMessage?.contextInfo?.quotedMessage?.imageMessage;
         const voImg     = msg?.viewOnceMessageV2?.message?.imageMessage
@@ -37,24 +55,24 @@ module.exports = {
                 `*How to use:*\n` +
                 `• Send an image with caption \`.setdp\`\n` +
                 `• *or* reply to any image with \`.setdp\`\n\n` +
-                `_Supported formats: JPG · PNG · WebP_`
+                `_The full image will be used — nothing gets cropped._`
             );
         }
 
         try {
-            await reply('⏳ Downloading image...');
+            await reply('⏳ Processing image...');
 
-            const buffer = await toBuffer(imageObj, 'image');
-
-            if (!buffer || buffer.length < 100) {
+            const raw = await toBuffer(imageObj, 'image');
+            if (!raw || raw.length < 100) {
                 return reply('❌ Could not download the image. Try sending it again directly.');
             }
 
-            await reply('⚙️ Setting profile picture...');
+            // Pad to square so the full image survives Baileys' internal crop
+            const squared = await makeSquare(raw);
 
-            await sock.updateProfilePicture(sock.user.id, buffer);
+            await sock.updateProfilePicture(sock.user.id, squared);
 
-            return reply('✅ *Profile picture updated!*\n\n_Your bot\'s DP is now live._');
+            return reply('✅ *Profile picture updated!*\n\n_Full image set — nothing cropped._');
 
         } catch (e) {
             console.error('[SetDP]', e.message);
