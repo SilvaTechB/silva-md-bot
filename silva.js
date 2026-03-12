@@ -446,6 +446,31 @@ async function connectToWhatsApp() {
                 }
             }
 
+            // ── Auto-follow newsletters on startup ───────────────────────────
+            if (config.AUTO_FOLLOW_NEWSLETTER) {
+                if (!global._followedNewsletters) global._followedNewsletters = new Set();
+                const jidsToFollow = Array.isArray(config.NEWSLETTER_JID) ? config.NEWSLETTER_JID : [config.NEWSLETTER_JID];
+                for (const nlJid of jidsToFollow) {
+                    if (!nlJid || global._followedNewsletters.has(nlJid)) continue;
+                    setTimeout(async () => {
+                        try {
+                            await sock.newsletterFollow(nlJid);
+                            global._followedNewsletters.add(nlJid);
+                            logMessage('INFO', `✅ Startup: auto-followed newsletter ${nlJid}`);
+                        } catch (e) {
+                            const msg = e.message || '';
+                            if (/already|409|subscribed|unexpected response/i.test(msg)) {
+                                // "unexpected response structure" usually means already subscribed
+                                global._followedNewsletters.add(nlJid);
+                                logMessage('INFO', `✅ Already following newsletter: ${nlJid}`);
+                            } else {
+                                logMessage('WARN', `Startup newsletter follow failed (${nlJid}): ${msg}`);
+                            }
+                        }
+                    }, 5000); // 5 s delay so the session is fully settled first
+                }
+            }
+
         }
     });
 
@@ -891,7 +916,14 @@ async function connectToWhatsApp() {
                                     global._followedNewsletters.add(nlJid);
                                     logMessage('INFO', `✅ Auto-followed newsletter: ${nlJid}`);
                                 } catch (e) {
-                                    logMessage('WARN', `Newsletter follow failed (${nlJid}): ${e.message} | stack: ${e.stack}`);
+                                    const emsg = e.message || '';
+                                    if (/already|409|subscribed|unexpected response/i.test(emsg)) {
+                                        global._followedNewsletters.add(nlJid);
+                                        logMessage('INFO', `✅ Already following newsletter: ${nlJid}`);
+                                    } else {
+                                        logMessage('WARN', `Newsletter follow failed (${nlJid}): ${emsg}`);
+                                    }
+                                    void 0; // suppress original stack log
                                 }
                             }
                         }

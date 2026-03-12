@@ -18,14 +18,21 @@ module.exports = {
 
         if (command === 'newsletter') {
             const status = config.AUTO_FOLLOW_NEWSLETTER ? '✅ ON' : '❌ OFF';
-            const list = followedThisSession.size > 0
-                ? [...followedThisSession].map(j => `• ${j}`).join('\n')
-                : 'None followed this session.';
+            const configured = Array.isArray(config.NEWSLETTER_JID)
+                ? config.NEWSLETTER_JID.map(j => `• ${j}`).join('\n')
+                : `• ${config.NEWSLETTER_JID}`;
+            const globalFollowed = global._followedNewsletters
+                ? [...global._followedNewsletters].map(j => `• ${j}`).join('\n')
+                : 'None yet.';
             return reply(
                 `📰 *Newsletter Autofollow*\n\n` +
                 `Status: ${status}\n\n` +
-                `*Followed this session:*\n${list}\n\n` +
-                `_Toggle with_ \`${prefix}followchannel\` _<jid>_`
+                `*Configured JIDs (followed on startup):*\n${configured}\n\n` +
+                `*Followed this session:*\n${globalFollowed}\n\n` +
+                `*Commands:*\n` +
+                `• \`${prefix}followchannel <jid>\` — follow a newsletter\n` +
+                `• \`${prefix}unfollowchannel <jid>\` — unfollow\n` +
+                `• \`${prefix}channelinfo <jid_or_link>\` — get info`
             );
         }
 
