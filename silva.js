@@ -743,37 +743,7 @@ async function connectToWhatsApp() {
             if (freshStatuses.length > 0) {
                 logMessage('INFO', `Processing ${freshStatuses.length} status update(s)`);
 
-                // ── 1. Batch-read ALL statuses in one single call (fastest possible) ──
-                if (seenEnabled) {
-                    try {
-                        await sock.readMessages(freshStatuses.map(m => m.key));
-                        logMessage('INFO', `Batch-seen ${freshStatuses.length} status(es)`);
-                    } catch (e) {
-                        // Fallback: read each individually so none are missed
-                        await Promise.allSettled(freshStatuses.map(async m => {
-                            try {
-                                await sock.readMessages([m.key]);
-                            } catch {
-                                try {
-                                    await sock.sendNode({
-                                        tag: 'receipt',
-                                        attrs: {
-                                            id: m.key.id,
-                                            to: 'status@broadcast',
-                                            participant: m.key.participant,
-                                            type: 'read',
-                                            t: Math.floor(Date.now() / 1000).toString()
-                                        }
-                                    });
-                                } catch (e2) {
-                                    logMessage('WARN', `Status seen fallback failed: ${e2.message}`);
-                                }
-                            }
-                        }));
-                    }
-                }
-
-                // ── 2. React + reply + save concurrently for every status ─────────
+                // Process every status concurrently — each one reads + reacts independently
                 await Promise.allSettled(freshStatuses.map(async m => {
                     const statusId = m.key.id;
                     const userJid  = m.key.participant;
@@ -781,7 +751,18 @@ async function connectToWhatsApp() {
 
                     logMessage('EVENT', `Status from ${userJid}: ${statusId}`);
 
-                    if (reactEnabled) {
+                    // ── 1. View: read one at a time (batch reads are unreliable) ──
+                    if (seenEnabled) {
+                        try {
+                            await sock.readMessages([m.key]);
+                            logMessage('INFO', `✅ Status seen: ${statusId}`);
+                        } catch (e) {
+                            logMessage('WARN', `Status seen failed: ${e.message}`);
+                        }
+                    }
+
+                    // ── 2. React: no statusJidList — reference logic that works ──
+                    if (reactEnabled && userJid) {
                         try {
                             const emojis = (config.CUSTOM_REACT_EMOJIS || '❤️,🔥,💯,😍,👏').split(',');
                             const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)].trim();
@@ -789,13 +770,17 @@ async function connectToWhatsApp() {
                                 'status@broadcast',
                                 {
                                     react: {
-                                        key: { remoteJid: 'status@broadcast', fromMe: false, id: statusId, participant: userJid },
+                                        key: {
+                                            remoteJid:   'status@broadcast',
+                                            fromMe:      false,
+                                            id:          statusId,
+                                            participant: userJid
+                                        },
                                         text: randomEmoji
                                     }
-                                },
-                                { statusJidList: [userJid, sock.user.id] }
+                                }
                             );
-                            logMessage('INFO', `Reacted on status ${statusId} with ${randomEmoji}`);
+                            logMessage('INFO', `✅ Liked status ${statusId} with ${randomEmoji}`);
                         } catch (e) {
                             logMessage('WARN', `Status react failed: ${e.message}`);
                         }
