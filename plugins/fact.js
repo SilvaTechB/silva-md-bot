@@ -1,5 +1,6 @@
 'use strict';
 const axios = require('axios');
+const { fmt } = require('../lib/theme');
 
 module.exports = {
     commands:    ['fact', 'facts', 'funfact'],
@@ -28,7 +29,7 @@ module.exports = {
             fact = fallbacks[Math.floor(Math.random() * fallbacks.length)];
         }
         await sock.sendMessage(jid, {
-            text: `🧠 *Random Fact*\n\n💡 ${fact}`,
+            text: fmt(`🧠 *Random Fact*\n\n💡 ${fact}`),
             contextInfo
         }, { quoted: message });
     }

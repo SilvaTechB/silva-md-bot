@@ -1,5 +1,7 @@
 'use strict';
 
+const { fmt } = require('../lib/theme');
+
 module.exports = {
     commands:    ['tagall', 'mentionall', 'pingall'],
     description: 'Mention all members in the group',
@@ -13,14 +15,14 @@ module.exports = {
 
         if (!isAdmin && !message.key.fromMe) {
             return sock.sendMessage(jid, {
-                text: theme.admin || '⛔ Only group admins can use this command.',
+                text: fmt(theme.admin || '⛔ Only group admins can use this command.'),
                 contextInfo
             }, { quoted: message });
         }
 
         if (!isBotAdmin) {
             return sock.sendMessage(jid, {
-                text: theme.botAdmin || '⛔ I need to be an admin to tag all members.',
+                text: fmt(theme.botAdmin || '⛔ I need to be an admin to tag all members.'),
                 contextInfo
             }, { quoted: message });
         }
@@ -28,7 +30,7 @@ module.exports = {
         const participants = groupMetadata?.participants || [];
         if (!participants.length) {
             return sock.sendMessage(jid, {
-                text: '❌ Could not fetch group members.',
+                text: fmt('❌ Could not fetch group members.'),
                 contextInfo
             }, { quoted: message });
         }
@@ -41,7 +43,7 @@ module.exports = {
             .map(p => `• @${p.id.split('@')[0]}`)
             .join('\n');
 
-        const text = `${header}\n\n${memberLines}\n\n👥 *${participants.length} members tagged*`;
+        const text = fmt(`${header}\n\n${memberLines}\n\n👥 *${participants.length} members tagged*`);
 
         await sock.sendMessage(jid, { text, mentions }, { quoted: message });
     }

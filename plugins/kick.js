@@ -1,5 +1,7 @@
 'use strict';
 
+const { fmt } = require('../lib/theme');
+
 module.exports = {
     commands:    ['kick', 'remove'],
     description: 'Remove a member from the group (reply to their message or mention them)',
@@ -12,10 +14,10 @@ module.exports = {
         const { jid, isAdmin, isBotAdmin, contextInfo, groupMetadata, mentionedJid, theme } = ctx;
 
         if (!isAdmin) {
-            return sock.sendMessage(jid, { text: theme.admin || '⛔ Only admins can use this command.', contextInfo }, { quoted: message });
+            return sock.sendMessage(jid, { text: fmt(theme.admin || '⛔ Only admins can use this command.'), contextInfo }, { quoted: message });
         }
         if (!isBotAdmin) {
-            return sock.sendMessage(jid, { text: theme.botAdmin || '⛔ I need to be an admin to remove members.', contextInfo }, { quoted: message });
+            return sock.sendMessage(jid, { text: fmt(theme.botAdmin || '⛔ I need to be an admin to remove members.'), contextInfo }, { quoted: message });
         }
 
         // Collect targets: quoted message sender OR mentions
@@ -32,7 +34,7 @@ module.exports = {
 
         if (!targets.length) {
             return sock.sendMessage(jid, {
-                text: '❌ Reply to a message or mention someone to kick them.\n\nUsage: `.kick @user`',
+                text: fmt('❌ Reply to a message or mention someone to kick them.\n\nUsage: `.kick @user`'),
                 contextInfo
             }, { quoted: message });
         }
@@ -44,7 +46,7 @@ module.exports = {
 
         if (skipped.length) {
             await sock.sendMessage(jid, {
-                text: `⚠️ Skipping ${skipped.map(j => `@${j.split('@')[0]}`).join(', ')} — cannot kick an admin.`,
+                text: fmt(`⚠️ Skipping ${skipped.map(j => `@${j.split('@')[0]}`).join(', ')} — cannot kick an admin.`),
                 mentions: skipped,
                 contextInfo
             });
@@ -56,7 +58,7 @@ module.exports = {
 
         const names = toKick.map(j => `@${j.split('@')[0]}`).join(', ');
         await sock.sendMessage(jid, {
-            text: `🦵 ${names} ${toKick.length === 1 ? 'has' : 'have'} been removed from the group.`,
+            text: fmt(`🦵 ${names} ${toKick.length === 1 ? 'has' : 'have'} been removed from the group.`),
             mentions: toKick,
             contextInfo
         });

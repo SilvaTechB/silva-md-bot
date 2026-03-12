@@ -1,6 +1,7 @@
 'use strict';
 
 const axios = require('axios');
+const { fmt } = require('../lib/theme');
 
 
 module.exports = {
@@ -17,7 +18,7 @@ module.exports = {
 
         if (!args.length) {
             return sock.sendMessage(jid, {
-                text: `❌ *Usage:* \`.qr <text or URL>\`\n\n_Examples:_\n• \`.qr https://silvatech.co.ke\`\n• \`.qr Hello World\`\n• \`.qr +254700000000\``,
+                text: fmt(`❌ *Usage:* \`.qr <text or URL>\`\n\n_Examples:_\n• \`.qr https://silvatech.co.ke\`\n• \`.qr Hello World\`\n• \`.qr +254700000000\``),
                 contextInfo
             }, { quoted: message });
         }
@@ -32,7 +33,7 @@ module.exports = {
 
             await sock.sendMessage(jid, {
                 image:   buffer,
-                caption: `✅ *QR Code Generated*\n\n📝 *Content:* ${content.length > 80 ? content.slice(0, 77) + '...' : content}`,
+                caption: fmt(`✅ *QR Code Generated*\n\n📝 *Content:* ${content.length > 80 ? content.slice(0, 77) + '...' : content}`),
                 contextInfo
             }, { quoted: message });
 

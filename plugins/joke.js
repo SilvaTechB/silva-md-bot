@@ -1,5 +1,6 @@
 'use strict';
 const axios = require('axios');
+const { fmt } = require('../lib/theme');
 
 module.exports = {
     commands:    ['joke', 'jokes'],
@@ -21,7 +22,7 @@ module.exports = {
             const jokeText = data.type === 'twopart'
                 ? `😂 *Joke* _(${data.category})_\n\n❓ ${data.setup}\n\n💬 ${data.delivery}`
                 : `😂 *Joke* _(${data.category})_\n\n${data.joke}`;
-            await sock.sendMessage(jid, { text: jokeText, contextInfo }, { quoted: message });
+            await sock.sendMessage(jid, { text: fmt(jokeText), contextInfo }, { quoted: message });
         } catch (err) {
             await sock.sendMessage(jid, { text: `❌ Couldn't fetch a joke: ${err.message}`, contextInfo }, { quoted: message });
         }

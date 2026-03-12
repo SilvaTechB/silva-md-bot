@@ -1,6 +1,7 @@
 'use strict';
 
 const { performance } = require('perf_hooks');
+const { fmt } = require('../lib/theme');
 
 
 module.exports = {
@@ -11,7 +12,7 @@ module.exports = {
     private:     true,
     run: async (sock, message, args, { jid, contextInfo, safeSend }) => {
         const start = performance.now();
-        await safeSend({ text: '🏓 Pinging...' }, { quoted: message });
+        await safeSend({ text: fmt('🏓 _Pinging..._') }, { quoted: message });
         const ms = (performance.now() - start).toFixed(2);
 
         const uptime = process.uptime();
@@ -20,7 +21,7 @@ module.exports = {
         const s = Math.floor(uptime % 60);
 
         await safeSend({
-            text: `✅ *Bot is Online!*\n\n⏱ *Response:* ${ms} ms\n⏳ *Uptime:* ${h}h ${m}m ${s}s`,
+            text: fmt(`✅ *Bot is Online!*\n\n⏱ *Response:* ${ms} ms\n⏳ *Uptime:* ${h}h ${m}m ${s}s`),
             contextInfo
         }, { quoted: message });
     }

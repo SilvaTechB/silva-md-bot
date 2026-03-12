@@ -1,6 +1,7 @@
 'use strict';
 
-// Global set of banned JIDs — checked in handler.js before dispatch
+const { fmt } = require('../lib/theme');
+
 if (!global.bannedUsers) global.bannedUsers = new Set();
 
 module.exports = {
@@ -19,12 +20,12 @@ module.exports = {
 
         if (rawCmd === 'banlist') {
             if (!global.bannedUsers.size) {
-                return sock.sendMessage(jid, { text: '📋 *Ban List*\n\nNo users are currently banned.', contextInfo }, { quoted: message });
+                return sock.sendMessage(jid, { text: fmt('📋 *Ban List*\n\nNo users are currently banned.'), contextInfo }, { quoted: message });
             }
             const list = [...global.bannedUsers].map(j => `• @${j.split('@')[0]}`).join('\n');
             const mentions = [...global.bannedUsers];
             return sock.sendMessage(jid, {
-                text: `📋 *Banned Users (${global.bannedUsers.size})*\n\n${list}`,
+                text: fmt(`📋 *Banned Users (${global.bannedUsers.size})*\n\n${list}`),
                 mentions,
                 contextInfo
             }, { quoted: message });
@@ -38,27 +39,26 @@ module.exports = {
         if (!targets.length) {
             const action = rawCmd === 'ban' ? 'ban' : 'unban';
             return sock.sendMessage(jid, {
-                text: `❌ Reply to or mention someone to ${action} them.\n\nUsage: \`.${action} @user\``,
+                text: fmt(`❌ Reply to or mention someone to ${action} them.\n\nUsage: \`.${action} @user\``),
                 contextInfo
             }, { quoted: message });
         }
 
         if (rawCmd === 'ban') {
             const toBan = targets.filter(t => {
-                // Cannot ban the bot owner
                 const tNum = t.split('@')[0].replace(/\D/g, '');
                 const ownerNum = (process.env.OWNER_NUMBER || global.botNum || '').replace(/\D/g, '');
                 return tNum !== ownerNum;
             });
 
             if (!toBan.length) {
-                return sock.sendMessage(jid, { text: '⛔ Cannot ban the bot owner.', contextInfo }, { quoted: message });
+                return sock.sendMessage(jid, { text: fmt('⛔ Cannot ban the bot owner.'), contextInfo }, { quoted: message });
             }
 
             toBan.forEach(t => global.bannedUsers.add(t));
             const names = toBan.map(j => `@${j.split('@')[0]}`).join(', ');
             await sock.sendMessage(jid, {
-                text: `🔨 *Banned:* ${names}\n\nThey can no longer use bot commands.`,
+                text: fmt(`🔨 *Banned:* ${names}\n\nThey can no longer use bot commands.`),
                 mentions: toBan,
                 contextInfo
             }, { quoted: message });
@@ -68,12 +68,12 @@ module.exports = {
             targets.forEach(t => global.bannedUsers.delete(t));
 
             if (!wasKnown.length) {
-                return sock.sendMessage(jid, { text: '⚠️ None of the mentioned users are currently banned.', contextInfo }, { quoted: message });
+                return sock.sendMessage(jid, { text: fmt('⚠️ None of the mentioned users are currently banned.'), contextInfo }, { quoted: message });
             }
 
             const names = wasKnown.map(j => `@${j.split('@')[0]}`).join(', ');
             await sock.sendMessage(jid, {
-                text: `✅ *Unbanned:* ${names}\n\nThey can use bot commands again.`,
+                text: fmt(`✅ *Unbanned:* ${names}\n\nThey can use bot commands again.`),
                 mentions: wasKnown,
                 contextInfo
             }, { quoted: message });

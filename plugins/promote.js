@@ -1,5 +1,7 @@
 'use strict';
 
+const { fmt } = require('../lib/theme');
+
 module.exports = {
     commands:    ['promote', 'demote', 'admin', 'unadmin'],
     description: 'Promote or demote a group member (reply or mention)',
@@ -19,10 +21,10 @@ module.exports = {
         const isPromote = /^\.?(promote|admin)$/i.test(rawCmd);
 
         if (!isAdmin) {
-            return sock.sendMessage(jid, { text: theme.admin || '⛔ Only admins can use this command.', contextInfo }, { quoted: message });
+            return sock.sendMessage(jid, { text: fmt(theme.admin || '⛔ Only admins can use this command.'), contextInfo }, { quoted: message });
         }
         if (!isBotAdmin) {
-            return sock.sendMessage(jid, { text: theme.botAdmin || '⛔ I need to be an admin to promote/demote members.', contextInfo }, { quoted: message });
+            return sock.sendMessage(jid, { text: fmt(theme.botAdmin || '⛔ I need to be an admin to promote/demote members.'), contextInfo }, { quoted: message });
         }
 
         const targets = [];
@@ -32,7 +34,7 @@ module.exports = {
 
         if (!targets.length) {
             return sock.sendMessage(jid, {
-                text: `❌ Reply to a message or mention someone.\n\nUsage:\n• \`.promote @user\` — make admin\n• \`.demote @user\` — remove admin`,
+                text: fmt(`❌ Reply to a message or mention someone.\n\nUsage:\n• \`.promote @user\` — make admin\n• \`.demote @user\` — remove admin`),
                 contextInfo
             }, { quoted: message });
         }
@@ -45,7 +47,7 @@ module.exports = {
 
         const names = targets.map(j => `@${j.split('@')[0]}`).join(', ');
         await sock.sendMessage(jid, {
-            text: `${label} ${names} — ${roleTag}.`,
+            text: fmt(`${label} ${names} — ${roleTag}.`),
             mentions: targets,
             contextInfo
         });

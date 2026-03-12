@@ -1,4 +1,5 @@
 const config = require('../config');
+const { fmt } = require('../lib/theme');
 if (!global.antilinkGroups) global.antilinkGroups = new Set();
 
 module.exports = {
@@ -17,28 +18,28 @@ module.exports = {
 
         if (!sub) {
             const status = globalOn ? '✅ ON (global config)' : groupOn ? '✅ ON (this group)' : '❌ OFF';
-            return reply(
+            return reply(fmt(
                 `🔗 *Anti-Link Status*\n\n` +
                 `Status: ${status}\n\n` +
                 `Usage:\n` +
                 `• \`.antilink on\` — enable for this group\n` +
                 `• \`.antilink off\` — disable for this group`
-            );
+            ));
         }
 
         if (sub === 'on') {
             global.antilinkGroups.add(jid);
-            return reply('✅ *Anti-Link enabled* for this group.\n\nAny message containing a link will be deleted.');
+            return reply(fmt('✅ *Anti-Link enabled* for this group.\n\nAny message containing a link will be deleted.'));
         }
 
         if (sub === 'off') {
             global.antilinkGroups.delete(jid);
             if (globalOn) {
-                return reply('⚠️ Anti-link is *still active* globally (set via config).\nContact the bot owner to disable it globally.');
+                return reply(fmt('⚠️ Anti-link is *still active* globally (set via config).\nContact the bot owner to disable it globally.'));
             }
-            return reply('❌ *Anti-Link disabled* for this group.');
+            return reply(fmt('❌ *Anti-Link disabled* for this group.'));
         }
 
-        return reply('Usage: `.antilink on` or `.antilink off`');
+        return reply(fmt('Usage: `.antilink on` or `.antilink off`'));
     }
 };

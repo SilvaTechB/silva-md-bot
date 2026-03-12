@@ -1,5 +1,6 @@
 'use strict';
 const axios = require('axios');
+const { fmt } = require('../lib/theme');
 
 module.exports = {
     commands:    ['quote', 'inspire', 'motivation'],
@@ -26,7 +27,7 @@ module.exports = {
             content = pick.q; author = pick.a;
         }
         await sock.sendMessage(jid, {
-            text: `💬 *Quote of the Moment*\n\n"${content}"\n\n— *${author}*`,
+            text: fmt(`💬 *Quote of the Moment*\n\n"${content}"\n\n— *${author}*`),
             contextInfo
         }, { quoted: message });
     }
