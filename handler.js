@@ -118,6 +118,12 @@ function setupConnectionHandlers(sock) {
     sock.ev.on('connection.update', ({ connection }) => {
         if (connection === 'open') console.log('[Handler] WhatsApp connection open.');
     });
+    sock.ev.on('group-participants.update', async (update) => {
+        for (const p of plugins) {
+            if (typeof p.onGroupParticipantsUpdate !== 'function') continue;
+            try { await p.onGroupParticipantsUpdate(sock, update); } catch { /* ignore */ }
+        }
+    });
 }
 
 // ─── Command predictor ───────────────────────────────────────────────────────
@@ -242,6 +248,19 @@ async function handleMessages(sock, message) {
                     }
                     return;
                 }
+            }
+        }
+
+        // ── onMessage hooks — fired for ALL messages (not just commands) ────────
+        if (!message.key.fromMe) {
+            for (const p of plugins) {
+                if (typeof p.onMessage !== 'function') continue;
+                try {
+                    await p.onMessage(sock, message, text, {
+                        jid, sender, from, isGroup,
+                        contextInfo: isGroup ? {} : GLOBAL_CONTEXT_INFO
+                    });
+                } catch { /* ignore plugin onMessage errors */ }
             }
         }
 
@@ -389,6 +408,7 @@ async function handleMessages(sock, message) {
             reply:         (replyText) => safeSend(sock, jid, { text: replyText }, { quoted: message }),
             theme:         getActiveTheme()?.global || {},
             getStr,
+            command:       resolvedCommand,
         };
 
         // ── Ban gate — banned users cannot trigger any command (owner always exempt) ──

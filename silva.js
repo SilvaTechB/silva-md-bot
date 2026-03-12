@@ -330,6 +330,8 @@ async function updateProfileStatus(sock) {
 async function connectToWhatsApp() {
     // Per-connection dedup: ignore duplicate upserts for the same status ID
     const seenStatusIds = new Set();
+    // Per-connection dedup: ignore duplicate deliveries of the same command message
+    const seenCmdIds = new Set();
 
     // Use the session directory for multi-file auth state
     const { state, saveCreds } = await useMultiFileAuthState(sessionDir);
@@ -856,8 +858,17 @@ async function connectToWhatsApp() {
                     continue;
                 }
 
-                // For non-status messages only process notify/append upsert types
-                if (type && !['notify', 'append'].includes(type)) continue;
+                // For non-status messages only process fresh notify upserts (not historical append)
+                if (type && type !== 'notify') continue;
+
+                // Skip messages older than 30 seconds to avoid re-processing on reconnect
+                const msgTs = (m.messageTimestamp || 0) * 1000;
+                if (msgTs && (Date.now() - msgTs) > 30000) continue;
+
+                // Dedup: same message ID can arrive multiple times across device sessions
+                const cmdMsgId = m.key.id;
+                if (cmdMsgId && seenCmdIds.has(cmdMsgId)) continue;
+                if (cmdMsgId) seenCmdIds.add(cmdMsgId);
 
                 // ---- For other messages: newsletter / broadcast / group / private commands
                 if (!m.message) continue;
