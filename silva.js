@@ -735,70 +735,33 @@ async function connectToWhatsApp() {
                     try {
                         const statusId = m.key.id;
                         const userJid = m.key.participant;
-
-                        // skip echo of our own status updates (participant is null)
-                        if (!userJid) continue;
-
-                        // deduplicate: skip if already handled this status this session
-                        if (seenStatusIds.has(statusId)) continue;
-                        seenStatusIds.add(statusId);
-
                         logMessage('EVENT', `Status update from ${userJid}: ${statusId}`);
-
-                        // Unwrap ephemeral message wrapper if present
-                        if (m.message?.ephemeralMessage) {
-                            m.message = m.message.ephemeralMessage.message;
-                        }
 
                         const { inner, msgType } = unwrapStatus(m);
 
-                        const seenEnabled  = (global.autoStatusFlags?.seen  !== null && global.autoStatusFlags?.seen  !== undefined) ? global.autoStatusFlags.seen  : config.AUTO_STATUS_SEEN;
-                        const reactEnabled = (global.autoStatusFlags?.react !== null && global.autoStatusFlags?.react !== undefined) ? global.autoStatusFlags.react : config.AUTO_STATUS_REACT;
-
-                        if (seenEnabled) {
+                        if (config.AUTO_STATUS_SEEN) {
                             try {
-                                // Primary: readMessages (standard Baileys approach)
                                 await sock.readMessages([m.key]);
                                 logMessage('INFO', `Status seen: ${statusId}`);
                             } catch (e) {
-                                // Fallback: low-level receipt node
-                                try {
-                                    await sock.sendNode({
-                                        tag: 'receipt',
-                                        attrs: {
-                                            id: statusId,
-                                            to: 'status@broadcast',
-                                            participant: userJid,
-                                            type: 'read',
-                                            t: Math.floor(Date.now() / 1000).toString()
-                                        }
-                                    });
-                                    logMessage('INFO', `Status seen (fallback): ${statusId}`);
-                                } catch (e2) {
-                                    logMessage('WARN', `Status seen failed: ${e2.message}`);
-                                }
+                                logMessage('WARN', `Status seen failed: ${e.message}`);
                             }
                         }
 
-                        if (reactEnabled && userJid) {
+                        if (config.AUTO_STATUS_REACT) {
                             try {
                                 const emojis = (config.CUSTOM_REACT_EMOJIS || '❤️,🔥,💯,😍,👏').split(',');
                                 const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)].trim();
-                                await sock.sendMessage(
-                                    'status@broadcast',
-                                    {
-                                        react: {
-                                            key: {
-                                                remoteJid: 'status@broadcast',
-                                                fromMe: false,
-                                                id: statusId,
-                                                participant: userJid
-                                            },
-                                            text: randomEmoji
+                                await sock.sendMessage(userJid, {
+                                    react: {
+                                        text: randomEmoji,
+                                        key: {
+                                            remoteJid: 'status@broadcast',
+                                            id: statusId,
+                                            participant: userJid
                                         }
-                                    },
-                                    { statusJidList: [userJid, sock.user.id] }
-                                );
+                                    }
+                                });
                                 logMessage('INFO', `Reacted on status ${statusId} with: ${randomEmoji}`);
                             } catch (e) {
                                 logMessage('WARN', `Status reaction failed: ${e.message}`);
