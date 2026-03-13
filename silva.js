@@ -988,6 +988,18 @@ process.on('unhandledRejection', (reason, promise) => {
 // ✅ Boot Bot
 (async () => {
     try {
+        console.log('\x1b[36m');
+        console.log('╔══════════════════════════════════════════╗');
+        console.log('║  ____  _ _                 __  __ ____   ║');
+        console.log('║ / ___|| (_)_   ____ _     |  \\/  |  _ \\  ║');
+        console.log('║ \\___ \\| | \\ \\ / / _` |    | |\\/| | | | | ║');
+        console.log('║  ___) | | |\\ V / (_| |    | |  | | |_| | ║');
+        console.log('║ |____/|_|_| \\_/ \\__,_|    |_|  |_|____/  ║');
+        console.log('║                                            ║');
+        console.log('║        WhatsApp Bot  •  Node.js           ║');
+        console.log('║     github.com/SilvaMD  •  v2.0           ║');
+        console.log('╚══════════════════════════════════════════╝');
+        console.log('\x1b[0m');
         logMessage('INFO', 'Booting Silva MD Bot...');
         // loadSession is called ONCE here at startup.
         // connectToWhatsApp() and all reconnects reuse the saved state on disk.

@@ -99,15 +99,14 @@ function loadPlugins() {
 
             if (Array.isArray(plugin.commands) && plugin.commands.length && typeof plugin.run === 'function') {
                 plugins.push(plugin);
-                console.log(`[Plugin] Loaded: ${file} (${plugin.commands.join(', ')})`);
             } else {
                 console.warn(`[Plugin] Skipped: ${file} — missing commands or run/handler`);
             }
         } catch (err) {
-            console.error(`[Plugin] Error loading ${file}:`, err.stack || err.message);
+            console.error(`[Plugin] Error loading ${file}: ${err.message}`);
         }
     }
-    console.log(`[Plugin] ${plugins.length} plugins loaded`);
+    console.log(`[Plugin] ✅ ${plugins.length} plugins loaded successfully`);
 }
 
 loadPlugins();
