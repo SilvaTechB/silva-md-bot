@@ -35,4 +35,5 @@ module.exports = {
     DEBUG:                 toBool(process.env.DEBUG,                 false),
     THEME:                 (process.env.THEME || 'silva').toLowerCase().trim(),
     GREETING:              process.env.GREETING || '',
+    APP_URL:               process.env.APP_URL || '',
 };

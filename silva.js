@@ -871,12 +871,47 @@ async function connectToWhatsApp() {
 // ✅ Express Web API
 const app = express();
 app.use(express.static(path.join(__dirname, 'smm')));
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'smm', 'silva.html')));
-app.get('/health', (req, res) => res.send(`✅ ${config.BOT_NAME} is Running!`));
+app.get('/', (req, res) => {
+    const html = path.join(__dirname, 'smm', 'silva.html');
+    if (fs.existsSync(html)) return res.sendFile(html);
+    res.send(`<h2>✅ ${config.BOT_NAME} is Running!</h2>`);
+});
+app.get('/health', (req, res) => res.json({ status: 'ok', bot: config.BOT_NAME, time: new Date().toISOString() }));
+app.get('/ping', (req, res) => res.send('pong'));
 
 app.listen(port, () => {
     logMessage('INFO', `🌐 Server running on port ${port}`);
     logMessage('INFO', `📊 Dashboard available at http://localhost:${port}`);
+
+    // ── Heroku keep-alive self-ping ─────────────────────────────────────────
+    // On Heroku free/eco dynos the process sleeps after 30 min of no traffic,
+    // killing the WhatsApp socket. Pinging our own /ping endpoint every 25 min
+    // keeps the dyno awake without needing an external service.
+    // Set APP_URL=https://your-app.herokuapp.com in Heroku config vars.
+    const keepAliveUrl = process.env.APP_URL || process.env.HEROKU_APP_DEFAULT_DOMAIN_NAME
+        ? `https://${process.env.HEROKU_APP_DEFAULT_DOMAIN_NAME}/ping`
+        : null;
+
+    if (keepAliveUrl || process.env.APP_URL) {
+        const pingUrl = process.env.APP_URL
+            ? `${process.env.APP_URL.replace(/\/$/, '')}/ping`
+            : keepAliveUrl;
+        const https = require('https');
+        const http  = require('http');
+        const pinger = pingUrl.startsWith('https') ? https : http;
+
+        setInterval(() => {
+            try {
+                pinger.get(pingUrl, (res) => {
+                    logMessage('DEBUG', `[KeepAlive] pinged ${pingUrl} → ${res.statusCode}`);
+                }).on('error', (e) => {
+                    logMessage('WARN', `[KeepAlive] ping failed: ${e.message}`);
+                });
+            } catch (e) { /* ignore */ }
+        }, 25 * 60 * 1000); // every 25 minutes
+
+        logMessage('INFO', `🔄 Heroku keep-alive enabled → ${pingUrl}`);
+    }
 });
 
 // ✅ Error handling
