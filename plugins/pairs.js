@@ -12,28 +12,30 @@ module.exports = {
     permission:  'public',
     group:       true,
     private:     false,
-    run: async (sock, message, args, { sender, groupId, prefix, contextInfo }) => {
-        const cmd      = message.body?.split(' ')[0]?.replace(prefix, '').toLowerCase();
-        const mentions = message.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
-        const pairs    = loadPairs();
-        const chatKey  = groupId;
+    run: async (sock, message, args, { from, jid, prefix, contextInfo, mentionedJid }) => {
+        const cmd   = message.body?.split(' ')[0]?.replace(prefix, '').toLowerCase();
+        const mentions = mentionedJid?.length
+            ? mentionedJid
+            : (message.message?.extendedTextMessage?.contextInfo?.mentionedJid || []);
+        const pairs   = loadPairs();
+        const chatKey = jid;
 
         if (cmd === 'divorce') {
-            const key = Object.keys(pairs[chatKey] || {}).find(k => k.includes(sender));
-            if (!key) return sock.sendMessage(groupId, { text: '❌ You are not paired with anyone.', contextInfo }, { quoted: message });
+            const key = Object.keys(pairs[chatKey] || {}).find(k => k.includes(from));
+            if (!key) return sock.sendMessage(jid, { text: '❌ You are not paired with anyone.', contextInfo }, { quoted: message });
             delete pairs[chatKey][key];
             savePairs(pairs);
-            return sock.sendMessage(groupId, { text: `💔 Divorce processed. You are now single.`, contextInfo }, { quoted: message });
+            return sock.sendMessage(jid, { text: '💔 Divorce processed. You are now single.', contextInfo }, { quoted: message });
         }
 
-        const p1 = mentions[0] || sender;
+        const p1 = mentions[0] || from;
         const p2 = mentions[1];
         if (!p2) {
-            return sock.sendMessage(groupId, { text: '💕 Mention two people to pair them!\nExample: .pair @person1 @person2', contextInfo }, { quoted: message });
+            return sock.sendMessage(jid, { text: '💕 Mention two people to pair them!\nExample: .pair @person1 @person2', contextInfo }, { quoted: message });
         }
         if (!pairs[chatKey]) pairs[chatKey] = {};
         const alreadyPaired = Object.keys(pairs[chatKey]).find(k => k.includes(p1) || k.includes(p2));
-        if (alreadyPaired) return sock.sendMessage(groupId, { text: '❌ One of them is already paired! Use .divorce first.', contextInfo }, { quoted: message });
+        if (alreadyPaired) return sock.sendMessage(jid, { text: '❌ One of them is already paired! Use .divorce first.', contextInfo }, { quoted: message });
 
         const pairKey = [p1, p2].sort().join('::');
         pairs[chatKey][pairKey] = { since: new Date().toISOString() };
@@ -41,7 +43,7 @@ module.exports = {
 
         const n1 = p1.split('@')[0];
         const n2 = p2.split('@')[0];
-        await sock.sendMessage(groupId, {
+        await sock.sendMessage(jid, {
             text: `💍 *Congratulations!*\n\n💕 @${n1} and @${n2} are now paired!\n\n_May your bond last forever 💖_`,
             mentions: [p1, p2],
             contextInfo
