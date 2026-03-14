@@ -200,7 +200,21 @@ async function handleMessages(sock, message) {
         }
 
         const isGroup = isJidGroup(jid);
-        const prefix  = config.PREFIX || '.';
+
+        // ── Multi-prefix parser ──────────────────────────────────────────────
+        // PREFIX env var supports:
+        //   '.'          → only dot prefix
+        //   '.,!,/,?'    → comma-separated list — any of them works
+        //   'any'        → any single leading non-alphanumeric/non-space char
+        //   '' / 'none'  → no prefix needed (bare command words are matched)
+        const rawPrefix   = (config.PREFIX || '.').trim();
+        const noPrefixMode  = !rawPrefix || rawPrefix.toLowerCase() === 'none' || rawPrefix.toLowerCase() === 'false';
+        const anyPrefixMode = rawPrefix.toLowerCase() === 'any';
+        const prefixList    = (!noPrefixMode && !anyPrefixMode)
+            ? rawPrefix.split(',').map(p => p.trim()).filter(Boolean)
+            : [];
+        // primary prefix used in help text / plugin output
+        const prefix = prefixList[0] || (anyPrefixMode ? '.' : '');
 
         // ── Extract text ─────────────────────────────────────────────────────
         const text =
@@ -264,12 +278,36 @@ async function handleMessages(sock, message) {
             }
         }
 
-        if (!text.startsWith(prefix)) {
+        // ── Detect which prefix was used (or if no prefix needed) ──────────────
+        let usedPrefix = null;       // the actual prefix string found in the message
+        let commandText = '';        // text with prefix stripped
+
+        if (noPrefixMode) {
+            // Any message could be a command — match bare words
+            usedPrefix  = '';
+            commandText = text.trim();
+        } else if (anyPrefixMode) {
+            // Any single leading character that isn't alphanumeric / space = prefix
+            const first = text[0];
+            if (first && !/^[a-zA-Z0-9\u00C0-\u024F\s]/.test(first)) {
+                usedPrefix  = first;
+                commandText = text.slice(1).trim();
+            }
+        } else {
+            // Exact prefix list — check each in order, longest match wins
+            const sorted = [...prefixList].sort((a, b) => b.length - a.length);
+            for (const p of sorted) {
+                if (text.startsWith(p)) {
+                    usedPrefix  = p;
+                    commandText = text.slice(p.length).trim();
+                    break;
+                }
+            }
+        }
+
+        if (usedPrefix === null) {
+            // No prefix matched — fire typing indicator then stop
             if (!message.key.fromMe && (config.AUTO_TYPING || config.AUTO_RECORDING)) {
-                // Keep the typing/recording indicator visible for 2 seconds so the
-                // other person can actually see it before it disappears.
-                // (Without this delay, composing + paused fire within microseconds
-                // of each other and the indicator is invisible.)
                 const presenceType = config.AUTO_RECORDING ? 'recording' : 'composing';
                 try { await sock.sendPresenceUpdate(presenceType, jid); } catch { /* ok */ }
                 setTimeout(async () => {
@@ -279,9 +317,10 @@ async function handleMessages(sock, message) {
             return;
         }
 
-        const parts   = text.slice(prefix.length).trim().split(/\s+/);
-        const command = parts.shift().toLowerCase();
+        const parts   = commandText.split(/\s+/);
+        const command = (parts.shift() || '').toLowerCase();
         const args    = parts;
+        if (!command) return;
 
         // ── Command predictor: resolve typos / short-forms ───────────────────
         let resolvedCommand = command;
@@ -311,7 +350,7 @@ async function handleMessages(sock, message) {
             }
         }
 
-        console.log(`[HANDLER] cmd=${command}${resolvedCommand !== command ? `→${resolvedCommand}` : ''} jid=${jid} from=${from}`);
+        console.log(`[HANDLER] prefix="${usedPrefix}" cmd=${command}${resolvedCommand !== command ? `→${resolvedCommand}` : ''} jid=${jid} from=${from}`);
 
         // ── Fetch group metadata FIRST — needed for LID resolution ────────────
         // Modern WhatsApp sends group messages with a @lid (privacy/account ID)
@@ -408,7 +447,8 @@ async function handleMessages(sock, message) {
             isOwner,
             args,
             text,
-            prefix,
+            prefix,               // primary/canonical prefix for help text
+            usedPrefix,           // the actual prefix that triggered this command
             groupMetadata,
             contextInfo:   isGroup ? {} : GLOBAL_CONTEXT_INFO,
             mentionedJid:  msg.extendedTextMessage?.contextInfo?.mentionedJid || [],

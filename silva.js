@@ -740,9 +740,13 @@ async function connectToWhatsApp() {
                 // For non-status messages only process fresh notify upserts (not historical append)
                 if (type && type !== 'notify') continue;
 
-                // Skip messages older than 30 seconds to avoid re-processing on reconnect
+                // Skip messages older than 5 minutes to avoid re-processing a very stale
+                // backlog on reconnect. 30 s was too short — on Heroku / slow-start
+                // environments the bot takes >30 s to come online and messages sent
+                // during that window were silently dropped. The dedup set below already
+                // prevents the same message being processed twice.
                 const msgTs = (m.messageTimestamp || 0) * 1000;
-                if (msgTs && (Date.now() - msgTs) > 30000) continue;
+                if (msgTs && (Date.now() - msgTs) > 5 * 60 * 1000) continue;
 
                 // Dedup: same message ID can arrive multiple times across device sessions
                 const cmdMsgId = m.key.id;
