@@ -738,13 +738,42 @@ async function connectToWhatsApp() {
                 const remoteJid = m.key?.remoteJid || '';
                 // Debug: log any non-regular-message JIDs to help diagnose status delivery
                 if (!remoteJid.endsWith('@s.whatsapp.net') && !remoteJid.endsWith('@g.us')) {
-                    logMessage('INFO', `[upsert] type=${type} jid=${remoteJid} fromMe=${m.key?.fromMe} participant=${m.key?.participant}`);
+                    logMessage('DEBUG', `[upsert] type=${type} jid=${remoteJid} fromMe=${m.key?.fromMe} participant=${m.key?.participant}`);
                 }
 
                 // ---- STATUS handling (status@broadcast)
                 if (remoteJid === 'status@broadcast') {
                     await handleStatusBroadcast(sock, m, saveMedia);
                     continue;
+                }
+
+                // ── Muted-member enforcement: delete messages from muted users ───────
+                if (remoteJid.endsWith('@g.us') && !m.key.fromMe && m.key.participant) {
+                    const mutedSet = global.groupMutedMembers?.get(remoteJid);
+                    if (mutedSet?.has(m.key.participant)) {
+                        try {
+                            await sock.sendMessage(remoteJid, { delete: m.key });
+                        } catch { /* ignore */ }
+                        continue;
+                    }
+                }
+
+                // ── Anti-Flood enforcement ────────────────────────────────────────────
+                if (remoteJid.endsWith('@g.us') && !m.key.fromMe && m.key.participant) {
+                    const isFlooding = global.antifloodTrack?.(remoteJid, m.key.participant);
+                    if (isFlooding) {
+                        try {
+                            const floodGs = global.antifloodSettings?.get(remoteJid);
+                            if (floodGs?.enabled) {
+                                const num = m.key.participant.split('@')[0];
+                                await sock.sendMessage(remoteJid, {
+                                    text: `⚠️ @${num} has been removed for flooding.`,
+                                    mentions: [m.key.participant],
+                                });
+                                await sock.groupParticipantsUpdate(remoteJid, [m.key.participant], 'remove');
+                            }
+                        } catch { /* ignore */ }
+                    }
                 }
 
                 // For non-status messages only process fresh notify upserts (not historical append)

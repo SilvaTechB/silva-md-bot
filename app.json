@@ -11,7 +11,7 @@
       "value": ""
     },
     "PREFIX": {
-      "description": "Bot command prefix.",
+      "description": "Command prefix. Single: '.' | Multiple: '.,!,/,?' (any of them works) | Any symbol: 'any' | No prefix: 'none'. Can also be changed at runtime with .setprefix command.",
       "required": false,
       "value": "."
     },
