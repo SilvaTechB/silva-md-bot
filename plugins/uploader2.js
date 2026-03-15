@@ -5,7 +5,7 @@ const { fmt } = require('../lib/theme');
 const { dlBuffer } = require('../lib/dlmedia');
 
 module.exports = {
-    commands: ['imgbb', 'pixhost', 'giftedcdn', 'githubcdn'],
+    commands: ['imgbb', 'pixhost', 'githubcdn'],
     description: 'Upload images to various CDN/hosting services',
     permission:  'public',
     group:       true,
@@ -78,30 +78,6 @@ module.exports = {
                 }
                 return send('❌ Pixhost upload failed.');
             } catch { return send('❌ Pixhost upload failed. Try `.catbox` instead.'); }
-        }
-
-        if (cmd === 'giftedcdn') {
-            if (!hasMedia && !text) return send('❌ Send an image or provide a URL with `.giftedcdn`');
-            try {
-                await sock.sendPresenceUpdate('composing', jid);
-                if (hasMedia) {
-                    const buf = await dlBuffer(imgMsg || docMsg, imgMsg ? 'image' : 'document');
-                    const FormData = require('form-data');
-                    const form = new FormData();
-                    form.append('reqtype', 'fileupload');
-                    form.append('fileToUpload', buf, { filename: 'upload.jpg', contentType: 'image/jpeg' });
-                    const res = await axios.post('https://catbox.moe/user/api.php', form, {
-                        headers: form.getHeaders(), timeout: 30000
-                    });
-                    return send(`✅ *CDN Upload!*\n\n🔗 ${res.data}`);
-                } else {
-                    const res = await axios.post('https://catbox.moe/user/api.php',
-                        `reqtype=urlupload&url=${encodeURIComponent(text)}`,
-                        { headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, timeout: 30000 }
-                    );
-                    return send(`✅ *CDN Upload!*\n\n🔗 ${res.data}`);
-                }
-            } catch { return send('❌ CDN upload failed.'); }
         }
 
         if (cmd === 'githubcdn') {
