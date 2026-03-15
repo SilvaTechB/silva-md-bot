@@ -321,7 +321,7 @@ module.exports = {
     commands:    ['getjid', 'jid', 'whois', 'userinfo', 'jidinfo', 'chatinfo'],
     description: 'Advanced JID & account intelligence — user, group, business, LID, country, bio and more',
     usage:       '.jid | .whois @user | .jidinfo +2547XXXXXXXX | .chatinfo',
-    permission:  'member',
+    permission:  'public',
     group:       true,
     private:     true,
 
