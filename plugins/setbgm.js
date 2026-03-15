@@ -39,7 +39,10 @@ function extractQuotedAudio(message) {
     const ctxInfo = message.message?.extendedTextMessage?.contextInfo;
     const quoted  = ctxInfo?.quotedMessage;
     if (!quoted) return null;
-    if (quoted.audioMessage) return { msg: quoted, type: 'audio' };
+    if (quoted.audioMessage) {
+        const mimetype = quoted.audioMessage.mimetype || 'audio/mp4';
+        return { msg: quoted, type: 'audio', mimetype };
+    }
     return null;
 }
 
@@ -132,7 +135,7 @@ module.exports = {
                     { reuploadRequest: sock.updateMediaMessage }
                 );
 
-                const savedWord = setTrigger(word, buf);
+                const savedWord = setTrigger(word, buf, found.mimetype);
 
                 return reply(fmt(
                     `✅ *BGM Trigger Set!*\n\n` +
@@ -165,7 +168,7 @@ module.exports = {
         try {
             await sock.sendMessage(jid, {
                 audio:    match.audioBuffer,
-                mimetype: 'audio/ogg; codecs=opus',
+                mimetype: match.mimetype,
                 ptt:      false,
                 contextInfo,
             }, { quoted: message });
