@@ -1,16 +1,30 @@
-'use strict';
+"use strict";
 
-const crypto = require('crypto');
-const ffmpeg = require('fluent-ffmpeg');
-const { PassThrough } = require('stream');
-const baileys = require('@whiskeysockets/baileys');
+const crypto = require("crypto");
+const ffmpeg = require("fluent-ffmpeg");
+const { PassThrough } = require("stream");
+const baileys = require("@whiskeysockets/baileys");
+
+// ─── COLOR MAP (hex) ─────────────────────────────────────────────────────────
+const COLORS = {
+    blue: "#34B7F1",
+    green: "#25D366",
+    yellow: "#FFD700",
+    orange: "#FF8C00",
+    red: "#FF3B30",
+    purple: "#9C27B0",
+    gray: "#9E9E9E",
+    black: "#000000",
+    white: "#FFFFFF",
+    cyan: "#00BCD4",
+};
 
 module.exports = {
-    commands:    ['togstatus', 'swgc', 'groupstatus'],
-    description: 'Send text, image, video or audio as group status',
-    permission:  'public',
-    group:       true,
-    private:     false,
+    commands: ["togstatus", "swgc", "groupstatus"],
+    description: "Send text / image / video / audio as group status",
+    permission: "public",
+    group: true,
+    private: false,
 
     run: async (sock, message, args, ctx) => {
         const { contextInfo } = ctx;
@@ -27,132 +41,151 @@ module.exports = {
                         forwardingScore: 999,
                         isForwarded: true,
                         forwardedNewsletterMessageInfo: {
-                            newsletterJid: '120363200367779016@newsletter',
-                            newsletterName: 'SILVA GROUP STATUS💖',
+                            newsletterJid: "120363200367779016@newsletter",
+                            newsletterName: "SILVA GROUP STATUS\uD83D\uDC96",
                             serverMessageId: 143,
                         },
                     },
                 },
-                { quoted: message }
+                { quoted: message },
             );
 
         try {
             // Parse args: caption|color|groupUrl
-            const raw = args.join(' ').trim();
+            const raw = args.join(" ").trim();
             let [caption, color, groupUrl] = raw
-                .split('|')
+                .split("|")
                 .map((v) => v?.trim());
 
-            // Resolve target group
+            // Resolve target group (optional external link)
             let targetGroupId = jid;
             if (groupUrl) {
                 try {
-                    const code = groupUrl.split('/').pop().split('?')[0];
+                    const code = groupUrl.split("/").pop().split("?")[0];
                     const info = await sock.groupGetInviteInfo(code);
                     targetGroupId = info.id;
-                    await reply(`🎯 Target group: *${info.subject}*`);
+                    await reply(`\uD83C\uDFAF Target group: *${info.subject}*`);
                 } catch {
-                    return reply('❌ Invalid group link or bot is not in that group.');
+                    return reply(
+                        "\u274C Invalid group link or bot is not in that group.",
+                    );
                 }
             }
 
-            // Detect quoted message
+            // Detect quoted message (handles both reply context and direct media)
             const quoted =
-                message.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+                message.message?.extendedTextMessage?.contextInfo
+                    ?.quotedMessage ||
+                (message.message?.imageMessage ? message.message : null) ||
+                (message.message?.videoMessage ? message.message : null) ||
+                (message.message?.audioMessage ? message.message : null);
 
             // ── TEXT STATUS ──────────────────────────────────────────────────
-            if (!quoted) {
+            const hasMedia =
+                quoted &&
+                (quoted.imageMessage ||
+                    quoted.videoMessage ||
+                    quoted.audioMessage);
+
+            if (!hasMedia) {
                 if (!caption) {
                     return reply(
-                        `📝 *Group Status Usage*\n\n` +
-                        `.togstatus caption|color\n` +
-                        `.togstatus |blue\n` +
-                        `Reply to image / video / audio\n\n` +
-                        `🎨 Colors:\nblue, green, yellow, orange, red,\npurple, gray, black, white, cyan`
+                        `\uD83D\uDCDD *Group Status Usage*\n\n` +
+                            `.togstatus caption|color\n` +
+                            `.togstatus |blue\n` +
+                            `Reply to image / video / audio\n\n` +
+                            `\uD83C\uDFA8 Colors:\nblue, green, yellow, orange, red,\npurple, gray, black, white, cyan`,
                     );
                 }
 
-                const colors = {
-                    blue:   '#34B7F1',
-                    green:  '#25D366',
-                    yellow: '#FFD700',
-                    orange: '#FF8C00',
-                    red:    '#FF3B30',
-                    purple: '#9C27B0',
-                    gray:   '#9E9E9E',
-                    black:  '#000000',
-                    white:  '#FFFFFF',
-                    cyan:   '#00BCD4',
-                };
+                const bgHex = COLORS[color?.toLowerCase()] || COLORS.blue;
 
+                // FIX 1: extendedTextMessage + ARGB integer (NOT hex option on generateWAMessageContent)
                 await groupStatus(sock, targetGroupId, {
-                    text: caption,
-                    backgroundColor: colors[color?.toLowerCase()] || colors.blue,
+                    extendedTextMessage: {
+                        text: caption,
+                        backgroundArgb: hexToArgb(bgHex),
+                        font: 0,
+                    },
                 });
 
-                return reply('✅ Text status sent!');
+                return reply("\u2705 Text status sent!");
             }
 
             // ── IMAGE STATUS ─────────────────────────────────────────────────
             if (quoted.imageMessage) {
                 const buf = await baileys.downloadMediaMessage(
-                    { message: quoted, key: message.key },
-                    'buffer',
+                    buildMsgObj(message, quoted),
+                    "buffer",
                     {},
-                    { reuploadRequest: sock.updateMediaMessage }
+                    { reuploadRequest: sock.updateMediaMessage },
                 );
 
-                await groupStatus(sock, targetGroupId, {
-                    image: buf,
-                    caption: caption || '',
-                });
-
-                return reply('✅ Image status sent!');
+                // FIX 2: use generateWAMessageContent then pass proto via toJSON
+                const content = await baileys.generateWAMessageContent(
+                    { image: buf, caption: caption || "" },
+                    { upload: sock.waUploadToServer },
+                );
+                await groupStatus(sock, targetGroupId, content);
+                return reply("\u2705 Image status sent!");
             }
 
             // ── VIDEO STATUS ─────────────────────────────────────────────────
             if (quoted.videoMessage) {
                 const buf = await baileys.downloadMediaMessage(
-                    { message: quoted, key: message.key },
-                    'buffer',
+                    buildMsgObj(message, quoted),
+                    "buffer",
                     {},
-                    { reuploadRequest: sock.updateMediaMessage }
+                    { reuploadRequest: sock.updateMediaMessage },
                 );
 
-                await groupStatus(sock, targetGroupId, {
-                    video: buf,
-                    caption: caption || '',
-                });
-
-                return reply('✅ Video status sent!');
+                const content = await baileys.generateWAMessageContent(
+                    { video: buf, caption: caption || "" },
+                    { upload: sock.waUploadToServer },
+                );
+                await groupStatus(sock, targetGroupId, content);
+                return reply("\u2705 Video status sent!");
             }
 
             // ── AUDIO STATUS ─────────────────────────────────────────────────
             if (quoted.audioMessage) {
                 const buf = await baileys.downloadMediaMessage(
-                    { message: quoted, key: message.key },
-                    'buffer',
+                    buildMsgObj(message, quoted),
+                    "buffer",
                     {},
-                    { reuploadRequest: sock.updateMediaMessage }
+                    { reuploadRequest: sock.updateMediaMessage },
                 );
 
                 const vn = await toVN(buf);
-                const waveform = await generateWaveform(buf);
+                const waveform = await generateWaveform(buf); // FIX 3: pipe bug fixed
 
-                await groupStatus(sock, targetGroupId, {
-                    audio: vn,
-                    mimetype: 'audio/ogg; codecs=opus',
-                    ptt: true,
-                    waveform,
-                });
+                const content = await baileys.generateWAMessageContent(
+                    {
+                        audio: vn,
+                        mimetype: "audio/ogg; codecs=opus",
+                        ptt: true,
+                    },
+                    { upload: sock.waUploadToServer },
+                );
 
-                return reply('✅ Audio status sent!');
+                // Attach waveform bytes to the audioMessage
+                if (content.audioMessage) {
+                    content.audioMessage.waveform = Buffer.from(
+                        waveform,
+                        "base64",
+                    );
+                }
+
+                await groupStatus(sock, targetGroupId, content);
+                return reply("\u2705 Audio status sent!");
             }
 
-            return reply('❌ Unsupported media type. Reply to an image, video, or audio.');
-
+            return reply(
+                "\u274C Unsupported media type. Reply to an image, video, or audio.",
+            );
         } catch (err) {
-            return reply(`❌ Status error:\n${err.message}`);
+            console.error("[togstatus]", err);
+            return reply(`\u274C Status error:\n${err.message}`);
         }
     },
 };
@@ -160,43 +193,67 @@ module.exports = {
 // ─── HELPERS ────────────────────────────────────────────────────────────────
 
 /**
- * Sends content as a group status (groupStatusMessageV2).
+ * FIX 1 — Convert #RRGGBB hex string → unsigned 32-bit ARGB integer.
+ * WhatsApp's backgroundArgb field requires an integer, not a hex string.
+ */
+function hexToArgb(hex) {
+    const h = hex.replace("#", "");
+    const r = parseInt(h.slice(0, 2), 16);
+    const g = parseInt(h.slice(2, 4), 16);
+    const b = parseInt(h.slice(4, 6), 16);
+    return ((0xff << 24) | (r << 16) | (g << 8) | b) >>> 0;
+}
+
+/**
+ * FIX 4 — Build a proper message object for downloadMediaMessage.
+ * The key must reference the quoted message's stanza, not the parent message.
+ */
+function buildMsgObj(originalMessage, quotedContent) {
+    const ctxInfo = originalMessage.message?.extendedTextMessage?.contextInfo;
+    return {
+        key: {
+            remoteJid: originalMessage.key.remoteJid,
+            fromMe: false,
+            id: ctxInfo?.stanzaId || originalMessage.key.id,
+            participant: ctxInfo?.participant,
+        },
+        message: quotedContent,
+    };
+}
+
+/**
+ * Send content as a WhatsApp group status (groupStatusMessageV2).
+ * FIX 2 — Proto spread: call toJSON() on proto objects before spreading,
+ * so all fields survive the spread into the plain JS object.
  */
 async function groupStatus(conn, jid, content) {
-    const { backgroundColor } = content;
-    delete content.backgroundColor;
-
-    const inside = await baileys.generateWAMessageContent(content, {
-        upload: conn.waUploadToServer,
-        backgroundColor,
-    });
-
     const secret = crypto.randomBytes(32);
 
-    const msg = baileys.generateWAMessageFromContent(
-        jid,
-        {
-            messageContextInfo: { messageSecret: secret },
-            groupStatusMessageV2: {
-                message: {
-                    ...inside,
-                    messageContextInfo: { messageSecret: secret },
-                },
+    // Convert proto → plain object if necessary
+    const innerMsg =
+        typeof content.toJSON === "function" ? content.toJSON() : content;
+
+    const fullContent = {
+        messageContextInfo: { messageSecret: secret },
+        groupStatusMessage: {
+            message: {
+                ...innerMsg,
+                messageContextInfo: { messageSecret: secret },
             },
         },
-        {}
-    );
+    };
 
+    const msg = baileys.generateWAMessageFromContent(jid, fullContent, {});
     await conn.relayMessage(jid, msg.message, { messageId: msg.key.id });
     return msg;
 }
 
 /**
- * Converts any audio buffer to Opus/OGG (voice note format).
+ * Convert any audio buffer → Opus/OGG voice note format.
  */
 function toVN(buffer) {
     return new Promise((resolve, reject) => {
-        const input  = new PassThrough();
+        const input = new PassThrough();
         const output = new PassThrough();
         const chunks = [];
 
@@ -204,57 +261,63 @@ function toVN(buffer) {
 
         ffmpeg(input)
             .noVideo()
-            .audioCodec('libopus')
-            .format('ogg')
+            .audioCodec("libopus")
+            .format("ogg")
             .audioChannels(1)
             .audioFrequency(48000)
-            .on('error', reject)
-            .on('end', () => resolve(Buffer.concat(chunks)))
+            .on("error", reject)
+            .on("end", () => resolve(Buffer.concat(chunks)))
             .pipe(output);
 
-        output.on('data', (c) => chunks.push(c));
+        output.on("data", (c) => chunks.push(c));
+        output.on("error", reject);
     });
 }
 
 /**
- * Generates a base64-encoded waveform string from an audio buffer.
- * @param {Buffer} buffer
- * @param {number} bars   Number of waveform bars (default 64)
+ * Generate a base64-encoded waveform from an audio buffer.
+ * FIX 3 — .pipe() with no argument returns nothing; pipe to a PassThrough instead.
  */
 function generateWaveform(buffer, bars = 64) {
     return new Promise((resolve, reject) => {
-        const input  = new PassThrough();
+        const input = new PassThrough();
+        const output = new PassThrough(); // <-- named output stream (was missing)
         const chunks = [];
 
         input.end(buffer);
 
-        const stream = ffmpeg(input)
+        ffmpeg(input)
             .audioChannels(1)
             .audioFrequency(16000)
-            .format('s16le')
-            .on('error', reject)
-            .on('end', () => {
-                const raw     = Buffer.concat(chunks);
+            .format("s16le")
+            .on("error", reject)
+            .on("end", () => {
+                const raw = Buffer.concat(chunks);
                 const samples = raw.length / 2;
-                const amps    = [];
+                const amps = [];
 
                 for (let i = 0; i < samples; i++) {
                     amps.push(Math.abs(raw.readInt16LE(i * 2)) / 32768);
                 }
 
-                const size = Math.floor(amps.length / bars);
-                const avg  = Array.from({ length: bars }, (_, i) => {
+                const size = Math.max(1, Math.floor(amps.length / bars));
+                const avg = Array.from({ length: bars }, (_, i) => {
                     const slice = amps.slice(i * size, (i + 1) * size);
-                    return slice.reduce((a, b) => a + b, 0) / slice.length;
+                    return slice.length
+                        ? slice.reduce((a, b) => a + b, 0) / slice.length
+                        : 0;
                 });
 
-                const max = Math.max(...avg);
+                const max = Math.max(...avg) || 1; // guard against divide-by-zero
                 resolve(
-                    Buffer.from(avg.map((v) => Math.floor((v / max) * 100))).toString('base64')
+                    Buffer.from(
+                        avg.map((v) => Math.floor((v / max) * 100)),
+                    ).toString("base64"),
                 );
             })
-            .pipe();   // returns writable stream
+            .pipe(output); // <-- pipe to named stream
 
-        stream.on('data', (c) => chunks.push(c));
+        output.on("data", (c) => chunks.push(c));
+        output.on("error", reject);
     });
 }
