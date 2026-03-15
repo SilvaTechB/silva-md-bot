@@ -422,7 +422,11 @@ async function connectToWhatsApp() {
                 ? sock.user.id.split(':')[0]
                 : sock.user.id.split('@')[0];
             global.botNum = rawNum;
-            global.botLid = sock.user.lid || '';  // e.g. "271476913610986@lid"
+            // Strip any device suffix from the LID  e.g. "271476913610986:7@lid" → "271476913610986@lid"
+            const rawLid = sock.user.lid || sock.user.id || '';
+            global.botLid = rawLid.includes(':')
+                ? rawLid.split(':')[0] + '@' + (rawLid.split('@')[1] || 'lid')
+                : rawLid;
             logMessage('INFO', `Bot LID: ${global.botLid || '(none)'}`);
 
             // Only fall back to the bot's own number when OWNER_NUMBER is not
@@ -731,8 +735,14 @@ async function connectToWhatsApp() {
             if (!Array.isArray(messages) || messages.length === 0) return;
 
             for (const m of messages) {
+                const remoteJid = m.key?.remoteJid || '';
+                // Debug: log any non-regular-message JIDs to help diagnose status delivery
+                if (!remoteJid.endsWith('@s.whatsapp.net') && !remoteJid.endsWith('@g.us')) {
+                    logMessage('INFO', `[upsert] type=${type} jid=${remoteJid} fromMe=${m.key?.fromMe} participant=${m.key?.participant}`);
+                }
+
                 // ---- STATUS handling (status@broadcast)
-                if (m.key.remoteJid === 'status@broadcast') {
+                if (remoteJid === 'status@broadcast') {
                     await handleStatusBroadcast(sock, m, saveMedia);
                     continue;
                 }
