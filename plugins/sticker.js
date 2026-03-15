@@ -1,7 +1,7 @@
 'use strict';
 
-const { createSticker, StickerTypes } = require('wa-sticker-formatter');
-const config     = require('../config');
+const { Sticker }     = require('wa-sticker-formatter');
+const config          = require('../config');
 const { getStr, fmt } = require('../lib/theme');
 const { dlBuffer }    = require('../lib/dlmedia');
 
@@ -12,7 +12,7 @@ module.exports = {
     group:       true,
     private:     true,
 
-    run: async (sock, message, args, { jid, sender, contextInfo, reply }) => {
+    run: async (sock, message, args, { jid, contextInfo, reply }) => {
         const msg = message.message;
 
         const imgMsg    = msg?.imageMessage;
@@ -30,18 +30,24 @@ module.exports = {
 
         try {
             await sock.sendPresenceUpdate('composing', jid);
+
             const buffer = await dlBuffer(target, mediaType);
 
-            const sticker = await createSticker(buffer, {
-                pack:       config.BOT_NAME || getStr('botName') || 'Silva MD',
-                author:     getStr('botName') || 'Silva MD',
-                type:       mediaType === 'image' ? StickerTypes.FULL : StickerTypes.CROPPED,
-                categories: ['🤩', '🎉'],
-                quality:    50,
-                background: '#00000000'
+            const packName = config.BOT_NAME || getStr('botName') || 'Silva MD';
+            const sticker  = new Sticker(buffer, {
+                pack:     packName,
+                author:   packName,
+                animated: mediaType === 'video',
+                crop:     true,
             });
 
-            await sock.sendMessage(jid, sticker, { quoted: message });
+            await sticker.build();
+            const stickerBuffer = await sticker.get();
+
+            await sock.sendMessage(jid, {
+                sticker: stickerBuffer,
+            }, { quoted: message });
+
             await sock.sendPresenceUpdate('paused', jid);
 
         } catch (err) {
