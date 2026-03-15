@@ -166,7 +166,7 @@ module.exports = {
             await sock.sendMessage(jid, {
                 audio:    match.audioBuffer,
                 mimetype: 'audio/ogg; codecs=opus',
-                ptt:      true,        // send as voice note
+                ptt:      false,
                 contextInfo,
             }, { quoted: message });
         } catch (err) {
