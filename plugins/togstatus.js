@@ -235,7 +235,7 @@ async function groupStatus(conn, jid, content) {
 
     const fullContent = {
         messageContextInfo: { messageSecret: secret },
-        groupStatusMessage: {
+        groupStatusMessageV2: {
             message: {
                 ...innerMsg,
                 messageContextInfo: { messageSecret: secret },
