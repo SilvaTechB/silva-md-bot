@@ -1,40 +1,46 @@
 'use strict';
 
-const ffmpeg     = require('fluent-ffmpeg');
-const { Readable } = require('stream');
-const fs         = require('fs');
-const path       = require('path');
-const os         = require('os');
+const ffmpeg       = require('fluent-ffmpeg');
+const fs           = require('fs');
+const path         = require('path');
+const os           = require('os');
+const { fmt }      = require('../lib/theme');
+const { dlBuffer } = require('../lib/dlmedia');
 
 module.exports = {
     commands:    ['toaudio', 'tomp3', 'tovn', 'audio'],
-    description: 'Convert a video or voice message to an audio file',
+    description: 'Convert a video or voice message to an MP3 audio file',
     usage:       '.toaudio (reply to a video or audio message)',
     permission:  'public',
     group:       true,
     private:     true,
 
-    run: async (sock, message, args, ctx) => {
-        const { jid, contextInfo } = ctx;
+    run: async (sock, message, args, { jid, contextInfo, reply }) => {
+        const msg    = message.message;
+        const quoted = msg?.extendedTextMessage?.contextInfo?.quotedMessage;
 
-        const msg = message.message;
-        const hasVideo = msg?.videoMessage || msg?.extendedTextMessage?.contextInfo?.quotedMessage?.videoMessage;
-        const hasAudio = msg?.audioMessage || msg?.extendedTextMessage?.contextInfo?.quotedMessage?.audioMessage;
+        // Detect the actual media source and type
+        const vidDirect  = msg?.videoMessage;
+        const audDirect  = msg?.audioMessage;
+        const vidQuoted  = quoted?.videoMessage;
+        const audQuoted  = quoted?.audioMessage;
 
-        if (!hasVideo && !hasAudio) {
-            return sock.sendMessage(jid, {
-                text: '❌ Reply to a *video* or *audio* message with `.toaudio`',
-                contextInfo
-            }, { quoted: message });
+        const target    = vidDirect || vidQuoted || audDirect || audQuoted;
+        const mediaType = (vidDirect || vidQuoted) ? 'video' : (audDirect || audQuoted) ? 'audio' : null;
+
+        if (!target || !mediaType) {
+            return reply(fmt('❌ Reply to a *video* or *audio/voice* message with `.toaudio`'));
         }
 
-        await sock.sendMessage(jid, { text: '⏳ Converting to audio…', contextInfo }, { quoted: message });
+        await sock.sendMessage(jid, { text: fmt('⏳ Converting to audio…'), contextInfo }, { quoted: message });
+
+        const inputPath  = path.join(os.tmpdir(), `silva_in_${Date.now()}`);
+        const outputPath = path.join(os.tmpdir(), `silva_out_${Date.now()}.mp3`);
 
         try {
-            const buffer = await sock.downloadMediaMessage(message);
-            const inputPath  = path.join(os.tmpdir(), `silva_in_${Date.now()}`);
-            const outputPath = path.join(os.tmpdir(), `silva_out_${Date.now()}.mp3`);
+            await sock.sendPresenceUpdate('composing', jid);
 
+            const buffer = await dlBuffer(target, mediaType);
             fs.writeFileSync(inputPath, buffer);
 
             await new Promise((resolve, reject) => {
@@ -49,8 +55,6 @@ module.exports = {
             });
 
             const audio = fs.readFileSync(outputPath);
-            fs.unlinkSync(inputPath);
-            fs.unlinkSync(outputPath);
 
             await sock.sendMessage(jid, {
                 audio,
@@ -58,8 +62,14 @@ module.exports = {
                 ptt:      false
             }, { quoted: message });
 
-        } catch (e) {
-            await sock.sendMessage(jid, { text: `❌ Conversion failed: ${e.message}`, contextInfo }, { quoted: message });
+            await sock.sendPresenceUpdate('paused', jid);
+
+        } catch (err) {
+            console.error('[ToAudio]', err.message);
+            await reply(fmt(`❌ Conversion failed: ${err.message}`));
+        } finally {
+            if (fs.existsSync(inputPath))  try { fs.unlinkSync(inputPath);  } catch { /* ignore */ }
+            if (fs.existsSync(outputPath)) try { fs.unlinkSync(outputPath); } catch { /* ignore */ }
         }
     }
 };
