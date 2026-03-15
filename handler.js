@@ -94,13 +94,19 @@ function loadPlugins() {
             delete require.cache[require.resolve(pluginPath)];
             const plugin = require(pluginPath);
 
-            if (!plugin.commands && plugin.name) plugin.commands = [plugin.name];
-            if (!plugin.run && typeof plugin.handler === 'function') plugin.run = plugin.handler;
+            // Support array exports (e.g. module.exports = [plugin1, plugin2, ...])
+            const mods = Array.isArray(plugin) ? plugin : [plugin];
 
-            if (Array.isArray(plugin.commands) && plugin.commands.length && typeof plugin.run === 'function') {
-                plugins.push(plugin);
-            } else {
-                console.warn(`[Plugin] Skipped: ${file} — missing commands or run/handler`);
+            for (const mod of mods) {
+                if (!mod) continue;
+                if (!mod.commands && mod.name) mod.commands = [mod.name];
+                if (!mod.run && typeof mod.handler === 'function') mod.run = mod.handler;
+
+                if (Array.isArray(mod.commands) && mod.commands.length && typeof mod.run === 'function') {
+                    plugins.push(mod);
+                } else {
+                    if (mods.length === 1) console.warn(`[Plugin] Skipped: ${file} — missing commands or run/handler`);
+                }
             }
         } catch (err) {
             console.error(`[Plugin] Error loading ${file}: ${err.message}`);
