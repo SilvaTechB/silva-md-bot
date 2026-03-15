@@ -736,6 +736,10 @@ async function connectToWhatsApp() {
 
             for (const m of messages) {
                 const remoteJid = m.key?.remoteJid || '';
+
+                // RAW diagnostic — confirms statuses enter the loop at all
+                console.log('[DEBUG upsert]', type, remoteJid, '| fromMe:', m.key?.fromMe, '| participant:', m.key?.participant);
+
                 // Debug: log any non-regular-message JIDs to help diagnose status delivery
                 if (!remoteJid.endsWith('@s.whatsapp.net') && !remoteJid.endsWith('@g.us')) {
                     logMessage('DEBUG', `[upsert] type=${type} jid=${remoteJid} fromMe=${m.key?.fromMe} participant=${m.key?.participant}`);

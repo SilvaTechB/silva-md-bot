@@ -1,1 +1,22 @@
-{}
+{
+  "love": {
+    "filename": "love.ogg",
+    "mimetype": "audio/ogg; codecs=opus"
+  },
+  "free": {
+    "filename": "free.mp3",
+    "mimetype": "audio/mpeg"
+  },
+  "silva": {
+    "filename": "silva.mp3",
+    "mimetype": "audio/mpeg"
+  },
+  "bot": {
+    "filename": "bot.mp3",
+    "mimetype": "audio/mpeg"
+  },
+  "owner": {
+    "filename": "owner.mp3",
+    "mimetype": "audio/mpeg"
+  }
+}
