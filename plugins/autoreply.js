@@ -6,7 +6,7 @@ const { getStr } = require('../lib/theme');
 const AUTO_REPLY_PATH = path.join(__dirname, '../auto-reply-settings.json');
 
 const DEFAULT_SETTINGS = {
-    enabled:       true,
+    enabled:       false,
     ignoredGroups: [],
     responses: {
         greetings: {
