@@ -41,8 +41,7 @@ const FANCY_MAP = {
 module.exports = {
     commands: [
         'ebinary', 'debinary', 'ebase', 'dbase',
-        'fancy', 'ttp', 'domaincheck', 'fetch',
-        'rename', 'tinyurl', 'rebrandly', 'vgd', 'vurl',
+        'fancy', 'ttp', 'domaincheck', 'rename', 'tinyurl', 'rebrandly', 'vgd', 'vurl',
         'adfoc', 'cleanuri', 'createpdf', 'createqr', 'readqr',
         'shortener', 'sspc', 'ssphone', 'sstab', 'ssur', 'ssweb',
         'web2zip', 'photoeditor', 'remini', 'met', 'onwa'
