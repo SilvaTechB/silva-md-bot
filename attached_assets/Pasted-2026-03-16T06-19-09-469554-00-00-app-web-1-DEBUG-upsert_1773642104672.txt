@@ -1,0 +1,79 @@
+2026-03-16T06:19:09.469554+00:00 app[web.1]: [DEBUG upsert] notify 254701513650@s.whatsapp.net | fromMe: true | participant: undefined
+2026-03-16T06:19:09.469598+00:00 app[web.1]: [2026-03-16T06:19:09.469Z] [MESSAGE] New private message from 254701513650@s.whatsapp.net
+2026-03-16T06:19:09.971098+00:00 app[web.1]: [DEBUG upsert] notify 120363362839073981@g.us | fromMe: false | participant: null
+2026-03-16T06:19:09.971778+00:00 app[web.1]: [2026-03-16T06:19:09.971Z] [MESSAGE] New group message from 120363362839073981@g.us
+2026-03-16T06:19:10.430103+00:00 app[web.1]: [2026-03-16T06:19:10.430Z] [INFO] ✅ Startup: following newsletter 120363200367779016@newsletter
+2026-03-16T06:19:13.694732+00:00 app[web.1]: [DEBUG upsert] notify 120363362839073981@g.us | fromMe: false | participant: 142005141282909@lid
+2026-03-16T06:19:13.694790+00:00 app[web.1]: [2026-03-16T06:19:13.694Z] [MESSAGE] New group message from 120363362839073981@g.us
+2026-03-16T06:19:16.154608+00:00 app[web.1]: [DEBUG upsert] notify 120363362839073981@g.us | fromMe: false | participant: 142005141282909@lid
+2026-03-16T06:19:16.154658+00:00 app[web.1]: [2026-03-16T06:19:16.154Z] [MESSAGE] New group message from 120363362839073981@g.us
+2026-03-16T06:19:16.538948+00:00 app[api]: Log session created by user sylivanus@silvatech.top
+2026-03-16T06:19:18.786498+00:00 app[web.1]: [DEBUG upsert] notify 120363362839073981@g.us | fromMe: false | participant: 142005141282909@lid
+2026-03-16T06:19:18.786550+00:00 app[web.1]: [2026-03-16T06:19:18.786Z] [MESSAGE] New group message from 120363362839073981@g.us
+2026-03-16T06:19:21.333948+00:00 app[web.1]: [DEBUG upsert] notify 120363362839073981@g.us | fromMe: false | participant: 142005141282909@lid
+2026-03-16T06:19:21.333987+00:00 app[web.1]: [2026-03-16T06:19:21.333Z] [MESSAGE] New group message from 120363362839073981@g.us
+2026-03-16T06:19:21.000000+00:00 app[api]: Build succeeded
+2026-03-16T06:19:23.797002+00:00 app[web.1]: [DEBUG upsert] notify 120363362839073981@g.us | fromMe: false | participant: 142005141282909@lid
+2026-03-16T06:19:40.504396+00:00 app[web.1]: [DEBUG upsert] notify 120363362839073981@g.us | fromMe: false | participant: 142125417144375@lid
+2026-03-16T06:19:53.649474+00:00 app[web.1]: [DEBUG upsert] notify 120363362839073981@g.us | fromMe: false | participant: 142005141282909@lid
+2026-03-16T06:19:56.191456+00:00 app[web.1]: [DEBUG upsert] notify 120363362839073981@g.us | fromMe: false | participant: 142005141282909@lid
+2026-03-16T06:19:58.730273+00:00 app[web.1]: [DEBUG upsert] notify 120363362839073981@g.us | fromMe: false | participant: 142005141282909@lid
+2026-03-16T06:20:06.936124+00:00 app[web.1]: [DEBUG upsert] notify 120363362839073981@g.us | fromMe: false | participant: 142005141282909@lid
+2026-03-16T06:20:09.666006+00:00 app[web.1]: [DEBUG upsert] notify 120363362839073981@g.us | fromMe: false | participant: 142005141282909@lid
+2026-03-16T06:20:12.183274+00:00 app[web.1]: [DEBUG upsert] notify 120363362839073981@g.us | fromMe: false | participant: 142005141282909@lid
+2026-03-16T06:20:12.274448+00:00 app[web.1]: [DEBUG upsert] notify 120363362839073981@g.us | fromMe: false | participant: 103023967785096@lid
+2026-03-16T06:20:13.166810+00:00 app[web.1]: [DEBUG upsert] notify 120363362839073981@g.us | fromMe: false | participant: 5592668201029@lid
+2026-03-16T06:20:14.854303+00:00 app[web.1]: [DEBUG upsert] notify 120363362839073981@g.us | fromMe: false | participant: 142005141282909@lid
+2026-03-16T06:20:17.718407+00:00 app[web.1]: [DEBUG upsert] notify 120363362839073981@g.us | fromMe: false | participant: 142005141282909@lid
+2026-03-16T06:20:17.843721+00:00 app[web.1]: [DEBUG upsert] notify 254701513650@s.whatsapp.net | fromMe: true | participant: undefined
+2026-03-16T06:20:17.843747+00:00 app[web.1]: [2026-03-16T06:20:17.843Z] [MESSAGE] New private message from 254701513650@s.whatsapp.net
+2026-03-16T06:20:18.108933+00:00 app[web.1]: [DEBUG upsert] notify 120363362839073981@g.us | fromMe: false | participant: 103023967785096@lid
+2026-03-16T06:20:18.344502+00:00 app[web.1]: [DEBUG upsert] notify 120363362839073981@g.us | fromMe: false | participant: null
+2026-03-16T06:20:23.040584+00:00 app[web.1]: [DEBUG upsert] notify 254701513650@s.whatsapp.net | fromMe: true | participant: undefined
+2026-03-16T06:20:23.040602+00:00 app[web.1]: [2026-03-16T06:20:23.040Z] [MESSAGE] New private message from 254701513650@s.whatsapp.net
+2026-03-16T06:20:46.070827+00:00 app[web.1]: [DEBUG upsert] notify status@broadcast | fromMe: false | participant: 96048907305193@lid
+2026-03-16T06:20:51.112069+00:00 app[web.1]: [DEBUG upsert] append status@broadcast | fromMe: true | participant: null
+2026-03-16T06:20:51.629322+00:00 app[web.1]: [DEBUG upsert] notify 254701513650@s.whatsapp.net | fromMe: true | participant: undefined
+2026-03-16T06:20:51.629373+00:00 app[web.1]: [2026-03-16T06:20:51.629Z] [MESSAGE] New private message from 254701513650@s.whatsapp.net
+2026-03-16T06:20:52.129075+00:00 app[web.1]: [DEBUG upsert] notify status@broadcast | fromMe: false | participant: null
+2026-03-16T06:20:55.583873+00:00 app[web.1]: Failed to decrypt message with any known session...
+2026-03-16T06:20:55.583981+00:00 app[web.1]: Session error:Error: Bad MAC Error: Bad MAC
+2026-03-16T06:20:55.583982+00:00 app[web.1]:     at Object.verifyMAC (/app/node_modules/libsignal/src/crypto.js:87:15)
+2026-03-16T06:20:55.583987+00:00 app[web.1]:     at SessionCipher.doDecryptWhisperMessage (/app/node_modules/libsignal/src/session_cipher.js:250:16)
+2026-03-16T06:20:55.583987+00:00 app[web.1]:     at async SessionCipher.decryptWithSessions (/app/node_modules/libsignal/src/session_cipher.js:147:29)
+2026-03-16T06:20:55.583987+00:00 app[web.1]:     at async 96048907305193.0 [as awaitable] (/app/node_modules/libsignal/src/session_cipher.js:171:28)
+2026-03-16T06:20:55.583988+00:00 app[web.1]:     at async _asyncQueueExecutor (/app/node_modules/libsignal/src/queue_job.js:20:29)
+2026-03-16T06:20:55.585430+00:00 app[web.1]: [DEBUG upsert] notify status@broadcast | fromMe: false | participant: 96048907305193@lid
+2026-03-16T06:20:57.138248+00:00 app[web.1]: Closing open session in favor of incoming prekey bundle
+2026-03-16T06:20:57.138920+00:00 app[web.1]: Closing session: SessionEntry {
+2026-03-16T06:20:57.138921+00:00 app[web.1]:   _chains: {
+2026-03-16T06:20:57.138922+00:00 app[web.1]:     BfGzATNRTOtXr9os7RT7Mx7o9p9luFwnHuiihBfLx3Q4: { chainKey: [Object], chainType: 1, messageKeys: {} }
+2026-03-16T06:20:57.138922+00:00 app[web.1]:   },
+2026-03-16T06:20:57.138922+00:00 app[web.1]:   registrationId: 74132789,
+2026-03-16T06:20:57.138923+00:00 app[web.1]:   currentRatchet: {
+2026-03-16T06:20:57.138923+00:00 app[web.1]:     ephemeralKeyPair: {
+2026-03-16T06:20:57.138924+00:00 app[web.1]:       pubKey: <Buffer 05 f1 b3 01 33 51 4c eb 57 af da 2c ed 14 fb 33 1e e8 f6 9f 65 b8 5c 27 1e e8 a2 84 17 cb c7 74 38>,
+2026-03-16T06:20:57.138924+00:00 app[web.1]:       privKey: <Buffer e8 40 c4 9b b8 70 cf 69 f2 b5 35 e4 50 8c 45 dd 59 12 3d d3 8a 2f 19 5a aa 14 3e f2 36 25 60 65>
+2026-03-16T06:20:57.138924+00:00 app[web.1]:     },
+2026-03-16T06:20:57.138925+00:00 app[web.1]:     lastRemoteEphemeralKey: <Buffer 05 5b 1b c7 b3 b6 25 5a 2b f5 a1 48 47 e2 1d 26 9f d8 65 57 11 d5 f5 bd fb 9d de b7 d8 f3 67 f4 3d>,
+2026-03-16T06:20:57.138925+00:00 app[web.1]:     previousCounter: 0,
+2026-03-16T06:20:57.138925+00:00 app[web.1]:     rootKey: <Buffer 3a 1d 8a 8e 79 2d 31 a2 7b d3 bc 67 ba d6 f7 67 dc fb ed d1 6e 3b ad 7b 6c 59 04 0f 3b 71 7d 5b>
+2026-03-16T06:20:57.138925+00:00 app[web.1]:   },
+2026-03-16T06:20:57.138925+00:00 app[web.1]:   indexInfo: {
+2026-03-16T06:20:57.138925+00:00 app[web.1]:     baseKey: <Buffer 05 47 4d 30 61 a0 84 70 22 f2 6a e2 99 4f 43 32 9c 26 9a 6a 94 80 79 da c3 7d ec be 0d a6 a8 f7 70>,
+2026-03-16T06:20:57.138926+00:00 app[web.1]:     baseKeyType: 1,
+2026-03-16T06:20:57.138926+00:00 app[web.1]:     closed: -1,
+2026-03-16T06:20:57.138926+00:00 app[web.1]:     used: 1773642051108,
+2026-03-16T06:20:57.138926+00:00 app[web.1]:     created: 1773642051108,
+2026-03-16T06:20:57.138926+00:00 app[web.1]:     remoteIdentityKey: <Buffer 05 95 f0 5f ae f1 b1 f8 e5 05 2c a4 13 03 5b eb b6 e5 c2 e9 cd 97 2b e5 df 5b b8 eb 2a dc 9d ee 6d>
+2026-03-16T06:20:57.138926+00:00 app[web.1]:   },
+2026-03-16T06:20:57.138927+00:00 app[web.1]:   pendingPreKey: {
+2026-03-16T06:20:57.138927+00:00 app[web.1]:     signedKeyId: 7023925,
+2026-03-16T06:20:57.138927+00:00 app[web.1]:     baseKey: <Buffer 05 47 4d 30 61 a0 84 70 22 f2 6a e2 99 4f 43 32 9c 26 9a 6a 94 80 79 da c3 7d ec be 0d a6 a8 f7 70>
+2026-03-16T06:20:57.138927+00:00 app[web.1]:   }
+2026-03-16T06:20:57.138927+00:00 app[web.1]: }
+2026-03-16T06:20:57.144338+00:00 app[web.1]: [DEBUG upsert] notify status@broadcast | fromMe: false | participant: 96048907305193@lid
+2026-03-16T06:21:04.022861+00:00 app[web.1]: [DEBUG upsert] append status@broadcast | fromMe: true | participant: null
+2026-03-16T06:21:06.443248+00:00 app[web.1]: [DEBUG upsert] append status@broadcast | fromMe: true | participant: null
+2026-03-16T06:21:14.994798+00:00 app[web.1]: [DEBUG upsert] notify 120363362839073981@g.us | fromMe: false | participant: 142125417144375@lid
+2026-03-16T06:21:14.994828+00:00 app[web.1]: [2026-03-16T06:21:14.994Z] [MESSAGE] New group message from 120363362839073981@g.us
