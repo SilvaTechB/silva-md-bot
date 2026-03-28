@@ -95,23 +95,24 @@ async function loadSession() {
         const hasTilde = sid.includes('~');
 
         if (sid && hasTilde) {
-            // SESSION_ID is provided in Silva~<b64> format — replace only creds.json.
-            if (fs.existsSync(credsPath)) {
-                fs.unlinkSync(credsPath);
-                logMessage('INFO', "♻️ ᴏʟᴅ ꜱᴇꜱꜱɪᴏɴ ʀᴇᴍᴏᴠᴇᴅ");
-            }
+            // SESSION_ID is provided in Silva~<b64> format.
+            // Only restore from SESSION_ID if creds.json is missing.
+            // Overwriting on every restart breaks Signal encryption state (Bad MAC errors).
+            if (!fs.existsSync(credsPath)) {
+                const [header, b64data] = sid.split('~');
+                if (header !== "Silva" || !b64data) {
+                    logMessage('WARN', "⚠️ SESSION_ID format invalid — falling back to QR scan");
+                    return;
+                }
 
-            const [header, b64data] = sid.split('~');
-            if (header !== "Silva" || !b64data) {
-                logMessage('WARN', "⚠️ SESSION_ID format invalid — falling back to QR scan");
-                return;
+                const cleanB64 = b64data.replace('...', '');
+                const compressedData = Buffer.from(cleanB64, 'base64');
+                const decompressedData = zlib.gunzipSync(compressedData);
+                fs.writeFileSync(credsPath, decompressedData, "utf8");
+                logMessage('SUCCESS', "✅ ɴᴇᴡ ꜱᴇꜱꜱɪᴏɴ ʟᴏᴀᴅᴇᴅ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ");
+            } else {
+                logMessage('INFO', "📂 Using existing session from disk");
             }
-
-            const cleanB64 = b64data.replace('...', '');
-            const compressedData = Buffer.from(cleanB64, 'base64');
-            const decompressedData = zlib.gunzipSync(compressedData);
-            fs.writeFileSync(credsPath, decompressedData, "utf8");
-            logMessage('SUCCESS', "✅ ɴᴇᴡ ꜱᴇꜱꜱɪᴏɴ ʟᴏᴀᴅᴇᴅ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ");
 
         } else if (fs.existsSync(credsPath)) {
             // No SESSION_ID — reuse the session already on disk (Replit / local mode)
