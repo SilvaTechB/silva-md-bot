@@ -284,6 +284,34 @@ async function handleMessages(sock, message) {
 
         // ── onMessage hooks — fired for ALL messages (not just commands) ────────
         if (!message.key.fromMe) {
+            if (typeof global.trackMessage === 'function') try { global.trackMessage(jid, from); } catch {}
+            if (typeof global.addXP === 'function') {
+                try {
+                    const lvlUp = global.addXP(jid, from);
+                    if (lvlUp) {
+                        await safeSend(sock, jid, {
+                            text: `🎉 *Level Up!*\n\n@${lvlUp.sender.split('@')[0]} reached *Level ${lvlUp.level}*!\n${lvlUp.title}`,
+                            mentions: [lvlUp.sender]
+                        });
+                    }
+                } catch {}
+            }
+            if (!isGroup && typeof global.checkAutoReply === 'function') {
+                try {
+                    const autoReply = global.checkAutoReply(from);
+                    if (autoReply) {
+                        await safeSend(sock, jid, { text: `💤 *Auto-Reply:*\n\n${autoReply}` }, { quoted: message });
+                    }
+                } catch {}
+            }
+            if (isGroup && typeof global.checkWelcomeQuizAnswer === 'function') {
+                try {
+                    const result = global.checkWelcomeQuizAnswer(jid, from, text);
+                    if (result?.passed) {
+                        await safeSend(sock, jid, { text: `✅ @${from.split('@')[0]} passed the welcome quiz! Welcome to the group! 🎉`, mentions: [from] });
+                    }
+                } catch {}
+            }
             for (const p of plugins) {
                 if (typeof p.onMessage !== 'function') continue;
                 try {
