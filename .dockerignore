@@ -1,0 +1,12 @@
+node_modules/
+session/
+data/
+.env
+config.env
+*.log
+.replit
+replit.nix
+.local/
+attached_assets/
+.cache/
+.upm/

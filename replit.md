@@ -94,6 +94,14 @@ Plugins use a unified shape (single export or array export):
 - **Message cache**: 3-hour TTL for retry/anti-delete recovery
 - **`seenCmdIds` cleanup**: Auto-clears every 10 minutes
 
+## GitHub Packages
+
+- **npm package**: `@silvatechb/silva-md-bot` — published to GitHub Packages npm registry
+- **Docker image**: `ghcr.io/silvatechb/silva-md-v4` — published to GitHub Container Registry
+- **Auto-publish**: GitHub Actions workflows in `.github/workflows/` auto-publish on release or manual trigger
+- **Config files**: `.npmrc` (registry), `.npmignore` (excludes session/data), `Dockerfile`, `.dockerignore`
+- **Security**: `package.json` author field must be `"Silva"` — integrity check in `silva.js` validates this on startup
+
 ## Notes
 
 - The bot requires a `SESSION_ID` secret to connect to WhatsApp. Without it, the web dashboard still runs but the bot won't connect.

@@ -1,7 +1,7 @@
 {
-  "name": "silva-md-bot",
-  "version": "1.0.0",
-  "description": "Silva MD WhatsApp Bot using Baileys",
+  "name": "@silvatechb/silva-md-bot",
+  "version": "2.0.0",
+  "description": "Silva MD — A feature-rich multi-device WhatsApp bot with 1200+ commands, AI agent, 19 smart features, and anti-ban protection. Built with Node.js and Baileys.",
   "main": "silva.js",
   "scripts": {
     "start": "node silva.js"
@@ -9,8 +9,39 @@
   "engines": {
     "node": ">=20.0.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SilvaTechB/silva-md-v4.git"
+  },
+  "homepage": "https://silvatech.co.ke",
+  "bugs": {
+    "url": "https://github.com/SilvaTechB/silva-md-v4/issues"
+  },
+  "keywords": [
+    "silva-md",
+    "whatsapp-bot",
+    "baileys",
+    "multi-device",
+    "chatbot",
+    "ai-bot",
+    "whatsapp",
+    "nodejs",
+    "auto-status",
+    "anti-delete",
+    "anti-ban"
+  ],
   "author": "Silva",
+  "contributors": [
+    {
+      "name": "SilvaTech",
+      "email": "silvatechb@gmail.com",
+      "url": "https://silvatech.co.ke"
+    }
+  ],
   "license": "Apache-2.0",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "dependencies": {
     "@adiwajshing/keyed-db": "^0.2.4",
     "@bochilteam/scraper": "^4.2.4",
