@@ -984,6 +984,22 @@ process.on('unhandledRejection', (reason, promise) => {
         console.log('╚══════════════════════════════════════════╝');
         console.log('\x1b[0m');
         logMessage('INFO', 'Booting Silva MD Bot...');
+
+        // ── Load sudo users from disk ───────────────────────────────────────
+        try {
+            const sudoPath = require('path').join(__dirname, 'data', 'sudo.json');
+            if (require('fs').existsSync(sudoPath)) {
+                const sudoList = JSON.parse(require('fs').readFileSync(sudoPath, 'utf8'));
+                global.sudoUsers = new Set(Array.isArray(sudoList) ? sudoList : []);
+                logMessage('INFO', `Loaded ${global.sudoUsers.size} sudo user(s)`);
+            } else {
+                global.sudoUsers = new Set();
+            }
+        } catch (e) {
+            global.sudoUsers = new Set();
+            logMessage('WARN', `Could not load sudo list: ${e.message}`);
+        }
+
         // loadSession is called ONCE here at startup.
         // connectToWhatsApp() and all reconnects reuse the saved state on disk.
         await loadSession();

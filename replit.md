@@ -56,9 +56,11 @@ Plugins use a unified shape (single export or array export):
 **Permission tiers:**
 - `public` — any user
 - `admin` — group admins + owner
-- `owner` — bot owner only
+- `owner` — bot owner + sudo users
 
-**ctx object keys:** `sock, conn, m, message, sender, jid, chat, isGroup, isAdmin, isBotAdmin, isOwner, args, text, prefix, groupMetadata, contextInfo, mentionedJid, safeSend, reply`
+**Sudo system:** Sudo users get owner-level access to all bot commands. Managed via `.sudo add/del/list/reset` or `.setsudo/.delsudo/.getsudo/.resetsudo`. Only the real owner (matching OWNER_NUMBER or bot number) can manage the sudo list. Sudo list persists in `data/sudo.json` and loads on startup.
+
+**ctx object keys:** `sock, conn, m, message, sender, jid, chat, isGroup, isAdmin, isBotAdmin, isOwner, isSudo, args, text, prefix, groupMetadata, contextInfo, mentionedJid, safeSend, reply`
 
 ## Plugin Categories (180+ files, 1200+ commands)
 

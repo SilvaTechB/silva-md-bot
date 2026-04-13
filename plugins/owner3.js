@@ -4,10 +4,26 @@ const fs     = require('fs');
 const path   = require('path');
 const config = require('../config');
 const { fmt } = require('../lib/theme');
+const { jidNormalizedUser } = require('@whiskeysockets/baileys');
 
 const SUDO_FILE = path.join(__dirname, '../data/sudo.json');
 function loadSudo()       { try { return JSON.parse(fs.readFileSync(SUDO_FILE, 'utf8')); } catch { return []; } }
 function saveSudo(list)   { fs.mkdirSync(path.dirname(SUDO_FILE), { recursive: true }); fs.writeFileSync(SUDO_FILE, JSON.stringify(list, null, 2)); }
+
+function isRealOwner(ctx) {
+    if (ctx.m?.key?.fromMe) return true;
+    const fromNorm = jidNormalizedUser(ctx.from);
+    const botLid = jidNormalizedUser(global.botLid || '');
+    if (botLid && fromNorm === botLid) return true;
+    const ownerNum = ((process.env.OWNER_NUMBER || '').trim()
+        || (typeof config.OWNER_NUMBER === 'string' ? config.OWNER_NUMBER.trim() : '')
+        || (global.botNum || '')).replace(/\D/g, '');
+    const botNum = (global.botNum || '').replace(/\D/g, '');
+    const fromNum = fromNorm.replace(/@.*/, '').replace(/\D/g, '');
+    if (fromNum && ownerNum && fromNum === ownerNum) return true;
+    if (fromNum && botNum && fromNum === botNum) return true;
+    return false;
+}
 
 module.exports = {
     commands: [
@@ -131,6 +147,9 @@ module.exports = {
         }
 
         if (cmd === 'setsudo') {
+            if (!isRealOwner(ctx)) {
+                return send('⛔ Only the real bot owner can manage sudo users.');
+            }
             const target = mentionedJid?.[0] || (text ? `${text.replace(/\D/g, '')}@s.whatsapp.net` : null);
             if (!target) return send('❌ *Usage:* `.setsudo @user` or `.setsudo <number>`');
             const list = loadSudo();
@@ -142,6 +161,9 @@ module.exports = {
         }
 
         if (cmd === 'delsudo') {
+            if (!isRealOwner(ctx)) {
+                return send('⛔ Only the real bot owner can manage sudo users.');
+            }
             const target = mentionedJid?.[0] || (text ? `${text.replace(/\D/g, '')}@s.whatsapp.net` : null);
             if (!target) return send('❌ *Usage:* `.delsudo @user`');
             const list = loadSudo().filter(j => j !== target);
@@ -158,6 +180,9 @@ module.exports = {
         }
 
         if (cmd === 'resetsudo') {
+            if (!isRealOwner(ctx)) {
+                return send('⛔ Only the real bot owner can manage sudo users.');
+            }
             saveSudo([]);
             if (global.sudoUsers) global.sudoUsers.clear();
             return send('✅ All sudo users cleared.');

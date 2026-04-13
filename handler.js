@@ -414,11 +414,17 @@ async function handleMessages(sock, message) {
         const botLid     = jidNormalizedUser(global.botLid || '');
         const fromNorm   = jidNormalizedUser(from);
 
+        const isSudo = global.sudoUsers?.size
+            ? (global.sudoUsers.has(from) || global.sudoUsers.has(fromNorm) || global.sudoUsers.has(resolvedFrom)
+               || (fromNum && [...global.sudoUsers].some(s => sameNumber(s.replace(/@.*/, ''), fromNum))))
+            : false;
+
         const isOwner = message.key.fromMe
             || (botLid && fromNorm === botLid)
             || (botLid && jidNormalizedUser(resolvedFrom) === botLid)
             || (fromNum && ownerNum && (fromNum === ownerNum || sameNumber(fromNum, ownerNum)))
-            || (fromNum && botNum   && (fromNum === botNum   || sameNumber(fromNum, botNum)));
+            || (fromNum && botNum   && (fromNum === botNum   || sameNumber(fromNum, botNum)))
+            || isSudo;
 
         // ── Resolve group admin status ────────────────────────────────────────
         if (isGroup && groupMetadata?.participants) {
@@ -462,6 +468,7 @@ async function handleMessages(sock, message) {
             isAdmin,
             isBotAdmin,
             isOwner,
+            isSudo,
             args,
             text,
             prefix,               // primary/canonical prefix for help text
