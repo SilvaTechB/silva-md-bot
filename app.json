@@ -1,37 +1,40 @@
 {
   "name": "silva-md",
-  "description": "Javascript WhatsApp bot made by Silva.",
-  "keywords": ["silva-md", "whatsapp", "baileys", "bot"],
+  "description": "Silva MD — A feature-rich multi-device WhatsApp bot with 1200+ commands, AI agent, auto-status, anti-delete, sudo system, and 19 smart features. Built with Node.js and Baileys.",
+  "keywords": ["silva-md", "whatsapp", "baileys", "bot", "multi-device", "ai", "chatbot", "whatsapp-bot", "nodejs"],
+  "logo": "https://files.catbox.moe/5uli5p.jpeg",
+  "repository": "https://github.com/SilvaTechB/silva-md-v4",
+  "website": "https://silvatech.co.ke",
   "success_url": "/",
   "stack": "heroku-24",
   "env": {
     "SESSION_ID": {
-      "description": "Put the session-id here.",
+      "description": "Your WhatsApp session ID. Get it from the pairing page.",
       "required": true,
       "value": ""
     },
     "PREFIX": {
-      "description": "Command prefix. Single: '.' | Multiple: '.,!,/,?' (any of them works) | Any symbol: 'any' | No prefix: 'none'. Can also be changed at runtime with .setprefix command.",
+      "description": "Command prefix. Single: '.' | Multiple: '.,!,/,?' | Any symbol: 'any' | No prefix: 'none'.",
       "required": false,
       "value": "."
     },
     "MODE": {
-      "description": "Bot mode: public, private, group, inbox.",
+      "description": "Bot mode: public (everyone), private (owner only), group (groups only), inbox (DM only), both (public).",
       "required": false,
       "value": "public"
     },
     "BOT_NAME": {
-      "description": "Bot display name.",
+      "description": "Bot display name shown in menus and greetings.",
       "required": false,
       "value": "✦ Silva ✦ MD ✦"
     },
     "OWNER_NUMBER": {
-      "description": "Owner WhatsApp number (digits only, with country code e.g. 254712345678).",
+      "description": "Owner WhatsApp number with country code (e.g. 254712345678).",
       "required": true,
       "value": ""
     },
     "OWNER_NAME": {
-      "description": "Bot owner name.",
+      "description": "Bot owner's display name.",
       "required": false,
       "value": "Silva MD"
     },
@@ -41,52 +44,57 @@
       "value": "*© ✦ Silva ✦ MD ✦*"
     },
     "THEME": {
-      "description": "Bot theme/character voice. Options: silva, adam, ayanokoji, edith, friday, genos, gideon, gojo, goku, luffy, naruto, nezuko, parker, secktor, suhail, zerotwo, itachi, batman, thanos",
+      "description": "Bot theme/voice. Options: silva, adam, ayanokoji, edith, friday, genos, gideon, gojo, goku, luffy, naruto, nezuko, parker, secktor, suhail, zerotwo, itachi, batman, thanos.",
       "required": false,
       "value": "silva"
     },
     "ALIVE_IMG": {
-      "description": "Paste your image URL here.",
+      "description": "Image URL shown with the alive/menu command.",
       "required": false,
       "value": "https://files.catbox.moe/5uli5p.jpeg"
     },
     "LIVE_MSG": {
-      "description": "Paste your alive message here.",
+      "description": "Custom alive message text.",
       "required": false,
       "value": "> SILVA MD IS ACTIVE AND RUNNING ⚡"
     },
     "ANTIDELETE_PRIVATE": {
-      "description": "Restore deleted messages in private chat.",
+      "description": "Recover deleted messages in private chats (true/false).",
       "required": false,
       "value": "true"
     },
     "ANTIDELETE_GROUP": {
-      "description": "Restore deleted messages in groups.",
+      "description": "Recover deleted messages in groups (true/false).",
       "required": false,
       "value": "true"
     },
     "ANTILINK": {
-      "description": "Enable anti-link feature globally in all groups.",
+      "description": "Auto-remove links in groups (true/false).",
+      "required": false,
+      "value": "false"
+    },
+    "ANTI_BAD": {
+      "description": "Auto-remove bad words in groups (true/false).",
       "required": false,
       "value": "false"
     },
     "ANTIVV": {
-      "description": "Auto-open view-once messages sent to the bot.",
+      "description": "Auto-recover view-once messages (true/false).",
       "required": false,
       "value": "true"
     },
     "AUTO_STATUS_SEEN": {
-      "description": "Auto-view all status updates.",
+      "description": "Auto-view all WhatsApp status updates (true/false).",
       "required": false,
       "value": "true"
     },
     "AUTO_STATUS_REACT": {
-      "description": "Auto-react to status updates.",
+      "description": "Auto-react to status updates with emoji (true/false).",
       "required": false,
       "value": "true"
     },
     "AUTO_STATUS_REPLY": {
-      "description": "Auto-reply to status updates.",
+      "description": "Auto-reply to status updates (true/false).",
       "required": false,
       "value": "false"
     },
@@ -96,44 +104,105 @@
       "value": "*👀 Seen by Silva MD ✅*"
     },
     "AUTO_REACT_NEWSLETTER": {
-      "description": "Auto-react to newsletter/channel messages.",
+      "description": "Auto-react to newsletter/channel messages (true/false).",
       "required": false,
       "value": "true"
     },
     "CUSTOM_REACT_EMOJIS": {
-      "description": "Comma-separated emojis used for random status reactions.",
+      "description": "Comma-separated emojis for random status reactions.",
       "required": false,
       "value": "💝,💖,💗,❤️‍🔥,❤️‍🩹,❤️,🩷,🧡,💛,💚,💙,🩵,💜,🤎,🖤,🩶,🤍"
     },
     "ALWAYS_ONLINE": {
-      "description": "Keep bot always shown as online.",
+      "description": "Keep bot always shown as online (true/false).",
       "required": false,
-      "value": "false"
+      "value": "true"
     },
     "AUTO_TYPING": {
-      "description": "Show typing indicator while processing commands.",
+      "description": "Show typing indicator while processing commands (true/false).",
       "required": false,
       "value": "true"
     },
     "AUTO_RECORDING": {
-      "description": "Show recording indicator for media commands.",
+      "description": "Show recording indicator for media commands (true/false).",
       "required": false,
       "value": "false"
     },
     "READ_MESSAGE": {
-      "description": "Auto-read (blue tick) all incoming messages.",
+      "description": "Auto-read (blue tick) all incoming messages (true/false).",
       "required": false,
       "value": "false"
+    },
+    "AUTO_BIO": {
+      "description": "Auto-update bot bio with time and date (true/false).",
+      "required": false,
+      "value": "true"
+    },
+    "ANTICALL": {
+      "description": "Auto-reject incoming calls and optionally block caller (true/false).",
+      "required": false,
+      "value": "false"
+    },
+    "CHATBOT": {
+      "description": "Enable smart chatbot for non-command messages (true/false).",
+      "required": false,
+      "value": "false"
+    },
+    "CHATBOT_MODE": {
+      "description": "Chatbot scope: pm (DMs only), group (groups only), both (everywhere).",
+      "required": false,
+      "value": "pm"
+    },
+    "GEMINI_API_KEY": {
+      "description": "Google Gemini API key for advanced AI responses. Get it from ai.google.dev.",
+      "required": false,
+      "value": ""
+    },
+    "PM_PERMIT": {
+      "description": "Warn unknown users who DM the bot (true/false).",
+      "required": false,
+      "value": "false"
+    },
+    "AUTO_REACT": {
+      "description": "Auto-react to incoming messages with random emoji (true/false).",
+      "required": false,
+      "value": "false"
+    },
+    "TIMEZONE": {
+      "description": "Timezone for date/time features (e.g. Africa/Nairobi, America/New_York).",
+      "required": false,
+      "value": "Africa/Nairobi"
+    },
+    "PACK_NAME": {
+      "description": "Sticker pack name shown in sticker info.",
+      "required": false,
+      "value": "Silva MD"
+    },
+    "PACK_AUTHOR": {
+      "description": "Sticker pack author shown in sticker info.",
+      "required": false,
+      "value": "SilvaTech"
+    },
+    "GREETING": {
+      "description": "Auto-greeting message for new DMs. Leave blank to disable.",
+      "required": false,
+      "value": ""
     },
     "DEBUG": {
       "description": "Enable verbose debug logging (true/false).",
       "required": false,
       "value": "false"
     },
-    "GREETING": {
-      "description": "Auto-greeting message sent to anyone who DMs the bot. Leave blank to disable or use .setgreet command instead.",
+    "PORT": {
+      "description": "HTTP server port for the web dashboard.",
       "required": false,
-      "value": ""
+      "value": "25680"
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "eco"
     }
   },
   "buildpacks": [

@@ -16,7 +16,7 @@ const TZ      = 'Africa/Nairobi';
 const CATEGORIES = [
     { icon: '⬇️',  name: 'Downloaders',        cmds: ['yt','tiktok','instagram','facebook','apk','catbox'] },
     { icon: '🎵',  name: 'Music & Audio',       cmds: ['play','shazam','lyrics','toaudio'] },
-    { icon: '🤖',  name: 'AI & Intelligence',   cmds: ['ai','imagine','translate','define','tts','calc','shorten','gitclone','anime','manga'] },
+    { icon: '🤖',  name: 'AI & Intelligence',   cmds: ['ai','agent','ask','silva','assistant','imagine','translate','define','tts','calc','shorten','gitclone','anime','manga'] },
     { icon: '🌍',  name: 'Search & Info',       cmds: ['wiki','country','ip','currency','time','weather','numberfact'] },
     { icon: '🖼️', name: 'Media & Stickers',    cmds: ['sticker','vv','ascii','qrcode','react'] },
     { icon: '👥',  name: 'Group Management',    cmds: ['kick','promote','demote','ban','unban','banlist','tagall','hidetag','poll','lock','unlock','link','revoke','setname','setdesc','broadcast'] },
@@ -27,6 +27,13 @@ const CATEGORIES = [
     { icon: '📊',  name: 'Status & Profile',    cmds: ['save','spp','presence','autojoin'] },
     { icon: '📰',  name: 'Channels',            cmds: ['newsletter','followchannel','unfollowchannel','channelinfo'] },
     { icon: 'ℹ️', name: 'Bot Info',            cmds: ['alive','ping','uptime','owner','getjid','repo','remind'] },
+    { icon: '👑',  name: 'Owner & Sudo',        cmds: ['sudo','setsudo','delsudo','getsudo','resetsudo','block','unblock','setmode','setprefix','setbotname','join','cmd','restart','shutdown'] },
+    { icon: '🎮',  name: 'Games',               cmds: ['rps','hangman','ttt','trivia','riddle','slots','8ball','scramble','flagquiz','mathquiz','wordchain','emojiguess'] },
+    { icon: '🔧',  name: 'Text & Dev Tools',    cmds: ['reverse','upper','lower','mock','binary','rot13','leet','json','urlencode','hash','timestamp','regex','httpcode','password'] },
+    { icon: '💰',  name: 'Crypto & Finance',    cmds: ['crypto','loan','savings','tax','inflation','billsplit','salary','discount','budget'] },
+    { icon: '💪',  name: 'Health & Fitness',     cmds: ['workout','stretching','calories','water','sleep','meditation','steps','yoga','bmi'] },
+    { icon: '📚',  name: 'Education',            cmds: ['element','planet','zodiac','vocab','acronym','flag','nato','country','phrasebook'] },
+    { icon: '📝',  name: 'Productivity',         cmds: ['pomodoro','habits','goals','journal','flashcards','bookmarks','schedule','todo','notes','timer'] },
 ];
 
 function box(title, lines) {
