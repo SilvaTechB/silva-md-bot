@@ -58,10 +58,21 @@ function bindGroupCacheInvalidation(sock) {
     sock.ev.on('group-participants.update', ({ id }) => groupCache.delete(id));
 }
 
-// ─── Safe send ───────────────────────────────────────────────────────────────
+const sendTimestamps = [];
+const MAX_SENDS_PER_MIN = 30;
+
 async function safeSend(sock, jid, content, opts = {}) {
     if (!jid || !sock?.sendMessage) return null;
     try {
+        const now = Date.now();
+        while (sendTimestamps.length && now - sendTimestamps[0] > 60000) sendTimestamps.shift();
+        if (sendTimestamps.length >= MAX_SENDS_PER_MIN) {
+            const wait = 60000 - (now - sendTimestamps[0]);
+            await new Promise(r => setTimeout(r, Math.min(wait, 3000)));
+        }
+        const jitter = Math.floor(Math.random() * 400) + 100;
+        await new Promise(r => setTimeout(r, jitter));
+        sendTimestamps.push(Date.now());
         return await sock.sendMessage(jid, content, opts);
     } catch (err) {
         console.error(`[SafeSend] ${jid}: ${err.message}`);

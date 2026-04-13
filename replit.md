@@ -1,12 +1,12 @@
 # Silva MD Bot
 
-A modular WhatsApp bot built with Baileys (multi-device), featuring an admin dashboard web interface.
+A feature-rich multi-device WhatsApp bot built with Node.js and the Baileys library, featuring 1200+ commands across 180+ plugins, an AI agent, and comprehensive admin tools.
 
 ## Architecture
 
 - **Runtime**: Node.js 20
 - **Entry point**: `silva.js`
-- **Web dashboard**: `smm/silva.html` — served via Express at port 5000
+- **Web dashboard**: `smm/silva.html` — served via Express at port 25680
 - **Plugins**: `plugins/` directory — loaded dynamically on start
 - **Config**: `config.js` reads from `config.env` (if present) or environment variables
 - **Session storage**: `session/` directory (multi-file auth state)
@@ -18,7 +18,7 @@ A modular WhatsApp bot built with Baileys (multi-device), featuring an admin das
 | `silva.js`       | Main entry — connects to WhatsApp, runs Express |
 | `handler.js`     | Message handler & command dispatcher            |
 | `config.js`      | Config reader (env vars / config.env)           |
-| `plugins/`       | Individual feature plugins (commands)           |
+| `plugins/`       | Individual feature plugins (1200+ commands)     |
 | `themes/`        | Theme JSON files (19 themes — silva default)    |
 | `lib/theme.js`   | Theme loader — `getStr()`, `setActiveTheme()`   |
 | `lib/`           | Shared utilities and functions                  |
@@ -33,12 +33,12 @@ See `sample.env` for the full list. Key ones:
 - `OWNER_NUMBER` — Bot owner's WhatsApp number
 - `PREFIX` — Command prefix (default `.`)
 - `MODE` — `public`, `private`, or `both`
-- `PORT` — HTTP server port (set to `5000` for Replit)
+- `PORT` — HTTP server port (default `25680`)
 
 ## Workflow
 
 - **Command**: `node silva.js`
-- **Port**: 5000 (Express web dashboard)
+- **Port**: 25680 (Express web dashboard)
 - **Output type**: webview
 
 ## Deployment
@@ -48,7 +48,7 @@ See `sample.env` for the full list. Key ones:
 
 ## Plugin System
 
-All 31 plugins use a unified shape:
+Plugins use a unified shape (single export or array export):
 ```js
 { commands, description, permission, group, private, run(sock, message, args, ctx) }
 ```
@@ -60,59 +60,37 @@ All 31 plugins use a unified shape:
 
 **ctx object keys:** `sock, conn, m, message, sender, jid, chat, isGroup, isAdmin, isBotAdmin, isOwner, args, text, prefix, groupMetadata, contextInfo, mentionedJid, safeSend, reply`
 
-## Installed Plugins (49)
+## Plugin Categories (180+ files, 1200+ commands)
 
-| Plugin | Commands | Permission |
-|--------|----------|------------|
-| afk | afk, back | owner |
-| anime | anime, animesearch, manga | public |
-| ascii | ascii, figlet, art, textart | public |
-| ban | ban, unban, banlist | admin |
-| broadcast | broadcast, bc | owner |
-| eval | eval, exec, run | owner |
-| react | react, reaction, emoji | public |
-| tempmail | tempmail, tmpmail, fakemail, disposable | public |
-| toaudio | toaudio, tomp3, tovn, audio | public |
-| anticall | anticall | owner |
-| antidelete | antidelete, antidel | owner |
-| antidemote | antidemote | admin |
-| apk | apk, apkdl, getapk | public |
-| autoreply | autoreply, ar | admin |
-| blocklist | blocklist, listblock | owner |
-| call | call, support, ss | public |
-| catbox | tourl, imgtourl, imgurl, geturl, upload | public |
-| facebook | facebook, fb, fbdl | public |
-| getpp | spp, profile, getpp | public |
-| gitclone | gitclone | public |
-| grouplink | grouplink, invitelink, link, revoke, revokelink | admin |
-| hello | hello | public |
-| instagram | instagram, igdl, ig, insta | public |
-| kick | kick, remove | admin |
-| lock | lock, unlock, close, open | admin |
-| menu | menu, help, list | public |
-| music | play | public |
-| poll | poll, vote | admin |
-| promote | promote, demote, admin, unadmin | admin |
-| remind | remind, remindme, reminder | public |
-| repo | repo, repository, github | public |
-| setgroup | setname, setdesc, setdescription, groupname, groupdesc | admin |
-| shazam | shazam, identify, song | public |
-| silva-ai | ai, gpt, chatgpt | public |
-| silva-getjid | getjid, jid | public |
-| silva-owner | owner, creator | public |
-| silva-ping | ping | public |
-| silva-shorturl | shorten | public |
-| silva-uptime | uptime, runtime | public |
-| statussave | save, nitumie, statussave | public |
-| sticker | sticker, s | public |
-| test | test, botdemo, features | public |
-| testhandler | testhandler | owner |
-| tiktok | tiktok, tt, ttdl, tiktokdl | public |
-| viewonce | vv, antivv, avv, viewonce, open, openphoto, openvideo, vvphoto | owner |
-| virus | scanurl, urlscan, checksafe | public |
-| weather | weather, climate, mosam | public |
-| welcome | welcome, goodbye, setwelcome, setgoodbye, welcomeoff, goodbyeoff | admin |
-| yt | yt, youtube | public |
+| Category | File(s) | Commands |
+|----------|---------|----------|
+| AI Agent | silva-agent.js | agent, do, silva, assistant, ask |
+| Text Tools | text-tools.js | reverse, upper, lower, mock, morse, binary, base64, rot13, zalgo, leet, etc. (68 cmds) |
+| Math Tools | math-tools.js | add, subtract, multiply, divide, sqrt, fibonacci, bmi, convert, roman, etc. (30+ cmds) |
+| Games | games.js, emoji-games.js | rps, hangman, ttt, trivia, riddles, slots, 8ball, scramble, flagquiz, mathquiz, etc. (70+ cmds) |
+| Utility | utility-tools.js | date, calendar, timer, timezone, qr, choose, notes, todo, uuid, lorem, speedtest, etc. (49 cmds) |
+| Fun Facts | fun-facts.js | animal, space, history, science, tech, food, math, body, country, movie, music, sport facts (26 cmds) |
+| Social | social-tools.js | tagall, hidetag, admins, groupinfo, mute, warn, rules, antiflood, antispam, report, etc. (33 cmds) |
+| Education | education.js | element, country, planet, zodiac, vocab, acronym, currency, flag, phrasebook, nato, etc. (35 cmds) |
+| Entertainment | entertainment.js | pickup lines, dad jokes, poems, memes, horoscopes, personality/mbti, ship, rate, etc. (30+ cmds) |
+| Dev Tools | dev-tools.js | json, urlencode, hash, timestamp, regex, httpcode, ipinfo, password gen, cron, chmod (35 cmds) |
+| Health/Fitness | health-fitness.js | workout, stretching, calories, water, sleep, meditation, steps, heart rate, yoga, recipe (28 cmds) |
+| Random Gen | random-generators.js | fake name/email/phone/id, superpower, nickname, excuse, advice, motivation, affirmation, dream (33 cmds) |
+| Language | language-tools.js | greetings, I love you, proverbs, slang, idioms, rhymes, synonyms, antonyms, palindrome (29 cmds) |
+| Security | security-tools.js | antiban, settings, setprefix, block, setbio, restart, leave, join, antilink, antibadword (38 cmds) |
+| Productivity | productivity.js | pomodoro, habits, goals, journal, budget, flashcards, bookmarks, schedule, gratitude (24 cmds) |
+| Info Lookup | info-lookup.js | dog/cat breeds, superheroes, programming langs, OS info, social platforms, cars, phones (20 cmds) |
+| Crypto/Finance | crypto-finance.js | crypto info, loan calc, savings calc, tax, inflation, bill split, salary, discount (26 cmds) |
+| Misc | misc-extras.js | matrix, uwuify, copypasta, border, rainbow text, bio/caption ideas, zodiac match, text art (42 cmds) |
+| Original Plugins | 160+ original plugin files | sticker, menu, music, tiktok, instagram, youtube, weather, translate, eval, etc. |
+
+## Safety Features
+
+- **Rate limiting**: max 30 messages/minute via `safeSend()`
+- **Random jitter**: 100-500ms delay between messages
+- **Anti-spam/flood**: Per-group configurable protection
+- **Message cache**: 3-hour TTL for retry/anti-delete recovery
+- **`seenCmdIds` cleanup**: Auto-clears every 10 minutes
 
 ## Notes
 

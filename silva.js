@@ -335,10 +335,13 @@ async function updateProfileStatus(sock) {
 
 // ✅ Connect to WhatsApp (main)
 async function connectToWhatsApp() {
-    // Per-connection dedup: ignore duplicate upserts for the same status ID
     const seenStatusIds = new Set();
-    // Per-connection dedup: ignore duplicate deliveries of the same command message
     const seenCmdIds = new Set();
+
+    setInterval(() => {
+        if (seenCmdIds.size > 5000) seenCmdIds.clear();
+        if (seenStatusIds.size > 5000) seenStatusIds.clear();
+    }, 10 * 60 * 1000);
 
     // Use the session directory for multi-file auth state
     const { state, saveCreds } = await useMultiFileAuthState(sessionDir);
@@ -362,7 +365,13 @@ async function connectToWhatsApp() {
         markOnlineOnConnect: config.ALWAYS_ONLINE,
         syncFullHistory: false,
         generateHighQualityLinkPreview: false,
-        getMessage: async () => undefined,
+        getMessage: async (key) => {
+            const cacheKey = `${key.remoteJid}-${key.id}`;
+            const cached = messageCache.get(cacheKey);
+            if (cached?.message) return cached.message;
+            const stored = store.loadMessage(key.remoteJid, key.id);
+            return stored?.message || undefined;
+        },
         ...cryptoOptions
     });
 
@@ -499,10 +508,9 @@ async function connectToWhatsApp() {
             });
         }
         
-        // Clean old cache entries (older than 1 hour)
         const now = Date.now();
         for (const [key, value] of messageCache.entries()) {
-            if (now - value.timestamp > 60 * 60 * 1000) { // 1 hour
+            if (now - value.timestamp > 3 * 60 * 60 * 1000) {
                 messageCache.delete(key);
             }
         }
@@ -572,69 +580,50 @@ async function connectToWhatsApp() {
         }
     });
 
-    // Anti-delete handler (messages.delete - existing)
     sock.ev.on('messages.delete', async (item) => {
         try {
             logMessage('DEBUG', 'messages.delete triggered');
             const keys = Array.isArray(item) ? item.map(i => i.key) : (item?.keys || []);
             for (const key of keys) {
                 const from = key.remoteJid;
-                const isGroup = from?.endsWith?.('@g.us');
-                if ((isGroup && !config.ANTIDELETE_GROUP) || (!isGroup && !config.ANTIDELETE_PRIVATE)) {
-                    logMessage('DEBUG', `Anti-delete disabled for ${isGroup ? 'group' : 'private'}`);
-                    continue;
-                }
+                const isGroupChat = from?.endsWith?.('@g.us');
+                if ((isGroupChat && !config.ANTIDELETE_GROUP) || (!isGroupChat && !config.ANTIDELETE_PRIVATE)) continue;
 
-                const deletedMsg = await store.loadMessage(from, key.id);
-                if (!deletedMsg) {
-                    logMessage('WARN', `No stored message found for ${key.id}`);
+                const cacheKey = `${from}-${key.id}`;
+                const cached = messageCache.get(cacheKey);
+                const storedMsg = cached?.message || store.loadMessage(from, key.id)?.message;
+                if (!storedMsg) {
+                    logMessage('WARN', `No cached message for anti-delete: ${key.id}`);
                     continue;
                 }
 
                 const ownerJid = `${config.OWNER_NUMBER}@s.whatsapp.net`;
                 const sender = key.participant || from;
                 const senderName = (sender || '').split('@')[0];
-                const msg = deletedMsg.message;
-                const msgType = Object.keys(msg)[0];
-
-                const caption = `🗑️ *Anti-Delete Alert!*\n\n👤 *Sender:* @${senderName}\n📌 *Chat:* ${isGroup ? 'Group' : 'Private'}\n\n💬 *Restored Message:*`;
+                const msgType = Object.keys(storedMsg)[0];
+                const caption = `🗑️ *Anti-Delete Alert!*\n\n👤 *Sender:* @${senderName}\n📌 *Chat:* ${isGroupChat ? 'Group' : 'Private'}\n\n💬 *Restored Message:*`;
                 const opts = { contextInfo: { mentionedJid: [sender] } };
-                const targetJid = ownerJid;
 
-                switch (msgType) {
-                    case 'conversation':
-                        await sock.sendMessage(targetJid, { text: `${caption}\n\n${msg.conversation}`, ...opts });
-                        break;
-                    case 'extendedTextMessage':
-                        await sock.sendMessage(targetJid, { text: `${caption}\n\n${msg.extendedTextMessage.text}`, ...opts });
-                        break;
-                    case 'imageMessage': {
-                        const buffer = await downloadAsBuffer(msg.imageMessage, 'image');
-                        if (buffer) await sock.sendMessage(targetJid, { image: buffer, caption: `${caption}\n\n${msg.imageMessage.caption || ''}`, ...opts });
-                        break;
+                try {
+                    if (["conversation", "extendedTextMessage"].includes(msgType)) {
+                        const text = storedMsg.conversation || storedMsg.extendedTextMessage?.text || '';
+                        await sock.sendMessage(ownerJid, { text: `${caption}\n\n${text}`, ...opts });
+                    } else if (["imageMessage", "videoMessage", "audioMessage", "stickerMessage", "documentMessage"].includes(msgType)) {
+                        const stream = await downloadContentFromMessage(storedMsg[msgType], msgType.replace("Message", ""));
+                        let buffer = Buffer.from([]);
+                        for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
+                        const field = msgType.replace("Message", "");
+                        const payload = { [field]: buffer, ...opts };
+                        if (storedMsg[msgType]?.caption) payload.caption = `${caption}\n\n${storedMsg[msgType].caption}`;
+                        else payload.caption = caption;
+                        await sock.sendMessage(ownerJid, payload);
+                    } else {
+                        await sock.sendMessage(ownerJid, { text: `${caption}\n\n[${msgType}]`, ...opts });
                     }
-                    case 'videoMessage': {
-                        const buffer = await downloadAsBuffer(msg.videoMessage, 'video');
-                        if (buffer) await sock.sendMessage(targetJid, { video: buffer, caption: `${caption}\n\n${msg.videoMessage.caption || ''}`, ...opts });
-                        break;
-                    }
-                    case 'documentMessage': {
-                        const buffer = await downloadAsBuffer(msg.documentMessage, 'document');
-                        if (buffer) await sock.sendMessage(targetJid, {
-                            document: buffer,
-                            mimetype: msg.documentMessage.mimetype,
-                            fileName: msg.documentMessage.fileName || 'Restored-File',
-                            caption,
-                            ...opts
-                        });
-                        break;
-                    }
-                    default:
-                        await sock.sendMessage(targetJid, { text: `${caption}\n\n[Unsupported Message Type: ${msgType}]`, ...opts });
-                        break;
+                    logMessage('SUCCESS', `Restored deleted message from ${senderName}`);
+                } catch (err) {
+                    logMessage('ERROR', `Delete recovery failed: ${err.message}`);
                 }
-
-                logMessage('SUCCESS', `Restored deleted message from ${senderName}`);
             }
         } catch (err) {
             logMessage('ERROR', `Anti-Delete Error: ${err.stack || err.message}`);
