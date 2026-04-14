@@ -7,4 +7,6 @@ temp/
 .env
 .replit
 replit.nix
+data/lid-phone-cache.json
+data/push-names.json
 .local/

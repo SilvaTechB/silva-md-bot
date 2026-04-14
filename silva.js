@@ -197,7 +197,14 @@ function loadPlugins() {
             logMessage('ERROR', `Failed loading plugin ${file}: ${err.message}`);
         }
     }
-    logMessage('INFO', `✅ Loaded ${plugins.size} plugins`);
+    let totalCmds = 0;
+    for (const [, p] of plugins) {
+        const mods = Array.isArray(p) ? p : [p];
+        for (const m of mods) {
+            if (m && m.commands) totalCmds += m.commands.length;
+        }
+    }
+    logMessage('INFO', `✅ Loaded ${plugins.size} plugin files (${totalCmds} commands)`);
 }
 loadPlugins();
 
@@ -292,7 +299,7 @@ async function sendWelcomeMessage(sock) {
         `*${config.BOT_NAME}* is online ⚡`,
         ``,
         `▸ Prefix: \`${prefix}\``,
-        `▸ Plugins: ${plugins.size} loaded`,
+        `▸ Plugins: ${plugins.size} files | ${(() => { let c=0; for(const [,p] of plugins){ const ms=Array.isArray(p)?p:[p]; for(const m of ms){ if(m&&m.commands) c+=m.commands.length; } } return c; })()} commands`,
         `▸ Mode: ${config.MODE}`,
         `▸ Time: ${now}`,
         ``,
@@ -385,6 +392,47 @@ async function connectToWhatsApp() {
     // On fully LID-migrated accounts the contact id IS the LID — no phone JID is provided.
     // We keep a map in case partial data arrives via messaging-history.set on other accounts.
     if (!global.lidJidMap) global.lidJidMap = new Map();
+    if (!global.lidPhoneCache) global.lidPhoneCache = new Map();
+    if (!global.pushNameCache) global.pushNameCache = new Map();
+    let _globalLidMapping;
+    try { ({ globalLidMapping: _globalLidMapping } = require('@whiskeysockets/baileys/lib/Utils/lid-mapping')); } catch {}
+
+    const CACHE_DIR_EARLY = path.join(__dirname, 'data');
+    const LID_CACHE_EARLY = path.join(CACHE_DIR_EARLY, 'lid-phone-cache.json');
+    const NAME_CACHE_EARLY = path.join(CACHE_DIR_EARLY, 'push-names.json');
+    try {
+        if (fs.existsSync(LID_CACHE_EARLY)) {
+            const raw = JSON.parse(fs.readFileSync(LID_CACHE_EARLY, 'utf8'));
+            for (const [lid, phone] of Object.entries(raw)) {
+                global.lidPhoneCache.set(lid, phone);
+                if (_globalLidMapping) _globalLidMapping.set(lid.endsWith('@lid') ? lid : lid + '@lid', phone.endsWith('@s.whatsapp.net') ? phone : phone + '@s.whatsapp.net');
+            }
+            logMessage('INFO', `[Cache] Early-loaded ${Object.keys(raw).length} LID→phone mappings`);
+        }
+    } catch {}
+    try {
+        if (fs.existsSync(NAME_CACHE_EARLY)) {
+            const raw = JSON.parse(fs.readFileSync(NAME_CACHE_EARLY, 'utf8'));
+            for (const [jid, name] of Object.entries(raw)) global.pushNameCache.set(jid, name);
+            logMessage('INFO', `[Cache] Early-loaded ${Object.keys(raw).length} push names`);
+        }
+    } catch {}
+
+    let _cacheTimerEarly = null;
+    function scheduleCacheSave() {
+        if (_cacheTimerEarly) return;
+        _cacheTimerEarly = setTimeout(() => {
+            _cacheTimerEarly = null;
+            try {
+                fs.mkdirSync(CACHE_DIR_EARLY, { recursive: true });
+                const lidObj = {}; global.lidPhoneCache.forEach((v, k) => { lidObj[k] = v; });
+                fs.writeFileSync(LID_CACHE_EARLY, JSON.stringify(lidObj));
+                const nameObj = {}; global.pushNameCache.forEach((v, k) => { nameObj[k] = v; });
+                fs.writeFileSync(NAME_CACHE_EARLY, JSON.stringify(nameObj));
+            } catch {}
+        }, 30000);
+    }
+
     const trackContacts = (contacts, source) => {
         let mapped = 0;
         for (const c of contacts) {
@@ -392,11 +440,25 @@ async function connectToWhatsApp() {
             const jid = c.id;
             if (lid && jid && lid.endsWith('@lid') && jid.includes('@s.whatsapp.net')) {
                 global.lidJidMap.set(lid, jid);
+                if (_globalLidMapping) _globalLidMapping.set(lid, jid);
+                const normLid = lid.split(':')[0].split('@')[0];
+                const phone = jid.split('@')[0].replace(/:/g, '').replace(/\D/g, '');
+                if (normLid && phone && phone.length >= 7) {
+                    global.lidPhoneCache.set(normLid, phone);
+                    global.lidPhoneCache.set(normLid + '@lid', phone);
+                    global.lidPhoneCache.set(lid, phone);
+                }
                 mapped++;
+            }
+            if (c.name || c.notify || c.pushName || c.verifiedName) {
+                const name = c.name || c.notify || c.pushName || c.verifiedName;
+                if (jid) { global.pushNameCache.set(jid, name); }
+                if (lid) { global.pushNameCache.set(lid, name); const n = lid.split(':')[0] + '@lid'; global.pushNameCache.set(n, name); }
             }
         }
         if (contacts.length > 0 && mapped > 0) {
             logMessage('INFO', `[LID] ${source}: mapped ${mapped}/${contacts.length} LID→JID (total: ${global.lidJidMap.size})`);
+            scheduleCacheSave();
         }
     };
     sock.ev.on('contacts.upsert', (c) => trackContacts(c, 'contacts.upsert'));
@@ -719,6 +781,28 @@ async function connectToWhatsApp() {
         return { inner, msgType };
     }
 
+    function cacheLidPhone(lid, phone) {
+        if (!lid || !phone) return;
+        const normLid = lid.split(':')[0].split('@')[0];
+        const normPhone = phone.split('@')[0].replace(/:/g, '').replace(/\D/g, '');
+        if (!normLid || !normPhone || normPhone.length < 7) return;
+        global.lidPhoneCache.set(normLid, normPhone);
+        global.lidPhoneCache.set(normLid + '@lid', normPhone);
+        if (_globalLidMapping) _globalLidMapping.set(normLid + '@lid', normPhone + '@s.whatsapp.net');
+        scheduleCacheSave();
+    }
+
+    function cachePushName(jid, name) {
+        if (!jid || !name) return;
+        global.pushNameCache.set(jid, name);
+        const norm = jid.split(':')[0];
+        if (norm !== jid) {
+            if (jid.includes('@lid')) global.pushNameCache.set(norm + '@lid', name);
+            else if (jid.includes('@s.whatsapp.net')) global.pushNameCache.set(norm + '@s.whatsapp.net', name);
+        }
+        scheduleCacheSave();
+    }
+
     // === ONE consolidated messages.upsert handler for statuses, newsletters and commands ===
     sock.ev.on('messages.upsert', async ({ messages, type }) => {
         try {
@@ -726,6 +810,28 @@ async function connectToWhatsApp() {
 
             for (const m of messages) {
                 const remoteJid = m.key?.remoteJid || '';
+
+                if (m.pushName) {
+                    if (m.key?.participant) {
+                        cachePushName(m.key.participant, m.pushName);
+                        if (m.key.participantPn) {
+                            cachePushName(m.key.participantPn, m.pushName);
+                            cacheLidPhone(m.key.participant, m.key.participantPn);
+                        }
+                    } else if (remoteJid) {
+                        cachePushName(remoteJid, m.pushName);
+                        if (m.key?.senderPn) {
+                            cachePushName(m.key.senderPn, m.pushName);
+                            cacheLidPhone(remoteJid, m.key.senderPn);
+                        }
+                    }
+                }
+                if (m.key?.participant && m.key?.participantPn) {
+                    cacheLidPhone(m.key.participant, m.key.participantPn);
+                }
+                if (m.key?.senderLid && m.key?.senderPn) {
+                    cacheLidPhone(m.key.senderLid, m.key.senderPn);
+                }
 
                 // RAW diagnostic — confirms statuses enter the loop at all
                 console.log('[DEBUG upsert]', type, remoteJid, '| fromMe:', m.key?.fromMe, '| participant:', m.key?.participant);
