@@ -418,20 +418,33 @@ async function connectToWhatsApp() {
         }
     } catch {}
 
+    function atomicWriteJson(filePath, data) {
+        const tmp = filePath + '.tmp';
+        fs.writeFileSync(tmp, JSON.stringify(data));
+        fs.renameSync(tmp, filePath);
+    }
+
+    function flushCachesToDisk() {
+        try {
+            fs.mkdirSync(CACHE_DIR_EARLY, { recursive: true });
+            const lidObj = {}; global.lidPhoneCache.forEach((v, k) => { lidObj[k] = v; });
+            atomicWriteJson(LID_CACHE_EARLY, lidObj);
+            const nameObj = {}; global.pushNameCache.forEach((v, k) => { nameObj[k] = v; });
+            atomicWriteJson(NAME_CACHE_EARLY, nameObj);
+        } catch (e) { logMessage('WARN', `[Cache] flush error: ${e.message}`); }
+    }
+
     let _cacheTimerEarly = null;
     function scheduleCacheSave() {
         if (_cacheTimerEarly) return;
         _cacheTimerEarly = setTimeout(() => {
             _cacheTimerEarly = null;
-            try {
-                fs.mkdirSync(CACHE_DIR_EARLY, { recursive: true });
-                const lidObj = {}; global.lidPhoneCache.forEach((v, k) => { lidObj[k] = v; });
-                fs.writeFileSync(LID_CACHE_EARLY, JSON.stringify(lidObj));
-                const nameObj = {}; global.pushNameCache.forEach((v, k) => { nameObj[k] = v; });
-                fs.writeFileSync(NAME_CACHE_EARLY, JSON.stringify(nameObj));
-            } catch {}
+            flushCachesToDisk();
         }, 30000);
     }
+
+    process.once('SIGINT', () => { flushCachesToDisk(); process.exit(0); });
+    process.once('SIGTERM', () => { flushCachesToDisk(); process.exit(0); });
 
     const trackContacts = (contacts, source) => {
         let mapped = 0;
@@ -453,7 +466,7 @@ async function connectToWhatsApp() {
             if (c.name || c.notify || c.pushName || c.verifiedName) {
                 const name = c.name || c.notify || c.pushName || c.verifiedName;
                 if (jid) { global.pushNameCache.set(jid, name); }
-                if (lid) { global.pushNameCache.set(lid, name); const n = lid.split(':')[0] + '@lid'; global.pushNameCache.set(n, name); }
+                if (lid) { global.pushNameCache.set(lid, name); const n = lid.split(':')[0].split('@')[0] + '@lid'; if (n !== lid) global.pushNameCache.set(n, name); }
             }
         }
         if (contacts.length > 0 && mapped > 0) {
