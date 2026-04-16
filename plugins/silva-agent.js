@@ -148,8 +148,95 @@ function findIntent(query) {
     return null;
 }
 
+// ── Built-in smart conversation engine (no API key needed) ───────────────────
+const smartResponses = [
+    { p: /^(hi+|hello+|hey+|howdy|sup|yo+|hii+|ello)\b/i,
+      r: [`Hey! 👋 What can I do for you today?`, `Hello! 😊 How can I help you?`, `Hey there! I'm Silva, your WhatsApp assistant. What do you need? 🤖`] },
+    { p: /how (are you|r u|are u|do you do)|what('?s| is) (up|good)|wassup|wyd\b/i,
+      r: [`All systems go! ⚡ I'm here and ready to help. What do you need?`, `Running perfectly! 🤖 What can I do for you?`, `Doing great, thanks for asking! 😊 Ready to assist.`] },
+    { p: /thank(s| you|u)|thx|ty\b/i,
+      r: [`You're welcome! 😊`, `Happy to help! Anything else? 🤖`, `Anytime! That's what I'm here for. 😊`] },
+    { p: /good (morning|mornin|afternoon|evening|night)/i,
+      r: [`Good morning! ☀️ Hope you have an amazing day!`, `Hey! 😊 Hope your day is going great!`, `Good day! 🌟 What can I help you with?`] },
+    { p: /i('?m| am) bored|bored\b/i,
+      r: [`Let's fix that! 🎮 Try:\n• \`silva play <your fav song>\`\n• \`.joke\` for a laugh\n• \`.wyr\` for Would You Rather\n• \`.8ball will today be fun?\``] },
+    { p: /i (love|like|adore) you|luv u|❤️/i,
+      r: [`Aww! 🥰 I love you too (in a bot kind of way)! What can I help with?`, `That's sweet! 😊 Always here for you. What do you need?`] },
+    { p: /you('?re| are) (great|amazing|awesome|the best|good|nice|cool|smart|brilliant)/i,
+      r: [`Thank you so much! 😊 You're amazing too! What can I do for you?`, `Aww thanks! 🥰 Just doing my job. How can I help?`] },
+    { p: /you (suck|('re|are) (bad|terrible|useless|stupid|trash))/i,
+      r: [`That hurts 😢 but I'll try to do better! Let me know what went wrong.`, `I'm always improving! 🤖 Tell me what I can do better.`] },
+    { p: /what('?s| is) your name|your name\b|who are you\b/i,
+      r: [`I'm *Silva* 🤖 — your intelligent WhatsApp assistant! Built on ${BOT_IDENTITY.name} v${BOT_IDENTITY.version}.`] },
+    { p: /what can you do|your (capabilities|powers|features|abilities)\b/i,
+      r: [`I can: 🎵 play music, 📸 make stickers, ⬇️ download from TikTok/Instagram/YouTube, 🌤️ check weather, 📚 search Wikipedia, 🌐 translate text, 👥 manage groups, and 1400+ commands! Type \`silva help\` to see everything.`] },
+    { p: /what time is it|current time|time now\b/i,
+      fn: () => `🕐 Current time: *${new Date().toLocaleTimeString('en-US', { timeZone: config.TIMEZONE || 'Africa/Nairobi', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}*` },
+    { p: /what('?s| is) today|what day|current date\b/i,
+      fn: () => `📅 Today is *${new Date().toLocaleDateString('en-US', { timeZone: config.TIMEZONE || 'Africa/Nairobi', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}*` },
+    { p: /are you (a bot|ai|robot|human|real)\??/i,
+      r: [`I'm an AI-powered WhatsApp bot 🤖 — not human, but I try to be as helpful as one! Created by ${BOT_IDENTITY.developer}.`] },
+    { p: /(\d+)\s*[\+\-\*\/\%\^]\s*(\d+)/,
+      r: null }, // handled by calc
+    { p: /ok(ay)?|alright|got it|understood|cool\b/i,
+      r: [`👍 Great! Anything else I can help with?`, `Got it! Let me know if you need anything else. 😊`] },
+    { p: /bye|goodbye|see you|cya|ttyl|later\b/i,
+      r: [`Goodbye! 👋 Come back anytime!`, `See you later! 😊 Take care!`, `Bye! 👋 I'll be here when you need me!`] },
+    { p: /help\b/i,
+      r: [`Type \`silva\` (no prefix needed) to see everything I can do! Or try:\n• \`silva play <song name>\`\n• \`silva weather <city>\`\n• \`silva wiki <topic>\`\n• \`silva sticker\` (reply to a photo)`] },
+];
+
+function getSmartResponse(query) {
+    for (const sr of smartResponses) {
+        if (!sr.p.test(query)) continue;
+        if (sr.fn) return sr.fn();
+        if (sr.r) return sr.r[Math.floor(Math.random() * sr.r.length)];
+    }
+    return null;
+}
+
+// ── Free AI APIs (no key required) ───────────────────────────────────────────
+async function askFreeAI(query) {
+    const apis = [
+        async () => {
+            const res = await axios.get(`https://api.paxsenix.biz.id/ai/gpt4o?text=${encodeURIComponent(query)}`, { timeout: 12000 });
+            return res.data?.message || res.data?.result || null;
+        },
+        async () => {
+            const res = await axios.get(`https://api.siputzx.my.id/api/ai/deepseek-r1?content=${encodeURIComponent(query)}`, { timeout: 12000 });
+            return res.data?.data || null;
+        },
+        async () => {
+            const res = await axios.get(`https://api.popcat.xyz/chatbot?msg=${encodeURIComponent(query)}&owner=${encodeURIComponent(config.OWNER_NAME || 'Silva')}&botname=Silva`, { timeout: 8000 });
+            return res.data?.response || null;
+        },
+    ];
+    for (const fn of apis) {
+        try { const r = await fn(); if (r) return String(r).trim(); } catch { /* next */ }
+    }
+    return null;
+}
+
 const agentActions = {
     run_command: /^(run|execute|do|use|try|open)\s+(\.?\w+)/i,
+    // ── Group management (natural language) ──────────────────────────────────
+    group_rename:  /(change|rename|set|update)\s+(the\s+)?(group\s+)?(name|title|subject)\s*(to\s+)?/i,
+    group_desc:    /(change|set|update)\s+(the\s+)?(group\s+)?(desc(ription)?|bio|about|info)\s*(to\s+)?/i,
+    group_mute:    /\b(mute|silence)\s+(the\s+)?group\b/i,
+    group_unmute:  /\b(unmute|unsilence)\s+(the\s+)?group\b|(open|enable)\s+(group\s+)?chat\b/i,
+    group_lock:    /\block\s+(the\s+)?(group|chat)\b/i,
+    group_unlock:  /\bunlock\s+(the\s+)?(group|chat)\b/i,
+    group_link:    /(get|show|send|give)\s+(me\s+)?(the\s+)?group\s+(link|invite|url)/i,
+    group_revoke:  /(revoke|reset|change)\s+(the\s+)?group\s+(link|invite)/i,
+    group_kick:    /\b(kick|remove|boot)\s+/i,
+    group_add:     /\badd\s+(\+?\d|\@)/i,
+    group_promote: /\b(promote|make)\s+.*(admin)\b|\bpromo\b/i,
+    group_demote:  /\b(demote|remove)\s+.*(admin)\b/i,
+    group_warn:    /\bwarn\s+/i,
+    group_tag:     /\b(tag|mention|notify)\s+(all|everyone|members|group)\b/i,
+    group_admins:  /\b(list|show|who are)\s+(the\s+)?admins?\b/i,
+    group_info:    /\b(group\s+info|groupinfo|about\s+this\s+group)\b/i,
+    // ─────────────────────────────────────────────────────────────────────────
     create_group_desc: /create\s+(a\s+)?(group\s+)?desc(ription)?/i,
     create_bio: /create\s+(a\s+)?(bio|about|profile\s*(text|desc))/i,
     create_welcome: /create\s+(a\s+)?welcome\s*(msg|message)?/i,
@@ -751,6 +838,15 @@ module.exports = {
                 `• Poems • Stories • Songs • Raps\n` +
                 `• Jokes • Quotes • Captions\n` +
                 `• Letters • Emails • Essays\n\n` +
+                `👥 *Group Management*\n` +
+                `• "silva change group name to X"\n` +
+                `• "silva set group description to X"\n` +
+                `• "silva mute/unmute group"\n` +
+                `• "silva lock/unlock group"\n` +
+                `• "silva get group link"\n` +
+                `• "silva tag all members"\n` +
+                `• "silva list admins"\n` +
+                `• "silva kick/add/promote/demote"\n\n` +
                 `🌐 *Web Access*\n` +
                 `• Search • News • Weather • IP lookup\n\n` +
                 `ℹ️ *Bot Knowledge*\n` +
@@ -762,6 +858,188 @@ module.exports = {
                 `🧠 *AI Chat*\n` +
                 `• Ask anything — powered by AI\n\n` +
                 `_Platform: ${BOT_IDENTITY.platform} | ${BOT_IDENTITY.language} ${process.version}_`;
+
+        // ── Group management handlers (natural language → plugin) ────────────
+        } else if (agentActions.group_rename.test(query)) {
+            if (!ctx.isGroup) return reply(`⚠️ This command only works in a group.`);
+            if (!isAdmin && !isOwner) return reply(`⛔ You need admin permission to rename the group.`);
+            const newName = query.replace(agentActions.group_rename, '').trim();
+            if (!newName) return reply(`❓ What should I rename the group to?\n\nExample: _silva change group name to Study Squad_`);
+            await safeSend({ text: `✏️ Renaming group to *"${newName}"*...` }, { quoted: message });
+            const pm = pluginMap();
+            const plugin = pm.get('groupname') || pm.get('setname');
+            if (plugin) { try { await plugin.run(sock, message, [newName], ctx); } catch (e) { return reply(`❌ Failed: ${e.message}`); } }
+            else {
+                try { await sock.groupUpdateSubject(ctx.from, newName); reply(`✅ Group name changed to *"${newName}"*!`); }
+                catch (e) { reply(`❌ Failed to rename group: ${e.message}`); }
+            }
+            return;
+
+        } else if (agentActions.group_desc.test(query)) {
+            if (!ctx.isGroup) return reply(`⚠️ This command only works in a group.`);
+            if (!isAdmin && !isOwner) return reply(`⛔ You need admin permission to update the description.`);
+            const newDesc = query.replace(agentActions.group_desc, '').trim();
+            if (!newDesc) return reply(`❓ What should the group description say?\n\nExample: _silva set group description to Welcome to our group!_`);
+            await safeSend({ text: `📝 Updating group description...` }, { quoted: message });
+            const pm = pluginMap();
+            const plugin = pm.get('setdesc') || pm.get('groupdesc') || pm.get('setdescription');
+            if (plugin) { try { await plugin.run(sock, message, [newDesc], ctx); } catch (e) { reply(`❌ Failed: ${e.message}`); } }
+            else {
+                try { await sock.groupUpdateDescription(ctx.from, newDesc); reply(`✅ Group description updated!`); }
+                catch (e) { reply(`❌ Failed: ${e.message}`); }
+            }
+            return;
+
+        } else if (agentActions.group_mute.test(query)) {
+            if (!ctx.isGroup) return reply(`⚠️ This command only works in a group.`);
+            if (!isAdmin && !isOwner) return reply(`⛔ Admin permission required.`);
+            const pm = pluginMap();
+            const plugin = pm.get('mute');
+            if (plugin) { try { await plugin.run(sock, message, [], ctx); } catch (e) { reply(`❌ Failed: ${e.message}`); } }
+            else {
+                try { await sock.groupSettingUpdate(ctx.from, 'announcement'); reply(`🔇 Group has been *muted* — only admins can send messages.`); }
+                catch (e) { reply(`❌ Failed: ${e.message}`); }
+            }
+            return;
+
+        } else if (agentActions.group_unmute.test(query)) {
+            if (!ctx.isGroup) return reply(`⚠️ This command only works in a group.`);
+            if (!isAdmin && !isOwner) return reply(`⛔ Admin permission required.`);
+            const pm = pluginMap();
+            const plugin = pm.get('unmute') || pm.get('open');
+            if (plugin) { try { await plugin.run(sock, message, [], ctx); } catch (e) { reply(`❌ Failed: ${e.message}`); } }
+            else {
+                try { await sock.groupSettingUpdate(ctx.from, 'not_announcement'); reply(`🔊 Group has been *unmuted* — all members can now send messages.`); }
+                catch (e) { reply(`❌ Failed: ${e.message}`); }
+            }
+            return;
+
+        } else if (agentActions.group_lock.test(query)) {
+            if (!ctx.isGroup) return reply(`⚠️ This command only works in a group.`);
+            if (!isAdmin && !isOwner) return reply(`⛔ Admin permission required.`);
+            const pm = pluginMap();
+            const plugin = pm.get('lock') || pm.get('close');
+            if (plugin) { try { await plugin.run(sock, message, [], ctx); } catch (e) { reply(`❌ Failed: ${e.message}`); } }
+            else {
+                try { await sock.groupSettingUpdate(ctx.from, 'locked'); reply(`🔒 Group settings have been *locked* — only admins can edit group info.`); }
+                catch (e) { reply(`❌ Failed: ${e.message}`); }
+            }
+            return;
+
+        } else if (agentActions.group_unlock.test(query)) {
+            if (!ctx.isGroup) return reply(`⚠️ This command only works in a group.`);
+            if (!isAdmin && !isOwner) return reply(`⛔ Admin permission required.`);
+            const pm = pluginMap();
+            const plugin = pm.get('unlock') || pm.get('open');
+            if (plugin) { try { await plugin.run(sock, message, [], ctx); } catch (e) { reply(`❌ Failed: ${e.message}`); } }
+            else {
+                try { await sock.groupSettingUpdate(ctx.from, 'unlocked'); reply(`🔓 Group settings *unlocked* — all members can edit group info.`); }
+                catch (e) { reply(`❌ Failed: ${e.message}`); }
+            }
+            return;
+
+        } else if (agentActions.group_link.test(query)) {
+            if (!ctx.isGroup) return reply(`⚠️ This command only works in a group.`);
+            if (!isAdmin && !isOwner) return reply(`⛔ Admin permission required.`);
+            const pm = pluginMap();
+            const plugin = pm.get('grouplink') || pm.get('invite');
+            if (plugin) { try { await plugin.run(sock, message, [], ctx); } catch (e) { reply(`❌ Failed: ${e.message}`); } }
+            else {
+                try { const code = await sock.groupInviteCode(ctx.from); reply(`🔗 *Group Invite Link*\n\nhttps://chat.whatsapp.com/${code}`); }
+                catch (e) { reply(`❌ Failed: ${e.message}`); }
+            }
+            return;
+
+        } else if (agentActions.group_revoke.test(query)) {
+            if (!ctx.isGroup) return reply(`⚠️ This command only works in a group.`);
+            if (!isAdmin && !isOwner) return reply(`⛔ Admin permission required.`);
+            const pm = pluginMap();
+            const plugin = pm.get('revoke');
+            if (plugin) { try { await plugin.run(sock, message, [], ctx); } catch (e) { reply(`❌ Failed: ${e.message}`); } }
+            else {
+                try { await sock.groupRevokeInvite(ctx.from); reply(`🔄 Group invite link has been *reset*. The old link no longer works.`); }
+                catch (e) { reply(`❌ Failed: ${e.message}`); }
+            }
+            return;
+
+        } else if (agentActions.group_kick.test(query)) {
+            if (!ctx.isGroup) return reply(`⚠️ This command only works in a group.`);
+            if (!isAdmin && !isOwner) return reply(`⛔ Admin permission required to kick members.`);
+            const pm = pluginMap(); const plugin = pm.get('kick');
+            if (plugin) { try { await plugin.run(sock, message, [], ctx); } catch (e) { reply(`❌ Failed: ${e.message}`); } }
+            else reply(`💡 Reply to a member's message and type: \`.kick\` to kick them.`);
+            return;
+
+        } else if (agentActions.group_add.test(query)) {
+            if (!ctx.isGroup) return reply(`⚠️ This command only works in a group.`);
+            if (!isAdmin && !isOwner) return reply(`⛔ Admin permission required.`);
+            const numMatch = query.match(/(\+?[\d]{7,15})/);
+            const pm = pluginMap(); const plugin = pm.get('add');
+            if (plugin) { try { await plugin.run(sock, message, numMatch ? [numMatch[1]] : [], ctx); } catch (e) { reply(`❌ Failed: ${e.message}`); } }
+            else reply(`💡 Use: \`.add +<phone number>\` to add a member.`);
+            return;
+
+        } else if (agentActions.group_promote.test(query)) {
+            if (!ctx.isGroup) return reply(`⚠️ This command only works in a group.`);
+            if (!isAdmin && !isOwner) return reply(`⛔ Admin permission required.`);
+            const pm = pluginMap(); const plugin = pm.get('promote');
+            if (plugin) { try { await plugin.run(sock, message, [], ctx); } catch (e) { reply(`❌ Failed: ${e.message}`); } }
+            else reply(`💡 Reply to a member's message and type: \`.promote\``);
+            return;
+
+        } else if (agentActions.group_demote.test(query)) {
+            if (!ctx.isGroup) return reply(`⚠️ This command only works in a group.`);
+            if (!isAdmin && !isOwner) return reply(`⛔ Admin permission required.`);
+            const pm = pluginMap(); const plugin = pm.get('demote');
+            if (plugin) { try { await plugin.run(sock, message, [], ctx); } catch (e) { reply(`❌ Failed: ${e.message}`); } }
+            else reply(`💡 Reply to a member's message and type: \`.demote\``);
+            return;
+
+        } else if (agentActions.group_warn.test(query)) {
+            if (!ctx.isGroup) return reply(`⚠️ This command only works in a group.`);
+            if (!isAdmin && !isOwner) return reply(`⛔ Admin permission required.`);
+            const pm = pluginMap(); const plugin = pm.get('warn');
+            if (plugin) { try { await plugin.run(sock, message, [], ctx); } catch (e) { reply(`❌ Failed: ${e.message}`); } }
+            else reply(`💡 Reply to a member's message and type: \`.warn\``);
+            return;
+
+        } else if (agentActions.group_tag.test(query)) {
+            if (!ctx.isGroup) return reply(`⚠️ This command only works in a group.`);
+            const pm = pluginMap(); const plugin = pm.get('tagall') || pm.get('everyone') || pm.get('hidetag');
+            if (plugin) { try { await plugin.run(sock, message, [], ctx); } catch (e) { reply(`❌ Failed: ${e.message}`); } }
+            else reply(`💡 Use: \`.tagall\` to mention all members.`);
+            return;
+
+        } else if (agentActions.group_admins.test(query)) {
+            if (!ctx.isGroup) return reply(`⚠️ This command only works in a group.`);
+            const pm = pluginMap(); const plugin = pm.get('admins') || pm.get('adminlist');
+            if (plugin) { try { await plugin.run(sock, message, [], ctx); } catch (e) { reply(`❌ Failed: ${e.message}`); } }
+            else {
+                try {
+                    const meta = ctx.groupMetadata || await sock.groupMetadata(ctx.from);
+                    const admins = meta.participants.filter(p => p.admin).map((p, i) => `${i + 1}. @${p.id.split('@')[0]}`);
+                    await sock.sendMessage(ctx.from, { text: `👑 *Group Admins (${admins.length})*\n\n${admins.join('\n')}`, mentions: meta.participants.filter(p => p.admin).map(p => p.id) }, { quoted: message });
+                } catch (e) { reply(`❌ Failed: ${e.message}`); }
+            }
+            return;
+
+        } else if (agentActions.group_info.test(query)) {
+            if (!ctx.isGroup) return reply(`⚠️ This command only works in a group.`);
+            try {
+                const meta = ctx.groupMetadata || await sock.groupMetadata(ctx.from);
+                const admins = meta.participants.filter(p => p.admin).length;
+                reply(
+                    `👥 *Group Info*\n\n` +
+                    `📛 *Name:* ${meta.subject}\n` +
+                    `🆔 *ID:* ${ctx.from}\n` +
+                    `👤 *Members:* ${meta.participants.length}\n` +
+                    `👑 *Admins:* ${admins}\n` +
+                    `📝 *Description:* ${meta.desc || '_(none)_'}\n` +
+                    `📅 *Created:* ${meta.creation ? new Date(meta.creation * 1000).toLocaleDateString() : 'Unknown'}`
+                );
+            } catch (e) { reply(`❌ Could not fetch group info: ${e.message}`); }
+            return;
+
         } else {
             // ── Natural language intent detection ────────────────────────────
             // Understands phrases like "play u me luv", "sticker", "translate hello"
@@ -806,41 +1084,52 @@ module.exports = {
                 }
             }
 
-            try {
-                const { GoogleGenerativeAI } = require('@google/generative-ai');
-                const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_KEY || '';
-                if (apiKey) {
-                    const genAI = new GoogleGenerativeAI(apiKey);
-                    const model = genAI.getGenerativeModel({
-                        model: 'gemini-1.5-flash',
-                        generationConfig: {
-                            temperature: 0.85,
-                            maxOutputTokens: 800,
-                        },
-                    });
-                    const systemPrompt =
-                        `You are Silva, an intelligent WhatsApp bot assistant built on ${BOT_IDENTITY.name} v${BOT_IDENTITY.version}. ` +
-                        `You were created by ${BOT_IDENTITY.developer}. The bot owner is ${config.OWNER_NAME}. ` +
-                        `You run on ${BOT_IDENTITY.platform} using ${BOT_IDENTITY.language} and the ${BOT_IDENTITY.library} library. ` +
-                        `You have ${pluginMap().size}+ commands and ${BOT_IDENTITY.features.length} smart features. ` +
-                        `Your website is ${BOT_IDENTITY.website}. ` +
-                        `Be concise, friendly, warm, and genuinely helpful. ` +
-                        `Format responses for WhatsApp: use *bold* for emphasis, avoid markdown headers (#), keep replies under 400 words unless asked for more.`;
-                    const chat = model.startChat({
-                        history: [{ role: 'user', parts: [{ text: systemPrompt }] }, { role: 'model', parts: [{ text: `Got it! I'm Silva, ready to help.` }] }],
-                    });
-                    const result = await chat.sendMessage(query);
-                    response = `🤖 *Silva*\n\n${result.response.text()}`;
-                } else {
+            // ── 1. Built-in smart response (instant, no API) ─────────────────
+            const smart = getSmartResponse(query);
+            if (smart) {
+                response = `🤖 *Silva*\n\n${smart}`;
+            } else {
+                // ── 2. Free AI APIs (no key required) ────────────────────────
+                let aiReply = await askFreeAI(query);
+                if (!aiReply) {
+                    // ── 3. Gemini (bonus — only if key is set) ───────────────
                     try {
-                        const res = await axios.get(`https://api.popcat.xyz/chatbot?msg=${encodeURIComponent(query)}&owner=Silva+MD&botname=Silva`, { timeout: 10000 });
-                        response = `🤖 *Silva*\n\n${res.data?.response || 'I understood your request. Type .silva help to see what I can do!'}`;
-                    } catch {
-                        response = `🤖 *Silva*\n\nI received: "${query}"\n\n_For full AI responses, set a GEMINI_API_KEY. Try .silva help to see all capabilities._`;
-                    }
+                        const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_KEY || '';
+                        if (apiKey) {
+                            const { GoogleGenerativeAI } = require('@google/generative-ai');
+                            const genAI = new GoogleGenerativeAI(apiKey);
+                            const model = genAI.getGenerativeModel({
+                                model: 'gemini-1.5-flash',
+                                generationConfig: { temperature: 0.85, maxOutputTokens: 800 },
+                            });
+                            const systemPrompt =
+                                `You are Silva, an intelligent WhatsApp bot assistant built on ${BOT_IDENTITY.name} v${BOT_IDENTITY.version}. ` +
+                                `You were created by ${BOT_IDENTITY.developer}. The bot owner is ${config.OWNER_NAME}. ` +
+                                `Be concise, friendly, and helpful. Format for WhatsApp: use *bold*, avoid markdown headers.`;
+                            const chat = model.startChat({
+                                history: [
+                                    { role: 'user', parts: [{ text: systemPrompt }] },
+                                    { role: 'model', parts: [{ text: `Got it! I'm Silva, ready to help.` }] },
+                                ],
+                            });
+                            const result = await chat.sendMessage(query);
+                            aiReply = result.response.text();
+                        }
+                    } catch { /* Gemini unavailable, continue */ }
                 }
-            } catch (err) {
-                response = `🤖 *Silva*\n\nSorry, I ran into an issue: ${err.message?.slice(0, 80) || 'unknown error'}.\n\n_Try asking about time, math, jokes, or type .silva help for capabilities._`;
+                if (aiReply) {
+                    response = `🤖 *Silva*\n\n${aiReply}`;
+                } else {
+                    response =
+                        `🤖 *Silva*\n\n` +
+                        `I'm not sure how to help with that right now. Here are some things I *can* do:\n\n` +
+                        `🎵 \`silva play <song>\` — play music\n` +
+                        `🌤️ \`silva weather <city>\` — weather\n` +
+                        `📚 \`silva wiki <topic>\` — Wikipedia\n` +
+                        `🌐 \`silva translate <text>\` — translate\n` +
+                        `👥 \`silva change group name to X\` — rename group\n` +
+                        `📋 \`silva help\` — see all ${pluginMap().size}+ commands`;
+                }
             }
         }
 
