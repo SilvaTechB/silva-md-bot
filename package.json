@@ -78,6 +78,7 @@
     "formdata-node": "^5.0.1",
     "fs": "*",
     "g-i-s": "^2.1.7",
+    "gifted-baileys": "^2.5.8",
     "gifted-btns": "^1.0.2",
     "google-it": "^1.6.4",
     "got": "^14.6.6",
