@@ -39,21 +39,30 @@ const BOT_IDENTITY = {
 };
 
 function getPluginMap() {
-    const dir = path.join(__dirname);
     const map = new Map();
-    for (const f of fs.readdirSync(dir).filter(f => f.endsWith('.js'))) {
-        try {
-            const p = require(path.join(dir, f));
+    try {
+        // Use the same plugin list handler.js loaded — guaranteed same instances
+        const { plugins } = require('../handler');
+        for (const p of plugins) {
             if (Array.isArray(p.commands) && typeof p.run === 'function') {
                 for (const cmd of p.commands) {
                     if (!map.has(cmd)) map.set(cmd, p);
                 }
-            } else if (Array.isArray(p)) {
-                for (const entry of p) {
-                    if (Array.isArray(entry.commands) && typeof entry.run === 'function') {
-                        for (const cmd of entry.commands) {
-                            if (!map.has(cmd)) map.set(cmd, entry);
-                        }
+            }
+        }
+        if (map.size > 0) return map;
+    } catch { /* fallback below */ }
+
+    // Fallback: scan plugins directory directly
+    const dir = path.join(__dirname);
+    for (const f of fs.readdirSync(dir).filter(f => f.endsWith('.js'))) {
+        try {
+            const p = require(path.join(dir, f));
+            const mods = Array.isArray(p) ? p : [p];
+            for (const mod of mods) {
+                if (Array.isArray(mod?.commands) && typeof mod.run === 'function') {
+                    for (const cmd of mod.commands) {
+                        if (!map.has(cmd)) map.set(cmd, mod);
                     }
                 }
             }
@@ -62,10 +71,8 @@ function getPluginMap() {
     return map;
 }
 
-let cachedPluginMap = null;
 function pluginMap() {
-    if (!cachedPluginMap) cachedPluginMap = getPluginMap();
-    return cachedPluginMap;
+    return getPluginMap();
 }
 
 function formatUptime() {
@@ -285,7 +292,7 @@ module.exports = {
     description: 'Silva - AI assistant that runs commands, creates content, searches the web, and knows everything about the bot',
     permission: 'public',
     run: async (sock, message, args, ctx) => {
-        const { jid, reply, safeSend, isOwner, isGroup, isAdmin } = ctx;
+        const { jid, reply, safeSend, isOwner, isGroup, isAdmin, isBotAdmin } = ctx;
         const query = args.join(' ').trim();
         if (!query) return reply(
             `🤖 *Silva*\n\n` +
@@ -859,181 +866,190 @@ module.exports = {
                 `• Ask anything — powered by AI\n\n` +
                 `_Platform: ${BOT_IDENTITY.platform} | ${BOT_IDENTITY.language} ${process.version}_`;
 
-        // ── Group management handlers (natural language → plugin) ────────────
+        // ── Group management handlers (direct Baileys API calls) ─────────────
+        // These call the WhatsApp API directly so they always work regardless
+        // of how the message was triggered (no rawCmd detection issues).
         } else if (agentActions.group_rename.test(query)) {
-            if (!ctx.isGroup) return reply(`⚠️ This command only works in a group.`);
+            if (!isGroup) return reply(`⚠️ This command only works in a group.`);
             if (!isAdmin && !isOwner) return reply(`⛔ You need admin permission to rename the group.`);
+            if (!isBotAdmin) return reply(`⛔ I need to be an admin to rename the group. Please promote me first.`);
             const newName = query.replace(agentActions.group_rename, '').trim();
             if (!newName) return reply(`❓ What should I rename the group to?\n\nExample: _silva change group name to Study Squad_`);
-            await safeSend({ text: `✏️ Renaming group to *"${newName}"*...` }, { quoted: message });
-            const pm = pluginMap();
-            const plugin = pm.get('groupname') || pm.get('setname');
-            if (plugin) { try { await plugin.run(sock, message, [newName], ctx); } catch (e) { return reply(`❌ Failed: ${e.message}`); } }
-            else {
-                try { await sock.groupUpdateSubject(ctx.from, newName); reply(`✅ Group name changed to *"${newName}"*!`); }
-                catch (e) { reply(`❌ Failed to rename group: ${e.message}`); }
-            }
+            if (newName.length > 100) return reply(`❌ Group name cannot exceed 100 characters.`);
+            try {
+                await sock.groupUpdateSubject(jid, newName);
+                reply(`✅ Group name changed to *"${newName}"*!`);
+            } catch (e) { reply(`❌ Failed: ${e.message}`); }
             return;
 
         } else if (agentActions.group_desc.test(query)) {
-            if (!ctx.isGroup) return reply(`⚠️ This command only works in a group.`);
+            if (!isGroup) return reply(`⚠️ This command only works in a group.`);
             if (!isAdmin && !isOwner) return reply(`⛔ You need admin permission to update the description.`);
+            if (!isBotAdmin) return reply(`⛔ I need to be an admin to update the description. Please promote me first.`);
             const newDesc = query.replace(agentActions.group_desc, '').trim();
             if (!newDesc) return reply(`❓ What should the group description say?\n\nExample: _silva set group description to Welcome to our group!_`);
-            await safeSend({ text: `📝 Updating group description...` }, { quoted: message });
-            const pm = pluginMap();
-            const plugin = pm.get('setdesc') || pm.get('groupdesc') || pm.get('setdescription');
-            if (plugin) { try { await plugin.run(sock, message, [newDesc], ctx); } catch (e) { reply(`❌ Failed: ${e.message}`); } }
-            else {
-                try { await sock.groupUpdateDescription(ctx.from, newDesc); reply(`✅ Group description updated!`); }
-                catch (e) { reply(`❌ Failed: ${e.message}`); }
-            }
+            if (newDesc.length > 512) return reply(`❌ Description cannot exceed 512 characters.`);
+            try {
+                await sock.groupUpdateDescription(jid, newDesc);
+                reply(`✅ Group description updated!`);
+            } catch (e) { reply(`❌ Failed: ${e.message}`); }
             return;
 
         } else if (agentActions.group_mute.test(query)) {
-            if (!ctx.isGroup) return reply(`⚠️ This command only works in a group.`);
+            if (!isGroup) return reply(`⚠️ This command only works in a group.`);
             if (!isAdmin && !isOwner) return reply(`⛔ Admin permission required.`);
-            const pm = pluginMap();
-            const plugin = pm.get('mute');
-            if (plugin) { try { await plugin.run(sock, message, [], ctx); } catch (e) { reply(`❌ Failed: ${e.message}`); } }
-            else {
-                try { await sock.groupSettingUpdate(ctx.from, 'announcement'); reply(`🔇 Group has been *muted* — only admins can send messages.`); }
-                catch (e) { reply(`❌ Failed: ${e.message}`); }
-            }
+            if (!isBotAdmin) return reply(`⛔ I need to be an admin to mute the group.`);
+            try {
+                await sock.groupSettingUpdate(jid, 'announcement');
+                reply(`🔇 Group *muted* — only admins can send messages.`);
+            } catch (e) { reply(`❌ Failed: ${e.message}`); }
             return;
 
         } else if (agentActions.group_unmute.test(query)) {
-            if (!ctx.isGroup) return reply(`⚠️ This command only works in a group.`);
+            if (!isGroup) return reply(`⚠️ This command only works in a group.`);
             if (!isAdmin && !isOwner) return reply(`⛔ Admin permission required.`);
-            const pm = pluginMap();
-            const plugin = pm.get('unmute') || pm.get('open');
-            if (plugin) { try { await plugin.run(sock, message, [], ctx); } catch (e) { reply(`❌ Failed: ${e.message}`); } }
-            else {
-                try { await sock.groupSettingUpdate(ctx.from, 'not_announcement'); reply(`🔊 Group has been *unmuted* — all members can now send messages.`); }
-                catch (e) { reply(`❌ Failed: ${e.message}`); }
-            }
+            if (!isBotAdmin) return reply(`⛔ I need to be an admin to unmute the group.`);
+            try {
+                await sock.groupSettingUpdate(jid, 'not_announcement');
+                reply(`🔊 Group *unmuted* — all members can now send messages.`);
+            } catch (e) { reply(`❌ Failed: ${e.message}`); }
             return;
 
         } else if (agentActions.group_lock.test(query)) {
-            if (!ctx.isGroup) return reply(`⚠️ This command only works in a group.`);
+            if (!isGroup) return reply(`⚠️ This command only works in a group.`);
             if (!isAdmin && !isOwner) return reply(`⛔ Admin permission required.`);
-            const pm = pluginMap();
-            const plugin = pm.get('lock') || pm.get('close');
-            if (plugin) { try { await plugin.run(sock, message, [], ctx); } catch (e) { reply(`❌ Failed: ${e.message}`); } }
-            else {
-                try { await sock.groupSettingUpdate(ctx.from, 'locked'); reply(`🔒 Group settings have been *locked* — only admins can edit group info.`); }
-                catch (e) { reply(`❌ Failed: ${e.message}`); }
-            }
+            if (!isBotAdmin) return reply(`⛔ I need to be an admin to lock the group.`);
+            try {
+                await sock.groupSettingUpdate(jid, 'locked');
+                reply(`🔒 Group *locked* — only admins can edit group info.`);
+            } catch (e) { reply(`❌ Failed: ${e.message}`); }
             return;
 
         } else if (agentActions.group_unlock.test(query)) {
-            if (!ctx.isGroup) return reply(`⚠️ This command only works in a group.`);
+            if (!isGroup) return reply(`⚠️ This command only works in a group.`);
             if (!isAdmin && !isOwner) return reply(`⛔ Admin permission required.`);
-            const pm = pluginMap();
-            const plugin = pm.get('unlock') || pm.get('open');
-            if (plugin) { try { await plugin.run(sock, message, [], ctx); } catch (e) { reply(`❌ Failed: ${e.message}`); } }
-            else {
-                try { await sock.groupSettingUpdate(ctx.from, 'unlocked'); reply(`🔓 Group settings *unlocked* — all members can edit group info.`); }
-                catch (e) { reply(`❌ Failed: ${e.message}`); }
-            }
+            if (!isBotAdmin) return reply(`⛔ I need to be an admin to unlock the group.`);
+            try {
+                await sock.groupSettingUpdate(jid, 'unlocked');
+                reply(`🔓 Group *unlocked* — all members can edit group info.`);
+            } catch (e) { reply(`❌ Failed: ${e.message}`); }
             return;
 
         } else if (agentActions.group_link.test(query)) {
-            if (!ctx.isGroup) return reply(`⚠️ This command only works in a group.`);
+            if (!isGroup) return reply(`⚠️ This command only works in a group.`);
             if (!isAdmin && !isOwner) return reply(`⛔ Admin permission required.`);
-            const pm = pluginMap();
-            const plugin = pm.get('grouplink') || pm.get('invite');
-            if (plugin) { try { await plugin.run(sock, message, [], ctx); } catch (e) { reply(`❌ Failed: ${e.message}`); } }
-            else {
-                try { const code = await sock.groupInviteCode(ctx.from); reply(`🔗 *Group Invite Link*\n\nhttps://chat.whatsapp.com/${code}`); }
-                catch (e) { reply(`❌ Failed: ${e.message}`); }
-            }
+            try {
+                const code = await sock.groupInviteCode(jid);
+                reply(`🔗 *Group Invite Link*\n\nhttps://chat.whatsapp.com/${code}`);
+            } catch (e) { reply(`❌ Failed: ${e.message}`); }
             return;
 
         } else if (agentActions.group_revoke.test(query)) {
-            if (!ctx.isGroup) return reply(`⚠️ This command only works in a group.`);
+            if (!isGroup) return reply(`⚠️ This command only works in a group.`);
             if (!isAdmin && !isOwner) return reply(`⛔ Admin permission required.`);
-            const pm = pluginMap();
-            const plugin = pm.get('revoke');
-            if (plugin) { try { await plugin.run(sock, message, [], ctx); } catch (e) { reply(`❌ Failed: ${e.message}`); } }
-            else {
-                try { await sock.groupRevokeInvite(ctx.from); reply(`🔄 Group invite link has been *reset*. The old link no longer works.`); }
-                catch (e) { reply(`❌ Failed: ${e.message}`); }
-            }
+            if (!isBotAdmin) return reply(`⛔ I need to be an admin to reset the group link.`);
+            try {
+                await sock.groupRevokeInvite(jid);
+                reply(`🔄 Group invite link *reset*. The old link no longer works.`);
+            } catch (e) { reply(`❌ Failed: ${e.message}`); }
             return;
 
         } else if (agentActions.group_kick.test(query)) {
-            if (!ctx.isGroup) return reply(`⚠️ This command only works in a group.`);
+            if (!isGroup) return reply(`⚠️ This command only works in a group.`);
             if (!isAdmin && !isOwner) return reply(`⛔ Admin permission required to kick members.`);
-            const pm = pluginMap(); const plugin = pm.get('kick');
-            if (plugin) { try { await plugin.run(sock, message, [], ctx); } catch (e) { reply(`❌ Failed: ${e.message}`); } }
-            else reply(`💡 Reply to a member's message and type: \`.kick\` to kick them.`);
+            if (!isBotAdmin) return reply(`⛔ I need to be an admin to kick members.`);
+            // Get mentioned/quoted user
+            const mentioned = ctx.mentionedJid?.[0] || message.message?.extendedTextMessage?.contextInfo?.participant;
+            if (!mentioned) return reply(`💡 Reply to a member's message and say: _silva kick_\n\nOr tag them: _silva kick @member_`);
+            try {
+                await sock.groupParticipantsUpdate(jid, [mentioned], 'remove');
+                reply(`✅ @${mentioned.split('@')[0]} has been kicked from the group.`);
+            } catch (e) { reply(`❌ Failed: ${e.message}`); }
             return;
 
         } else if (agentActions.group_add.test(query)) {
-            if (!ctx.isGroup) return reply(`⚠️ This command only works in a group.`);
+            if (!isGroup) return reply(`⚠️ This command only works in a group.`);
             if (!isAdmin && !isOwner) return reply(`⛔ Admin permission required.`);
+            if (!isBotAdmin) return reply(`⛔ I need to be an admin to add members.`);
             const numMatch = query.match(/(\+?[\d]{7,15})/);
-            const pm = pluginMap(); const plugin = pm.get('add');
-            if (plugin) { try { await plugin.run(sock, message, numMatch ? [numMatch[1]] : [], ctx); } catch (e) { reply(`❌ Failed: ${e.message}`); } }
-            else reply(`💡 Use: \`.add +<phone number>\` to add a member.`);
+            if (!numMatch) return reply(`💡 Provide a phone number.\n\nExample: _silva add +254712345678_`);
+            const phone = numMatch[1].replace(/\D/g, '');
+            try {
+                await sock.groupParticipantsUpdate(jid, [`${phone}@s.whatsapp.net`], 'add');
+                reply(`✅ +${phone} has been added to the group!`);
+            } catch (e) { reply(`❌ Failed: ${e.message}`); }
             return;
 
         } else if (agentActions.group_promote.test(query)) {
-            if (!ctx.isGroup) return reply(`⚠️ This command only works in a group.`);
+            if (!isGroup) return reply(`⚠️ This command only works in a group.`);
             if (!isAdmin && !isOwner) return reply(`⛔ Admin permission required.`);
-            const pm = pluginMap(); const plugin = pm.get('promote');
-            if (plugin) { try { await plugin.run(sock, message, [], ctx); } catch (e) { reply(`❌ Failed: ${e.message}`); } }
-            else reply(`💡 Reply to a member's message and type: \`.promote\``);
+            if (!isBotAdmin) return reply(`⛔ I need to be an admin to promote members.`);
+            const mentioned = ctx.mentionedJid?.[0] || message.message?.extendedTextMessage?.contextInfo?.participant;
+            if (!mentioned) return reply(`💡 Reply to a member's message and say: _silva promote_\n\nOr tag them: _silva promote @member_`);
+            try {
+                await sock.groupParticipantsUpdate(jid, [mentioned], 'promote');
+                reply(`⭐ @${mentioned.split('@')[0]} has been promoted to admin!`);
+            } catch (e) { reply(`❌ Failed: ${e.message}`); }
             return;
 
         } else if (agentActions.group_demote.test(query)) {
-            if (!ctx.isGroup) return reply(`⚠️ This command only works in a group.`);
+            if (!isGroup) return reply(`⚠️ This command only works in a group.`);
             if (!isAdmin && !isOwner) return reply(`⛔ Admin permission required.`);
-            const pm = pluginMap(); const plugin = pm.get('demote');
-            if (plugin) { try { await plugin.run(sock, message, [], ctx); } catch (e) { reply(`❌ Failed: ${e.message}`); } }
-            else reply(`💡 Reply to a member's message and type: \`.demote\``);
+            if (!isBotAdmin) return reply(`⛔ I need to be an admin to demote members.`);
+            const mentioned = ctx.mentionedJid?.[0] || message.message?.extendedTextMessage?.contextInfo?.participant;
+            if (!mentioned) return reply(`💡 Reply to a member's message and say: _silva demote_\n\nOr tag them: _silva demote @member_`);
+            try {
+                await sock.groupParticipantsUpdate(jid, [mentioned], 'demote');
+                reply(`📉 @${mentioned.split('@')[0]} has been demoted from admin.`);
+            } catch (e) { reply(`❌ Failed: ${e.message}`); }
             return;
 
         } else if (agentActions.group_warn.test(query)) {
-            if (!ctx.isGroup) return reply(`⚠️ This command only works in a group.`);
+            if (!isGroup) return reply(`⚠️ This command only works in a group.`);
             if (!isAdmin && !isOwner) return reply(`⛔ Admin permission required.`);
-            const pm = pluginMap(); const plugin = pm.get('warn');
-            if (plugin) { try { await plugin.run(sock, message, [], ctx); } catch (e) { reply(`❌ Failed: ${e.message}`); } }
-            else reply(`💡 Reply to a member's message and type: \`.warn\``);
+            // Delegate to the warn plugin — it has its own warning state/counter
+            const pm = pluginMap();
+            const warnPlugin = pm.get('warn');
+            if (warnPlugin) { try { await warnPlugin.run(sock, message, [], ctx); } catch (e) { reply(`❌ Failed: ${e.message}`); } }
+            else return reply(`💡 Reply to a member's message and use: \`.warn\``);
             return;
 
         } else if (agentActions.group_tag.test(query)) {
-            if (!ctx.isGroup) return reply(`⚠️ This command only works in a group.`);
-            const pm = pluginMap(); const plugin = pm.get('tagall') || pm.get('everyone') || pm.get('hidetag');
-            if (plugin) { try { await plugin.run(sock, message, [], ctx); } catch (e) { reply(`❌ Failed: ${e.message}`); } }
-            else reply(`💡 Use: \`.tagall\` to mention all members.`);
+            if (!isGroup) return reply(`⚠️ This command only works in a group.`);
+            // Build the @all mention ourselves so it works without rawCmd
+            try {
+                const meta = ctx.groupMetadata || await sock.groupMetadata(jid);
+                const mentions = meta.participants.map(p => p.id);
+                const tagText = meta.participants.map(p => `@${p.id.split('@')[0]}`).join(' ');
+                await sock.sendMessage(jid, {
+                    text: `📢 *Attention everyone!*\n\n${tagText}`,
+                    mentions,
+                }, { quoted: message });
+            } catch (e) { reply(`❌ Failed: ${e.message}`); }
             return;
 
         } else if (agentActions.group_admins.test(query)) {
-            if (!ctx.isGroup) return reply(`⚠️ This command only works in a group.`);
-            const pm = pluginMap(); const plugin = pm.get('admins') || pm.get('adminlist');
-            if (plugin) { try { await plugin.run(sock, message, [], ctx); } catch (e) { reply(`❌ Failed: ${e.message}`); } }
-            else {
-                try {
-                    const meta = ctx.groupMetadata || await sock.groupMetadata(ctx.from);
-                    const admins = meta.participants.filter(p => p.admin).map((p, i) => `${i + 1}. @${p.id.split('@')[0]}`);
-                    await sock.sendMessage(ctx.from, { text: `👑 *Group Admins (${admins.length})*\n\n${admins.join('\n')}`, mentions: meta.participants.filter(p => p.admin).map(p => p.id) }, { quoted: message });
-                } catch (e) { reply(`❌ Failed: ${e.message}`); }
-            }
+            if (!isGroup) return reply(`⚠️ This command only works in a group.`);
+            try {
+                const meta = ctx.groupMetadata || await sock.groupMetadata(jid);
+                const adminList = meta.participants.filter(p => p.admin);
+                const text = `👑 *Group Admins (${adminList.length})*\n\n` +
+                    adminList.map((p, i) => `${i + 1}. @${p.id.split('@')[0]}`).join('\n');
+                await sock.sendMessage(jid, { text, mentions: adminList.map(p => p.id) }, { quoted: message });
+            } catch (e) { reply(`❌ Failed: ${e.message}`); }
             return;
 
         } else if (agentActions.group_info.test(query)) {
-            if (!ctx.isGroup) return reply(`⚠️ This command only works in a group.`);
+            if (!isGroup) return reply(`⚠️ This command only works in a group.`);
             try {
-                const meta = ctx.groupMetadata || await sock.groupMetadata(ctx.from);
-                const admins = meta.participants.filter(p => p.admin).length;
+                const meta = ctx.groupMetadata || await sock.groupMetadata(jid);
+                const adminCount = meta.participants.filter(p => p.admin).length;
                 reply(
                     `👥 *Group Info*\n\n` +
                     `📛 *Name:* ${meta.subject}\n` +
-                    `🆔 *ID:* ${ctx.from}\n` +
+                    `🆔 *ID:* ${jid}\n` +
                     `👤 *Members:* ${meta.participants.length}\n` +
-                    `👑 *Admins:* ${admins}\n` +
+                    `👑 *Admins:* ${adminCount}\n` +
                     `📝 *Description:* ${meta.desc || '_(none)_'}\n` +
                     `📅 *Created:* ${meta.creation ? new Date(meta.creation * 1000).toLocaleDateString() : 'Unknown'}`
                 );
