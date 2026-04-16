@@ -351,15 +351,21 @@ async function handleMessages(sock, message) {
         }
 
         if (usedPrefix === null) {
-            // No prefix matched — fire typing indicator then stop
-            if (!message.key.fromMe && (config.AUTO_TYPING || config.AUTO_RECORDING)) {
-                const presenceType = config.AUTO_RECORDING ? 'recording' : 'composing';
-                try { await sock.sendPresenceUpdate(presenceType, jid); } catch { /* ok */ }
-                setTimeout(async () => {
-                    try { await sock.sendPresenceUpdate('paused', jid); } catch { /* ok */ }
-                }, 2000);
+            // Allow "silva" or "agent" to trigger the AI assistant without any prefix
+            if (/^(silva|agent)\b/i.test(text.trim())) {
+                usedPrefix  = '';
+                commandText = text.trim();
+            } else {
+                // No prefix matched — fire typing indicator then stop
+                if (!message.key.fromMe && (config.AUTO_TYPING || config.AUTO_RECORDING)) {
+                    const presenceType = config.AUTO_RECORDING ? 'recording' : 'composing';
+                    try { await sock.sendPresenceUpdate(presenceType, jid); } catch { /* ok */ }
+                    setTimeout(async () => {
+                        try { await sock.sendPresenceUpdate('paused', jid); } catch { /* ok */ }
+                    }, 2000);
+                }
+                return;
             }
-            return;
         }
 
         const parts   = commandText.split(/\s+/);
