@@ -5,6 +5,18 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
+function detectPlatform() {
+    if (process.env.PLATFORM) return process.env.PLATFORM;
+    if (process.env.HEROKU_APP_NAME || process.env.DYNO) return 'Heroku';
+    if (process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_SERVICE_NAME) return 'Railway';
+    if (process.env.RENDER) return 'Render';
+    if (process.env.VERCEL) return 'Vercel';
+    if (process.env.FLY_APP_NAME) return 'Fly.io';
+    if (process.env.KOYEB_SERVICE_NAME) return 'Koyeb';
+    if (process.env.REPL_ID || process.env.REPLIT_DB_URL) return 'Replit';
+    return `${os.type()} Server`;
+}
+
 const BOT_IDENTITY = {
     name: 'Silva MD',
     version: '2.0',
@@ -12,7 +24,7 @@ const BOT_IDENTITY = {
     library: 'Baileys (gifted-baileys)',
     repo: 'https://github.com/SilvaTechB/silva-md-v4',
     website: 'https://silvatech.co.ke',
-    platform: 'Replit',
+    get platform() { return detectPlatform(); },
     developer: 'SilvaTech',
     ownerName: config.OWNER_NAME || 'Silva MD',
     ownerNumber: config.OWNER_NUMBER || '',
@@ -70,7 +82,7 @@ function getPlatformInfo() {
     const memUsed = Math.round(process.memoryUsage().rss / 1024 / 1024);
     const totalMem = Math.round(os.totalmem() / 1024 / 1024);
     return {
-        platform: 'Replit',
+        platform: detectPlatform(),
         os: `${os.type()} ${os.release()}`,
         arch: os.arch(),
         nodeVersion: process.version,
@@ -143,14 +155,14 @@ const agentActions = {
 };
 
 module.exports = {
-    commands: ['agent', 'do', 'silva', 'assistant', 'ask'],
-    description: 'AI Agent - Can run commands, create content, search the web, and knows everything about the bot',
+    commands: ['silva', 'agent', 'do', 'assistant', 'ask'],
+    description: 'Silva - AI assistant that runs commands, creates content, searches the web, and knows everything about the bot',
     permission: 'public',
     run: async (sock, message, args, ctx) => {
         const { jid, reply, safeSend, isOwner, isGroup, isAdmin } = ctx;
         const query = args.join(' ').trim();
         if (!query) return reply(
-            `🤖 *Silva Agent*\n\n` +
+            `🤖 *Silva*\n\n` +
             `I'm ${BOT_IDENTITY.name} v${BOT_IDENTITY.version}, your intelligent WhatsApp assistant!\n\n` +
             `*What I can do:*\n\n` +
             `📋 *Run Commands*\n` +
@@ -505,8 +517,8 @@ module.exports = {
                 const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_KEY || '';
                 if (apiKey) {
                     const genAI = new GoogleGenerativeAI(apiKey);
-                    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
-                    const prompt = `Write a ${contentType}${topic ? ` about: ${topic}` : ''}. Keep it concise, well-formatted, and professional. Do not use markdown headers. Sign off as "${config.OWNER_NAME}" if appropriate.`;
+                    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+                    const prompt = `Write a ${contentType}${topic ? ` about: ${topic}` : ''}. Keep it concise, well-formatted, and professional. Do not use markdown headers or asterisks for bold. Sign off as "${config.OWNER_NAME}" if appropriate.`;
                     const result = await model.generateContent(prompt);
                     response = `✍️ *${contentType.charAt(0).toUpperCase() + contentType.slice(1)}*\n\n${result.response.text()}`;
                 } else {
@@ -676,7 +688,7 @@ module.exports = {
         } else if (agentActions.help.test(query)) {
             const pm = pluginMap();
             response =
-                `🤖 *${BOT_IDENTITY.name} Agent — Full Capabilities*\n\n` +
+                `🤖 *Silva — Full Capabilities*\n\n` +
                 `📋 *Run Commands* (${pm.size} available)\n` +
                 `• "run menu" • "do alive" • "use sticker"\n` +
                 `• "run <any command name>"\n\n` +
@@ -721,26 +733,36 @@ module.exports = {
                 const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_KEY || '';
                 if (apiKey) {
                     const genAI = new GoogleGenerativeAI(apiKey);
-                    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+                    const model = genAI.getGenerativeModel({
+                        model: 'gemini-1.5-flash',
+                        generationConfig: {
+                            temperature: 0.85,
+                            maxOutputTokens: 800,
+                        },
+                    });
                     const systemPrompt =
-                        `You are ${BOT_IDENTITY.name} v${BOT_IDENTITY.version}, an intelligent WhatsApp bot assistant. ` +
-                        `You were created by ${BOT_IDENTITY.developer} (${config.OWNER_NAME}). ` +
+                        `You are Silva, an intelligent WhatsApp bot assistant built on ${BOT_IDENTITY.name} v${BOT_IDENTITY.version}. ` +
+                        `You were created by ${BOT_IDENTITY.developer}. The bot owner is ${config.OWNER_NAME}. ` +
                         `You run on ${BOT_IDENTITY.platform} using ${BOT_IDENTITY.language} and the ${BOT_IDENTITY.library} library. ` +
                         `You have ${pluginMap().size}+ commands and ${BOT_IDENTITY.features.length} smart features. ` +
-                        `Your website is ${BOT_IDENTITY.website} and repo is ${BOT_IDENTITY.repo}. ` +
-                        `Be concise, friendly, and helpful. Use simple formatting suitable for WhatsApp.`;
-                    const result = await model.generateContent(`${systemPrompt}\n\nUser says: ${query}`);
-                    response = `🤖 *Silva Agent*\n\n${result.response.text()}`;
+                        `Your website is ${BOT_IDENTITY.website}. ` +
+                        `Be concise, friendly, warm, and genuinely helpful. ` +
+                        `Format responses for WhatsApp: use *bold* for emphasis, avoid markdown headers (#), keep replies under 400 words unless asked for more.`;
+                    const chat = model.startChat({
+                        history: [{ role: 'user', parts: [{ text: systemPrompt }] }, { role: 'model', parts: [{ text: `Got it! I'm Silva, ready to help.` }] }],
+                    });
+                    const result = await chat.sendMessage(query);
+                    response = `🤖 *Silva*\n\n${result.response.text()}`;
                 } else {
                     try {
-                        const res = await axios.get(`https://api.popcat.xyz/chatbot?msg=${encodeURIComponent(query)}&owner=Silva+MD&botname=Silva+Agent`, { timeout: 10000 });
-                        response = `🤖 *Silva Agent*\n\n${res.data?.response || 'I understood your request.'}`;
+                        const res = await axios.get(`https://api.popcat.xyz/chatbot?msg=${encodeURIComponent(query)}&owner=Silva+MD&botname=Silva`, { timeout: 10000 });
+                        response = `🤖 *Silva*\n\n${res.data?.response || 'I understood your request. Type .silva help to see what I can do!'}`;
                     } catch {
-                        response = `🤖 *Silva Agent*\n\nI received: "${query}"\n\n_For better AI responses, set a GEMINI_API_KEY._`;
+                        response = `🤖 *Silva*\n\nI received: "${query}"\n\n_For full AI responses, set a GEMINI_API_KEY. Try .silva help to see all capabilities._`;
                     }
                 }
-            } catch {
-                response = `🤖 *Silva Agent*\n\nI received: "${query}"\n\n_Try asking about time, math, jokes, or type ".agent help" for capabilities._`;
+            } catch (err) {
+                response = `🤖 *Silva*\n\nSorry, I ran into an issue: ${err.message?.slice(0, 80) || 'unknown error'}.\n\n_Try asking about time, math, jokes, or type .silva help for capabilities._`;
             }
         }
 

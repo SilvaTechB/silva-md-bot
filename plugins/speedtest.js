@@ -1,5 +1,17 @@
 'use strict';
 const axios = require('axios');
+const os = require('os');
+
+function detectPlatform() {
+    if (process.env.PLATFORM) return process.env.PLATFORM;
+    if (process.env.HEROKU_APP_NAME || process.env.DYNO) return 'Heroku';
+    if (process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_SERVICE_NAME) return 'Railway';
+    if (process.env.RENDER) return 'Render';
+    if (process.env.FLY_APP_NAME) return 'Fly.io';
+    if (process.env.KOYEB_SERVICE_NAME) return 'Koyeb';
+    if (process.env.REPL_ID || process.env.REPLIT_DB_URL) return 'Replit';
+    return os.type() + ' Server';
+}
 
 module.exports = {
     commands:    ['speedtest', 'ping2', 'netspeed'],
@@ -27,7 +39,7 @@ module.exports = {
 ⬇️ *Download:* ${mbps} Mbps
 ⚡ *Latency:*   ${latency}ms
 📦 *Data:*      ${(bytes / 1024 / 1024).toFixed(2)} MB in ${elapsed.toFixed(2)}s
-🖥️ *Server:*   Replit (${process.platform})
+🖥️ *Server:*   ${detectPlatform()} (${process.platform})
 
 _Powered by Cloudflare • Silva MD_`,
                 contextInfo
