@@ -112,7 +112,7 @@ function getActiveFeatures() {
 // ── Natural language intent map ───────────────────────────────────────────────
 // Maps everyday words → actual bot plugin commands.
 const intentMap = [
-    { pattern: /\b(play|download\s+song|get\s+song|stream)\b/i,                   cmd: 'song',       label: '🎵 Fetching music',          strip: /\bplay\b|\bdownload\s+song\b|\bget\s+song\b|\bstream\b/gi },
+    { pattern: /\b(play|download\s+song|get\s+song|stream)\b/i,                   cmd: 'play',       label: '🎵 Fetching music',          strip: /\bplay\b|\bdownload\s+song\b|\bget\s+song\b|\bstream\b/gi },
     { pattern: /\b(yt\s*video|ytvideo|youtube\s*video|watch\s+on\s+youtube)\b/i,  cmd: 'ytmp4',      label: '🎬 Downloading YouTube video', strip: /\byt\s*video\b|\bytvideo\b|\byoutube\s*video\b|\bwatch\s+on\s+youtube\b/gi },
     { pattern: /\blyrics?\b/i,                                                      cmd: 'lyrics',     label: '🎤 Fetching lyrics',          strip: /\blyrics?\b/gi },
     { pattern: /\btiktok\b|\btik\s*tok\b/i,                                         cmd: 'tiktok',     label: '🎵 Downloading TikTok',       strip: /\btiktok\b|\btik\s*tok\b/gi },
