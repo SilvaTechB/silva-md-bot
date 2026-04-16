@@ -3,6 +3,28 @@ const config = require('../config');
 const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
+
+// ── Conversation memory (per JID, keeps last 8 exchanges) ────────────────────
+const conversationMemory = new Map();
+const MEMORY_MAX = 8;
+
+function rememberMessage(jid, role, text) {
+    if (!conversationMemory.has(jid)) conversationMemory.set(jid, []);
+    const mem = conversationMemory.get(jid);
+    mem.push({ role, text, ts: Date.now() });
+    if (mem.length > MEMORY_MAX) mem.shift();
+}
+
+function getMemory(jid) {
+    return conversationMemory.get(jid) || [];
+}
+
+function buildContextPrompt(jid, currentQuery) {
+    const mem = getMemory(jid).slice(-6); // last 6 turns
+    if (!mem.length) return currentQuery;
+    const history = mem.map(m => `${m.role === 'user' ? 'User' : 'Silva'}: ${m.text}`).join('\n');
+    return `You are Silva, a smart, friendly WhatsApp AI assistant. Stay in character. Be concise and helpful.\n\nConversation so far:\n${history}\n\nUser: ${currentQuery}\nSilva:`;
+}
 const os = require('os');
 
 function detectPlatform() {
@@ -117,28 +139,56 @@ function getActiveFeatures() {
 }
 
 // ── Natural language intent map ───────────────────────────────────────────────
-// Maps everyday words → actual bot plugin commands.
+// Maps everyday words/phrases → actual bot plugin commands.
 const intentMap = [
-    { pattern: /\b(play|download\s+song|get\s+song|stream)\b/i,                   cmd: 'play',       label: '🎵 Fetching music',          strip: /\bplay\b|\bdownload\s+song\b|\bget\s+song\b|\bstream\b/gi },
-    { pattern: /\b(yt\s*video|ytvideo|youtube\s*video|watch\s+on\s+youtube)\b/i,  cmd: 'ytmp4',      label: '🎬 Downloading YouTube video', strip: /\byt\s*video\b|\bytvideo\b|\byoutube\s*video\b|\bwatch\s+on\s+youtube\b/gi },
-    { pattern: /\blyrics?\b/i,                                                      cmd: 'lyrics',     label: '🎤 Fetching lyrics',          strip: /\blyrics?\b/gi },
-    { pattern: /\btiktok\b|\btik\s*tok\b/i,                                         cmd: 'tiktok',     label: '🎵 Downloading TikTok',       strip: /\btiktok\b|\btik\s*tok\b/gi },
-    { pattern: /\binstagram\b|\binsta\b/i,                                           cmd: 'ig',         label: '📸 Downloading Instagram',    strip: /\binstagram\b|\binsta\b/gi },
-    { pattern: /\bfacebook\b|\bfb\b/i,                                              cmd: 'facebook',   label: '📘 Downloading Facebook',     strip: /\bfacebook\b|\bfb\b/gi },
-    { pattern: /\bpinterest\b/i,                                                     cmd: 'pinterest',  label: '📌 Searching Pinterest',      strip: /\bpinterest\b/gi },
-    { pattern: /\bspotify\b/i,                                                       cmd: 'spotify',    label: '🎵 Searching Spotify',        strip: /\bspotify\b/gi },
-    { pattern: /\btranslate\b|\btranslation\b/i,                                     cmd: 'translate',  label: '🌐 Translating',              strip: /\btranslate\b|\btranslation\b/gi },
-    { pattern: /\bwikipedia\b|\bwiki\b/i,                                            cmd: 'wiki',       label: '📚 Searching Wikipedia',      strip: /\bwikipedia\b|\bwiki\b/gi },
-    { pattern: /\bqr\s*code\b|\bqrcode\b/i,                                         cmd: 'qr',         label: '📱 Generating QR code',       strip: /\bqr\s*code\b|\bqrcode\b/gi },
-    { pattern: /\bscreenshoot?\b/i,                                                  cmd: 'screenshot', label: '📸 Taking screenshot',        strip: /\bscreenshoot?\b/gi },
-    { pattern: /\bsticker\b/i,                                                       cmd: 'sticker',    label: '🎭 Creating sticker',         strip: /\bsticker\b/gi },
-    { pattern: /\bgemini\b|\bchatgpt\b|\bgpt\b/i,                                   cmd: 'gemini',     label: '🤖 Asking Gemini AI',         strip: /\bgemini\b|\bchatgpt\b|\bgpt\b/gi },
-    { pattern: /\bspeedtest\b|\bspeed\s*test\b/i,                                   cmd: 'speedtest',  label: '🌐 Running speed test',       strip: /\bspeedtest\b|\bspeed\s*test\b/gi },
-    { pattern: /\bdefine\b|\bdefinition\b|\bdictionary\b/i,                          cmd: 'define',     label: '📖 Looking up definition',    strip: /\bdefine\b|\bdefinition\b|\bdictionary\b/gi },
-    { pattern: /\buptime\b|\bruntime\b/i,                                            cmd: 'uptime',     label: '⏱️ Checking uptime',         strip: /\buptime\b|\bruntime\b/gi },
-    { pattern: /\bgithub\b/i,                                                        cmd: 'githubstalk',label: '🐙 Fetching GitHub profile',  strip: /\bgithub\b/gi },
-    { pattern: /\balive\b|\bping\b/i,                                                cmd: 'alive',      label: '⚡ Checking bot status',      strip: /\balive\b|\bping\b/gi },
-    { pattern: /\bmenu\b|\bcommands\b/i,                                             cmd: 'menu',       label: '📋 Loading menu',             strip: /\bmenu\b|\bcommands\b/gi },
+    // ── Music & Audio ────────────────────────────────────────────────────────
+    { pattern: /\b(play|download\s+song|get\s+song|stream)\b/i,                        cmd: 'play',        label: '🎵 Fetching music',             strip: /\bplay\b|\bdownload\s+song\b|\bget\s+song\b|\bstream\b/gi },
+    { pattern: /\b(yt\s*video|ytvideo|youtube\s*video|watch\s+on\s+youtube|ytv)\b/i,  cmd: 'ytmp4',       label: '🎬 Downloading YouTube video',   strip: /\byt\s*video\b|\bytvideo\b|\byoutube\s*video\b|\bwatch\s+on\s+youtube\b|\bytv\b/gi },
+    { pattern: /\blyrics?\b/i,                                                          cmd: 'lyrics',      label: '🎤 Fetching lyrics',            strip: /\blyrics?\b/gi },
+    { pattern: /\b(speak|say|read\s+aloud|text\s*to\s*speech|tts)\b/i,                cmd: 'tts',         label: '🔊 Converting text to speech',  strip: /\bspeak\b|\bsay\b|\bread\s+aloud\b|\btext\s*to\s*speech\b|\btts\b/gi },
+    { pattern: /\bspotify\b/i,                                                          cmd: 'spotify',     label: '🎵 Searching Spotify',          strip: /\bspotify\b/gi },
+
+    // ── Social Media Downloads ───────────────────────────────────────────────
+    { pattern: /\btiktok\b|\btik\s*tok\b/i,                                             cmd: 'tiktok',      label: '🎵 Downloading TikTok',         strip: /\btiktok\b|\btik\s*tok\b/gi },
+    { pattern: /\binstagram\b|\binsta\b/i,                                               cmd: 'ig',          label: '📸 Downloading Instagram',      strip: /\binstagram\b|\binsta\b/gi },
+    { pattern: /\bfacebook\b|\bfb\b/i,                                                  cmd: 'facebook',    label: '📘 Downloading Facebook',       strip: /\bfacebook\b|\bfb\b/gi },
+    { pattern: /\bpinterest\b/i,                                                         cmd: 'pinterest',   label: '📌 Searching Pinterest',        strip: /\bpinterest\b/gi },
+    { pattern: /\btwitter\b|\btweet\b|\bx\.com\b/i,                                     cmd: 'twitter',     label: '🐦 Downloading Twitter/X',      strip: /\btwitter\b|\btweet\b|\bx\.com\b/gi },
+
+    // ── Images & Stickers ────────────────────────────────────────────────────
+    { pattern: /\bsticker\b/i,                                                           cmd: 'sticker',     label: '🎭 Creating sticker',           strip: /\bsticker\b/gi },
+    { pattern: /\b(generate|create|make|draw|imagine)\s+(an?\s+)?(ai\s+)?(image|photo|picture|art|artwork|illustration)\b/i, cmd: 'imagine', label: '🎨 Generating AI image', strip: /\b(generate|create|make|draw|imagine)\s+(an?\s+)?(ai\s+)?(image|photo|picture|art|artwork|illustration)\b/gi },
+    { pattern: /\bimagine\b/i,                                                           cmd: 'imagine',     label: '🎨 Generating AI image',        strip: /\bimagine\b/gi },
+    { pattern: /\b(quotly|quote\s*sticker|quote\s*card|q2s)\b/i,                       cmd: 'quotly',      label: '💬 Creating quote sticker',     strip: /\b(quotly|quote\s*sticker|quote\s*card|q2s)\b/gi },
+
+    // ── AI & Analysis ────────────────────────────────────────────────────────
+    { pattern: /\b(describe|analyze|caption|what\s+(is|in)\s+(this|the)\s+image|identify\s+this)\b/i, cmd: 'describe', label: '👁️ Analyzing image', strip: /\b(describe|analyze|caption|what\s+(is|in)\s+(this|the)\s+image|identify\s+this)\b/gi },
+    { pattern: /\b(summarize|summary|tldr|tl;dr|brief|shorten)\b/i,                    cmd: 'summarize',   label: '📝 Summarizing text',           strip: /\b(summarize|summary|tldr|tl;dr|brief|shorten)\b/gi },
+    { pattern: /\bgemini\b|\bchatgpt\b|\bgpt\b/i,                                       cmd: 'gemini',      label: '🤖 Asking Gemini AI',           strip: /\bgemini\b|\bchatgpt\b|\bgpt\b/gi },
+
+    // ── Info & Search ────────────────────────────────────────────────────────
+    { pattern: /\bwikipedia\b|\bwiki\b/i,                                                cmd: 'wiki',        label: '📚 Searching Wikipedia',        strip: /\bwikipedia\b|\bwiki\b/gi },
+    { pattern: /\btranslate\b|\btranslation\b/i,                                         cmd: 'translate',   label: '🌐 Translating',                strip: /\btranslate\b|\btranslation\b/gi },
+    { pattern: /\bdefine\b|\bdefinition\b|\bdictionary\b/i,                              cmd: 'define',      label: '📖 Looking up definition',      strip: /\bdefine\b|\bdefinition\b|\bdictionary\b/gi },
+    { pattern: /\bgithub\b/i,                                                            cmd: 'githubstalk', label: '🐙 Fetching GitHub profile',    strip: /\bgithub\b/gi },
+
+    // ── Productivity ─────────────────────────────────────────────────────────
+    { pattern: /\b(remind\s+me|set\s+(a\s+)?reminder|reminder)\b/i,                    cmd: 'remind',      label: '⏰ Setting reminder',           strip: /\b(remind\s+me|set\s+(a\s+)?reminder|reminder)\b/gi },
+    { pattern: /\b(save\s+(a\s+)?note|note\s+down|take\s+note)\b/i,                    cmd: 'notes',       label: '📝 Saving note',                strip: /\b(save\s+(a\s+)?note|note\s+down|take\s+note)\b/gi },
+    { pattern: /\b(get\s+(my\s+)?note|show\s+(my\s+)?note|read\s+(my\s+)?note)\b/i,   cmd: 'notes',       label: '📝 Fetching note',              strip: /\b(get\s+(my\s+)?note|show\s+(my\s+)?note|read\s+(my\s+)?note)\b/gi },
+    { pattern: /\b(create\s+(a\s+)?poll|make\s+(a\s+)?poll|start\s+(a\s+)?poll)\b/i,  cmd: 'poll',        label: '📊 Creating poll',              strip: /\b(create\s+(a\s+)?poll|make\s+(a\s+)?poll|start\s+(a\s+)?poll)\b/gi },
+    { pattern: /\b(schedule\s+(a\s+)?message|schedule\s+send)\b/i,                     cmd: 'schedule',    label: '⏱️ Scheduling message',        strip: /\b(schedule\s+(a\s+)?message|schedule\s+send)\b/gi },
+
+    // ── Tools ────────────────────────────────────────────────────────────────
+    { pattern: /\bqr\s*code\b|\bqrcode\b/i,                                             cmd: 'qr',          label: '📱 Generating QR code',         strip: /\bqr\s*code\b|\bqrcode\b/gi },
+    { pattern: /\bscreenshoot?\b/i,                                                      cmd: 'screenshot',  label: '📸 Taking screenshot',          strip: /\bscreenshoot?\b/gi },
+    { pattern: /\bspeedtest\b|\bspeed\s*test\b|\binternet\s+speed\b/i,                  cmd: 'speedtest',   label: '🌐 Running speed test',         strip: /\bspeedtest\b|\bspeed\s*test\b|\binternet\s+speed\b/gi },
+    { pattern: /\bweather\b|\bforecast\b|\btemperature\s+in\b/i,                        cmd: 'weather',     label: '🌤️ Checking weather',          strip: /\bweather\b|\bforecast\b|\btemperature\s+in\b/gi },
+
+    // ── Bot Status ───────────────────────────────────────────────────────────
+    { pattern: /\buptime\b|\bruntime\b/i,                                                cmd: 'uptime',      label: '⏱️ Checking uptime',           strip: /\buptime\b|\bruntime\b/gi },
+    { pattern: /\balive\b|\bping\b/i,                                                    cmd: 'alive',       label: '⚡ Checking bot status',        strip: /\balive\b|\bping\b/gi },
+    { pattern: /\bmenu\b|\bcommands\b/i,                                                 cmd: 'menu',        label: '📋 Loading menu',               strip: /\bmenu\b|\bcommands\b/gi },
 ];
 
 function findIntent(query) {
@@ -202,30 +252,38 @@ function getSmartResponse(query) {
     return null;
 }
 
-// ── Free AI APIs (no key required) ───────────────────────────────────────────
-async function askFreeAI(query) {
+// ── Free AI APIs (no key required, with conversation context) ────────────────
+async function askFreeAI(query, jid) {
+    const contextPrompt = jid ? buildContextPrompt(jid, query) : query;
     const apis = [
         async () => {
-            const res = await axios.get(`https://api.paxsenix.biz.id/ai/gpt4o?text=${encodeURIComponent(query)}`, { timeout: 12000 });
+            const res = await axios.get(`https://api.paxsenix.biz.id/ai/gpt4o?text=${encodeURIComponent(contextPrompt)}`, { timeout: 15000 });
             return res.data?.message || res.data?.result || null;
         },
         async () => {
-            const res = await axios.get(`https://api.siputzx.my.id/api/ai/deepseek-r1?content=${encodeURIComponent(query)}`, { timeout: 12000 });
+            const res = await axios.get(`https://api.siputzx.my.id/api/ai/deepseek-r1?content=${encodeURIComponent(contextPrompt)}`, { timeout: 15000 });
             return res.data?.data || null;
         },
         async () => {
+            // Popcat doesn't support full context, use simple query
             const res = await axios.get(`https://api.popcat.xyz/chatbot?msg=${encodeURIComponent(query)}&owner=${encodeURIComponent(config.OWNER_NAME || 'Silva')}&botname=Silva`, { timeout: 8000 });
             return res.data?.response || null;
         },
+        async () => {
+            // Extra fallback: another free endpoint
+            const res = await axios.get(`https://api.paxsenix.biz.id/ai/claude?text=${encodeURIComponent(contextPrompt)}`, { timeout: 15000 });
+            return res.data?.message || res.data?.result || null;
+        },
     ];
     for (const fn of apis) {
-        try { const r = await fn(); if (r) return String(r).trim(); } catch { /* next */ }
+        try { const r = await fn(); if (r && r.length > 2) return String(r).trim(); } catch { /* next */ }
     }
     return null;
 }
 
 const agentActions = {
     run_command: /^(run|execute|do|use|try|open)\s+(\.?\w+)/i,
+
     // ── Group management (natural language) ──────────────────────────────────
     group_rename:  /(change|rename|set|update)\s+(the\s+)?(group\s+)?(name|title|subject)\s*(to\s+)?/i,
     group_desc:    /(change|set|update)\s+(the\s+)?(group\s+)?(desc(ription)?|bio|about|info)\s*(to\s+)?/i,
@@ -243,48 +301,76 @@ const agentActions = {
     group_tag:     /\b(tag|mention|notify)\s+(all|everyone|members|group)\b/i,
     group_admins:  /\b(list|show|who are)\s+(the\s+)?admins?\b/i,
     group_info:    /\b(group\s+info|groupinfo|about\s+this\s+group)\b/i,
-    // ─────────────────────────────────────────────────────────────────────────
-    create_group_desc: /create\s+(a\s+)?(group\s+)?desc(ription)?/i,
-    create_bio: /create\s+(a\s+)?(bio|about|profile\s*(text|desc))/i,
-    create_welcome: /create\s+(a\s+)?welcome\s*(msg|message)?/i,
-    create_goodbye: /create\s+(a\s+)?goodbye\s*(msg|message)?/i,
-    create_caption: /create\s+(a\s+)?caption/i,
+
+    // ── Content creation ─────────────────────────────────────────────────────
+    create_group_desc:   /create\s+(a\s+)?(group\s+)?desc(ription)?/i,
+    create_bio:          /create\s+(a\s+)?(bio|about|profile\s*(text|desc))/i,
+    create_welcome:      /create\s+(a\s+)?welcome\s*(msg|message)?/i,
+    create_goodbye:      /create\s+(a\s+)?goodbye\s*(msg|message)?/i,
+    create_caption:      /create\s+(a\s+)?caption/i,
     create_announcement: /create\s+(a\s+)?(announcement|broadcast|notice)/i,
-    create_rules: /create\s+(a\s+)?(group\s+)?rules/i,
-    create_greeting: /create\s+(a\s+)?greet(ing)?\s*(msg|message)?/i,
-    create_quote: /create\s+(a\s+)?(custom\s+)?quote/i,
-    create_poem: /create\s+(a\s+)?poem/i,
-    create_story: /create\s+(a\s+)?story/i,
-    create_joke: /create\s+(a\s+)?joke/i,
-    create_rap: /create\s+(a\s+)?rap/i,
-    create_song: /create\s+(a\s+)?song/i,
-    write: /write\s+(a\s+)?(message|text|letter|email|note|essay|paragraph|article|review|speech|toast)/i,
-    menu: /^(show\s+)?(menu|commands|help|list\s+commands)/i,
-    about_bot: /about\s*(the\s*)?(bot|silva|yourself)|who\s*are\s*you|what\s*are\s*you|tell\s*me\s*about\s*(yourself|silva|this\s*bot)/i,
+    create_rules:        /create\s+(a\s+)?(group\s+)?rules/i,
+    create_greeting:     /create\s+(a\s+)?greet(ing)?\s*(msg|message)?/i,
+    create_quote:        /create\s+(a\s+)?(custom\s+)?quote/i,
+    create_poem:         /create\s+(a\s+)?poem/i,
+    create_story:        /create\s+(a\s+)?story/i,
+    create_joke:         /create\s+(a\s+)?joke/i,
+    create_rap:          /create\s+(a\s+)?rap/i,
+    create_song:         /create\s+(a\s+)?song/i,
+    write:               /write\s+(a\s+)?(message|text|letter|email|note|essay|paragraph|article|review|speech|toast)/i,
+
+    // ── Productivity ─────────────────────────────────────────────────────────
+    remind:    /\b(remind\s+me|set\s+(a\s+)?reminder|reminder\s+to)\b/i,
+    note_save: /\b(save\s+(a\s+)?note|note\s+down|take\s+note|save\s+this)\b/i,
+    note_get:  /\b(get\s+(my\s+)?notes?|show\s+(my\s+)?notes?|list\s+(my\s+)?notes?|read\s+(my\s+)?notes?)\b/i,
+    poll:      /\b(create|make|start)\s+(a\s+)?poll\b/i,
+    schedule:  /\b(schedule|send\s+later|delayed\s+send)\b.*\bmessage\b/i,
+
+    // ── Media / AI ───────────────────────────────────────────────────────────
+    imagine:   /\b(generate|create|make|draw|paint|design|sketch)\s+(an?\s+)?(ai\s+)?(image|photo|picture|art|artwork|illustration|wallpaper|thumbnail)\b|\bimagine\b/i,
+    tts:       /\b(speak|say\s+this|read\s+aloud|convert\s+to\s+speech|voice|tts)\b/i,
+    quotly:    /\b(quotly|quote\s*sticker|quote\s*card|quote\s*image|q2s)\b/i,
+    describe:  /\b(describe|analyze|caption|identify|what\s+(is|are)?\s*(in|this)?\s*(the\s+)?(image|photo|picture|this))\b/i,
+    summarize: /\b(summarize|summary|tldr|tl;dr|brief(ly)?|shorten|too\s+long)\b/i,
+
+    // ── Info ─────────────────────────────────────────────────────────────────
+    menu:           /^(show\s+)?(menu|commands|help|list\s+commands)/i,
+    about_bot:      /about\s*(the\s*)?(bot|silva|yourself)|who\s*are\s*you|what\s*are\s*you|tell\s*me\s*about\s*(yourself|silva|this\s*bot)/i,
     about_platform: /platform|server|hosting|where\s*(are\s*you|is\s*(the\s*bot|silva))\s*(running|hosted)|system\s*info|server\s*info|specs/i,
-    about_owner: /who\s*(is\s*)?(the\s*)?(owner|creator|developer|made|built|coded)|your\s*(owner|creator|dev)/i,
-    features: /features|what\s*can\s*(you|the\s*bot|silva)\s*do|capabilities|abilities|powers/i,
-    settings: /settings|config|current\s*settings|bot\s*settings|show\s*settings/i,
-    time: /what\s*(time|hour|clock)|current\s*time|time\s*now/i,
-    date: /what\s*(date|day|today)|current\s*date|today/i,
-    calc: /calc|compute|math|solve|\d+\s*[\+\-\*\/\%\^]\s*\d+/i,
-    joke: /^(tell\s+)?(a\s+)?joke|funny|laugh|humor/i,
-    fact: /^(tell\s+)?(a\s+)?fact|did\s*you\s*know|interesting/i,
-    quote: /^(give\s+)?(a\s+)?quote|motivat|inspir/i,
-    flip: /flip\s*(a\s*)?coin|coin\s*flip|heads\s*or\s*tails/i,
-    roll: /roll\s*(a\s*)?dice|dice\s*roll/i,
+    about_owner:    /who\s*(is\s*)?(the\s*)?(owner|creator|developer|made|built|coded)|your\s*(owner|creator|dev)/i,
+    features:       /features|what\s*can\s*(you|the\s*bot|silva)\s*do|capabilities|abilities|powers/i,
+    settings:       /settings|config|current\s*settings|bot\s*settings|show\s*settings/i,
+    plugin_list:    /list\s*plugins|how\s*many\s*(commands|plugins)|plugin\s*count|total\s*commands/i,
+    sudo:           /sudo\s*(list|users|info)|who\s*(are|is)\s*(the\s*)?sudo/i,
+    help:           /^help$|what\s*can\s*you\s*do|your\s*capabilities/i,
+
+    // ── Quick tools ───────────────────────────────────────────────────────────
+    time:     /what\s*(time|hour|clock)|current\s*time|time\s*now/i,
+    date:     /what\s*(date|day|today)|current\s*date|today/i,
+    calc:     /calc|compute|math|solve|\d+\s*[\+\-\*\/\%\^]\s*\d+/i,
+    joke:     /^(tell\s+)?(a\s+)?joke|funny|laugh|humor/i,
+    fact:     /^(tell\s+)?(a\s+)?fact|did\s*you\s*know|interesting/i,
+    quote:    /^(give\s+)?(a\s+)?quote|motivat|inspir/i,
+    flip:     /flip\s*(a\s*)?coin|coin\s*flip|heads\s*or\s*tails/i,
+    roll:     /roll\s*(a\s*)?dice|dice\s*roll/i,
     password: /password|pass\s*gen|random\s*pass/i,
-    color: /color|colour|hex|rgb/i,
-    uptime: /uptime|how\s*long.*running/i,
-    search: /search|google|look\s*up|find\s+(info|about|on)/i,
-    news: /news|headlines|latest\s+news|breaking/i,
+    color:    /color|colour|hex|rgb/i,
+    uptime:   /uptime|how\s*long.*running/i,
+    love:     /love\s*calc|love\s*meter|compatib/i,
+    group:    /group\s*(info|details|members|count)/i,
+
+    // ── Web ───────────────────────────────────────────────────────────────────
+    search:  /search|google|look\s*up|find\s+(info|about|on)/i,
+    news:    /news|headlines|latest\s+news|breaking/i,
     weather: /weather|temperature|forecast|climate/i,
-    ip: /ip\s*(info|address|lookup|check)|my\s*ip|what.*ip/i,
-    love: /love\s*calc|love\s*meter|compatib/i,
-    group: /group\s*(info|details|members|count)/i,
-    plugin_list: /list\s*plugins|how\s*many\s*(commands|plugins)|plugin\s*count|total\s*commands/i,
-    sudo: /sudo\s*(list|users|info)|who\s*(are|is)\s*(the\s*)?sudo/i,
-    help: /^help$|what\s*can\s*you\s*do|your\s*capabilities/i,
+    ip:      /ip\s*(info|address|lookup|check)|my\s*ip|what.*ip/i,
+
+    // ── Settings shortcuts (natural language) ─────────────────────────────────
+    toggle_antibad:    /\b(turn\s+on|enable|activate)\s+(anti\s*bad|bad\s*words?|swear\s*filter|profanity)\b/i,
+    toggle_antibad_off:/\b(turn\s+off|disable|deactivate)\s+(anti\s*bad|bad\s*words?|swear\s*filter|profanity)\b/i,
+    toggle_bluetick:   /\b(turn\s+on|enable)\s+(blue\s*ticks?|read\s*receipts?)\b/i,
+    toggle_bluetick_off:/\b(turn\s+off|disable|hide)\s+(blue\s*ticks?|read\s*receipts?)\b/i,
+    clear_memory:      /\b(forget|clear|reset)\s+(our\s+)?(chat|conversation|memory|history|context)\b/i,
 };
 
 module.exports = {
@@ -295,37 +381,48 @@ module.exports = {
         const { jid, reply, safeSend, isOwner, isGroup, isAdmin, isBotAdmin } = ctx;
         const query = args.join(' ').trim();
         if (!query) return reply(
-            `🤖 *Silva*\n\n` +
-            `I'm ${BOT_IDENTITY.name} v${BOT_IDENTITY.version}, your intelligent WhatsApp assistant!\n\n` +
-            `*Just talk to me naturally:*\n\n` +
+            `🤖 *${BOT_IDENTITY.name} Agent v${BOT_IDENTITY.version}*\n\n` +
+            `Your intelligent WhatsApp assistant — just talk naturally!\n\n` +
             `🎵 *Music & Media*\n` +
-            `• "play u me luv"\n` +
-            `• "lyrics blinding lights"\n` +
-            `• "tiktok <url>"\n` +
-            `• "youtube video shape of you"\n\n` +
+            `• "silva play <song>" • "silva lyrics <song>"\n` +
+            `• "silva tiktok <url>" • "silva youtube video <name>"\n` +
+            `• "silva speak Hello world" _(text-to-speech)_\n\n` +
+            `🎨 *AI & Images*\n` +
+            `• "silva generate image of a lion in space"\n` +
+            `• "silva describe" _(reply to any photo)_\n` +
+            `• "silva summarize" _(reply to a long message)_\n` +
+            `• "silva quotly" _(reply to a message → quote sticker)_\n\n` +
             `📲 *Downloads*\n` +
-            `• "instagram <url>"\n` +
-            `• "facebook <url>"\n` +
-            `• "spotify bad guy"\n` +
-            `• "pinterest aesthetic"\n\n` +
+            `• "silva instagram <url>" • "silva facebook <url>"\n` +
+            `• "silva spotify <name>" • "silva pinterest <query>"\n\n` +
+            `⏰ *Productivity*\n` +
+            `• "silva remind me in 30m to call mom"\n` +
+            `• "silva save note shopping: milk, eggs"\n` +
+            `• "silva get my notes"\n` +
+            `• "silva create a poll: Question | A | B | C"\n` +
+            `• "silva schedule message at 9pm: team meeting"\n\n` +
             `🛠️ *Tools*\n` +
-            `• "sticker" (reply to a photo)\n` +
-            `• "translate hello to french"\n` +
-            `• "wiki artificial intelligence"\n` +
-            `• "define resilience"\n` +
-            `• "qr code https://example.com"\n` +
-            `• "screenshot https://google.com"\n\n` +
-            `📋 *Run Any Bot Command*\n` +
-            `• "run menu" • "do alive"\n` +
-            `• "use <any command>"\n\n` +
-            `✍️ *Create Content*\n` +
-            `• "create a bio" • "create welcome message"\n` +
-            `• "write a poem" • "create group rules"\n\n` +
+            `• "silva sticker" _(reply to photo)_\n` +
+            `• "silva translate hello to french"\n` +
+            `• "silva wiki artificial intelligence"\n` +
+            `• "silva weather Nairobi"\n` +
+            `• "silva qr code https://example.com"\n\n` +
+            `👥 *Group Management*\n` +
+            `• "silva change group name to X"\n` +
+            `• "silva mute/unmute group"\n` +
+            `• "silva tag all members"\n` +
+            `• "silva kick @user" • "silva promote @user"\n` +
+            `• "silva create a poll: Vote | Yes | No"\n\n` +
+            `✍️ *Content Creation*\n` +
+            `• "silva create a bio / welcome / rules / poem"\n` +
+            `• "silva write an email about X"\n\n` +
             `🌐 *Info & Web*\n` +
-            `• "weather Nairobi" • "news" • "search Node.js"\n` +
-            `• "who is the owner" • "show features"\n\n` +
-            `🧠 *AI Chat* — Ask me anything!\n\n` +
-            `_No prefix needed — just say: silva play u me luv_`
+            `• "silva weather / news / search / ip info"\n` +
+            `• "silva about bot / platform / owner / settings"\n\n` +
+            `🧠 *AI Chat* — Ask me anything! I remember our conversation.\n` +
+            `• "silva forget" — clears chat memory\n\n` +
+            `📋 *Run Any Command:* "silva run <command>"\n\n` +
+            `_${pluginMap().size}+ commands available • Platform: ${BOT_IDENTITY.platform}_`
         );
 
         let response = '';
@@ -1056,6 +1153,200 @@ module.exports = {
             } catch (e) { reply(`❌ Could not fetch group info: ${e.message}`); }
             return;
 
+        // ── Productivity handlers ─────────────────────────────────────────────
+        } else if (agentActions.remind.test(query)) {
+            // "silva remind me in 30 minutes to check email"
+            const pm = pluginMap();
+            const plugin = pm.get('remind') || pm.get('reminder');
+            const cleaned = query.replace(agentActions.remind, '').trim();
+            if (plugin) {
+                try { await plugin.run(sock, message, cleaned.split(/\s+/), ctx); }
+                catch (e) { reply(`❌ Failed: ${e.message}`); }
+            } else {
+                reply(
+                    `⏰ *Reminder Setup*\n\n` +
+                    `Use: \`.remind <time> <message>\`\n\n` +
+                    `_Examples:_\n• \`.remind 30m check the oven\`\n• \`.remind 2h call mom\`\n• \`.remind 1d meeting at 9am\``
+                );
+            }
+            return;
+
+        } else if (agentActions.note_save.test(query)) {
+            const pm = pluginMap();
+            const plugin = pm.get('notes') || pm.get('note');
+            const noteContent = query.replace(agentActions.note_save, '').trim();
+            if (!noteContent) return reply(`❓ What should I save?\n\nExample: _silva save note shopping list: milk, eggs, bread_`);
+            if (plugin) {
+                try { await plugin.run(sock, message, ['save', ...noteContent.split(/\s+/)], ctx); }
+                catch { await plugin.run(sock, message, noteContent.split(/\s+/), ctx); }
+            } else {
+                reply(`📝 Use \`.notes save <name> <content>\` to save a note.`);
+            }
+            return;
+
+        } else if (agentActions.note_get.test(query)) {
+            const pm = pluginMap();
+            const plugin = pm.get('notes') || pm.get('note');
+            const noteName = query.replace(agentActions.note_get, '').trim();
+            if (plugin) {
+                try { await plugin.run(sock, message, noteName ? ['get', noteName] : ['list'], ctx); }
+                catch (e) { reply(`❌ Failed: ${e.message}`); }
+            } else {
+                reply(`📝 Use \`.notes list\` to see your notes, or \`.notes get <name>\` to read one.`);
+            }
+            return;
+
+        } else if (agentActions.poll.test(query)) {
+            const pm = pluginMap();
+            const plugin = pm.get('poll');
+            // Parse "silva create a poll: Question | Option A | Option B | Option C"
+            const pollContent = query.replace(agentActions.poll, '').replace(/^[:\-\s]+/, '').trim();
+            if (!pollContent) {
+                return reply(
+                    `📊 *Create a Poll*\n\n` +
+                    `Format: _silva create a poll: Question | Option 1 | Option 2 | Option 3_\n\n` +
+                    `Example: _silva create a poll: Favorite color? | Red | Blue | Green_`
+                );
+            }
+            if (plugin) {
+                try { await plugin.run(sock, message, pollContent.split(/\s+/), ctx); }
+                catch (e) { reply(`❌ Failed: ${e.message}`); }
+            } else {
+                const parts = pollContent.split(/\s*\|\s*/);
+                const question = parts[0];
+                const options = parts.slice(1);
+                try {
+                    await sock.sendMessage(jid, {
+                        poll: {
+                            name: question,
+                            values: options.length >= 2 ? options : ['Yes', 'No'],
+                            selectableCount: 1,
+                        },
+                    }, { quoted: message });
+                } catch (e) { reply(`❌ Could not create poll: ${e.message}`); }
+            }
+            return;
+
+        } else if (agentActions.schedule.test(query)) {
+            const pm = pluginMap();
+            const plugin = pm.get('schedule') || pm.get('sched');
+            const schedContent = query.replace(agentActions.schedule, '').trim();
+            if (plugin) {
+                try { await plugin.run(sock, message, schedContent.split(/\s+/), ctx); }
+                catch (e) { reply(`❌ Failed: ${e.message}`); }
+            } else {
+                reply(`⏱️ Use \`.schedule <time> <message>\` to schedule a message.`);
+            }
+            return;
+
+        // ── Media / AI handlers ───────────────────────────────────────────────
+        } else if (agentActions.imagine.test(query)) {
+            const pm = pluginMap();
+            const plugin = pm.get('imagine') || pm.get('generate') || pm.get('aiimage');
+            const prompt = query
+                .replace(/\b(generate|create|make|draw|paint|design|sketch|imagine)\s+(an?\s+)?(ai\s+)?(image|photo|picture|art|artwork|illustration|wallpaper|thumbnail)\b/gi, '')
+                .replace(/\bimagine\b/gi, '')
+                .trim();
+            if (!prompt) return reply(`🎨 What image should I generate?\n\nExample: _silva generate an image of a lion wearing a gold crown in a forest_`);
+            await safeSend({ text: `🎨 _Generating: "${prompt}"..._` }, { quoted: message });
+            if (plugin) {
+                try { await plugin.run(sock, message, prompt.split(/\s+/), ctx); }
+                catch (e) { reply(`❌ Failed: ${e.message}`); }
+            } else {
+                try {
+                    const seed = Math.floor(Math.random() * 999999);
+                    const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${seed}&nologo=true&model=flux`;
+                    const res = await axios.get(imgUrl, { responseType: 'arraybuffer', timeout: 60000 });
+                    await sock.sendMessage(jid, {
+                        image: Buffer.from(res.data),
+                        caption: `🎨 *AI Image*\n\n📝 ${prompt}`,
+                    }, { quoted: message });
+                } catch (e) { reply(`❌ Image generation failed: ${e.message}`); }
+            }
+            return;
+
+        } else if (agentActions.tts.test(query)) {
+            const pm = pluginMap();
+            const plugin = pm.get('tts') || pm.get('speech') || pm.get('voice');
+            const text = query.replace(agentActions.tts, '').trim();
+            // Also check quoted message for text to speak
+            const quotedText = message.message?.extendedTextMessage?.contextInfo?.quotedMessage?.conversation || '';
+            const speakText = text || quotedText;
+            if (!speakText) return reply(`🔊 What should I say?\n\nExample: _silva speak Hello everyone!_`);
+            if (plugin) {
+                try { await plugin.run(sock, message, speakText.split(/\s+/), ctx); }
+                catch (e) { reply(`❌ Failed: ${e.message}`); }
+            } else {
+                reply(`🔊 Use \`.tts <text>\` to convert text to speech.`);
+            }
+            return;
+
+        } else if (agentActions.quotly.test(query)) {
+            const pm = pluginMap();
+            const plugin = pm.get('quotly') || pm.get('quote2img') || pm.get('q2s');
+            const text = query.replace(agentActions.quotly, '').trim();
+            if (plugin) {
+                try { await plugin.run(sock, message, text ? text.split(/\s+/) : [], ctx); }
+                catch (e) { reply(`❌ Failed: ${e.message}`); }
+            } else {
+                reply(`💬 Reply to a message and use \`.quotly\` to create a quote sticker.`);
+            }
+            return;
+
+        } else if (agentActions.describe.test(query)) {
+            const pm = pluginMap();
+            const plugin = pm.get('describe') || pm.get('caption') || pm.get('analyze');
+            const question = query.replace(agentActions.describe, '').trim() || 'Describe this image in detail';
+            if (plugin) {
+                try { await plugin.run(sock, message, question.split(/\s+/), ctx); }
+                catch (e) { reply(`❌ Failed: ${e.message}`); }
+            } else {
+                reply(`👁️ Reply to an image and use \`.describe\` to get an AI description.`);
+            }
+            return;
+
+        } else if (agentActions.summarize.test(query)) {
+            const pm = pluginMap();
+            const plugin = pm.get('summarize') || pm.get('summary') || pm.get('tldr');
+            const text = query.replace(agentActions.summarize, '').trim();
+            if (plugin) {
+                try { await plugin.run(sock, message, text ? text.split(/\s+/) : [], ctx); }
+                catch (e) { reply(`❌ Failed: ${e.message}`); }
+            } else {
+                reply(`📝 Reply to a long message and use \`.summarize\` for a quick summary.`);
+            }
+            return;
+
+        // ── Settings shortcuts (natural language) ─────────────────────────────
+        } else if (agentActions.toggle_antibad.test(query)) {
+            if (!isOwner && !isAdmin) return reply(`⛔ Admin permission required.`);
+            config.ANTI_BAD = true;
+            reply(`✅ *Anti-Bad Words: ON*\n\nProfanity filter is now active in groups. Messages with bad words will be auto-deleted.`);
+            return;
+
+        } else if (agentActions.toggle_antibad_off.test(query)) {
+            if (!isOwner && !isAdmin) return reply(`⛔ Admin permission required.`);
+            config.ANTI_BAD = false;
+            reply(`✅ *Anti-Bad Words: OFF*\n\nProfanity filter disabled.`);
+            return;
+
+        } else if (agentActions.toggle_bluetick.test(query)) {
+            if (!isOwner) return reply(`⛔ Owner permission required.`);
+            config.READ_RECEIPT = true;
+            reply(`👁️ *Blue Ticks: ON*\n\nRead receipts are now visible.`);
+            return;
+
+        } else if (agentActions.toggle_bluetick_off.test(query)) {
+            if (!isOwner) return reply(`⛔ Owner permission required.`);
+            config.READ_RECEIPT = false;
+            reply(`🫥 *Blue Ticks: OFF*\n\nRead receipts hidden — your views are private.`);
+            return;
+
+        } else if (agentActions.clear_memory.test(query)) {
+            conversationMemory.delete(jid);
+            reply(`🧹 *Memory cleared!*\n\nI've forgotten our conversation history. Fresh start! 🤖`);
+            return;
+
         } else {
             // ── Natural language intent detection ────────────────────────────
             // Understands phrases like "play u me luv", "sticker", "translate hello"
@@ -1104,11 +1395,17 @@ module.exports = {
             const smart = getSmartResponse(query);
             if (smart) {
                 response = `🤖 *Silva*\n\n${smart}`;
+                rememberMessage(jid, 'user', query);
+                rememberMessage(jid, 'bot', smart);
             } else {
-                // ── 2. Free AI APIs (no key required) ────────────────────────
-                let aiReply = await askFreeAI(query);
+                // Save user message to memory before calling AI
+                rememberMessage(jid, 'user', query);
+
+                // ── 2. Free AI APIs with conversation context ─────────────────
+                let aiReply = await askFreeAI(query, jid);
+
                 if (!aiReply) {
-                    // ── 3. Gemini (bonus — only if key is set) ───────────────
+                    // ── 3. Gemini with conversation history ───────────────────
                     try {
                         const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_KEY || '';
                         if (apiKey) {
@@ -1118,33 +1415,54 @@ module.exports = {
                                 model: 'gemini-1.5-flash',
                                 generationConfig: { temperature: 0.85, maxOutputTokens: 800 },
                             });
-                            const systemPrompt =
-                                `You are Silva, an intelligent WhatsApp bot assistant built on ${BOT_IDENTITY.name} v${BOT_IDENTITY.version}. ` +
-                                `You were created by ${BOT_IDENTITY.developer}. The bot owner is ${config.OWNER_NAME}. ` +
-                                `Be concise, friendly, and helpful. Format for WhatsApp: use *bold*, avoid markdown headers.`;
-                            const chat = model.startChat({
-                                history: [
-                                    { role: 'user', parts: [{ text: systemPrompt }] },
-                                    { role: 'model', parts: [{ text: `Got it! I'm Silva, ready to help.` }] },
-                                ],
-                            });
+                            // Build Gemini conversation history from memory
+                            const mem = getMemory(jid).slice(-6);
+                            const geminiHistory = [
+                                {
+                                    role: 'user',
+                                    parts: [{
+                                        text: `You are Silva, an intelligent WhatsApp bot assistant built on ${BOT_IDENTITY.name} v${BOT_IDENTITY.version}. ` +
+                                              `You were created by ${BOT_IDENTITY.developer}. The bot owner is ${config.OWNER_NAME}. ` +
+                                              `Be concise, friendly, and helpful. Format for WhatsApp: use *bold*, avoid markdown headers. ` +
+                                              `Never break character. Keep replies under 200 words unless asked for more.`,
+                                    }],
+                                },
+                                { role: 'model', parts: [{ text: `Got it! I'm Silva, ready to help. 🤖` }] },
+                                ...mem.slice(0, -1).map(m => ({
+                                    role: m.role === 'user' ? 'user' : 'model',
+                                    parts: [{ text: m.text }],
+                                })),
+                            ];
+                            const chat = model.startChat({ history: geminiHistory });
                             const result = await chat.sendMessage(query);
                             aiReply = result.response.text();
                         }
-                    } catch { /* Gemini unavailable, continue */ }
+                    } catch { /* Gemini unavailable */ }
                 }
+
                 if (aiReply) {
                     response = `🤖 *Silva*\n\n${aiReply}`;
+                    rememberMessage(jid, 'bot', aiReply.slice(0, 300)); // store condensed
                 } else {
+                    // ── 4. Graceful fallback with suggestions ─────────────────
+                    const suggestions = [
+                        `🎵 \`silva play <song>\` — play music`,
+                        `🎨 \`silva generate image of <anything>\` — AI art`,
+                        `🌤️ \`silva weather <city>\` — weather`,
+                        `📚 \`silva wiki <topic>\` — Wikipedia`,
+                        `🌐 \`silva translate <text>\` — translate`,
+                        `📝 \`silva summarize\` — summarize a message`,
+                        `⏰ \`silva remind me in 30m to <task>\` — reminder`,
+                        `📊 \`silva create a poll: Q | A | B\` — poll`,
+                        `👁️ \`silva describe\` — describe an image`,
+                        `👥 \`silva change group name to X\` — group management`,
+                        `📋 \`silva help\` — see all ${pluginMap().size}+ commands`,
+                    ];
                     response =
                         `🤖 *Silva*\n\n` +
-                        `I'm not sure how to help with that right now. Here are some things I *can* do:\n\n` +
-                        `🎵 \`silva play <song>\` — play music\n` +
-                        `🌤️ \`silva weather <city>\` — weather\n` +
-                        `📚 \`silva wiki <topic>\` — Wikipedia\n` +
-                        `🌐 \`silva translate <text>\` — translate\n` +
-                        `👥 \`silva change group name to X\` — rename group\n` +
-                        `📋 \`silva help\` — see all ${pluginMap().size}+ commands`;
+                        `Hmm, I'm not sure about that one. Try one of these:\n\n` +
+                        suggestions.slice(0, 6).join('\n') +
+                        `\n\n_💡 Tip: \`silva forget\` clears our chat memory for a fresh start._`;
                 }
             }
         }
