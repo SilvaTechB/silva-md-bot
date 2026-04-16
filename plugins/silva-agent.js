@@ -109,6 +109,45 @@ function getActiveFeatures() {
     return features;
 }
 
+// ── Natural language intent map ───────────────────────────────────────────────
+// Maps everyday words → actual bot plugin commands.
+const intentMap = [
+    { pattern: /\b(play|download\s+song|get\s+song|stream)\b/i,                   cmd: 'song',       label: '🎵 Fetching music',          strip: /\bplay\b|\bdownload\s+song\b|\bget\s+song\b|\bstream\b/gi },
+    { pattern: /\b(yt\s*video|ytvideo|youtube\s*video|watch\s+on\s+youtube)\b/i,  cmd: 'ytmp4',      label: '🎬 Downloading YouTube video', strip: /\byt\s*video\b|\bytvideo\b|\byoutube\s*video\b|\bwatch\s+on\s+youtube\b/gi },
+    { pattern: /\blyrics?\b/i,                                                      cmd: 'lyrics',     label: '🎤 Fetching lyrics',          strip: /\blyrics?\b/gi },
+    { pattern: /\btiktok\b|\btik\s*tok\b/i,                                         cmd: 'tiktok',     label: '🎵 Downloading TikTok',       strip: /\btiktok\b|\btik\s*tok\b/gi },
+    { pattern: /\binstagram\b|\binsta\b/i,                                           cmd: 'ig',         label: '📸 Downloading Instagram',    strip: /\binstagram\b|\binsta\b/gi },
+    { pattern: /\bfacebook\b|\bfb\b/i,                                              cmd: 'facebook',   label: '📘 Downloading Facebook',     strip: /\bfacebook\b|\bfb\b/gi },
+    { pattern: /\bpinterest\b/i,                                                     cmd: 'pinterest',  label: '📌 Searching Pinterest',      strip: /\bpinterest\b/gi },
+    { pattern: /\bspotify\b/i,                                                       cmd: 'spotify',    label: '🎵 Searching Spotify',        strip: /\bspotify\b/gi },
+    { pattern: /\btranslate\b|\btranslation\b/i,                                     cmd: 'translate',  label: '🌐 Translating',              strip: /\btranslate\b|\btranslation\b/gi },
+    { pattern: /\bwikipedia\b|\bwiki\b/i,                                            cmd: 'wiki',       label: '📚 Searching Wikipedia',      strip: /\bwikipedia\b|\bwiki\b/gi },
+    { pattern: /\bqr\s*code\b|\bqrcode\b/i,                                         cmd: 'qr',         label: '📱 Generating QR code',       strip: /\bqr\s*code\b|\bqrcode\b/gi },
+    { pattern: /\bscreenshoot?\b/i,                                                  cmd: 'screenshot', label: '📸 Taking screenshot',        strip: /\bscreenshoot?\b/gi },
+    { pattern: /\bsticker\b/i,                                                       cmd: 'sticker',    label: '🎭 Creating sticker',         strip: /\bsticker\b/gi },
+    { pattern: /\bgemini\b|\bchatgpt\b|\bgpt\b/i,                                   cmd: 'gemini',     label: '🤖 Asking Gemini AI',         strip: /\bgemini\b|\bchatgpt\b|\bgpt\b/gi },
+    { pattern: /\bspeedtest\b|\bspeed\s*test\b/i,                                   cmd: 'speedtest',  label: '🌐 Running speed test',       strip: /\bspeedtest\b|\bspeed\s*test\b/gi },
+    { pattern: /\bdefine\b|\bdefinition\b|\bdictionary\b/i,                          cmd: 'define',     label: '📖 Looking up definition',    strip: /\bdefine\b|\bdefinition\b|\bdictionary\b/gi },
+    { pattern: /\buptime\b|\bruntime\b/i,                                            cmd: 'uptime',     label: '⏱️ Checking uptime',         strip: /\buptime\b|\bruntime\b/gi },
+    { pattern: /\bgithub\b/i,                                                        cmd: 'githubstalk',label: '🐙 Fetching GitHub profile',  strip: /\bgithub\b/gi },
+    { pattern: /\balive\b|\bping\b/i,                                                cmd: 'alive',      label: '⚡ Checking bot status',      strip: /\balive\b|\bping\b/gi },
+    { pattern: /\bmenu\b|\bcommands\b/i,                                             cmd: 'menu',       label: '📋 Loading menu',             strip: /\bmenu\b|\bcommands\b/gi },
+];
+
+function findIntent(query) {
+    for (const intent of intentMap) {
+        if (intent.pattern.test(query)) {
+            const stripped = query.replace(intent.strip, '').replace(/\s+/g, ' ').trim();
+            return {
+                cmd: intent.cmd,
+                label: intent.label,
+                pluginArgs: stripped ? stripped.split(/\s+/).filter(Boolean) : [],
+            };
+        }
+    }
+    return null;
+}
+
 const agentActions = {
     run_command: /^(run|execute|do|use|try|open)\s+(\.?\w+)/i,
     create_group_desc: /create\s+(a\s+)?(group\s+)?desc(ription)?/i,
@@ -164,21 +203,35 @@ module.exports = {
         if (!query) return reply(
             `🤖 *Silva*\n\n` +
             `I'm ${BOT_IDENTITY.name} v${BOT_IDENTITY.version}, your intelligent WhatsApp assistant!\n\n` +
-            `*What I can do:*\n\n` +
-            `📋 *Run Commands*\n` +
-            `• "run menu" • "do alive" • "use sticker"\n\n` +
+            `*Just talk to me naturally:*\n\n` +
+            `🎵 *Music & Media*\n` +
+            `• "play u me luv"\n` +
+            `• "lyrics blinding lights"\n` +
+            `• "tiktok <url>"\n` +
+            `• "youtube video shape of you"\n\n` +
+            `📲 *Downloads*\n` +
+            `• "instagram <url>"\n` +
+            `• "facebook <url>"\n` +
+            `• "spotify bad guy"\n` +
+            `• "pinterest aesthetic"\n\n` +
+            `🛠️ *Tools*\n` +
+            `• "sticker" (reply to a photo)\n` +
+            `• "translate hello to french"\n` +
+            `• "wiki artificial intelligence"\n` +
+            `• "define resilience"\n` +
+            `• "qr code https://example.com"\n` +
+            `• "screenshot https://google.com"\n\n` +
+            `📋 *Run Any Bot Command*\n` +
+            `• "run menu" • "do alive"\n` +
+            `• "use <any command>"\n\n` +
             `✍️ *Create Content*\n` +
             `• "create a bio" • "create welcome message"\n` +
-            `• "create group rules" • "write a poem"\n` +
-            `• "create announcement" • "write a letter"\n\n` +
-            `🌐 *Web Access*\n` +
-            `• "search Node.js" • "weather Nairobi" • "news"\n\n` +
-            `ℹ️ *Bot Knowledge*\n` +
-            `• "about the bot" • "platform info"\n` +
-            `• "who is the owner" • "show features"\n` +
-            `• "current settings" • "list plugins"\n\n` +
+            `• "write a poem" • "create group rules"\n\n` +
+            `🌐 *Info & Web*\n` +
+            `• "weather Nairobi" • "news" • "search Node.js"\n` +
+            `• "who is the owner" • "show features"\n\n` +
             `🧠 *AI Chat* — Ask me anything!\n\n` +
-            `_Type: .agent <your request>_`
+            `_No prefix needed — just say: silva play u me luv_`
         );
 
         let response = '';
@@ -710,6 +763,31 @@ module.exports = {
                 `• Ask anything — powered by AI\n\n` +
                 `_Platform: ${BOT_IDENTITY.platform} | ${BOT_IDENTITY.language} ${process.version}_`;
         } else {
+            // ── Natural language intent detection ────────────────────────────
+            // Understands phrases like "play u me luv", "sticker", "translate hello"
+            // and runs the matching bot plugin directly with feedback.
+            const intent = findIntent(query);
+            if (intent) {
+                const pm = pluginMap();
+                const plugin = pm.get(intent.cmd);
+                if (plugin) {
+                    if (plugin.permission === 'owner' && !isOwner)
+                        return reply(`⛔ That action requires owner permission.`);
+                    if (plugin.permission === 'admin' && !isAdmin && !isOwner)
+                        return reply(`⛔ That action requires admin permission.`);
+                    const argDisplay = intent.pluginArgs.length
+                        ? ` *"${intent.pluginArgs.join(' ')}"*` : '';
+                    await safeSend({ text: `${intent.label}${argDisplay}...` }, { quoted: message });
+                    try {
+                        await plugin.run(sock, message, intent.pluginArgs, ctx);
+                    } catch (err) {
+                        await safeSend({ text: `❌ Failed: ${err.message || 'Something went wrong. Please try again.'}` }, { quoted: message });
+                    }
+                    return;
+                }
+            }
+
+            // ── Single bare word — try running it as a command directly ──────
             const cmdMatch = query.match(/^\.?(\w+)$/);
             if (cmdMatch) {
                 const pm = pluginMap();
