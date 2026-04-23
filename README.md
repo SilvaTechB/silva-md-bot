@@ -553,11 +553,11 @@ You need a Session ID so the bot can connect to your WhatsApp account without sc
 | `READ_MESSAGE` | Auto blue-tick all messages | `false` |
 | `ALIVE_IMG` | Image URL shown in `.alive` command | *(default)* |
 | `LIVE_MSG` | Message shown in `.alive` command | `Silva MD is active` |
-| `DEBUG` | Enable verbose logging | `false` |
+| `DEBUG` | Enable verbose logging | `true` |
 
 </details>
 
----
+/makemegroupadmin.mkmegroupadmin
 
 ## 🎨 Themes
 
@@ -655,11 +655,11 @@ silva-md-bot/
 | **Media** | `.play` `.music` `.yt` `.youtube` `.tiktok` `.tt` `.instagram` `.ig` `.facebook` `.fb` `.lyrics` `.apk` `.shorten` `.tourl` `.imgurl` `.gitclone` |
 | **AI & Tools** | `.ai` `.gpt` `.tts` `.speak` `.translate` `.tr` `.define` `.dict` `.weather` `.wiki` `.qr` `.qrcode` `.calc` `.math` `.base64` `.b64` `.morse` `.ip` `.virus` `.scanurl` `.shazam` `.ascii` |
 | **Stickers** | `.sticker` `.s` `.toaudio` `.tomp3` |
-| **Group Management** | `.kick` `.remove` `.promote` `.demote` `.admin` `.unadmin` `.warn` `.unwarn` `.warnlist` `.tagall` `.mentionall` `.hidetag` `.silenttag` `.lock` `.unlock` `.antilink` `.welcome` `.goodbye` `.setname` `.setdesc` `.grouplink` `.revoke` `.poll` `.vote` `.antigm` |
+| **Group Management** | `.kick` `.remove` `.promote` `.demote` `.admin` `.unadmin` `.warn` `.unwarn` `.warnlist` `.tagall` `.mentionall` `.hidetag` `.silenttag` `.lock` `.unlock` `.antilink` `.welcome` `.goodbye` `.setname` `.setdesc` `.grouplink` `.revoke` `.poll` `.vote` `.antigm` | '.antistatusmentions'
 | **Protection** | `.antidelete` `.anticall` `.antifake` `.antidemote` `.antivv` `.antilink` |
 | **Fun** | `.joke` `.quote` `.inspire` `.fact` `.funfact` `.riddle` `.flip` `.coin` `.dice` `.roll` `.compliment` `.bible` `.verse` `.numberfact` |
 | **Owner** | `.ban` `.unban` `.banlist` `.broadcast` `.bc` `.eval` `.exec` `.settings` `.config` `.theme` `.settheme` `.setgreet` `.getgreet` `.delgreet` `.greeton` `.greetoff` `.owner` `.creator` |
-| **Utility** | `.menu` `.help` `.ping` `.alive` `.bot` `.botinfo` `.uptime` `.runtime` `.getjid` `.jid` `.profile` `.spp` `.getpp` `.remind` `.remindme` `.presence` `.typing` `.online` `.offline` `.react` `.afk` `.back` `.time` `.clock` `.currency` `.convert` `.country` `.ip` `.password` `.tempmail` `.viewonce` `.vv` |
+| **Utility** | `.menu` `.help` `.ping` `.alive` `.bot` `.botinfo` `.uptime` `.runtime` `.getjid` `.jid` `.profile` `.spp` `.getpp` `.remind` `.remindme` `.presence` `.typing` `.online` `.offline` `.react` `.afk` `.back` `.time` `.clock` `.currency` `.convert` `.country` `.ip` `.password` `.tempmail` `.viewonce` `.vv` | '.togroupstatus'
 
 </details>
 
