@@ -352,9 +352,19 @@ async function handleMessages(sock, message) {
 
         if (usedPrefix === null) {
             // Allow "silva" or "agent" to trigger the AI assistant without any prefix
-            if (/^(silva|agent)\b/i.test(text.trim())) {
-                usedPrefix  = '';
-                commandText = text.trim();
+            if (!m.isGroup || /^(silva|agent)\b/i.test(text.trim())) {
+    if (!text) return;
+    try {
+        await conn.sendPresenceUpdate('composing', m.chat);
+        let response = await fetch(`https://aivv.vercel.app/gemini?query=${encodeURIComponent(text)}`);
+        let res = await response.json();
+        if (res.result) {
+            await m.reply(res.result);
+        }
+    } catch (e) {
+        console.error("Gemini Error:", e);
+    }
+    return;
             } else {
                 // No prefix matched — fire typing indicator then stop
                 if (!message.key.fromMe && (config.AUTO_TYPING || config.AUTO_RECORDING)) {
