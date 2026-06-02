@@ -1,6 +1,8 @@
-// silva.js 
+// silva.js — Updated with fixes for group functionality and error handling
 const { File: BufferFile } = require('node:buffer');
 global.File = BufferFile;
+
+// ── Integrity verification ─────────────────────────────────────────────────
 ;(function _verify() {
     const _p = require('./package.json');
     const _k = [83,105,108,118,97].map(function(c){return String.fromCharCode(c);}).join('');
@@ -14,6 +16,9 @@ global.File = BufferFile;
 })();
 
 // ── Suppress noisy libsignal Bad MAC stack traces ──────────────────────────
+// libsignal calls console.error() directly when Signal decryption fails (Bad MAC).
+// These are non-fatal — Baileys catches them internally and sets m.message = null.
+// We intercept console.error to silence these specific lines so they don't flood logs.
 const _origConsoleError = console.error.bind(console);
 console.error = (...args) => {
     const msg = args.map(a => (typeof a === 'string' ? a : (a?.message || String(a)))).join(' ');
@@ -21,7 +26,7 @@ console.error = (...args) => {
     _origConsoleError(...args);
 };
 
-// ✅ Silva Tech Nexus Property 2025
+// ✅ Silva Tech Inc Property 2025
 const baileys = require('@whiskeysockets/baileys');
 const {
     makeWASocket,
@@ -39,8 +44,9 @@ const {
     generateMessageIDV2
 } = baileys;
 
+// Minimal in-memory message store (makeInMemoryStore was removed in gifted-baileys)
 function makeInMemoryStore() {
-    const messages = new Map(); 
+    const messages = new Map(); // jid -> Map(id -> message)
     const MAX_PER_JID = 200;
     return {
         bind(ev) {
@@ -67,7 +73,7 @@ function makeInMemoryStore() {
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const zlib = require('zlib'); 
+const zlib = require('zlib'); // Added for session decompression
 const express = require('express');
 const P = require('pino');
 const { handleMessages } = require('./handler');
@@ -100,6 +106,9 @@ async function loadSession() {
         const hasTilde = sid.includes('~');
 
         if (sid && hasTilde) {
+            // SESSION_ID is provided in Silva~<b64> format.
+            // Only restore from SESSION_ID if creds.json is missing.
+            // Overwriting on every restart breaks Signal encryption state (Bad MAC errors).
             if (!fs.existsSync(credsPath)) {
                 const [header, b64data] = sid.split('~');
                 if (header !== "Silva" || !b64data) {
@@ -117,6 +126,7 @@ async function loadSession() {
             }
 
         } else if (fs.existsSync(credsPath)) {
+            // No SESSION_ID — reuse the session already on disk (Replit / local mode)
             logMessage('INFO', "📂 Using existing session from disk");
 
         } else {
@@ -514,6 +524,8 @@ async function connectToWhatsApp() {
                 }
                 setTimeout(() => connectToWhatsApp(), 3000);
             } else if (statusCode === 440) {
+                // 440 = "replaced" — another instance connected with the same session.
+                // This means the bot is running simultaneously from two places (e.g. Replit + Heroku).
                 // Only ONE instance can hold a WhatsApp session at a time.
                 // Back off for 60 seconds before retrying — this stops the thrashing loop.
                 logMessage('WARN', '⚠️ Session conflict (440): another instance is using this session. Only one bot can be active at a time. Waiting 60s before retrying...');
@@ -534,19 +546,24 @@ async function connectToWhatsApp() {
                 ? sock.user.id.split(':')[0]
                 : sock.user.id.split('@')[0];
             global.botNum = rawNum;
+            // Strip any device suffix from the LID  e.g. "271476913610986:7@lid" → "271476913610986@lid"
             const rawLid = sock.user.lid || sock.user.id || '';
             global.botLid = rawLid.includes(':')
                 ? rawLid.split(':')[0] + '@' + (rawLid.split('@')[1] || 'lid')
                 : rawLid;
             logMessage('INFO', `Bot LID: ${global.botLid || '(none)'}`);
 
-        
+            // Only fall back to the bot's own number when OWNER_NUMBER is not
+            // explicitly configured — preserves the real owner's number when the
+            // bot runs as a separate WhatsApp account.
+            if (!process.env.OWNER_NUMBER) {
                 config.OWNER_NUMBER = rawNum;
                 logMessage('INFO', `Owner number defaulted to bot number: ${rawNum}`);
             } else {
                 logMessage('INFO', `Owner: ${config.OWNER_NUMBER} | Bot number: ${rawNum}`);
             }
 
+            // Update profile & send welcome
             await updateProfileStatus(sock);
             await sendWelcomeMessage(sock);
 
@@ -615,6 +632,9 @@ async function connectToWhatsApp() {
 
     sock.ev.on('creds.update', saveCreds);
 
+    // ✅ Cache messages for anti-delete
+    // Store pushName + resolved sender phone so delete events can show real names
+    // even when WhatsApp replaces the participant JID with a @lid privacy ID.
     sock.ev.on('messages.upsert', ({ messages }) => {
         if (!Array.isArray(messages)) return;
 
