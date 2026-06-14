@@ -16,7 +16,7 @@
 [![Forks](https://img.shields.io/github/forks/SilvaTechB/silva-md-bot?style=for-the-badge&logo=git&logoColor=white&labelColor=0d1117&color=6f42c1)](https://github.com/SilvaTechB/silva-md-bot/network/members)
 [![Last Commit](https://img.shields.io/github/last-commit/SilvaTechB/silva-md-bot?style=for-the-badge&logo=github&logoColor=white&labelColor=0d1117&color=00d4aa)](https://github.com/SilvaTechB/silva-md-bot/commits)
 [![License](https://img.shields.io/github/license/SilvaTechB/silva-md-bot?style=for-the-badge&logo=opensourceinitiative&logoColor=white&labelColor=0d1117&color=3b82f6)](LICENSE)
-
+[![Deploy to Silva Host](https://host.silvatech.co.ke/button.svg)](https://host.silvatech.co.ke/new?template=https://github.com/SilvaTechB/silva-md-bot)
 <br>
 
 **A powerful, feature-rich WhatsApp bot with 90+ commands, AI integration, media tools, group management, and themed responses — built on Node.js and the Baileys library.**
@@ -28,6 +28,8 @@
 ---
 
 ## ⚡ Deploy Silva MD Bot
+
+[![Deploy to Silva Host](https://host.silvatech.co.ke/button.svg)](https://host.silvatech.co.ke/new?template=https://github.com/SilvaTechB/silva-md-bot)
 
 <div align="center">
 
