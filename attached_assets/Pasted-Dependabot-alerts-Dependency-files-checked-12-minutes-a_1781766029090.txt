@@ -1,0 +1,106 @@
+Dependabot alerts
+Dependency files checked 12 minutes ago
+Give feedback
+is:open 
+
+Select all alerts
+
+Select alert: tough-cookie Prototype Pollution vulnerability
+tough-cookie Prototype Pollution vulnerability Moderate
+#44 opened last month • Detected in tough-cookie (npm) • package-lock.json
+
+Select alert: link-preview-js vulnerable to IPv6 and internal loopback attacks
+link-preview-js vulnerable to IPv6 and internal loopback attacks High Direct
+#128 opened last month • Detected in link-preview-js (npm) • package-lock.json
+
+Select alert: minimatch has a ReDoS via repeated wildcards with non-matching literal in pattern
+minimatch has a ReDoS via repeated wildcards with non-matching literal in pattern High
+#91 opened last month • Detected in minimatch (npm) • package-lock.json
+
+Select alert: axios's shouldBypassProxy does not recognize IPv4-mapped IPv6 addresses, allowing NO_PROXY bypass (incomplete fix for CVE-2025-62718)
+axios's shouldBypassProxy does not recognize IPv4-mapped IPv6 addresses, allowing NO_PROXY bypass (incomplete fix for CVE-2025-62718) High
+#143 opened 3 weeks ago • Detected in axios (npm) • package-lock.json
+
+Select alert: Infinite loop in jpeg-js
+Infinite loop in jpeg-js High
+#38 opened last month • Detected in jpeg-js (npm) • package-lock.json
+
+Select alert: Axios: Proxy-Authorization Credential Leak to Origin Server Across HTTP-to-HTTPS Redirect in Axios Node.js HTTP Adapter
+Axios: Proxy-Authorization Credential Leak to Origin Server Across HTTP-to-HTTPS Redirect in Axios Node.js HTTP Adapter High
+#147 opened 2 weeks ago • Detected in axios (npm) • package-lock.json
+
+Select alert: axios Requests Vulnerable To Possible SSRF and Credential Leakage via Absolute URL
+axios Requests Vulnerable To Possible SSRF and Credential Leakage via Absolute URL High
+#54 opened last month • Detected in axios (npm) • package-lock.json
+
+Select alert: Axios is Vulnerable to Denial of Service via __proto__ Key in mergeConfig
+Axios is Vulnerable to Denial of Service via __proto__ Key in mergeConfig High
+#88 opened last month • Detected in axios (npm) • package-lock.json
+
+Select alert: fast-uri vulnerable to path traversal via percent-encoded dot segments
+fast-uri vulnerable to path traversal via percent-encoded dot segments High
+#129 opened last month • Detected in fast-uri (npm) • package-lock.json
+
+Select alert: ws: Memory exhaustion DoS from tiny fragments and data chunks
+ws: Memory exhaustion DoS from tiny fragments and data chunks High Direct
+#150 opened 12 minutes ago • Detected in ws (npm) • package-lock.json
+
+Select alert: Axios: Regular Expression Denial of Service (ReDoS) via Cookie Name Injection
+Axios: Regular Expression Denial of Service (ReDoS) via Cookie Name Injection High
+#146 opened 2 weeks ago • Detected in axios (npm) • package-lock.json
+
+Select alert: Axios: Proxy-Authorization header leaks to redirect target when proxy is re-evaluated to direct connection
+Axios: Proxy-Authorization header leaks to redirect target when proxy is re-evaluated to direct connection High
+#145 opened 2 weeks ago • Detected in axios (npm) • package-lock.json
+
+Select alert: minimatch has ReDoS: matchOne() combinatorial backtracking via multiple non-adjacent GLOBSTAR segments
+minimatch has ReDoS: matchOne() combinatorial backtracking via multiple non-adjacent GLOBSTAR segments High
+#92 opened last month • Detected in minimatch (npm) • package-lock.json
+
+Select alert: minimatch ReDoS: nested *() extglobs generate catastrophically backtracking regular expressions
+minimatch ReDoS: nested *() extglobs generate catastrophically backtracking regular expressions High
+#93 opened last month • Detected in minimatch (npm) • package-lock.json
+
+Select alert: music-metadata has an infinite loop vulnerability in ASF parser
+music-metadata has an infinite loop vulnerability in ASF parser High
+#99 opened last month • Detected in music-metadata (npm) • package-lock.json
+
+Select alert: fast-uri vulnerable to host confusion via percent-encoded authority delimiters
+fast-uri vulnerable to host confusion via percent-encoded authority delimiters High
+#130 opened last month • Detected in fast-uri (npm) • package-lock.json
+
+Select alert: Axios: Prototype Pollution Gadgets - Response Tampering, Data Exfiltration, and Request Hijacking
+Axios: Prototype Pollution Gadgets - Response Tampering, Data Exfiltration, and Request Hijacking High
+#121 opened last month • Detected in axios (npm) • package-lock.json
+
+Select alert: Axios: Header Injection via Prototype Pollution
+Axios: Header Injection via Prototype Pollution High
+#122 opened last month • Detected in axios (npm) • package-lock.json
+
+Select alert: Axios: Incomplete Fix for CVE-2025-62718 — NO_PROXY Protection Bypassed via RFC 1122 Loopback Subnet (127.0.0.0/8) in Axios 1.15.0
+Axios: Incomplete Fix for CVE-2025-62718 — NO_PROXY Protection Bypassed via RFC 1122 Loopback Subnet (127.0.0.0/8) in Axios 1.15.0 High
+#118 opened last month • Detected in axios (npm) • package-lock.json
+
+Select alert: axios Vulnerable to Credential Theft and Response Hijacking via Prototype Pollution Gadget in Config Merge
+axios Vulnerable to Credential Theft and Response Hijacking via Prototype Pollution Gadget in Config Merge High
+#144 opened 3 weeks ago • Detected in axios (npm) • package-lock.json
+
+Select alert: Axios: unbounded recursion in toFormData causes DoS via deeply nested request data
+Axios: unbounded recursion in toFormData causes DoS via deeply nested request data Moderate
+#124 opened last month • Detected in axios (npm) • package-lock.json
+
+Select alert: Axios: no_proxy bypass via IP alias allows SSRF
+Axios: no_proxy bypass via IP alias allows SSRF Moderate
+#126 opened last month • Detected in axios (npm) • package-lock.json
+
+Select alert: Axios Cross-Site Request Forgery Vulnerability
+Axios Cross-Site Request Forgery Vulnerability Moderate
+#47 opened last month • Detected in axios (npm) • package-lock.json
+
+Select alert: Server-Side Request Forgery in Request
+Server-Side Request Forgery in Request Moderate
+#43 opened last month • Detected in request (npm) • package-lock.json
+
+Select alert: Axios has a NO_PROXY Hostname Normalization Bypass that Leads to SSRF
+Axios has a NO_PROXY Hostname Normalization Bypass that Leads to SSRF Moderate
+#108 opened last month • Detected in axios (npm) • package-lock.json
