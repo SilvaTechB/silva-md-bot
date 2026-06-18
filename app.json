@@ -6,7 +6,7 @@
   "repository": "https://github.com/SilvaTechB/silva-md-bot",
   "website": "https://silvatech.co.ke",
   "success_url": "/",
-  "stack": "heroku-24",
+  "stack": "heroku-26",
   "env": {
     "SESSION_ID": {
       "description": "Your WhatsApp session ID. Get it from the pairing page.",
