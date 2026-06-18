@@ -89,9 +89,9 @@
       "value": "false"
     },
     "ANTICALL": {
-      "description": "Auto-reject incoming calls (true/false).",
+      "description": "Auto-reject all incoming WhatsApp calls and notify owner (true/false).",
       "required": false,
-      "value": "false"
+      "value": "true"
     },
     "TIMEZONE": {
       "description": "Timezone for date/time features (e.g. Africa/Nairobi, America/New_York).",

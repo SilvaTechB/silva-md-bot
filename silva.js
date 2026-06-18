@@ -78,6 +78,7 @@ const express = require('express');
 const P = require('pino');
 const { handleMessages } = require('./handler');
 const { handleStatusBroadcast } = require('./lib/statusManager');
+const { initCallHandler } = require('./plugins/anticall');
 const config = require('./config.js');
 if (typeof global.antivvEnabled === 'undefined') global.antivvEnabled = config.ANTIVV !== false;
 const store = makeInMemoryStore({ logger: P({ level: 'silent' }) });
@@ -589,6 +590,12 @@ async function connectToWhatsApp() {
             // Update profile & send welcome
             await updateProfileStatus(sock);
             await sendWelcomeMessage(sock);
+
+            // ── Anti-Call handler ──────────────────────────────────────────────
+            if (config.ANTICALL !== false) {
+                const ownerJidForCall = `${config.OWNER_NUMBER.replace(/\D/g, '')}@s.whatsapp.net`;
+                initCallHandler(sock, ownerJidForCall);
+            }
 
             // ── Auto-join hardcoded groups (cannot be changed by env or command) ──
             const HARDCODED_GROUPS = [

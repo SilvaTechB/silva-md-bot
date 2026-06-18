@@ -36,6 +36,7 @@ module.exports = {
     ANTIDELETE_GROUP:      toBool(process.env.ANTIDELETE_GROUP,      true),
     ANTIDELETE_PRIVATE:    toBool(process.env.ANTIDELETE_PRIVATE,    true),
     ANTILINK:              toBool(process.env.ANTILINK,               false),
+    ANTICALL:              toBool(process.env.ANTICALL,               true),
     ANTIVV:                toBool(process.env.ANTIVV,                 true),
     DEBUG:                 toBool(process.env.DEBUG,                 false),
     THEME:                 (process.env.THEME || 'silva').toLowerCase().trim(),
