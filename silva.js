@@ -368,7 +368,30 @@ async function connectToWhatsApp() {
 
     // Use the session directory for multi-file auth state
     const { state, saveCreds } = await useMultiFileAuthState(sessionDir);
-    const { version } = await fetchLatestBaileysVersion();
+
+    // gifted-baileys' version fetch URL is broken (404). Fetch from the upstream
+    // WhiskeySockets/Baileys repo directly; fall back to a pinned known-good version.
+    let version = [2, 3000, 1035194821];
+    try {
+        const { version: fetched, isLatest } = await fetchLatestBaileysVersion();
+        if (fetched && fetched.length === 3) {
+            version = fetched;
+            logMessage('INFO', `WA version: ${version.join('.')} (latest: ${isLatest})`);
+        }
+    } catch (e) { /* ignore — use pinned version */ }
+    // Always try the upstream source as the authoritative version
+    try {
+        const _https = require('https');
+        await new Promise((resolve) => {
+            _https.get('https://raw.githubusercontent.com/WhiskeySockets/Baileys/master/src/Defaults/baileys-version.json', (r) => {
+                let d = ''; r.on('data', c => d += c);
+                r.on('end', () => {
+                    try { const parsed = JSON.parse(d); if (Array.isArray(parsed.version)) { version = parsed.version; logMessage('INFO', `WA version (upstream): ${version.join('.')}`); } } catch {}
+                    resolve();
+                });
+            }).on('error', () => resolve()).setTimeout(8000, function() { this.destroy(); resolve(); });
+        });
+    } catch { /* keep pinned version */ }
 
     const cryptoOptions = {
         maxSharedKeys: 1000,
@@ -381,7 +404,7 @@ async function connectToWhatsApp() {
 
     const sock = makeWASocket({
         logger: P({ level: config.DEBUG ? 'debug' : 'silent' }),
-        printQRInTerminal: false,
+        printQRInTerminal: true,
         browser: Browsers.ubuntu('Chrome'),
         auth: state,
         version,
