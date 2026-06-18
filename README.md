@@ -4,7 +4,7 @@
 
 <br>
 
-<img src="https://i.imgur.com/RvEKtPJ.jpeg" width="160" style="border-radius:50%; border: 3px solid #FF00A6; box-shadow: 0 0 30px #FF00A6"/>
+<img src="data/silvamdboticon.png" width="300"/>
 
 <br><br>
 
