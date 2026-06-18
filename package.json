@@ -99,7 +99,11 @@
     "yt-search": "^2.13.1",
     "ytdl-core": "^4.11.5"
   },
-  "overrides": {},
+  "overrides": {
+    "form-data": "^4.0.0",
+    "protobufjs": "^7.0.0",
+    "jsonpath-plus": "^10.0.0"
+  },
   "devDependencies": {
     "prettier": "^3.2.5"
   }
