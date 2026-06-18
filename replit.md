@@ -1,127 +1,166 @@
 # Silva MD Bot
 
-A feature-rich multi-device WhatsApp bot built with Node.js and the Baileys library, featuring 1200+ commands across 196+ plugins, an AI agent, and comprehensive admin tools.
+> A powerful, feature-rich multi-device WhatsApp bot built with Node.js and the Baileys library. 1500+ commands, 214 plugins, AI agent, anti-ban protection, and a live admin dashboard.
+
+---
+
+## Quick Start
+
+| Step | Action |
+|------|--------|
+| 1 | Set `SESSION_ID` secret (format: `Silva~<base64>`) |
+| 2 | Run: `node silva.js` |
+| 3 | Dashboard at `http://localhost:5000` |
+| 4 | Send `.menu` in WhatsApp to see all commands |
+
+---
 
 ## Architecture
 
-- **Runtime**: Node.js 20
-- **Entry point**: `silva.js`
-- **Web dashboard**: `smm/silva.html` — served via Express at port 25680
-- **Plugins**: `plugins/` directory — loaded dynamically on start
-- **Config**: `config.js` reads from `config.env` (if present) or environment variables
-- **Session storage**: `session/` directory (multi-file auth state)
+```
+silva-md-bot/
+├── silva.js          ← Main entry: WhatsApp connection + Express server
+├── handler.js        ← Message router & command dispatcher
+├── config.js         ← Config reader (env vars / config.env)
+├── plugins/          ← 214 plugin files (1500+ commands), loaded dynamically
+├── lib/              ← Shared utilities (theme, statusManager, phone-utils)
+├── themes/           ← 19 theme JSON files (default: silva)
+├── data/             ← Runtime JSON storage (sudo, pairs, warnings, etc.)
+├── session/          ← WhatsApp multi-file auth state
+├── smm/silva.html    ← Admin dashboard (served at port 5000)
+└── utils/            ← Delay, safeSend, warmupGroup helpers
+```
 
-## Key Components
-
-| File/Dir         | Purpose                                         |
-|------------------|-------------------------------------------------|
-| `silva.js`       | Main entry — connects to WhatsApp, runs Express |
-| `handler.js`     | Message handler & command dispatcher            |
-| `config.js`      | Config reader (env vars / config.env)           |
-| `plugins/`       | Individual feature plugins (1200+ commands)     |
-| `themes/`        | Theme JSON files (19 themes — silva default)    |
-| `lib/theme.js`   | Theme loader — `getStr()`, `setActiveTheme()`   |
-| `lib/`           | Shared utilities and functions                  |
-| `utils/`         | Delay, safeSend, warmupGroup helpers            |
-| `smm/silva.html` | Admin dashboard (served as static file)         |
+---
 
 ## Environment Variables
 
-See `sample.env` for the full list. Key ones:
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `SESSION_ID` | — | **Required.** WhatsApp session (`Silva~<base64-gzip>`) |
+| `OWNER_NUMBER` | auto | Bot owner's WhatsApp number (auto-set from bot JID) |
+| `PREFIX` | `.` | Command prefix. Supports comma list: `.` `,` `!` `/` |
+| `BOT_NAME` | `Silva MD` | Bot display name |
+| `MODE` | `both` | `public`, `private`, or `both` |
+| `PORT` | `5000` | HTTP server port |
+| `THEME` | `silva` | Active theme name |
+| `AUTO_STATUS_SEEN` | `true` | Auto-view WhatsApp statuses |
+| `AUTO_STATUS_REACT` | `true` | Auto-react to statuses |
+| `ANTIDELETE_GROUP` | `true` | Forward deleted group messages to owner |
+| `ANTIDELETE_PRIVATE` | `true` | Forward deleted private messages to owner |
+| `ALWAYS_ONLINE` | `true` | Keep bot always online |
+| `DEBUG` | `false` | Enable verbose logging |
 
-- `SESSION_ID` — WhatsApp session (required). Format: `Silva~<base64-gzip>`
-- `OWNER_NUMBER` — Bot owner's WhatsApp number
-- `PREFIX` — Command prefix (default `.`)
-- `MODE` — `public`, `private`, or `both`
-- `PORT` — HTTP server port (default `25680`)
+See `sample.env` for the full list.
 
-## Workflow
-
-- **Command**: `node silva.js`
-- **Port**: 25680 (Express web dashboard)
-- **Output type**: webview
-
-## Deployment
-
-- **Target**: VM (always-running — maintains WhatsApp connection)
-- **Run**: `node silva.js`
+---
 
 ## Plugin System
 
-Plugins use a unified shape (single export or array export):
+Plugins export a single object or array:
+
 ```js
-{ commands, description, permission, group, private, run(sock, message, args, ctx) }
+module.exports = {
+    commands:    ['cmd', 'alias'],
+    description: 'What this does',
+    permission:  'public',   // public | admin | owner
+    group:       true,       // works in groups
+    private:     true,       // works in private chats
+    run: async (sock, message, args, ctx) => { ... }
+};
 ```
 
-**Permission tiers:**
-- `public` — any user
-- `admin` — group admins + owner
-- `owner` — bot owner + sudo users
+**`ctx` object:** `sock, m, message, sender, jid, chat, isGroup, isAdmin, isBotAdmin, isOwner, isSudo, args, text, prefix, groupMetadata, contextInfo, mentionedJid, safeSend, reply`
 
-**Sudo system:** Sudo users get owner-level access to all bot commands. Managed via `.sudo add/del/list/reset` or `.setsudo/.delsudo/.getsudo/.resetsudo`. Only the real owner (matching OWNER_NUMBER or bot number) can manage the sudo list. Sudo list persists in `data/sudo.json` and loads on startup.
+### Permission Tiers
 
-**ctx object keys:** `sock, conn, m, message, sender, jid, chat, isGroup, isAdmin, isBotAdmin, isOwner, isSudo, args, text, prefix, groupMetadata, contextInfo, mentionedJid, safeSend, reply`
+| Level | Who |
+|-------|-----|
+| `public` | Any user |
+| `admin` | Group admins + owner + sudo |
+| `owner` | Bot owner + sudo users only |
 
-## Plugin Categories (180+ files, 1200+ commands)
+### Sudo System
 
-| Category | File(s) | Commands |
-|----------|---------|----------|
-| AI Agent | silva-agent.js | agent, do, silva, assistant, ask |
-| Text Tools | text-tools.js | reverse, upper, lower, mock, morse, binary, base64, rot13, zalgo, leet, etc. (68 cmds) |
-| Math Tools | math-tools.js | add, subtract, multiply, divide, sqrt, fibonacci, bmi, convert, roman, etc. (30+ cmds) |
-| Games | games.js, emoji-games.js | rps, hangman, ttt, trivia, riddles, slots, 8ball, scramble, flagquiz, mathquiz, etc. (70+ cmds) |
-| Utility | utility-tools.js | date, calendar, timer, timezone, qr, choose, notes, todo, uuid, lorem, speedtest, etc. (49 cmds) |
-| Fun Facts | fun-facts.js | animal, space, history, science, tech, food, math, body, country, movie, music, sport facts (26 cmds) |
-| Social | social-tools.js | tagall, hidetag, admins, groupinfo, mute, warn, rules, antiflood, antispam, report, etc. (33 cmds) |
-| Education | education.js | element, country, planet, zodiac, vocab, acronym, currency, flag, phrasebook, nato, etc. (35 cmds) |
-| Entertainment | entertainment.js | pickup lines, dad jokes, poems, memes, horoscopes, personality/mbti, ship, rate, etc. (30+ cmds) |
-| Dev Tools | dev-tools.js | json, urlencode, hash, timestamp, regex, httpcode, ipinfo, password gen, cron, chmod (35 cmds) |
-| Health/Fitness | health-fitness.js | workout, stretching, calories, water, sleep, meditation, steps, heart rate, yoga, recipe (28 cmds) |
-| Random Gen | random-generators.js | fake name/email/phone/id, superpower, nickname, excuse, advice, motivation, affirmation, dream (33 cmds) |
-| Language | language-tools.js | greetings, I love you, proverbs, slang, idioms, rhymes, synonyms, antonyms, palindrome (29 cmds) |
-| Security | security-tools.js | antiban, settings, setprefix, block, setbio, restart, leave, join, antilink, antibadword (38 cmds) |
-| Productivity | productivity.js | pomodoro, habits, goals, journal, budget, flashcards, bookmarks, schedule, gratitude (24 cmds) |
-| Info Lookup | info-lookup.js | dog/cat breeds, superheroes, programming langs, OS info, social platforms, cars, phones (20 cmds) |
-| Crypto/Finance | crypto-finance.js | crypto info, loan calc, savings calc, tax, inflation, bill split, salary, discount (26 cmds) |
-| Misc | misc-extras.js | matrix, uwuify, copypasta, border, rainbow text, bio/caption ideas, zodiac match, text art (42 cmds) |
-| Original Plugins | 160+ original plugin files | sticker, menu, music, tiktok, instagram, youtube, weather, translate, eval, etc. |
+Sudo users have owner-level access. Managed with:
+- `.sudo add/del/list/reset`
+- Only the real owner (matching `OWNER_NUMBER`) can manage sudo
+- Persists in `data/sudo.json`
 
-## Safety Features
+---
 
-- **Rate limiting**: max 30 messages/minute via `safeSend()`
-- **Random jitter**: 100-500ms delay between messages
-- **Anti-spam/flood**: Per-group configurable protection
-- **Message cache**: 3-hour TTL for retry/anti-delete recovery
-- **`seenCmdIds` cleanup**: Auto-clears every 10 minutes
+## Plugin Categories
 
-## GitHub Packages
+| Category | Commands |
+|----------|----------|
+| 🤖 AI Agent | `silva`, `ask`, `agent`, `do`, `assistant` |
+| 🎵 Music & Video | `play`, `music`, `ytmp3`, `ytmp4`, `tiktok`, `tt` |
+| 🔤 Text Tools | `reverse`, `upper`, `lower`, `morse`, `binary`, `base64`, `zalgo`, `leet` (68 cmds) |
+| 🧮 Math | `add`, `subtract`, `multiply`, `divide`, `sqrt`, `fibonacci`, `bmi`, `convert` (30+ cmds) |
+| 🎮 Games | `rps`, `hangman`, `ttt`, `trivia`, `slots`, `8ball`, `scramble`, `flagquiz` (70+ cmds) |
+| 🛠 Utility | `date`, `calendar`, `timer`, `qr`, `notes`, `todo`, `uuid`, `speedtest` (49 cmds) |
+| 🌐 Social/Group | `tagall`, `hidetag`, `admins`, `mute`, `warn`, `antiflood`, `report` (33 cmds) |
+| 📚 Education | `element`, `country`, `planet`, `zodiac`, `vocab`, `currency`, `flag` (35 cmds) |
+| 😂 Entertainment | `pickup`, `dadjoke`, `poem`, `meme`, `horoscope`, `ship`, `rate` (30+ cmds) |
+| 🔒 Security | `antiban`, `setprefix`, `antilink`, `antibadword`, `antispam`, `restart` (38 cmds) |
+| 💪 Health | `workout`, `calories`, `water`, `sleep`, `meditation`, `yoga` (28 cmds) |
+| 💻 Dev Tools | `json`, `hash`, `timestamp`, `regex`, `httpcode`, `password`, `cron` (35 cmds) |
+| 🎲 Random | `fakename`, `superpower`, `excuse`, `advice`, `motivation`, `dream` (33 cmds) |
+| 💰 Finance | `crypto`, `loan`, `savings`, `tax`, `billsplit`, `salary`, `discount` (26 cmds) |
+| 📖 Language | `greet`, `proverb`, `slang`, `idiom`, `rhyme`, `synonym`, `antonym` (29 cmds) |
+| ✅ Productivity | `pomodoro`, `habit`, `goal`, `journal`, `budget`, `flashcard`, `schedule` (24 cmds) |
+| 🎨 Misc/Fun | `matrix`, `uwuify`, `copypasta`, `rainbow`, `zodiacmatch`, `textart` (42 cmds) |
 
-- **npm package**: `@silvatechb/silva-md-bot` — published to GitHub Packages npm registry
-- **Docker image**: `ghcr.io/silvatechb/silva-md-v4` — published to GitHub Container Registry
-- **Auto-publish**: GitHub Actions workflows in `.github/workflows/` auto-publish on release or manual trigger
-- **Config files**: `.npmrc` (registry), `.npmignore` (excludes session/data), `Dockerfile`, `.dockerignore`
-- **Security**: `package.json` author field must be `"Silva"` — integrity check in `silva.js` validates this on startup
+---
 
-## GitHub Push (Pending)
+## Safety & Anti-Ban Features
 
-To push code automatically to GitHub, one of these is needed:
-1. **Connect GitHub via OAuth** — click the GitHub integration in the Replit sidebar and complete the OAuth flow, then ask agent to push.
-2. **GitHub Personal Access Token** — create one at https://github.com/settings/tokens (classic, `repo` scope), add it as a secret named `GITHUB_TOKEN`, then ask agent to push.
+- **Rate limiting** — max 30 sends/minute via `safeSend()`
+- **Random jitter** — 100–500ms delay between messages
+- **Anti-flood** — per-group configurable flood protection
+- **Anti-spam** — pattern-based spam detection and removal
+- **Anti-link** — auto-delete unauthorized group links
+- **Anti-delete** — recovers deleted messages and forwards to owner
+- **Anti-ViewOnce** — auto-reveals view-once media to owner
+- **Anti-demote** — re-promotes demoted admins in protected groups
+- **Message dedup** — `seenCmdIds` set auto-clears every 10 min
+- **Message cache** — 3-hour TTL for retry/anti-delete recovery
 
-The remote is already configured: `origin https://github.com/SilvaTechB/silva-md-bot`
+---
 
-Pending commits to push:
-- `app.json` — essential Heroku deployment config
-- `silva.js` — MaxListeners fix + server-side GitHub API proxy
-- `smm/silva.html` — dashboard uses local `/api/*` routes (no more 403 errors)
+## Deployment
 
-## Notes
+- **Runtime:** Node.js ≥ 20
+- **Command:** `node silva.js`
+- **Port:** `5000` (configurable via `PORT` env var)
+- **Target:** VM / always-running server (maintains WhatsApp connection)
+- **Session:** Stored in `session/` directory; restore from `SESSION_ID` secret on cold start
 
-- The bot requires a `SESSION_ID` secret to connect to WhatsApp. Without it, the web dashboard still runs but the bot won't connect.
-- Session data is stored in the `session/` directory.
-- Baileys: `@whiskeysockets/baileys@6.7.21` — direct stable release (no alias)
-- `config.OWNER_NUMBER` is set dynamically on `connection.update → open` from `sock.user.id` — no need to hardcode it.
-- `handler.js` exports: `handleMessages, safeSend, setupConnectionHandlers, PERM, plugins`
-- Anti-delete (`messages.update` + `messages.delete`) always forwards recovered/edited messages to owner JID only.
-- Anti-demote: `group-participants.update` listener re-promotes demoted admins in groups tracked by `global.antiDemoteGroups` (Set).
-- AFK auto-reply fires before prefix check for non-owner messages; owner messages bypass it so `.back` always works.
+### Auto-Join Groups
+
+The bot hardcodes specific group invite codes in `silva.js` (`HARDCODED_GROUPS` array). These cannot be overridden by environment variables or bot commands — the bot will always rejoin them on every startup.
+
+---
+
+## Key Technical Notes
+
+- **Baileys fork:** `gifted-baileys` via `@whiskeysockets/baileys` alias
+- **WA version:** Fetched live from upstream WhiskeySockets/Baileys on startup (pinned fallback: `2.3000.1035194821`)
+- **LID support:** Full LID↔JID mapping for newer WhatsApp accounts
+- **AFK system:** Auto-reply when AFK; owner `.back` command always bypasses it
+- **Anti-delete:** `messages.update` + `messages.delete` listeners → forwards to owner JID only
+- **Anti-demote:** `group-participants.update` re-promotes admins in `global.antiDemoteGroups`
+- **Session restore:** `SESSION_ID` only writes `creds.json` if it does not already exist (prevents Bad MAC errors)
+
+---
+
+## GitHub
+
+- **Repo:** [github.com/SilvaTechB/silva-md-bot](https://github.com/SilvaTechB/silva-md-bot)
+- **npm package:** `@silvatechb/silva-md-bot` → GitHub Packages
+- **Docker image:** `ghcr.io/silvatechb/silva-md-v4` → GitHub Container Registry
+- **Security:** `package.json` `author` field must equal `"Silva"` — verified on every startup
+
+## User Preferences
+
+- Keep the group auto-join code hardcoded in `silva.js` (`HARDCODED_GROUPS`) so it cannot be changed via env or commands.

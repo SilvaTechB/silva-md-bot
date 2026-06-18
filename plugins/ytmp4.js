@@ -1,49 +1,61 @@
 'use strict';
-const ytdl = require('ytdl-core');
-const fs   = require('fs');
-const path = require('path');
-const os   = require('os');
+
+const axios  = require('axios');
+const playdl = require('play-dl');
+
+const BASE = 'https://apis.davidcyriltech.my.id';
 
 module.exports = {
-    commands:    ['ytmp4', 'ytvideo', 'ytv'],
-    description: 'Download YouTube video (360p/720p)',
+    commands:    ['ytmp4', 'ytvideo', 'ytv', 'yt', 'youtube'],
+    description: 'Download YouTube video (up to 10 min)',
     permission:  'public',
     group:       true,
     private:     true,
+
     run: async (sock, message, args, { sender, contextInfo }) => {
-        const url     = args[0];
-        const quality = args[1] === '720' ? '136' : '18';
-        if (!url || !ytdl.validateURL(url)) {
+        const url = args[0];
+        if (!url || !/^https?:\/\/(www\.)?(youtube\.com|youtu\.be)/.test(url)) {
             return sock.sendMessage(sender, {
-                text: '🎬 Please provide a valid YouTube URL.\nExample: .ytmp4 https://youtu.be/dQw4w9WgXcQ [720]\n_Default quality: 360p. Add 720 for HD._',
+                text: '🎬 Please provide a valid YouTube URL.\nExample: `.ytmp4 https://youtu.be/dQw4w9WgXcQ`',
                 contextInfo
             }, { quoted: message });
         }
-        await sock.sendMessage(sender, { text: `⏳ Downloading video (${args[1] === '720' ? '720p' : '360p'})...`, contextInfo }, { quoted: message });
-        const tmpPath = path.join(os.tmpdir(), `ytvid_${Date.now()}.mp4`);
+
+        await sock.sendMessage(sender, { text: '⏳ Fetching video...', contextInfo }, { quoted: message });
+
         try {
-            const info    = await ytdl.getInfo(url);
-            const details = info.videoDetails;
-            if (details.lengthSeconds > 600) {
-                return sock.sendMessage(sender, { text: '❌ Video too long (max 10 minutes). Use .ytmp3 for audio.', contextInfo }, { quoted: message });
+            let title = 'Video', artist = 'Unknown', duration = '', durationSec = 0;
+            try {
+                const info = await playdl.video_info(url);
+                const d = info.video_details;
+                title       = d.title || title;
+                artist      = d.channel?.name || artist;
+                duration    = d.durationRaw || '';
+                durationSec = d.durationInSec || 0;
+            } catch {}
+
+            if (durationSec > 600) {
+                return sock.sendMessage(sender, {
+                    text: '❌ Video too long (max 10 minutes). Use `.play` for audio only.',
+                    contextInfo
+                }, { quoted: message });
             }
-            await new Promise((resolve, reject) => {
-                const stream = ytdl(url, { quality });
-                const out    = fs.createWriteStream(tmpPath);
-                stream.pipe(out);
-                stream.on('error', reject);
-                out.on('finish', resolve);
-                out.on('error', reject);
-            });
+
+            const { data } = await axios.get(`${BASE}/download/ytmp4?url=${encodeURIComponent(url)}`, { timeout: 30000 });
+            const videoUrl = data?.result?.download_url || data?.result?.downloadUrl || data?.result?.url || data?.url || data?.link;
+            if (!videoUrl) throw new Error('Could not retrieve download link');
+
             await sock.sendMessage(sender, {
-                video:   fs.readFileSync(tmpPath),
-                caption: `▶️ *${details.title}*\n👤 ${details.author.name}  •  ⏱ ${Math.floor(details.lengthSeconds/60)}m ${details.lengthSeconds%60}s`,
+                video:   { url: videoUrl },
+                caption: `▶️ *${title}*\n👤 ${artist}  •  ⏱ ${duration}`,
                 contextInfo
             }, { quoted: message });
-        } catch (e) {
-            await sock.sendMessage(sender, { text: `❌ Video download failed: ${e.message}`, contextInfo }, { quoted: message });
-        } finally {
-            if (fs.existsSync(tmpPath)) try { fs.unlinkSync(tmpPath); } catch {}
+
+        } catch (err) {
+            await sock.sendMessage(sender, {
+                text: `❌ Video download failed: ${err.message}`,
+                contextInfo
+            }, { quoted: message });
         }
     }
 };
