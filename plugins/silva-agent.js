@@ -170,7 +170,8 @@ const intentMap = [
     { pattern: /\bwikipedia\b|\bwiki\b/i,                                                cmd: 'wiki',        label: '📚 Searching Wikipedia',        strip: /\bwikipedia\b|\bwiki\b/gi },
     { pattern: /\btranslate\b|\btranslation\b/i,                                         cmd: 'translate',   label: '🌐 Translating',                strip: /\btranslate\b|\btranslation\b/gi },
     { pattern: /\bdefine\b|\bdefinition\b|\bdictionary\b/i,                              cmd: 'define',      label: '📖 Looking up definition',      strip: /\bdefine\b|\bdefinition\b|\bdictionary\b/gi },
-    { pattern: /\bgithub\b/i,                                                            cmd: 'githubstalk', label: '🐙 Fetching GitHub profile',    strip: /\bgithub\b/gi },
+    // NOTE: \bgithub\b only fires for plain user profiles (not repo paths / silvatech)
+    { pattern: /\bgithub\b(?!.*\/)/i,                                                    cmd: 'githubstalk', label: '🐙 Fetching GitHub profile',    strip: /\bgithub\b/gi },
 
     // ── Productivity ─────────────────────────────────────────────────────────
     { pattern: /\b(remind\s+me|set\s+(a\s+)?reminder|reminder)\b/i,                    cmd: 'remind',      label: '⏰ Setting reminder',           strip: /\b(remind\s+me|set\s+(a\s+)?reminder|reminder)\b/gi },
@@ -369,7 +370,11 @@ const agentActions = {
     calc:     /calc|compute|math|solve|\d+\s*[\+\-\*\/\%\^]\s*\d+/i,
 
     // ── GitHub SilvaTechB (read-only) ─────────────────────────────────────────
-    github_silvatech: /\b(silvatech|silva\s*tech|silvatechwb|silvatechb)\b.*\b(repos?|github|projects?|code|files?|zip|download)\b|\b(repos?|github|projects?|code)\b.*\b(silvatech|silvatechb)\b|\b(list|show|get)\s+(silva\s*tech|silvatechb)\s+(repos?|projects?)\b/i,
+    github_silvatech: /\b(silvatech|silvatechwb|silvatechb|silvarepos)\b|\bsilvatech\s+(repos?|github|projects?|code|files?|zip|download)\b/i,
+
+    // ── GitHub repo file/zip fetch ("send me a clip of SilvaTechB/repo") ──────
+    github_repo_zip:  /\b(clip|zip|archive|download|send\s+me)\b.*\b([\w-]+\/[\w-]+)\b|\b([\w-]+\/[\w-]+)\b.*\b(zip|clone|download)\b/i,
+    github_repo_file: /\b(get|fetch|read|show|send)\b.+\b(from|in|of)\b.+\b([\w\/-]+\/[\w\/-]+\.[\w]+)\b|\b(readme|package\.json|index\.js|config|\.env)\b.*\b(from|in|of)\b.+\bsilva/i,
 
     // ── Fun & knowledge ───────────────────────────────────────────────────────
     riddle_agent:  /\b(riddle|puzzle|brain\s*teaser|solve\s*this)\b/i,
@@ -1381,34 +1386,94 @@ module.exports = {
         } else if (agentActions.github_silvatech.test(query)) {
             const pm = pluginMap();
             const ghPlugin = pm.get('silvatech') || pm.get('silvarepos');
+            // Pass the cleaned query as args so the plugin can parse subcommands
+            const cleanedArgs = query
+                .replace(/\b(silvatech|silvatechwb|silvatechb|silvarepos)\b/gi, '')
+                .replace(/\b(repos?|list|show|get|github|projects?)\b/gi, '')
+                .trim().split(/\s+/).filter(Boolean);
             if (ghPlugin) {
-                try { await ghPlugin.run(sock, message, args, ctx); return; } catch {}
+                try { await ghPlugin.run(sock, message, cleanedArgs, ctx); return; }
+                catch (e) { reply(`❌ GitHub error: ${e.message}`); return; }
             }
-            // Inline fallback: list repos from GitHub API
-            await sock.sendPresenceUpdate('composing', jid);
+            return;
+
+        // ── GitHub repo ZIP download ("send me a clip of SilvaTechB/silva-md-bot") ──
+        } else if (agentActions.github_repo_zip.test(query)) {
+            const repoMatch = query.match(/\b([\w-]+\/[\w-]+)\b/);
+            const fullRepo = repoMatch ? repoMatch[1] : null;
+            if (!fullRepo || fullRepo.includes('silva') === false && !fullRepo.includes('/')) {
+                return reply(`📦 Please specify the repo in *owner/repo* format.\n\nExample: _silva send me a clip of SilvaTechB/silva-md-bot_`);
+            }
+            const [owner, repo] = fullRepo.split('/');
+            await safeSend({ text: `📦 _Preparing download link for *${fullRepo}*..._` }, { quoted: message });
             try {
                 const ghHeaders = { 'User-Agent': 'SilvaMD-Bot/2.0', 'Accept': 'application/vnd.github+json' };
-                const reposRes = await axios.get('https://api.github.com/users/SilvaTechB/repos?sort=updated&per_page=15&type=owner', { headers: ghHeaders, timeout: 12000 });
-                const repos = reposRes.data || [];
-                if (!repos.length) return reply(`📭 No public repositories found for SilvaTechB.`);
-                const lines = [
-                    `🐙 *SilvaTechB GitHub Repos*`,
-                    `🔗 https://github.com/SilvaTechB`,
-                    ``,
-                    `*📦 Repositories (${repos.length})*`,
-                ];
-                for (const r of repos.slice(0, 10)) {
-                    const lang  = r.language ? ` · ${r.language}` : '';
-                    const stars = r.stargazers_count ? ` ⭐${r.stargazers_count}` : '';
-                    const forks = r.forks_count       ? ` 🍴${r.forks_count}`       : '';
-                    lines.push(`• *${r.name}*${lang}${stars}${forks}`);
-                    if (r.description) lines.push(`  _${r.description.slice(0, 70)}_`);
-                }
-                lines.push(``);
-                lines.push(`_Use \`.silvatech <repo>\` for details or to fetch files._`);
-                reply(lines.join('\n'));
+                if (process.env.GITHUB_TOKEN) ghHeaders['Authorization'] = `Bearer ${process.env.GITHUB_TOKEN}`;
+                const res = await axios.get(`https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`, { headers: ghHeaders, timeout: 8000 });
+                const r = res.data;
+                const branch = r.default_branch || 'main';
+                reply(
+                    `📦 *${r.full_name}*\n\n` +
+                    `${r.description ? `📝 ${r.description}\n\n` : ''}` +
+                    `⭐ *${r.stargazers_count}* stars  🍴 *${r.forks_count}* forks\n\n` +
+                    `*⬇️ Download Links*\n` +
+                    `• ZIP: https://github.com/${r.full_name}/archive/refs/heads/${branch}.zip\n` +
+                    `• Tarball: https://github.com/${r.full_name}/archive/refs/heads/${branch}.tar.gz\n\n` +
+                    `*🔗 View on GitHub*\n${r.html_url}\n\n` +
+                    `_Use \`.silvatech ${repo} <filepath>\` to read specific files._`
+                );
             } catch (err) {
-                reply(`❌ Could not fetch SilvaTechB repos: ${err.message}`);
+                const branch = 'main';
+                reply(
+                    `📦 *${fullRepo}*\n\n` +
+                    `*⬇️ Download Links*\n` +
+                    `• ZIP (main): https://github.com/${owner}/${repo}/archive/refs/heads/main.zip\n` +
+                    `• ZIP (master): https://github.com/${owner}/${repo}/archive/refs/heads/master.zip\n\n` +
+                    `_Tap a link to download. Could not verify repo: ${err.message}_`
+                );
+            }
+            return;
+
+        // ── GitHub repo file fetch ────────────────────────────────────────────
+        } else if (agentActions.github_repo_file.test(query)) {
+            // Extract "owner/repo/path" or "file from owner/repo"
+            const repoFileMatch = query.match(/\b([\w-]+\/[\w-]+)\/([\w./\-]+)\b/) ||
+                                  query.match(/\b(readme|package\.json|index\.js|\.env)\b/i);
+            const repoMatch = query.match(/\b([\w-]+\/[\w-]+)\b/);
+            const fileKeyword = query.match(/\b(readme|package\.json|index\.js|config|handler|silva)\b/i)?.[1] || '';
+
+            if (!repoMatch) {
+                return reply(`📄 Specify the repo and file.\n\nExamples:\n• _silva get README from SilvaTechB/silva-md-bot_\n• _.silvatech silva-md-bot README.md_`);
+            }
+
+            const [owner, repo] = repoMatch[1].split('/');
+            const filePath = repoFileMatch?.[3] ||
+                            (fileKeyword.toLowerCase() === 'readme' ? 'README.md' : fileKeyword || 'README.md');
+
+            await safeSend({ text: `📄 _Fetching \`${filePath}\` from *${owner}/${repo}*..._` }, { quoted: message });
+            try {
+                const ghHeaders = { 'User-Agent': 'SilvaMD-Bot/2.0', 'Accept': 'application/vnd.github+json' };
+                if (process.env.GITHUB_TOKEN) ghHeaders['Authorization'] = `Bearer ${process.env.GITHUB_TOKEN}`;
+                const res = await axios.get(
+                    `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${encodeURIComponent(filePath)}`,
+                    { headers: ghHeaders, timeout: 10000 }
+                );
+                const file = res.data;
+                if (file.encoding === 'base64' && file.content) {
+                    const content = Buffer.from(file.content, 'base64').toString('utf8');
+                    const preview = content.length > 3000
+                        ? content.slice(0, 3000) + `\n\n_...file truncated (${content.length} chars total)_`
+                        : content;
+                    reply(`📄 *${owner}/${repo}/${filePath}*\n\n\`\`\`\n${preview}\n\`\`\``);
+                } else {
+                    reply(`📄 *${owner}/${repo}/${filePath}*\n\n🔗 ${file.html_url}\n⬇️ ${file.download_url || 'N/A'}`);
+                }
+            } catch (err) {
+                if (err.response?.status === 404) {
+                    reply(`❌ File not found: \`${owner}/${repo}/${filePath}\`\n\n_Use \`.silvatech ${repo}\` to browse available files._`);
+                } else {
+                    reply(`❌ Could not fetch file: ${err.message}`);
+                }
             }
             return;
 
