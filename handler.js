@@ -221,7 +221,13 @@ async function handleMessages(sock, message) {
         // jid  = the chat to respond to (group JID or private JID)
         // from = the individual who typed the command
         const jid    = message.key.remoteJid;
-        const from   = message.key.participant || jid;
+        // For fromMe private messages participant is undefined and jid is the
+        // recipient — not the sender.  Correct this so ctx.from always refers
+        // to the actual sender (bot's own JID when fromMe, participant when in
+        // a group, or the remote JID for incoming private messages).
+        const _botOwnJid = global.botJid || '';
+        const from = message.key.participant
+            || (message.key.fromMe && !isJidGroup(jid) ? (_botOwnJid || jid) : jid);
         // sender = chat JID for responses (matches legacy plugin expectation of m.key.remoteJid)
         const sender = jid;
         if (!jid || !from) return;
@@ -325,6 +331,7 @@ async function handleMessages(sock, message) {
         }
 
         // ── onMessage hooks — fired for ALL messages (not just commands) ────────
+        // Tracking and auto-reply only for other people's messages (not the bot's own).
         if (!message.key.fromMe) {
             if (typeof global.trackMessage === 'function') try { global.trackMessage(jid, from); } catch {}
             if (typeof global.addXP === 'function') {
@@ -346,15 +353,18 @@ async function handleMessages(sock, message) {
                     }
                 } catch {}
             }
-            for (const p of plugins) {
-                if (typeof p.onMessage !== 'function') continue;
-                try {
-                    await p.onMessage(sock, message, text, {
-                        jid, sender, from, isGroup,
-                        contextInfo: isGroup ? {} : GLOBAL_CONTEXT_INFO
-                    });
-                } catch { /* ignore plugin onMessage errors */ }
-            }
+        }
+        // Plugin onMessage hooks fire for everyone — including the connected
+        // contact (fromMe=true) — so conversation-aware plugins respond to
+        // the owner's own messages in both private and group chats.
+        for (const p of plugins) {
+            if (typeof p.onMessage !== 'function') continue;
+            try {
+                await p.onMessage(sock, message, text, {
+                    jid, sender, from, isGroup,
+                    contextInfo: isGroup ? {} : GLOBAL_CONTEXT_INFO
+                });
+            } catch { /* ignore plugin onMessage errors */ }
         }
 
         // ── Debug: log extracted text so we can trace prefix/command detection ─
