@@ -262,41 +262,43 @@ function getSmartResponse(query) {
 }
 
 // ── AI APIs: all race in parallel — ch.at primary, first valid response wins ──
+// Known-dead domains (ENOTFOUND): paxsenix.biz.id, vapis.my.id — removed.
+// popcat returns literal "Timed Out" string — filtered in tryOne.
+// ch.at returns {"answer":"..."} — read .answer field.
 async function askFreeAI(query, jid, systemPrompt) {
     const contextPrompt = jid ? buildContextPrompt(jid, query) : query;
     const fullPrompt    = systemPrompt
         ? systemPrompt + '\n\nUser: ' + contextPrompt
         : contextPrompt;
 
+    // Reject empty responses AND known error strings that look like valid text
+    const BAD = /^(timed?\s*out|error|sorry|undefined|null|false)$/i;
     const tryOne = async (fn) => {
         const r = await fn();
-        if (r && String(r).trim().length > 2) return String(r).trim();
+        const s = r ? String(r).trim() : '';
+        if (s.length > 4 && !BAD.test(s)) return s;
         throw new Error('empty');
     };
 
     try {
         return await Promise.any([
+            // 1. ch.at — primary (returns {"answer":"..."})
             tryOne(async () => {
                 const res = await axios.post('https://ch.at/api/chat',
                     { message: fullPrompt },
                     { headers: { 'Content-Type': 'application/json', 'User-Agent': 'SilvaMD-Bot/2.0' }, timeout: 10000 }
                 );
-                return res.data?.reply || res.data?.message || res.data?.response || res.data?.result || res.data?.text || null;
+                return res.data?.answer || res.data?.reply || res.data?.message || res.data?.response || res.data?.result || res.data?.text || null;
             }),
-            tryOne(async () => {
-                const res = await axios.get(
-                    'https://api.paxsenix.biz.id/ai/gpt4o?text=' + encodeURIComponent(fullPrompt),
-                    { timeout: 10000 }
-                );
-                return res.data?.message || res.data?.result || null;
-            }),
+            // 2. siputzx DeepSeek
             tryOne(async () => {
                 const res = await axios.get(
                     'https://api.siputzx.my.id/api/ai/deepseek-r1?content=' + encodeURIComponent(fullPrompt),
                     { timeout: 10000 }
                 );
-                return res.data?.data || null;
+                return res.data?.data || res.data?.message || null;
             }),
+            // 3. popcat chatbot (filter "Timed Out" via BAD regex above)
             tryOne(async () => {
                 const res = await axios.get(
                     'https://api.popcat.xyz/chatbot?msg=' + encodeURIComponent(query) +
@@ -305,24 +307,19 @@ async function askFreeAI(query, jid, systemPrompt) {
                 );
                 return res.data?.response || null;
             }),
+            // 4. DuckDuckGo AI chat (free, no key)
             tryOne(async () => {
-                const res = await axios.get(
-                    'https://api.paxsenix.biz.id/ai/claude?text=' + encodeURIComponent(fullPrompt),
-                    { timeout: 10000 }
+                const res = await axios.post('https://duckduckgo.com/duckchat/v1/chat',
+                    { model: 'gpt-4o-mini', messages: [{ role: 'user', content: fullPrompt }] },
+                    { headers: { 'Content-Type': 'application/json', 'x-vqd-4': '4-' }, timeout: 10000 }
                 );
-                return res.data?.message || res.data?.result || null;
+                return res.data?.message || null;
             }),
-            tryOne(async () => {
-                const res = await axios.get(
-                    'https://vapis.my.id/api/openai?q=' + encodeURIComponent(fullPrompt),
-                    { timeout: 10000 }
-                );
-                return res.data?.message || res.data?.result || res.data?.response || null;
-            }),
+            // 5. lance-frank (render.com)
             tryOne(async () => {
                 const res = await axios.get(
                     'https://lance-frank-asta.onrender.com/api/gpt?q=' + encodeURIComponent(fullPrompt),
-                    { timeout: 10000 }
+                    { timeout: 12000 }
                 );
                 return res.data?.message || res.data?.result || null;
             }),
