@@ -261,44 +261,75 @@ function getSmartResponse(query) {
     return null;
 }
 
-// ── Free AI APIs (ch.at primary, no API key required) ────────────────────────
-async function askFreeAI(query, jid) {
+// ── AI APIs: all race in parallel — ch.at primary, first valid response wins ──
+async function askFreeAI(query, jid, systemPrompt) {
     const contextPrompt = jid ? buildContextPrompt(jid, query) : query;
-    const apis = [
-        // ── Primary: ch.at (no API key, free forever) ────────────────────────
-        async () => {
-            const res = await axios.post('https://ch.at/api/chat',
-                { message: contextPrompt },
-                { headers: { 'Content-Type': 'application/json', 'User-Agent': 'SilvaMD-Bot/2.0' }, timeout: 20000 }
-            );
-            return res.data?.reply || res.data?.message || res.data?.response ||
-                   res.data?.result || res.data?.text || null;
-        },
-        // ── Fallback 1: paxsenix GPT-4o ──────────────────────────────────────
-        async () => {
-            const res = await axios.get(`https://api.paxsenix.biz.id/ai/gpt4o?text=${encodeURIComponent(contextPrompt)}`, { timeout: 15000 });
-            return res.data?.message || res.data?.result || null;
-        },
-        // ── Fallback 2: siputzx DeepSeek ─────────────────────────────────────
-        async () => {
-            const res = await axios.get(`https://api.siputzx.my.id/api/ai/deepseek-r1?content=${encodeURIComponent(contextPrompt)}`, { timeout: 15000 });
-            return res.data?.data || null;
-        },
-        // ── Fallback 3: Popcat (simple queries) ──────────────────────────────
-        async () => {
-            const res = await axios.get(`https://api.popcat.xyz/chatbot?msg=${encodeURIComponent(query)}&owner=${encodeURIComponent(config.OWNER_NAME || 'Silva')}&botname=Silva`, { timeout: 8000 });
-            return res.data?.response || null;
-        },
-        // ── Fallback 4: paxsenix Claude ──────────────────────────────────────
-        async () => {
-            const res = await axios.get(`https://api.paxsenix.biz.id/ai/claude?text=${encodeURIComponent(contextPrompt)}`, { timeout: 15000 });
-            return res.data?.message || res.data?.result || null;
-        },
-    ];
-    for (const fn of apis) {
-        try { const r = await fn(); if (r && r.length > 2) return String(r).trim(); } catch { /* next */ }
+    const fullPrompt    = systemPrompt
+        ? systemPrompt + '\n\nUser: ' + contextPrompt
+        : contextPrompt;
+
+    const tryOne = async (fn) => {
+        const r = await fn();
+        if (r && String(r).trim().length > 2) return String(r).trim();
+        throw new Error('empty');
+    };
+
+    try {
+        return await Promise.any([
+            tryOne(async () => {
+                const res = await axios.post('https://ch.at/api/chat',
+                    { message: fullPrompt },
+                    { headers: { 'Content-Type': 'application/json', 'User-Agent': 'SilvaMD-Bot/2.0' }, timeout: 10000 }
+                );
+                return res.data?.reply || res.data?.message || res.data?.response || res.data?.result || res.data?.text || null;
+            }),
+            tryOne(async () => {
+                const res = await axios.get(
+                    'https://api.paxsenix.biz.id/ai/gpt4o?text=' + encodeURIComponent(fullPrompt),
+                    { timeout: 10000 }
+                );
+                return res.data?.message || res.data?.result || null;
+            }),
+            tryOne(async () => {
+                const res = await axios.get(
+                    'https://api.siputzx.my.id/api/ai/deepseek-r1?content=' + encodeURIComponent(fullPrompt),
+                    { timeout: 10000 }
+                );
+                return res.data?.data || null;
+            }),
+            tryOne(async () => {
+                const res = await axios.get(
+                    'https://api.popcat.xyz/chatbot?msg=' + encodeURIComponent(query) +
+                    '&owner=' + encodeURIComponent(config.OWNER_NAME || 'Silva') + '&botname=Silva',
+                    { timeout: 8000 }
+                );
+                return res.data?.response || null;
+            }),
+            tryOne(async () => {
+                const res = await axios.get(
+                    'https://api.paxsenix.biz.id/ai/claude?text=' + encodeURIComponent(fullPrompt),
+                    { timeout: 10000 }
+                );
+                return res.data?.message || res.data?.result || null;
+            }),
+            tryOne(async () => {
+                const res = await axios.get(
+                    'https://vapis.my.id/api/openai?q=' + encodeURIComponent(fullPrompt),
+                    { timeout: 10000 }
+                );
+                return res.data?.message || res.data?.result || res.data?.response || null;
+            }),
+            tryOne(async () => {
+                const res = await axios.get(
+                    'https://lance-frank-asta.onrender.com/api/gpt?q=' + encodeURIComponent(fullPrompt),
+                    { timeout: 10000 }
+                );
+                return res.data?.message || res.data?.result || null;
+            }),
+        ]);
+    } catch {
+        return null;
     }
-    return null;
 }
 
 const agentActions = {
@@ -1558,154 +1589,128 @@ module.exports = {
             return;
 
         } else {
-            // ── Step 1: Send query to ch.at first — AI decides tool or answers ─
-            await sock.sendPresenceUpdate('composing', jid);
-
+            // ── Natural language: intent map first (instant), then AI races in parallel ──
             const pm = pluginMap();
-            const toolList = [...pm.keys()].slice(0, 100).join(', ');
-            const agentSystemPrompt =
-                `You are Silva, an AI WhatsApp bot assistant. The user sent: "${query}".\n` +
-                `Available bot commands: ${toolList}.\n` +
-                `If this query should use a bot command, reply with exactly: TOOL:<command>|<arguments>\n` +
-                `Examples:\n` +
-                `  TOOL:play|Shape of You Ed Sheeran\n` +
-                `  TOOL:translate|hello world to french\n` +
-                `  TOOL:tiktok|https://vm.tiktok.com/abc\n` +
-                `  TOOL:sticker|\n` +
-                `  TOOL:wiki|black holes\n` +
-                `If it is a general question or conversation, answer it naturally and concisely. Do not use markdown headers.`;
 
-            let chatAtReply = null;
-            try {
-                const chatAtRes = await axios.post(
-                    'https://ch.at/api/chat',
-                    { message: agentSystemPrompt },
-                    { headers: { 'Content-Type': 'application/json', 'User-Agent': 'SilvaMD-Bot/2.0' }, timeout: 20000 }
-                );
-                const d = chatAtRes.data;
-                const raw = d?.reply || d?.message || d?.response || d?.result || d?.text || null;
-                if (raw && String(raw).trim().length > 2) chatAtReply = String(raw).trim();
-            } catch { /* ch.at unavailable — fall through */ }
-
-            // ── Step 2: Parse ch.at response — execute tool or show AI reply ──
-            if (chatAtReply && /^TOOL:/i.test(chatAtReply)) {
-                const toolLine = chatAtReply.replace(/^TOOL:/i, '').split('\n')[0].trim();
-                const pipeIdx  = toolLine.indexOf('|');
-                const cmdName  = (pipeIdx >= 0 ? toolLine.slice(0, pipeIdx) : toolLine).trim().toLowerCase();
-                const argStr   = pipeIdx >= 0 ? toolLine.slice(pipeIdx + 1).trim() : '';
-                const toolArgs = argStr ? argStr.split(/\s+/).filter(Boolean) : [];
-                const plugin   = pm.get(cmdName);
-
+            // Step 1: fast regex intent matching (zero latency)
+            const intent = findIntent(query);
+            if (intent) {
+                const plugin = pm.get(intent.cmd);
                 if (plugin) {
                     if (plugin.permission === 'owner' && !isOwner)
                         return reply(`⛔ That action requires owner permission.`);
                     if (plugin.permission === 'admin' && !isAdmin && !isOwner)
                         return reply(`⛔ That action requires admin permission.`);
-                    const argDisplay = toolArgs.length ? ` *"${toolArgs.join(' ')}"*` : '';
-                    await safeSend({ text: `🔧 _${cmdName}${argDisplay}..._` }, { quoted: message });
+                    const argDisplay = intent.pluginArgs.length ? ` *"${intent.pluginArgs.join(' ')}"*` : '';
+                    await safeSend({ text: `${intent.label}${argDisplay}...` }, { quoted: message });
                     try {
-                        await plugin.run(sock, message, toolArgs, ctx);
+                        await plugin.run(sock, message, intent.pluginArgs, ctx);
                     } catch (err) {
                         await safeSend({ text: `❌ Failed: ${err.message || 'Something went wrong.'}` }, { quoted: message });
                     }
                     return;
                 }
-                // ch.at said TOOL but command doesn't exist — fall through to AI reply
-                chatAtReply = null;
             }
 
-            if (chatAtReply && chatAtReply.length > 2) {
-                // ch.at gave a conversational answer — use it directly
-                response = `🤖 *Silva*\n\n${chatAtReply}`;
+            // Step 2: bare single word — run as direct command
+            const cmdMatch = query.match(/^\.?(\w+)$/);
+            if (cmdMatch) {
+                const potentialCmd = cmdMatch[1].toLowerCase();
+                if (pm.has(potentialCmd)) {
+                    const plugin = pm.get(potentialCmd);
+                    if (plugin.permission === 'owner' && !isOwner)
+                        return reply(`⛔ \`${potentialCmd}\` requires owner permission.`);
+                    if (plugin.permission === 'admin' && !isAdmin && !isOwner)
+                        return reply(`⛔ \`${potentialCmd}\` requires admin permission.`);
+                    try { await plugin.run(sock, message, [], ctx); return; } catch (err) {
+                        return reply(`❌ Error running \`${potentialCmd}\`: ${err.message}`);
+                    }
+                }
+            }
+
+            // Step 3: instant built-in smart responses (no API call)
+            const smart = getSmartResponse(query);
+            if (smart) {
+                response = `🤖 *Silva*\n\n${smart}`;
                 rememberMessage(jid, 'user', query);
-                rememberMessage(jid, 'bot', chatAtReply);
+                rememberMessage(jid, 'bot', smart);
             } else {
-                // ── Step 3: ch.at failed — fall back to regex intent map ─────
-                const intent = findIntent(query);
-                if (intent) {
-                    const plugin = pm.get(intent.cmd);
-                    if (plugin) {
-                        if (plugin.permission === 'owner' && !isOwner)
-                            return reply(`⛔ That action requires owner permission.`);
-                        if (plugin.permission === 'admin' && !isAdmin && !isOwner)
-                            return reply(`⛔ That action requires admin permission.`);
-                        const argDisplay = intent.pluginArgs.length ? ` *"${intent.pluginArgs.join(' ')}"*` : '';
-                        await safeSend({ text: `${intent.label}${argDisplay}...` }, { quoted: message });
-                        try {
-                            await plugin.run(sock, message, intent.pluginArgs, ctx);
-                        } catch (err) {
-                            await safeSend({ text: `❌ Failed: ${err.message || 'Something went wrong.'}` }, { quoted: message });
+                // Step 4: AI — all backends race in parallel, first valid reply wins (max ~10s)
+                rememberMessage(jid, 'user', query);
+                await sock.sendPresenceUpdate('composing', jid);
+
+                const toolList = [...pm.keys()].slice(0, 80).join(', ');
+                const systemPrompt =
+                    `You are Silva, an intelligent WhatsApp bot assistant. ` +
+                    `Owner: ${config.OWNER_NAME || 'Silva'}. Bot: ${config.BOT_NAME || 'Silva MD'}.\n` +
+                    `Available commands: ${toolList}.\n` +
+                    `IMPORTANT: If the user's request should run one of those bot commands, ` +
+                    `reply with ONLY this format (no other text): TOOL:<command>|<arguments>\n` +
+                    `Examples: TOOL:play|Shape of You Ed Sheeran\n` +
+                    `          TOOL:weather|Nairobi\n` +
+                    `          TOOL:wiki|black holes\n` +
+                    `          TOOL:github|SilvaTechB\n` +
+                    `          TOOL:sticker|\n` +
+                    `If it is a general question or conversation, answer naturally. ` +
+                    `Use *bold* for emphasis. Keep it under 200 words. Never say you cannot run commands.`;
+
+                let aiReply = await askFreeAI(query, jid, systemPrompt);
+
+                // Gemini fallback when all free APIs fail
+                if (!aiReply) {
+                    try {
+                        const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_KEY || '';
+                        if (apiKey) {
+                            const { GoogleGenerativeAI } = require('@google/generative-ai');
+                            const genAI = new GoogleGenerativeAI(apiKey);
+                            const model = genAI.getGenerativeModel({
+                                model: 'gemini-1.5-flash',
+                                generationConfig: { temperature: 0.85, maxOutputTokens: 800 },
+                            });
+                            const mem = getMemory(jid).slice(-6);
+                            const geminiHistory = [
+                                { role: 'user',  parts: [{ text: systemPrompt }] },
+                                { role: 'model', parts: [{ text: `Got it! I'm Silva, ready to help. 🤖` }] },
+                                ...mem.slice(0, -1).map(m => ({
+                                    role: m.role === 'user' ? 'user' : 'model',
+                                    parts: [{ text: m.text }],
+                                })),
+                            ];
+                            const chat = model.startChat({ history: geminiHistory });
+                            const result = await chat.sendMessage(query);
+                            aiReply = result.response.text();
                         }
-                        return;
-                    }
+                    } catch { /* Gemini unavailable */ }
                 }
 
-                // ── Single bare word — try running it as a command directly ──
-                const cmdMatch = query.match(/^\.?(\w+)$/);
-                if (cmdMatch) {
-                    const potentialCmd = cmdMatch[1].toLowerCase();
-                    if (pm.has(potentialCmd)) {
-                        const plugin = pm.get(potentialCmd);
-                        if (plugin.permission === 'owner' && !isOwner) {
-                            return reply(`⛔ \`${potentialCmd}\` requires owner permission.`);
-                        }
-                        if (plugin.permission === 'admin' && !isAdmin && !isOwner) {
-                            return reply(`⛔ \`${potentialCmd}\` requires admin permission.`);
-                        }
-                        try { await plugin.run(sock, message, [], ctx); return; } catch (err) {
-                            return reply(`❌ Error running \`${potentialCmd}\`: ${err.message}`);
-                        }
-                    }
-                }
+                if (aiReply) {
+                    // Check if AI decided to run a bot tool
+                    if (/^TOOL:/i.test(aiReply.trim())) {
+                        const toolLine = aiReply.trim().replace(/^TOOL:/i, '').split('\n')[0].trim();
+                        const pipeIdx  = toolLine.indexOf('|');
+                        const cmdName  = (pipeIdx >= 0 ? toolLine.slice(0, pipeIdx) : toolLine).trim().toLowerCase();
+                        const argStr   = pipeIdx >= 0 ? toolLine.slice(pipeIdx + 1).trim() : '';
+                        const toolArgs = argStr ? argStr.split(/\s+/).filter(Boolean) : [];
+                        const plugin   = pm.get(cmdName);
 
-                // ── Step 4: smart response or AI fallback ───────────────────────────────────────────
-                const smart = getSmartResponse(query);
-                if (smart) {
-                    response = `🤖 *Silva*\n\n${smart}`;
-                    rememberMessage(jid, 'user', query);
-                    rememberMessage(jid, 'bot', smart);
-                } else {
-                    rememberMessage(jid, 'user', query);
-                    let aiReply = await askFreeAI(query, jid);
-
-                    if (!aiReply) {
-                        try {
-                            const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_KEY || '';
-                            if (apiKey) {
-                                const { GoogleGenerativeAI } = require('@google/generative-ai');
-                                const genAI = new GoogleGenerativeAI(apiKey);
-                                const model = genAI.getGenerativeModel({
-                                    model: 'gemini-1.5-flash',
-                                    generationConfig: { temperature: 0.85, maxOutputTokens: 800 },
-                                });
-                                const mem = getMemory(jid).slice(-6);
-                                const geminiHistory = [
-                                    {
-                                        role: 'user',
-                                        parts: [{
-                                            text: `You are Silva, an intelligent WhatsApp bot assistant built on ${BOT_IDENTITY.name} v${BOT_IDENTITY.version}. ` +
-                                                  `You were created by ${BOT_IDENTITY.developer}. The bot owner is ${config.OWNER_NAME}. ` +
-                                                  `Be concise, friendly, and helpful. Format for WhatsApp: use *bold*, avoid markdown headers. ` +
-                                                  `Never break character. Keep replies under 200 words unless asked for more.`,
-                                        }],
-                                    },
-                                    { role: 'model', parts: [{ text: `Got it! I'm Silva, ready to help. 🤖` }] },
-                                    ...mem.slice(0, -1).map(m => ({
-                                        role: m.role === 'user' ? 'user' : 'model',
-                                        parts: [{ text: m.text }],
-                                    })),
-                                ];
-                                const chat = model.startChat({ history: geminiHistory });
-                                const result = await chat.sendMessage(query);
-                                aiReply = result.response.text();
+                        if (plugin) {
+                            if (plugin.permission === 'owner' && !isOwner)
+                                return reply(`⛔ That action requires owner permission.`);
+                            if (plugin.permission === 'admin' && !isAdmin && !isOwner)
+                                return reply(`⛔ That action requires admin permission.`);
+                            const argDisplay = toolArgs.length ? ` *"${toolArgs.join(' ')}"*` : '';
+                            await safeSend({ text: `🔧 _${cmdName}${argDisplay}..._` }, { quoted: message });
+                            try {
+                                await plugin.run(sock, message, toolArgs, ctx);
+                            } catch (err) {
+                                await safeSend({ text: `❌ Failed: ${err.message || 'Something went wrong.'}` }, { quoted: message });
                             }
-                        } catch { /* Gemini unavailable */ }
+                            return;
+                        }
                     }
-
-                    if (aiReply) {
-                        response = `🤖 *Silva*\n\n${aiReply}`;
-                        rememberMessage(jid, 'bot', aiReply.slice(0, 300));
-                    }
+                    // Conversational AI response
+                    response = `🤖 *Silva*\n\n${aiReply}`;
+                    rememberMessage(jid, 'bot', aiReply.slice(0, 300));
                 }
             }
         }
