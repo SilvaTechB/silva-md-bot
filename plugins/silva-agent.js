@@ -1408,7 +1408,6 @@ module.exports = {
             await safeSend({ text: `📦 _Preparing download link for *${fullRepo}*..._` }, { quoted: message });
             try {
                 const ghHeaders = { 'User-Agent': 'SilvaMD-Bot/2.0', 'Accept': 'application/vnd.github+json' };
-                if (process.env.GITHUB_TOKEN) ghHeaders['Authorization'] = `Bearer ${process.env.GITHUB_TOKEN}`;
                 const res = await axios.get(`https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`, { headers: ghHeaders, timeout: 8000 });
                 const r = res.data;
                 const branch = r.default_branch || 'main';
@@ -1453,7 +1452,6 @@ module.exports = {
             await safeSend({ text: `📄 _Fetching \`${filePath}\` from *${owner}/${repo}*..._` }, { quoted: message });
             try {
                 const ghHeaders = { 'User-Agent': 'SilvaMD-Bot/2.0', 'Accept': 'application/vnd.github+json' };
-                if (process.env.GITHUB_TOKEN) ghHeaders['Authorization'] = `Bearer ${process.env.GITHUB_TOKEN}`;
                 const res = await axios.get(
                     `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${encodeURIComponent(filePath)}`,
                     { headers: ghHeaders, timeout: 10000 }

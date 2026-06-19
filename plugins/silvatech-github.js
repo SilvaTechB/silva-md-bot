@@ -20,7 +20,6 @@ const CACHE_TTL = 5 * 60 * 1000;
 
 function ghHeaders() {
     const h = { 'User-Agent': 'SilvaMD-Bot/2.0', 'Accept': 'application/vnd.github+json' };
-    if (process.env.GITHUB_TOKEN) h['Authorization'] = `Bearer ${process.env.GITHUB_TOKEN}`;
     return h;
 }
 
