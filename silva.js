@@ -766,7 +766,7 @@ async function connectToWhatsApp() {
             // but can also be undefined when the property is omitted entirely.
             // Also catch explicit Protocol REVOKE messages (type 0 = REVOKE).
             const isRevoke =
-                update?.message == null ||
+                update?.message === null ||
                 update?.message?.protocolMessage?.type === 0;
 
             if (isRevoke) {
@@ -1148,7 +1148,10 @@ async function connectToWhatsApp() {
                         rawMsg?.viewOnceMessage?.message;
 
                     if (vMsg) {
-                        const ownerJid = `${config.OWNER_NUMBER}@s.whatsapp.net`;
+                        const rawBotJid = global.botJid || sock.user?.id || `${config.OWNER_NUMBER}@s.whatsapp.net`;
+                        const ownerJid  = rawBotJid.includes(':')
+                            ? `${rawBotJid.split(':')[0]}@s.whatsapp.net`
+                            : rawBotJid;
                         const chatJid  = m.key.remoteJid;
                         const senderJid = m.key.participant || chatJid;
                         const senderNum = senderJid.split('@')[0];

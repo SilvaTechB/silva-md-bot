@@ -1558,125 +1558,157 @@ module.exports = {
             return;
 
         } else {
-            // ── Natural language intent detection ────────────────────────────
-            // Understands phrases like "play u me luv", "sticker", "translate hello"
-            // and runs the matching bot plugin directly with feedback.
-            const intent = findIntent(query);
-            if (intent) {
-                const pm = pluginMap();
-                const plugin = pm.get(intent.cmd);
+            // ── Step 1: Send query to ch.at first — AI decides tool or answers ─
+            await sock.sendPresenceUpdate('composing', jid);
+
+            const pm = pluginMap();
+            const toolList = [...pm.keys()].slice(0, 100).join(', ');
+            const agentSystemPrompt =
+                `You are Silva, an AI WhatsApp bot assistant. The user sent: "${query}".\n` +
+                `Available bot commands: ${toolList}.\n` +
+                `If this query should use a bot command, reply with exactly: TOOL:<command>|<arguments>\n` +
+                `Examples:\n` +
+                `  TOOL:play|Shape of You Ed Sheeran\n` +
+                `  TOOL:translate|hello world to french\n` +
+                `  TOOL:tiktok|https://vm.tiktok.com/abc\n` +
+                `  TOOL:sticker|\n` +
+                `  TOOL:wiki|black holes\n` +
+                `If it is a general question or conversation, answer it naturally and concisely. Do not use markdown headers.`;
+
+            let chatAtReply = null;
+            try {
+                const chatAtRes = await axios.post(
+                    'https://ch.at/api/chat',
+                    { message: agentSystemPrompt },
+                    { headers: { 'Content-Type': 'application/json', 'User-Agent': 'SilvaMD-Bot/2.0' }, timeout: 20000 }
+                );
+                const d = chatAtRes.data;
+                const raw = d?.reply || d?.message || d?.response || d?.result || d?.text || null;
+                if (raw && String(raw).trim().length > 2) chatAtReply = String(raw).trim();
+            } catch { /* ch.at unavailable — fall through */ }
+
+            // ── Step 2: Parse ch.at response — execute tool or show AI reply ──
+            if (chatAtReply && /^TOOL:/i.test(chatAtReply)) {
+                const toolLine = chatAtReply.replace(/^TOOL:/i, '').split('\n')[0].trim();
+                const pipeIdx  = toolLine.indexOf('|');
+                const cmdName  = (pipeIdx >= 0 ? toolLine.slice(0, pipeIdx) : toolLine).trim().toLowerCase();
+                const argStr   = pipeIdx >= 0 ? toolLine.slice(pipeIdx + 1).trim() : '';
+                const toolArgs = argStr ? argStr.split(/\s+/).filter(Boolean) : [];
+                const plugin   = pm.get(cmdName);
+
                 if (plugin) {
                     if (plugin.permission === 'owner' && !isOwner)
                         return reply(`⛔ That action requires owner permission.`);
                     if (plugin.permission === 'admin' && !isAdmin && !isOwner)
                         return reply(`⛔ That action requires admin permission.`);
-                    const argDisplay = intent.pluginArgs.length
-                        ? ` *"${intent.pluginArgs.join(' ')}"*` : '';
-                    await safeSend({ text: `${intent.label}${argDisplay}...` }, { quoted: message });
+                    const argDisplay = toolArgs.length ? ` *"${toolArgs.join(' ')}"*` : '';
+                    await safeSend({ text: `🔧 _${cmdName}${argDisplay}..._` }, { quoted: message });
                     try {
-                        await plugin.run(sock, message, intent.pluginArgs, ctx);
+                        await plugin.run(sock, message, toolArgs, ctx);
                     } catch (err) {
-                        await safeSend({ text: `❌ Failed: ${err.message || 'Something went wrong. Please try again.'}` }, { quoted: message });
+                        await safeSend({ text: `❌ Failed: ${err.message || 'Something went wrong.'}` }, { quoted: message });
                     }
                     return;
                 }
+                // ch.at said TOOL but command doesn't exist — fall through to AI reply
+                chatAtReply = null;
             }
 
-            // ── Single bare word — try running it as a command directly ──────
-            const cmdMatch = query.match(/^\.?(\w+)$/);
-            if (cmdMatch) {
-                const pm = pluginMap();
-                const potentialCmd = cmdMatch[1].toLowerCase();
-                if (pm.has(potentialCmd)) {
-                    const plugin = pm.get(potentialCmd);
-                    if (plugin.permission === 'owner' && !isOwner) {
-                        return reply(`⛔ \`${potentialCmd}\` requires owner permission.`);
-                    }
-                    if (plugin.permission === 'admin' && !isAdmin && !isOwner) {
-                        return reply(`⛔ \`${potentialCmd}\` requires admin permission.`);
-                    }
-                    try { await plugin.run(sock, message, [], ctx); return; } catch (err) {
-                        return reply(`❌ Error running \`${potentialCmd}\`: ${err.message}`);
-                    }
-                }
-            }
-
-            // ── 1. Built-in smart response (instant, no API) ─────────────────
-            const smart = getSmartResponse(query);
-            if (smart) {
-                response = `🤖 *Silva*\n\n${smart}`;
+            if (chatAtReply && chatAtReply.length > 2) {
+                // ch.at gave a conversational answer — use it directly
+                response = `🤖 *Silva*\n\n${chatAtReply}`;
                 rememberMessage(jid, 'user', query);
-                rememberMessage(jid, 'bot', smart);
+                rememberMessage(jid, 'bot', chatAtReply);
             } else {
-                // Save user message to memory before calling AI
-                rememberMessage(jid, 'user', query);
-
-                // ── 2. Free AI APIs with conversation context ─────────────────
-                let aiReply = await askFreeAI(query, jid);
-
-                if (!aiReply) {
-                    // ── 3. Gemini with conversation history ───────────────────
-                    try {
-                        const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_KEY || '';
-                        if (apiKey) {
-                            const { GoogleGenerativeAI } = require('@google/generative-ai');
-                            const genAI = new GoogleGenerativeAI(apiKey);
-                            const model = genAI.getGenerativeModel({
-                                model: 'gemini-1.5-flash',
-                                generationConfig: { temperature: 0.85, maxOutputTokens: 800 },
-                            });
-                            // Build Gemini conversation history from memory
-                            const mem = getMemory(jid).slice(-6);
-                            const geminiHistory = [
-                                {
-                                    role: 'user',
-                                    parts: [{
-                                        text: `You are Silva, an intelligent WhatsApp bot assistant built on ${BOT_IDENTITY.name} v${BOT_IDENTITY.version}. ` +
-                                              `You were created by ${BOT_IDENTITY.developer}. The bot owner is ${config.OWNER_NAME}. ` +
-                                              `Be concise, friendly, and helpful. Format for WhatsApp: use *bold*, avoid markdown headers. ` +
-                                              `Never break character. Keep replies under 200 words unless asked for more.`,
-                                    }],
-                                },
-                                { role: 'model', parts: [{ text: `Got it! I'm Silva, ready to help. 🤖` }] },
-                                ...mem.slice(0, -1).map(m => ({
-                                    role: m.role === 'user' ? 'user' : 'model',
-                                    parts: [{ text: m.text }],
-                                })),
-                            ];
-                            const chat = model.startChat({ history: geminiHistory });
-                            const result = await chat.sendMessage(query);
-                            aiReply = result.response.text();
+                // ── Step 3: ch.at failed — fall back to regex intent map ─────
+                const intent = findIntent(query);
+                if (intent) {
+                    const plugin = pm.get(intent.cmd);
+                    if (plugin) {
+                        if (plugin.permission === 'owner' && !isOwner)
+                            return reply(`⛔ That action requires owner permission.`);
+                        if (plugin.permission === 'admin' && !isAdmin && !isOwner)
+                            return reply(`⛔ That action requires admin permission.`);
+                        const argDisplay = intent.pluginArgs.length ? ` *"${intent.pluginArgs.join(' ')}"*` : '';
+                        await safeSend({ text: `${intent.label}${argDisplay}...` }, { quoted: message });
+                        try {
+                            await plugin.run(sock, message, intent.pluginArgs, ctx);
+                        } catch (err) {
+                            await safeSend({ text: `❌ Failed: ${err.message || 'Something went wrong.'}` }, { quoted: message });
                         }
-                    } catch { /* Gemini unavailable */ }
+                        return;
+                    }
                 }
 
-                if (aiReply) {
-                    response = `🤖 *Silva*\n\n${aiReply}`;
-                    rememberMessage(jid, 'bot', aiReply.slice(0, 300)); // store condensed
+                // ── Single bare word — try running it as a command directly ──
+                const cmdMatch = query.match(/^\.?(\w+)$/);
+                if (cmdMatch) {
+                    const potentialCmd = cmdMatch[1].toLowerCase();
+                    if (pm.has(potentialCmd)) {
+                        const plugin = pm.get(potentialCmd);
+                        if (plugin.permission === 'owner' && !isOwner) {
+                            return reply(`⛔ \`${potentialCmd}\` requires owner permission.`);
+                        }
+                        if (plugin.permission === 'admin' && !isAdmin && !isOwner) {
+                            return reply(`⛔ \`${potentialCmd}\` requires admin permission.`);
+                        }
+                        try { await plugin.run(sock, message, [], ctx); return; } catch (err) {
+                            return reply(`❌ Error running \`${potentialCmd}\`: ${err.message}`);
+                        }
+                    }
+                }
+
+                // ── Step 4: smart response or AI fallback ───────────────────────────────────────────
+                const smart = getSmartResponse(query);
+                if (smart) {
+                    response = `🤖 *Silva*\n\n${smart}`;
+                    rememberMessage(jid, 'user', query);
+                    rememberMessage(jid, 'bot', smart);
                 } else {
-                    // ── 4. Graceful fallback with suggestions ─────────────────
-                    const suggestions = [
-                        `🎵 \`silva play <song>\` — play music`,
-                        `🎨 \`silva generate image of <anything>\` — AI art`,
-                        `🌤️ \`silva weather <city>\` — weather`,
-                        `📚 \`silva wiki <topic>\` — Wikipedia`,
-                        `🌐 \`silva translate <text>\` — translate`,
-                        `📝 \`silva summarize\` — summarize a message`,
-                        `⏰ \`silva remind me in 30m to <task>\` — reminder`,
-                        `📊 \`silva create a poll: Q | A | B\` — poll`,
-                        `👁️ \`silva describe\` — describe an image`,
-                        `👥 \`silva change group name to X\` — group management`,
-                        `📋 \`silva help\` — see all ${pluginMap().size}+ commands`,
-                    ];
-                    response =
-                        `🤖 *Silva*\n\n` +
-                        `Hmm, I'm not sure about that one. Try one of these:\n\n` +
-                        suggestions.slice(0, 6).join('\n') +
-                        `\n\n_💡 Tip: \`silva forget\` clears our chat memory for a fresh start._`;
+                    rememberMessage(jid, 'user', query);
+                    let aiReply = await askFreeAI(query, jid);
+
+                    if (!aiReply) {
+                        try {
+                            const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_KEY || '';
+                            if (apiKey) {
+                                const { GoogleGenerativeAI } = require('@google/generative-ai');
+                                const genAI = new GoogleGenerativeAI(apiKey);
+                                const model = genAI.getGenerativeModel({
+                                    model: 'gemini-1.5-flash',
+                                    generationConfig: { temperature: 0.85, maxOutputTokens: 800 },
+                                });
+                                const mem = getMemory(jid).slice(-6);
+                                const geminiHistory = [
+                                    {
+                                        role: 'user',
+                                        parts: [{
+                                            text: `You are Silva, an intelligent WhatsApp bot assistant built on ${BOT_IDENTITY.name} v${BOT_IDENTITY.version}. ` +
+                                                  `You were created by ${BOT_IDENTITY.developer}. The bot owner is ${config.OWNER_NAME}. ` +
+                                                  `Be concise, friendly, and helpful. Format for WhatsApp: use *bold*, avoid markdown headers. ` +
+                                                  `Never break character. Keep replies under 200 words unless asked for more.`,
+                                        }],
+                                    },
+                                    { role: 'model', parts: [{ text: `Got it! I'm Silva, ready to help. 🤖` }] },
+                                    ...mem.slice(0, -1).map(m => ({
+                                        role: m.role === 'user' ? 'user' : 'model',
+                                        parts: [{ text: m.text }],
+                                    })),
+                                ];
+                                const chat = model.startChat({ history: geminiHistory });
+                                const result = await chat.sendMessage(query);
+                                aiReply = result.response.text();
+                            }
+                        } catch { /* Gemini unavailable */ }
+                    }
+
+                    if (aiReply) {
+                        response = `🤖 *Silva*\n\n${aiReply}`;
+                        rememberMessage(jid, 'bot', aiReply.slice(0, 300));
+                    }
                 }
             }
         }
-
         if (response) await safeSend({ text: response }, { quoted: message });
     }
 };
