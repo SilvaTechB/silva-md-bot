@@ -43,9 +43,14 @@ async function queryChatAt(query) {
 }
 
 async function queryAI(endpoints, query) {
+    // බොට් සාමාන්‍ය මනුස්සයෙක් වගේ හැසිරෙන්න ඕන උපදෙස් මාලාව (System Instruction)
+    const humanPrompt = `[IMPORTANT INSTRUCTION: Respond as a warm, friendly Sri Lankan friend on WhatsApp. Use casual, natural spoken Sinhala, English, or Singlish. Do NOT act like an AI or robot. Do NOT use structured bullet points or formal language unless asked. Be concise, use natural emojis, and talk like a real human. Never mention you are an AI.] Context/Question: `;
+    
+    const finalQuery = humanPrompt + query;
+
     for (const buildUrl of endpoints) {
         try {
-            const res = await axios.get(buildUrl(query), { timeout: 20000 });
+            const res = await axios.get(buildUrl(finalQuery), { timeout: 20000 });
             const d = res.data;
             const answer =
                 d?.result || d?.message || d?.response || d?.answer ||
@@ -73,7 +78,7 @@ function buildPlugin(cmds, label, endpointKey, fallbackKey = 'chatai') {
 
             if (!query) {
                 return sock.sendMessage(jid, {
-                    text: fmt(`❌ *Usage:* \`.${cmds[0]} <question>\`\n\nExample: \`.${cmds[0]} What is quantum computing?\``),
+                    text: fmt(`අනේ මන්දා ඉතින්.. 🙄 මොනවා හරි ප්‍රශ්නයක් අහන්නකෝ.\n\n*පාවිච්චි කරන විදිහ:* \`.${cmds[0]} ඔයාට කොහොමද?\``),
                     contextInfo
                 }, { quoted: message });
             }
@@ -93,10 +98,11 @@ function buildPlugin(cmds, label, endpointKey, fallbackKey = 'chatai') {
 
             if (!answer) answer = await queryChatAt(query);
             if (!answer) answer = await queryAI(AI_ENDPOINTS.chatai, query);
-            if (!answer) answer = '⚠️ All AI servers are currently busy. Please try again later.';
+            if (!answer) answer = 'අයියෝ.. සර්වර්ස් ටිකක් බිසී වගේ මැණික. පොඩ්ඩක් ඉඳලා ආයෙත් මැසේජ් එකක් දාන්නකෝ.. 💔';
 
+            // මෙතනින් රොබෝ ලේබල් (🤖 Gemini, ❓ Q:) ඔක්කොම අයින් කරලා කෙලින්ම උත්තරය විතරක් යන්න හැදුවා
             await sock.sendMessage(jid, {
-                text: fmt(`🤖 *${label}*\n\n❓ *Q:* ${query}\n\n💬 *A:* ${answer}`),
+                text: fmt(`${answer}`),
                 contextInfo
             }, { quoted: message });
         }
