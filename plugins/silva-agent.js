@@ -185,6 +185,14 @@ const intentMap = [
     { pattern: /\bspeedtest\b|\bspeed\s*test\b|\binternet\s+speed\b/i,                  cmd: 'speedtest',   label: '🌐 Running speed test',         strip: /\bspeedtest\b|\bspeed\s*test\b|\binternet\s+speed\b/gi },
     { pattern: /\bweather\b|\bforecast\b|\btemperature\s+in\b/i,                        cmd: 'weather',     label: '🌤️ Checking weather',          strip: /\bweather\b|\bforecast\b|\btemperature\s+in\b/gi },
 
+    // ── Fun & Knowledge ──────────────────────────────────────────────────────
+    { pattern: /\briddle\b/i,                                                            cmd: 'riddle',      label: '🧩 Getting a riddle',           strip: /\briddle\b/gi },
+    { pattern: /\bproverb\b|\bsaying\b|\bwisdom\b|\badage\b/i,                         cmd: 'proverb',     label: '📜 Fetching a proverb',         strip: /\bproverb\b|\bsaying\b|\bwisdom\b|\badage\b/gi },
+    { pattern: /\brhyme\b/i,                                                             cmd: 'rhyme',       label: '🎵 Finding rhymes',             strip: /\brhyme\b/gi },
+
+    // ── GitHub SilvaTechB ────────────────────────────────────────────────────
+    { pattern: /\bsilvatech\b.*\b(repos?|github|projects?)\b|\b(silvatech|silvarepos)\b/i, cmd: 'silvatech', label: '🐙 Fetching SilvaTechB repos',  strip: /\bsilvatech\b|\bsilvarepos?\b/gi },
+
     // ── Bot Status ───────────────────────────────────────────────────────────
     { pattern: /\buptime\b|\bruntime\b/i,                                                cmd: 'uptime',      label: '⏱️ Checking uptime',           strip: /\buptime\b|\bruntime\b/gi },
     { pattern: /\balive\b|\bping\b/i,                                                    cmd: 'alive',       label: '⚡ Checking bot status',        strip: /\balive\b|\bping\b/gi },
@@ -252,25 +260,36 @@ function getSmartResponse(query) {
     return null;
 }
 
-// ── Free AI APIs (no key required, with conversation context) ────────────────
+// ── Free AI APIs (ch.at primary, no API key required) ────────────────────────
 async function askFreeAI(query, jid) {
     const contextPrompt = jid ? buildContextPrompt(jid, query) : query;
     const apis = [
+        // ── Primary: ch.at (no API key, free forever) ────────────────────────
+        async () => {
+            const res = await axios.post('https://ch.at/api/chat',
+                { message: contextPrompt },
+                { headers: { 'Content-Type': 'application/json', 'User-Agent': 'SilvaMD-Bot/2.0' }, timeout: 20000 }
+            );
+            return res.data?.reply || res.data?.message || res.data?.response ||
+                   res.data?.result || res.data?.text || null;
+        },
+        // ── Fallback 1: paxsenix GPT-4o ──────────────────────────────────────
         async () => {
             const res = await axios.get(`https://api.paxsenix.biz.id/ai/gpt4o?text=${encodeURIComponent(contextPrompt)}`, { timeout: 15000 });
             return res.data?.message || res.data?.result || null;
         },
+        // ── Fallback 2: siputzx DeepSeek ─────────────────────────────────────
         async () => {
             const res = await axios.get(`https://api.siputzx.my.id/api/ai/deepseek-r1?content=${encodeURIComponent(contextPrompt)}`, { timeout: 15000 });
             return res.data?.data || null;
         },
+        // ── Fallback 3: Popcat (simple queries) ──────────────────────────────
         async () => {
-            // Popcat doesn't support full context, use simple query
             const res = await axios.get(`https://api.popcat.xyz/chatbot?msg=${encodeURIComponent(query)}&owner=${encodeURIComponent(config.OWNER_NAME || 'Silva')}&botname=Silva`, { timeout: 8000 });
             return res.data?.response || null;
         },
+        // ── Fallback 4: paxsenix Claude ──────────────────────────────────────
         async () => {
-            // Extra fallback: another free endpoint
             const res = await axios.get(`https://api.paxsenix.biz.id/ai/claude?text=${encodeURIComponent(contextPrompt)}`, { timeout: 15000 });
             return res.data?.message || res.data?.result || null;
         },
@@ -348,6 +367,14 @@ const agentActions = {
     time:     /what\s*(time|hour|clock)|current\s*time|time\s*now/i,
     date:     /what\s*(date|day|today)|current\s*date|today/i,
     calc:     /calc|compute|math|solve|\d+\s*[\+\-\*\/\%\^]\s*\d+/i,
+
+    // ── GitHub SilvaTechB (read-only) ─────────────────────────────────────────
+    github_silvatech: /\b(silvatech|silva\s*tech|silvatechwb|silvatechb)\b.*\b(repos?|github|projects?|code|files?|zip|download)\b|\b(repos?|github|projects?|code)\b.*\b(silvatech|silvatechb)\b|\b(list|show|get)\s+(silva\s*tech|silvatechb)\s+(repos?|projects?)\b/i,
+
+    // ── Fun & knowledge ───────────────────────────────────────────────────────
+    riddle_agent:  /\b(riddle|puzzle|brain\s*teaser|solve\s*this)\b/i,
+    proverb_agent: /\b(proverb|proverbs?|saying|wisdom|wise\s+words?|adage|maxim)\b/i,
+    rhyme_agent:   /\b(rhyme|rhymes?\s+with|words?\s+that\s+rhyme|what\s+rhymes)\b/i,
     joke:     /^(tell\s+)?(a\s+)?joke|funny|laugh|humor/i,
     fact:     /^(tell\s+)?(a\s+)?fact|did\s*you\s*know|interesting/i,
     quote:    /^(give\s+)?(a\s+)?quote|motivat|inspir/i,
@@ -392,6 +419,14 @@ module.exports = {
             `• "silva describe" _(reply to any photo)_\n` +
             `• "silva summarize" _(reply to a long message)_\n` +
             `• "silva quotly" _(reply to a message → quote sticker)_\n\n` +
+            `🧩 *Fun & Knowledge*\n` +
+            `• "silva riddle" — get a brain teaser\n` +
+            `• "silva proverb" / "silva wisdom" — wise saying\n` +
+            `• "silva rhyme moon" — words that rhyme\n\n` +
+            `🐙 *GitHub*\n` +
+            `• "silva silvatech repos" — list SilvaTechB repos\n` +
+            `• ".silvatech <repo>" — repo stats & files\n` +
+            `• ".silvatech zip <repo>" — download link\n\n` +
             `📲 *Downloads*\n` +
             `• "silva instagram <url>" • "silva facebook <url>"\n` +
             `• "silva spotify <name>" • "silva pinterest <query>"\n\n` +
@@ -755,16 +790,12 @@ module.exports = {
             const writeMatch = query.match(agentActions.write);
             const contentType = writeMatch ? writeMatch[2] : 'message';
             const topic = query.replace(agentActions.write, '').trim();
+            const aiPrompt = `Write a ${contentType}${topic ? ` about: ${topic}` : ''}. Keep it concise, well-formatted, and professional. Do not use markdown headers or asterisks for bold. Sign off as "${config.OWNER_NAME}" if appropriate.`;
 
             try {
-                const { GoogleGenerativeAI } = require('@google/generative-ai');
-                const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_KEY || '';
-                if (apiKey) {
-                    const genAI = new GoogleGenerativeAI(apiKey);
-                    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-                    const prompt = `Write a ${contentType}${topic ? ` about: ${topic}` : ''}. Keep it concise, well-formatted, and professional. Do not use markdown headers or asterisks for bold. Sign off as "${config.OWNER_NAME}" if appropriate.`;
-                    const result = await model.generateContent(prompt);
-                    response = `✍️ *${contentType.charAt(0).toUpperCase() + contentType.slice(1)}*\n\n${result.response.text()}`;
+                const aiResult = await askFreeAI(aiPrompt, null);
+                if (aiResult) {
+                    response = `✍️ *${contentType.charAt(0).toUpperCase() + contentType.slice(1)}*\n\n${aiResult}`;
                 } else {
                     response =
                         `✍️ *${contentType.charAt(0).toUpperCase() + contentType.slice(1)}${topic ? `: ${topic}` : ''}*\n\n` +
@@ -773,8 +804,7 @@ module.exports = {
                         `Thank you for your time and attention.\n\n` +
                         `Best regards,\n` +
                         `*${config.OWNER_NAME}*\n` +
-                        `_${config.BOT_NAME}_\n\n` +
-                        `_For better AI-generated content, set a GEMINI_API_KEY._`;
+                        `_${config.BOT_NAME}_`;
                 }
             } catch {
                 response = `❌ Could not generate the ${contentType}. Try again later.`;
@@ -1345,6 +1375,123 @@ module.exports = {
         } else if (agentActions.clear_memory.test(query)) {
             conversationMemory.delete(jid);
             reply(`🧹 *Memory cleared!*\n\nI've forgotten our conversation history. Fresh start! 🤖`);
+            return;
+
+        // ── GitHub SilvaTechB (read-only) ─────────────────────────────────────
+        } else if (agentActions.github_silvatech.test(query)) {
+            const pm = pluginMap();
+            const ghPlugin = pm.get('silvatech') || pm.get('silvarepos');
+            if (ghPlugin) {
+                try { await ghPlugin.run(sock, message, args, ctx); return; } catch {}
+            }
+            // Inline fallback: list repos from GitHub API
+            await sock.sendPresenceUpdate('composing', jid);
+            try {
+                const ghHeaders = { 'User-Agent': 'SilvaMD-Bot/2.0', 'Accept': 'application/vnd.github+json' };
+                const reposRes = await axios.get('https://api.github.com/users/SilvaTechB/repos?sort=updated&per_page=15&type=owner', { headers: ghHeaders, timeout: 12000 });
+                const repos = reposRes.data || [];
+                if (!repos.length) return reply(`📭 No public repositories found for SilvaTechB.`);
+                const lines = [
+                    `🐙 *SilvaTechB GitHub Repos*`,
+                    `🔗 https://github.com/SilvaTechB`,
+                    ``,
+                    `*📦 Repositories (${repos.length})*`,
+                ];
+                for (const r of repos.slice(0, 10)) {
+                    const lang  = r.language ? ` · ${r.language}` : '';
+                    const stars = r.stargazers_count ? ` ⭐${r.stargazers_count}` : '';
+                    const forks = r.forks_count       ? ` 🍴${r.forks_count}`       : '';
+                    lines.push(`• *${r.name}*${lang}${stars}${forks}`);
+                    if (r.description) lines.push(`  _${r.description.slice(0, 70)}_`);
+                }
+                lines.push(``);
+                lines.push(`_Use \`.silvatech <repo>\` for details or to fetch files._`);
+                reply(lines.join('\n'));
+            } catch (err) {
+                reply(`❌ Could not fetch SilvaTechB repos: ${err.message}`);
+            }
+            return;
+
+        // ── Riddle dispatch ───────────────────────────────────────────────────
+        } else if (agentActions.riddle_agent.test(query)) {
+            const pm = pluginMap();
+            const riddlePlugin = pm.get('riddle');
+            if (riddlePlugin) {
+                try { await riddlePlugin.run(sock, message, [], ctx); return; }
+                catch (e) { reply(`❌ Riddle error: ${e.message}`); return; }
+            }
+            reply(`🧩 Use \`.riddle\` to get a brain teaser! Then \`.answer\` to reveal the answer.`);
+            return;
+
+        // ── Proverb dispatch ──────────────────────────────────────────────────
+        } else if (agentActions.proverb_agent.test(query)) {
+            const pm = pluginMap();
+            const provPlugin = pm.get('proverb') || pm.get('saying') || pm.get('wisdom');
+            if (provPlugin) {
+                try { await provPlugin.run(sock, message, [], ctx); return; }
+                catch (e) { reply(`❌ Proverb error: ${e.message}`); return; }
+            }
+            const PROVERBS = [
+                'A stitch in time saves nine.',
+                'Actions speak louder than words.',
+                'All that glitters is not gold.',
+                'A penny saved is a penny earned.',
+                'Beggars can\'t be choosers.',
+                'Better late than never.',
+                'Don\'t count your chickens before they hatch.',
+                'Every cloud has a silver lining.',
+                'Fortune favors the bold.',
+                'Knowledge is power.',
+                'Look before you leap.',
+                'No pain, no gain.',
+                'Practice makes perfect.',
+                'The early bird catches the worm.',
+                'Time is money.',
+                'Two wrongs don\'t make a right.',
+                'When in Rome, do as the Romans do.',
+                'Where there\'s a will, there\'s a way.',
+                'You reap what you sow.',
+                'A fool and his money are soon parted.',
+                'Absence makes the heart grow fonder.',
+                'All roads lead to Rome.',
+                'Birds of a feather flock together.',
+                'Curiosity killed the cat.',
+                'Don\'t bite the hand that feeds you.',
+                'Great minds think alike.',
+                'Honesty is the best policy.',
+                'It takes two to tango.',
+                'Laughter is the best medicine.',
+                'Necessity is the mother of invention.',
+            ];
+            const pick = PROVERBS[Math.floor(Math.random() * PROVERBS.length)];
+            reply(`📜 *Proverb of the Moment*\n\n_"${pick}"_\n\n_Use \`.proverb\` for more wisdom!_`);
+            return;
+
+        // ── Rhyme dispatch ────────────────────────────────────────────────────
+        } else if (agentActions.rhyme_agent.test(query)) {
+            const pm = pluginMap();
+            const rhymePlugin = pm.get('rhyme') || pm.get('rhymes');
+            const wordMatch = query.match(/\brhymes?\s+(?:with\s+)?(\w+)\b/i) || query.match(/\bwords?\s+that\s+rhyme\s+(?:with\s+)?(\w+)\b/i) || query.match(/\bwhat\s+rhymes\s+(?:with\s+)?(\w+)\b/i);
+            const word = wordMatch ? wordMatch[1] : query.replace(/\brhyme\b|\brhymes?\s+with\b|\bwords?\s+that\s+rhyme\b/gi, '').trim().split(/\s+/).pop();
+            if (rhymePlugin && word) {
+                try { await rhymePlugin.run(sock, message, word ? [word] : [], ctx); return; }
+                catch (e) { reply(`❌ Rhyme error: ${e.message}`); return; }
+            }
+            if (word) {
+                try {
+                    const res = await axios.get(`https://api.datamuse.com/words?rel_rhy=${encodeURIComponent(word)}&max=12`, { timeout: 8000 });
+                    const rhymes = res.data?.map(r => r.word) || [];
+                    if (rhymes.length) {
+                        reply(`🎵 *Words that rhyme with "${word}"*\n\n${rhymes.join(', ')}\n\n_${rhymes.length} rhymes found_`);
+                    } else {
+                        reply(`🎵 No rhymes found for "*${word}*". Try another word!`);
+                    }
+                } catch {
+                    reply(`🎵 Use \`.rhyme <word>\` to find words that rhyme!`);
+                }
+            } else {
+                reply(`🎵 *Rhyme Finder*\n\nExample: _silva what rhymes with moon_\n\nOr use: \`.rhyme <word>\``);
+            }
             return;
 
         } else {
