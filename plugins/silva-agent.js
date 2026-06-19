@@ -41,10 +41,10 @@ function detectPlatform() {
 
 const BOT_IDENTITY = {
     name: 'Silva MD',
-    version: '2.0',
+    version: '4.0.1',
     language: 'Node.js',
-    library: 'Baileys (gifted-baileys)',
-    repo: 'https://github.com/SilvaTechB/silva-md-v4',
+    library: 'Baileys (silva-baileys)',
+    repo: 'https://github.com/SilvaTechB/silva-md-bot',
     website: 'https://silvatech.co.ke',
     get platform() { return detectPlatform(); },
     developer: 'SilvaTech',
