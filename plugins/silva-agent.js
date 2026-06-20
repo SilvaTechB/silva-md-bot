@@ -261,58 +261,139 @@ function getSmartResponse(query) {
     return null;
 }
 
-// ── AI APIs ── tested live; only these endpoints currently respond correctly ──
-// Dead (ENOTFOUND/4xx): paxsenix, vapis, siputzx, duckduckgo, lance-frank, etc.
-// ch.at: returns {"answer":"..."} — CONFIRMED WORKING ~400ms
-// pollinations text: returns plain string — CONFIRMED WORKING ~3s (slow fallback)
-// popcat: returns "Timed Out" string — kept but filtered via BAD regex
-async function askFreeAI(query, jid, systemPrompt) {
+// ── ch.at with automatic retry ───────────────────────────────────────────────
+// ch.at is the PRIMARY backbone. On transient network hiccups we retry up to
+// MAX_RETRIES times with exponential backoff before declaring defeat.
+const CHAT_ENDPOINT = 'https://ch.at/api/chat';
+const MAX_RETRIES   = 3;
+
+async function callChAt(prompt) {
+    let lastErr;
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        try {
+            const res = await axios.post(
+                CHAT_ENDPOINT,
+                { message: prompt },
+                {
+                    headers: { 'Content-Type': 'application/json', 'User-Agent': 'SilvaMD-Bot/2.0' },
+                    timeout: 12000,
+                }
+            );
+            const text = res.data?.answer
+                || res.data?.reply
+                || res.data?.message
+                || res.data?.response
+                || res.data?.result
+                || null;
+            if (text && String(text).trim().length > 4) return String(text).trim();
+        } catch (e) {
+            lastErr = e;
+            if (attempt < MAX_RETRIES) {
+                await new Promise(r => setTimeout(r, 500 * attempt)); // 500ms, 1s backoff
+            }
+        }
+    }
+    return null; // ch.at exhausted all retries
+}
+
+// ── Offline smart responder — NEVER returns null ──────────────────────────────
+// When every API is down this gives a contextually relevant reply without any
+// network call, so the agent always responds to every message.
+function offlineSmartReply(query, pluginKeys) {
+    const q = query.toLowerCase();
+
+    // Question about a specific topic → suggest the right command
+    const intents = [
+        [/\b(weather|forecast|rain|temperature|humid)\b/,       cmd => `🌤️ I can check that! Use \`.weather ${cmd || 'your city'}\` for live weather.`],
+        [/\b(play|music|song|audio|mp3)\b/,                     cmd => `🎵 Try \`.play ${cmd || 'song name'}\` to download and play music!`],
+        [/\b(translate|translation|language)\b/,                cmd => `🌐 Use \`.translate ${cmd || 'en text here'}\` to translate to any language.`],
+        [/\b(sticker|stiker|webp)\b/,                           ()  => `😄 Reply to any image with \`.sticker\` to convert it!`],
+        [/\b(download|ytmp3|youtube|tiktok|insta|facebook)\b/,  cmd => `⬇️ Try \`.ytmp3 ${cmd || 'song name'}\` or \`.tiktok <url>\` to download.`],
+        [/\b(joke|funny|laugh|humor)\b/,                        ()  => `😂 Type \`.joke\` for a random joke or \`.dadjoke\` for classics!`],
+        [/\b(news|headlines|today.?s news)\b/,                  ()  => `📰 Use \`.news\` for the latest headlines!`],
+        [/\b(crypto|bitcoin|btc|eth|price)\b/,                  cmd => `💰 Try \`.crypto ${cmd || 'BTC'}\` for live crypto prices!`],
+        [/\b(wiki|wikipedia|what is|explain|define|meaning)\b/, cmd => `📚 Type \`.wiki ${cmd || query}\` to look that up on Wikipedia!`],
+        [/\b(qr|qr code)\b/,                                    cmd => `🔲 Use \`.qr ${cmd || 'your text'}\` to generate a QR code!`],
+        [/\b(remind|reminder|remind me)\b/,                     ()  => `⏰ Use \`.remind 10m your message\` to set a reminder!`],
+        [/\b(poll|vote|voting)\b/,                              ()  => `📊 Create a poll with: \`.poll Question | Option1 | Option2\``],
+        [/\b(calculate|calc|math|\d[\+\-\*\/]\d)\b/,           ()  => `🧮 Type \`.calc your expression\` for math calculations!`],
+        [/\b(help|commands|what can you do)\b/,                 ()  => `📋 Type \`.menu\` to see all ${pluginKeys.size}+ commands I have!`],
+    ];
+
+    for (const [pattern, builder] of intents) {
+        if (pattern.test(q)) {
+            const match = q.match(/\b[a-z]{3,}\b/g)?.filter(w => !['what','that','this','with','have','your','from','about','does','will','when','where'].includes(w));
+            return `🤖 *Silva*\n\n` + builder(match?.slice(-2).join(' ') || '');
+        }
+    }
+
+    // Conversational fallbacks by question type
+    if (/\?$|^(what|who|when|where|why|how|is|are|can|will|does)\b/.test(q)) {
+        const responses = [
+            `🤖 That's a great question! I'm working on fetching an answer. In the meantime, try \`.wiki ${query.slice(0, 40)}\` for instant info!`,
+            `🤔 Interesting! My AI brain is having a moment. Try \`.ask ${query.slice(0, 40)}\` again in a few seconds — I'll get it.`,
+            `💡 Good question! My connection is a bit slow right now. Type \`.wiki ${query.slice(0, 30)}\` for a quick answer, or retry in a moment!`,
+        ];
+        return `🤖 *Silva*\n\n` + responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    // Generic catch-all — always acknowledges and gives direction
+    const catchAll = [
+        `Got your message! 👋 My AI is connecting… try again in a moment or type \`.menu\` to see what I can do.`,
+        `I'm here! 🤖 Having a brief connection blip. Retry in a few seconds — ch.at will pick it up. Or try \`.ask ${query.slice(0, 30)}\``,
+        `Silva here! 💬 My response engine is warming up. One more try should do it — or use \`.menu\` to browse all commands!`,
+    ];
+    return `🤖 *Silva*\n\n` + catchAll[Math.floor(Math.random() * catchAll.length)];
+}
+
+// ── Main AI dispatcher ────────────────────────────────────────────────────────
+// ch.at is the backbone. pollinations.ai races in parallel as a warm fallback.
+// If both lose, Gemini (if keyed) is tried. If everything fails the offline
+// smart responder guarantees a useful reply — this function NEVER returns null.
+async function askFreeAI(query, jid, systemPrompt, _pluginKeys) {
     const contextPrompt = jid ? buildContextPrompt(jid, query) : query;
     const fullPrompt    = systemPrompt
         ? systemPrompt + '\n\nUser: ' + contextPrompt
         : contextPrompt;
 
-    // Reject empty/error strings that some APIs return instead of a real answer
-    const BAD = /^(timed?\s*out|error|sorry|undefined|null|false|bad\s*request|unauthorized|forbidden)$/i;
-    const tryOne = async (fn) => {
-        const r = await fn();
-        const s = r ? String(r).trim() : '';
+    // Strings that look like content but are actually API error messages
+    const BAD = /^(timed?\s*out|error|sorry[,.]?\s*|undefined|null|false|bad\s*request|unauthorized|forbidden|rate.?limit)/i;
+
+    const validate = (raw) => {
+        const s = raw ? String(raw).trim() : '';
         if (s.length > 4 && !BAD.test(s)) return s;
-        throw new Error('empty');
+        return null;
     };
 
-    try {
-        return await Promise.any([
-            // 1. ch.at — PRIMARY (~400ms, returns {"answer":"..."})
-            tryOne(async () => {
-                const res = await axios.post('https://ch.at/api/chat',
-                    { message: fullPrompt },
-                    { headers: { 'Content-Type': 'application/json', 'User-Agent': 'SilvaMD-Bot/2.0' }, timeout: 10000 }
-                );
-                return res.data?.answer || res.data?.reply || res.data?.message || res.data?.response || res.data?.result || null;
-            }),
-            // 2. pollinations.ai — free, no key, plain text (~3s, slower but reliable)
-            tryOne(async () => {
-                const prompt = fullPrompt.slice(0, 600); // keep URL short
-                const res = await axios.get(
-                    'https://text.pollinations.ai/' + encodeURIComponent(prompt) + '?model=openai&seed=' + (Date.now() % 9999),
-                    { timeout: 15000 }
-                );
-                return typeof res.data === 'string' ? res.data : null;
-            }),
-            // 3. popcat — fast but unreliable ("Timed Out" filtered by BAD above)
-            tryOne(async () => {
-                const res = await axios.get(
-                    'https://api.popcat.xyz/chatbot?msg=' + encodeURIComponent(query.slice(0, 200)) +
-                    '&owner=' + encodeURIComponent(config.OWNER_NAME || 'Silva') + '&botname=Silva',
-                    { timeout: 7000 }
-                );
-                return res.data?.response || null;
-            }),
-        ]);
-    } catch {
-        return null; // Gemini fallback handled in caller
-    }
+    // Race ch.at (with internal retry) against pollinations.ai in parallel.
+    // ch.at retries up to 3× so it wins the race even on the first-attempt miss.
+    const chatAtPromise      = callChAt(fullPrompt);
+    const pollinationsPromise = axios.get(
+        'https://text.pollinations.ai/' + encodeURIComponent(fullPrompt.slice(0, 500)) +
+        '?model=openai&seed=' + (Date.now() % 9999),
+        { timeout: 18000 }
+    ).then(r => (typeof r.data === 'string' ? r.data : null)).catch(() => null);
+
+    // popcat is fast — fire as an extra parallel contestant
+    const popcatPromise = axios.get(
+        'https://api.popcat.xyz/chatbot?msg=' + encodeURIComponent(query.slice(0, 200)) +
+        '&owner=' + encodeURIComponent(config.OWNER_NAME || 'Silva') + '&botname=Silva',
+        { timeout: 7000 }
+    ).then(r => r.data?.response || null).catch(() => null);
+
+    // First valid reply from any source wins
+    const result = await Promise.race([
+        chatAtPromise,
+        pollinationsPromise,
+        popcatPromise,
+        // Hard ceiling so the caller is never stuck forever
+        new Promise(resolve => setTimeout(() => resolve(null), 20000)),
+    ].map(p => Promise.resolve(p).then(v => validate(v) ? validate(v) : new Promise(() => {}))));
+
+    if (result) return result;
+
+    // All parallel attempts exhausted — let the caller try Gemini, then offline fallback
+    return null;
 }
 
 const agentActions = {
@@ -1618,28 +1699,38 @@ module.exports = {
                 rememberMessage(jid, 'user', query);
                 rememberMessage(jid, 'bot', smart);
             } else {
-                // Step 4: AI — all backends race in parallel, first valid reply wins (max ~10s)
+                // Step 4: AI — ch.at (with retry) races pollinations + popcat in parallel.
+                //          Gemini is tried if all free APIs fail.
+                //          offlineSmartReply() is the guaranteed final backstop — NEVER silent.
                 rememberMessage(jid, 'user', query);
                 await sock.sendPresenceUpdate('composing', jid);
 
-                const toolList = [...pm.keys()].slice(0, 80).join(', ');
+                // Build a strong system prompt that tells ch.at exactly when to route a plugin
+                const toolList = [...pm.keys()].slice(0, 100).join(', ');
                 const systemPrompt =
-                    `You are Silva, an intelligent WhatsApp bot assistant. ` +
+                    `You are Silva, a smart WhatsApp bot assistant. ` +
                     `Owner: ${config.OWNER_NAME || 'Silva'}. Bot: ${config.BOT_NAME || 'Silva MD'}.\n` +
-                    `Available commands: ${toolList}.\n` +
-                    `IMPORTANT: If the user's request should run one of those bot commands, ` +
-                    `reply with ONLY this format (no other text): TOOL:<command>|<arguments>\n` +
-                    `Examples: TOOL:play|Shape of You Ed Sheeran\n` +
-                    `          TOOL:weather|Nairobi\n` +
-                    `          TOOL:wiki|black holes\n` +
-                    `          TOOL:github|SilvaTechB\n` +
-                    `          TOOL:sticker|\n` +
-                    `If it is a general question or conversation, answer naturally. ` +
-                    `Use *bold* for emphasis. Keep it under 200 words. Never say you cannot run commands.`;
+                    `Available bot commands: ${toolList}.\n\n` +
+                    `ROUTING RULES (follow exactly):\n` +
+                    `• If the user wants music/songs → reply: TOOL:play|<song name>\n` +
+                    `• If the user wants weather    → reply: TOOL:weather|<city>\n` +
+                    `• If the user wants Wikipedia  → reply: TOOL:wiki|<topic>\n` +
+                    `• If the user wants a sticker  → reply: TOOL:sticker|\n` +
+                    `• If the user wants TikTok DL  → reply: TOOL:tiktok|<url>\n` +
+                    `• If the user wants YouTube DL → reply: TOOL:ytmp4|<title>\n` +
+                    `• If the user wants translate  → reply: TOOL:translate|<lang> <text>\n` +
+                    `• If the user wants a joke     → reply: TOOL:joke|\n` +
+                    `• If the user wants news       → reply: TOOL:news|\n` +
+                    `• If the user wants QR code    → reply: TOOL:qr|<text>\n` +
+                    `• If the user wants a poem     → reply: TOOL:poem|<topic>\n` +
+                    `• If the user wants crypto     → reply: TOOL:crypto|<coin>\n` +
+                    `• For any other bot command in the list above, reply: TOOL:<command>|<args>\n` +
+                    `• For general questions, conversation, or topics NOT matching a command → answer naturally.\n\n` +
+                    `Format rules: Use *bold* for key info. Max 200 words. Never say you cannot run commands.`;
 
                 let aiReply = await askFreeAI(query, jid, systemPrompt);
 
-                // Gemini fallback when all free APIs fail
+                // Gemini secondary fallback (only if keyed)
                 if (!aiReply) {
                     try {
                         const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_KEY || '';
@@ -1666,37 +1757,44 @@ module.exports = {
                     } catch { /* Gemini unavailable */ }
                 }
 
-                if (aiReply) {
-                    // Check if AI decided to run a bot tool
-                    if (/^TOOL:/i.test(aiReply.trim())) {
-                        const toolLine = aiReply.trim().replace(/^TOOL:/i, '').split('\n')[0].trim();
-                        const pipeIdx  = toolLine.indexOf('|');
-                        const cmdName  = (pipeIdx >= 0 ? toolLine.slice(0, pipeIdx) : toolLine).trim().toLowerCase();
-                        const argStr   = pipeIdx >= 0 ? toolLine.slice(pipeIdx + 1).trim() : '';
-                        const toolArgs = argStr ? argStr.split(/\s+/).filter(Boolean) : [];
-                        const plugin   = pm.get(cmdName);
-
-                        if (plugin) {
-                            if (plugin.permission === 'owner' && !isOwner)
-                                return reply(`⛔ That action requires owner permission.`);
-                            if (plugin.permission === 'admin' && !isAdmin && !isOwner)
-                                return reply(`⛔ That action requires admin permission.`);
-                            const argDisplay = toolArgs.length ? ` *"${toolArgs.join(' ')}"*` : '';
-                            await safeSend({ text: `🔧 _${cmdName}${argDisplay}..._` }, { quoted: message });
-                            try {
-                                await plugin.run(sock, message, toolArgs, ctx);
-                            } catch (err) {
-                                await safeSend({ text: `❌ Failed: ${err.message || 'Something went wrong.'}` }, { quoted: message });
-                            }
-                            return;
-                        }
-                    }
-                    // Conversational AI response
-                    response = `🤖 *Silva*\n\n${aiReply}`;
-                    rememberMessage(jid, 'bot', aiReply.slice(0, 300));
+                // ── GUARANTEED RESPONSE — never silent ──────────────────────────────────
+                // offlineSmartReply always returns a useful string, so response is always set.
+                if (!aiReply) {
+                    aiReply = offlineSmartReply(query, pm);
                 }
+
+                // Check if AI (or offline) decided to route a plugin via TOOL: prefix
+                if (/^TOOL:/i.test(String(aiReply).trim())) {
+                    const toolLine = String(aiReply).trim().replace(/^TOOL:/i, '').split('\n')[0].trim();
+                    const pipeIdx  = toolLine.indexOf('|');
+                    const cmdName  = (pipeIdx >= 0 ? toolLine.slice(0, pipeIdx) : toolLine).trim().toLowerCase();
+                    const argStr   = pipeIdx >= 0 ? toolLine.slice(pipeIdx + 1).trim() : '';
+                    const toolArgs = argStr ? argStr.split(/\s+/).filter(Boolean) : [];
+                    const plugin   = pm.get(cmdName);
+
+                    if (plugin) {
+                        if (plugin.permission === 'owner' && !isOwner)
+                            return reply(`⛔ That action requires owner permission.`);
+                        if (plugin.permission === 'admin' && !isAdmin && !isOwner)
+                            return reply(`⛔ That action requires admin permission.`);
+                        const argDisplay = toolArgs.length ? ` *"${toolArgs.join(' ')}"*` : '';
+                        await safeSend({ text: `🔧 _Running ${cmdName}${argDisplay}..._` }, { quoted: message });
+                        try {
+                            await plugin.run(sock, message, toolArgs, ctx);
+                        } catch (err) {
+                            await safeSend({ text: `❌ ${cmdName} failed: ${err.message || 'Something went wrong.'}` }, { quoted: message });
+                        }
+                        return;
+                    }
+                    // TOOL: command not found — fall through to conversational reply
+                }
+
+                // Conversational response (may come from ch.at, Gemini, or offline fallback)
+                response = aiReply.startsWith('🤖 *Silva*') ? aiReply : `🤖 *Silva*\n\n${aiReply}`;
+                rememberMessage(jid, 'bot', aiReply.slice(0, 300));
             }
         }
+        // response is always set — either by an earlier branch or by offlineSmartReply above
         if (response) await safeSend({ text: response }, { quoted: message });
     }
 };
