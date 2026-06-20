@@ -101,15 +101,18 @@ module.exports = {
 
         if (cmd === 'ttp') {
             if (!text) return send('❌ *Usage:* `.ttp <text>`');
+            // siputzx.my.id is dead (2026-06). Provide themed text fallback.
             try {
                 await sock.sendPresenceUpdate('composing', jid);
-                const url = `https://api.siputzx.my.id/api/tools/ttp?text=${encodeURIComponent(text)}&color=green`;
-                const res = await axios.get(url, { responseType: 'arraybuffer', timeout: 20000 });
-                await sock.sendMessage(jid, { image: Buffer.from(res.data), caption: fmt(`🖼️ Text: *${text}*`), contextInfo }, { quoted: message });
-            } catch {
-                return send(`🖼️ Text Picture: *${text}*\n\n_API unavailable — use \`.fancy ${text}\` for styled text instead_`);
-            }
-            return;
+                // Try thum.io text-overlay QR (quick image generation)
+                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(text)}&bgcolor=000000&color=00FF00&qzone=2`;
+                const res = await axios.get(qrUrl, { responseType: 'arraybuffer', timeout: 12000 });
+                if (res.data?.length > 500) {
+                    await sock.sendMessage(jid, { image: Buffer.from(res.data), caption: fmt(`🖼️ Text: *${text}*\n\n_Use .fancy for styled text_`), contextInfo }, { quoted: message });
+                    return;
+                }
+            } catch {}
+            return send(`🖼️ *Text Picture*\n\n_${text}_\n\n_TTP image API unavailable — use \`.fancy ${text}\` for Unicode-styled text_`);
         }
 
         if (cmd === 'domaincheck') {
@@ -165,11 +168,16 @@ module.exports = {
 
         if (cmd === 'rebrandly') {
             if (!text) return send('❌ *Usage:* `.rebrandly <url>`');
+            // shrtco.de is dead (ENOTFOUND) — using tinyurl as replacement
             try {
-                const res = await axios.get(`https://api.shrtco.de/v2/shorten?url=${encodeURIComponent(text)}`, { timeout: 10000 });
-                const short = res.data?.result?.full_short_link || res.data?.result?.short_link;
-                return send(`🔗 *Short URL*\n\n*Original:* ${text}\n*Short:* ${short || 'N/A'}`);
-            } catch { return send('❌ URL shortener failed.'); }
+                const res = await axios.get(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(text)}`, { timeout: 10000 });
+                return send(`🔗 *Short URL*\n\n*Original:* ${text}\n*Short:* ${res.data}`);
+            } catch {
+                try {
+                    const res = await axios.get(`https://v.gd/create.php?format=simple&url=${encodeURIComponent(text)}`, { timeout: 10000 });
+                    return send(`🔗 *Short URL*\n\n*Original:* ${text}\n*Short:* ${res.data}`);
+                } catch { return send('❌ URL shortener failed. Try `.tinyurl <url>` or `.vgd <url>`.'); }
+            }
         }
 
         if (cmd === 'vurl' || cmd === 'adfoc' || cmd === 'shortener') {

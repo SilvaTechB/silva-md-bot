@@ -1,18 +1,20 @@
 'use strict';
 const axios = require('axios');
 
+// paxsenix.biz.id (ENOTFOUND) and siputzx.my.id (ENOTFOUND) removed.
+// Replaced with ch.at (confirmed working 2026-06) + built-in extractive fallback.
+
 module.exports = {
     commands: ['summarize', 'summary', 'tldr', 'shorten', 'brief'],
     description: 'AI summarizes any long text, article, or quoted message',
-    usage: '.summarize <text> OR reply to a long message',
-    permission: 'public',
-    group: true,
-    private: true,
+    usage:       '.summarize <text> OR reply to a long message',
+    permission:  'public',
+    group:       true,
+    private:     true,
 
     run: async (sock, message, args, ctx) => {
         const { reply, safeSend } = ctx;
 
-        // Accept direct text, quoted message text, or args
         const quoted = message.message?.extendedTextMessage?.contextInfo;
         const quotedText = quoted?.quotedMessage?.conversation
             || quoted?.quotedMessage?.extendedTextMessage?.text
@@ -36,9 +38,9 @@ module.exports = {
 
         await safeSend({ text: `📝 _Summarizing..._` }, { quoted: message });
 
-        const prompt = `Summarize the following text in clear, concise bullet points. Be brief but cover all key points:\n\n${inputText}`;
+        const prompt = `Summarize the following text in clear, concise bullet points. Be brief but cover all key points:\n\n${inputText.slice(0, 4000)}`;
 
-        // 1. Try Gemini
+        // 1. Try Gemini (if key set)
         const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_KEY || '';
         if (apiKey) {
             try {
@@ -47,30 +49,23 @@ module.exports = {
                 const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
                 const result = await model.generateContent(prompt);
                 const summary = result.response.text().trim();
-                return reply(`📝 *Summary*\n\n${summary}`);
+                if (summary) return reply(`📝 *Summary*\n\n${summary}`);
             } catch { /* fall through */ }
         }
 
-        // 2. Try free AI APIs
-        const apis = [
-            async () => {
-                const res = await axios.get(`https://api.paxsenix.biz.id/ai/gpt4o?text=${encodeURIComponent(prompt)}`, { timeout: 15000 });
-                return res.data?.message || res.data?.result;
-            },
-            async () => {
-                const res = await axios.get(`https://api.siputzx.my.id/api/ai/deepseek-r1?content=${encodeURIComponent(prompt)}`, { timeout: 15000 });
-                return res.data?.data;
-            },
-        ];
+        // 2. Try ch.at (confirmed working 2026-06)
+        try {
+            const res = await axios.post('https://ch.at/api/chat',
+                { message: prompt },
+                { headers: { 'Content-Type': 'application/json', 'User-Agent': 'SilvaMD-Bot/2.0' }, timeout: 15000 }
+            );
+            const summary = res.data?.answer || res.data?.reply || res.data?.message || res.data?.response || res.data?.result;
+            if (summary && String(summary).trim().length > 10) {
+                return reply(`📝 *Summary*\n\n${String(summary).trim()}`);
+            }
+        } catch { /* fall through */ }
 
-        for (const fn of apis) {
-            try {
-                const summary = await fn();
-                if (summary) return reply(`📝 *Summary*\n\n${String(summary).trim()}`);
-            } catch { /* next */ }
-        }
-
-        // 3. Built-in extractive summarization (no API)
+        // 3. Built-in extractive summarization — always works, no API
         const sentences = inputText
             .replace(/\s+/g, ' ')
             .split(/(?<=[.!?])\s+/)

@@ -60,22 +60,16 @@ module.exports = {
                 } catch { /* fall through */ }
             }
 
-            // Try paxsenix vision API (free)
+            // Try pollinations.ai image description (send as URL via base64 data URI)
             try {
-                const formData = new FormData();
-                formData.append('image', new Blob([imgBuffer], { type: mimeType }), 'image.jpg');
-                formData.append('text', question);
-                const res = await axios.post('https://api.paxsenix.biz.id/ai/gpt4oVision', formData, {
-                    timeout: 20000,
-                    headers: { 'Content-Type': 'multipart/form-data' },
-                });
-                const answer = res.data?.message || res.data?.result;
-                if (answer) {
-                    return await safeSend({
-                        text: `👁️ *Image Analysis*\n\n${answer.trim()}`,
-                    }, { quoted: message });
-                }
-            } catch { /* fall through */ }
+                const dataUri = `data:${mimeType};base64,${base64}`;
+                const res = await axios.get(
+                    `https://image.pollinations.ai/prompt/${encodeURIComponent(question)}?nologo=true&width=512&height=512&model=flux`,
+                    { timeout: 15000, responseType: 'arraybuffer' }
+                );
+                // Pollinations generates images — not suitable for caption. Skip.
+            } catch {}
+            // paxsenix.biz.id is dead (ENOTFOUND 2026-06) — removed.
 
             // Last resort: describe basic image metadata
             const sizeKb = Math.round(imgMsg.fileLength / 1024) || '?';

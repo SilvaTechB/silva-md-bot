@@ -1,8 +1,19 @@
 'use strict';
 
 const axios  = require('axios');
+const playdl = require('play-dl');
 const { fmt } = require('../lib/theme');
 const { dlBuffer } = require('../lib/dlmedia');
+
+const DC_BASE = 'https://apis.davidcyriltech.my.id';
+
+// Search YouTube via play-dl (no external API needed), download via davidcyriltech
+async function ytSearch(q, limit = 1) {
+    try {
+        const results = await playdl.search(q, { source: { youtube: 'video' }, limit });
+        return results || [];
+    } catch { return []; }
+}
 
 module.exports = {
     commands: ['toimg', 'toptt', 'tovideo', 'sendaudio', 'sendvideo', 'snack', 'video'],
@@ -24,7 +35,6 @@ module.exports = {
             const msg    = message.message;
             const webpMsg = msg?.stickerMessage || msg?.extendedTextMessage?.contextInfo?.quotedMessage?.stickerMessage;
             const imgMsg  = msg?.imageMessage   || msg?.extendedTextMessage?.contextInfo?.quotedMessage?.imageMessage;
-
             if (!webpMsg && !imgMsg) return send('❌ Reply to a *sticker* or *image* with `.toimg` to convert it.');
             const target = webpMsg || imgMsg;
             const type   = webpMsg ? 'sticker' : 'image';
@@ -72,66 +82,31 @@ module.exports = {
             return;
         }
 
-        if (cmd === 'ig' || cmd === 'fb') {
-            const url = text;
-            if (!url || (!url.includes('instagram.com') && !url.includes('facebook.com') && !url.includes('fb.com') && !url.includes('fb.watch'))) {
-                return send(`❌ *Usage:* \`.${cmd} <${cmd === 'ig' ? 'instagram' : 'facebook'} url>\``);
-            }
-            try {
-                const apis = cmd === 'ig' ? [
-                    `https://api.siputzx.my.id/api/d/igdl?url=${encodeURIComponent(url)}`,
-                    `https://api.ryzendesu.vip/api/downloader/igdl?url=${encodeURIComponent(url)}`
-                ] : [
-                    `https://api.siputzx.my.id/api/d/fbdl?url=${encodeURIComponent(url)}`,
-                    `https://api.ryzendesu.vip/api/downloader/fb?url=${encodeURIComponent(url)}`
-                ];
-
-                let dlUrl = null;
-                for (const api of apis) {
-                    try {
-                        const res = await axios.get(api, { timeout: 15000 });
-                        dlUrl = res.data?.data?.[0]?.url || res.data?.result?.url ||
-                                res.data?.url || res.data?.data?.url || res.data?.video_url;
-                        if (dlUrl) break;
-                    } catch {}
-                }
-
-                if (!dlUrl) return send(`❌ Could not extract download link.\n\n_Try: https://snapsave.app_`);
-
-                const vidBuf = await axios.get(dlUrl, { responseType: 'arraybuffer', timeout: 60000 });
-                await sock.sendMessage(jid, {
-                    video: Buffer.from(vidBuf.data),
-                    mimetype: 'video/mp4',
-                    caption: fmt(`📥 Downloaded from ${cmd === 'ig' ? 'Instagram' : 'Facebook'}`),
-                    contextInfo
-                }, { quoted: message });
-            } catch { return send(`❌ Download failed.\n\n_Try: https://snapsave.app for Instagram or https://fbdown.net for Facebook_`); }
-            return;
-        }
-
         if (cmd === 'snack') {
             if (!text) return send('❌ *Usage:* `.snack <snackvideo url>`');
-            return send('⚠️ Snack Video downloader requires paid API. Try SnapTik or SaveFrom.net for now.');
+            return send('⚠️ Snack Video downloader is unavailable. Try SnapTik.app or SaveFrom.net instead.');
         }
 
         if (cmd === 'play') {
-            if (!text) return send('❌ *Usage:* `.play <song name>`\n\nDownloads audio from YouTube.');
+            if (!text) return send('❌ *Usage:* `.play <song name>`\n\nDownloads audio from YouTube by song name.');
             try {
-                const searchRes = await axios.get(`https://api.siputzx.my.id/api/search/youtube?q=${encodeURIComponent(text)}`, { timeout: 15000 });
-                const first = searchRes.data?.data?.[0];
-                if (!first) return send(`❌ No results for: *${text}*`);
-                const ytUrl = first.url || `https://youtube.com/watch?v=${first.videoId}`;
-                const dlRes = await axios.get(`https://api.siputzx.my.id/api/d/ytmp3?url=${encodeURIComponent(ytUrl)}`, { timeout: 30000 });
-                const audioUrl = dlRes.data?.data?.url || dlRes.data?.url;
-                if (!audioUrl) return send(`❌ Could not get audio for: *${first.title || text}*`);
-                const audioBuf = await axios.get(audioUrl, { responseType: 'arraybuffer', timeout: 60000 });
-                await sock.sendMessage(jid, {
-                    audio: Buffer.from(audioBuf.data),
-                    mimetype: 'audio/mpeg',
-                    contextInfo
-                }, { quoted: message });
-                await send(`🎵 *${first.title || text}*\n⏱ ${first.duration || 'N/A'}`);
-            } catch { return send(`❌ Failed to download audio for: *${text}*\n\nTry \`.ytmp3 <youtube url>\` with a direct URL.`); }
+                const results = await ytSearch(text, 1);
+                const first = results[0];
+                if (!first?.url) return send(`❌ No YouTube results for: *${text}*`);
+
+                const dlRes = await axios.get(
+                    `${DC_BASE}/download/ytmp3?url=${encodeURIComponent(first.url)}`,
+                    { timeout: 35000 }
+                );
+                const audioUrl = dlRes.data?.result?.download_url || dlRes.data?.result?.downloadUrl
+                              || dlRes.data?.result?.url || dlRes.data?.url || dlRes.data?.link;
+                if (!audioUrl) return send(`❌ Could not get audio for: *${first.title || text}*\n\nTry \`.ytmp3 <youtube url>\` with a direct URL.`);
+
+                await sock.sendMessage(jid, { audio: { url: audioUrl }, mimetype: 'audio/mpeg', contextInfo }, { quoted: message });
+                await send(`🎵 *${first.title || text}*\n⏱ ${first.durationRaw || 'N/A'}`);
+            } catch (e) {
+                return send(`❌ Audio download failed: ${e.message?.slice(0, 80)}\n\nTry \`.ytmp3 <youtube url>\` with a direct URL.`);
+            }
             return;
         }
 
@@ -139,19 +114,26 @@ module.exports = {
             if (!text) return send('❌ *Usage:* `.video <youtube url or search term>`\n\nDownloads video from YouTube.');
             try {
                 let ytUrl = text;
+                let title = text;
                 if (!text.includes('youtube.com') && !text.includes('youtu.be')) {
-                    const searchRes = await axios.get(`https://api.siputzx.my.id/api/search/youtube?q=${encodeURIComponent(text)}`, { timeout: 15000 });
-                    ytUrl = searchRes.data?.data?.[0]?.url || text;
+                    const results = await ytSearch(text, 1);
+                    if (results[0]?.url) { ytUrl = results[0].url; title = results[0].title || text; }
                 }
-                const dlRes = await axios.get(`https://api.siputzx.my.id/api/d/ytmp4?url=${encodeURIComponent(ytUrl)}`, { timeout: 30000 });
-                const videoUrl = dlRes.data?.data?.url || dlRes.data?.url;
-                if (!videoUrl) return send(`❌ Could not get video. Try \`.ytmp4 <url>\` with a direct URL.`);
-                const vidBuf = await axios.get(videoUrl, { responseType: 'arraybuffer', timeout: 120000 });
+                const dlRes = await axios.get(
+                    `${DC_BASE}/download/ytmp4?url=${encodeURIComponent(ytUrl)}`,
+                    { timeout: 35000 }
+                );
+                const videoUrl = dlRes.data?.result?.download_url || dlRes.data?.result?.downloadUrl
+                               || dlRes.data?.result?.url || dlRes.data?.url || dlRes.data?.link;
+                if (!videoUrl) return send(`❌ Could not get video. Use \`.ytmp4 <youtube url>\` for a direct URL.`);
+
                 await sock.sendMessage(jid, {
-                    video: Buffer.from(vidBuf.data), mimetype: 'video/mp4',
-                    caption: fmt(`🎥 ${text}`), contextInfo
+                    video: { url: videoUrl }, mimetype: 'video/mp4',
+                    caption: fmt(`🎥 ${title}`), contextInfo
                 }, { quoted: message });
-            } catch { return send(`❌ Failed to download video.\n\nUse \`.ytmp4 <youtube url>\` for a direct URL.`); }
+            } catch (e) {
+                return send(`❌ Video download failed: ${e.message?.slice(0, 80)}\n\nUse \`.ytmp4 <youtube url>\` for a direct URL.`);
+            }
             return;
         }
     }

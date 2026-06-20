@@ -3,6 +3,10 @@
 const axios  = require('axios');
 const { fmt } = require('../lib/theme');
 
+// Dead APIs removed (2026-06): siputzx.my.id (ENOTFOUND), ryzendesu.vip (bot-protected)
+// No working free logo-image API exists without a key, so all styles fall through
+// to the built-in Unicode text-art fallback, which always works.
+
 const LOGO_STYLES = {
     advancedglow:    { style: 'neon',           color: '#00ff88', bg: '#000000' },
     americanflag:    { style: 'flag',            color: '#B22234', bg: '#3C3B6E' },
@@ -33,14 +37,36 @@ const LOGO_STYLES = {
     writetext:       { style: 'handwriting',     color: '#1A1A1A', bg: '#FFFFF0' },
     logomaker:       { style: 'logo',            color: '#FF6600', bg: '#FFFFFF' },
     logolist:        null,
-    logo1917:        { style: 'retro',           color: '#C0A000', bg: '#1A1A1A' },
 };
 
-const LOGO_APIS = [
-    (text, fg, bg) => `https://api.siputzx.my.id/api/maker/brat?text=${encodeURIComponent(text)}`,
-    (text, fg, bg) => `https://api.siputzx.my.id/api/maker/ttp?text=${encodeURIComponent(text)}&color=${fg.replace('#','')}&bgcolor=${bg.replace('#','')}`,
-    (text, fg, bg) => `https://api.ryzendesu.vip/api/sticker/carbon?text=${encodeURIComponent(text)}`,
-];
+// Unicode transformation maps
+const UNICODE_MAPS = {
+    bold:       c => { const code = c.charCodeAt(0); if (code >= 65 && code <= 90) return String.fromCodePoint(code + 0x1D3BF); if (code >= 97 && code <= 122) return String.fromCodePoint(code + 0x1D3B9); return c; },
+    italic:     c => { const code = c.charCodeAt(0); if (code >= 65 && code <= 90) return String.fromCodePoint(code + 0x1D3F3); if (code >= 97 && code <= 122) return String.fromCodePoint(code + 0x1D3ED); return c; },
+    bolditalic: c => { const code = c.charCodeAt(0); if (code >= 65 && code <= 90) return String.fromCodePoint(code + 0x1D427); if (code >= 97 && code <= 122) return String.fromCodePoint(code + 0x1D421); return c; },
+    mono:       c => { const code = c.charCodeAt(0); if (code >= 65 && code <= 90) return String.fromCodePoint(code + 0x1D62F); if (code >= 97 && code <= 122) return String.fromCodePoint(code + 0x1D629); return c; },
+    script:     c => { const m = {a:'𝒶',b:'𝒷',c:'𝒸',d:'𝒹',e:'𝑒',f:'𝒻',g:'𝑔',h:'𝒽',i:'𝒾',j:'𝒿',k:'𝓀',l:'𝓁',m:'𝓂',n:'𝓃',o:'𝑜',p:'𝓅',q:'𝓆',r:'𝓇',s:'𝓈',t:'𝓉',u:'𝓊',v:'𝓋',w:'𝓌',x:'𝓍',y:'𝓎',z:'𝓏',A:'𝒜',B:'ℬ',C:'𝒞',D:'𝒟',E:'ℰ',F:'ℱ',G:'𝒢',H:'ℋ',I:'ℐ',J:'𝒥',K:'𝒦',L:'ℒ',M:'ℳ',N:'𝒩',O:'𝒪',P:'𝒫',Q:'𝒬',R:'ℛ',S:'𝒮',T:'𝒯',U:'𝒰',V:'𝒱',W:'𝒲',X:'𝒳',Y:'𝒴',Z:'𝒵'}; return m[c] || c; },
+    bubble:     c => { const m = {a:'ⓐ',b:'ⓑ',c:'ⓒ',d:'ⓓ',e:'ⓔ',f:'ⓕ',g:'ⓖ',h:'ⓗ',i:'ⓘ',j:'ⓙ',k:'ⓚ',l:'ⓛ',m:'ⓜ',n:'ⓝ',o:'ⓞ',p:'ⓟ',q:'ⓠ',r:'ⓡ',s:'ⓢ',t:'ⓣ',u:'ⓤ',v:'ⓥ',w:'ⓦ',x:'ⓧ',y:'ⓨ',z:'ⓩ',A:'Ⓐ',B:'Ⓑ',C:'Ⓒ',D:'Ⓓ',E:'Ⓔ',F:'Ⓕ',G:'Ⓖ',H:'Ⓗ',I:'Ⓘ',J:'Ⓙ',K:'Ⓚ',L:'Ⓛ',M:'Ⓜ',N:'Ⓝ',O:'Ⓞ',P:'Ⓟ',Q:'Ⓠ',R:'Ⓡ',S:'Ⓢ',T:'Ⓣ',U:'Ⓤ',V:'Ⓥ',W:'Ⓦ',X:'Ⓧ',Y:'Ⓨ',Z:'Ⓩ'}; return m[c] || c; },
+    square:     c => { const m = {a:'🄰',b:'🄱',c:'🄲',d:'🄳',e:'🄴',f:'🄵',g:'🄶',h:'🄷',i:'🄸',j:'🄹',k:'🄺',l:'🄻',m:'🄼',n:'🄽',o:'🄾',p:'🄿',q:'🅀',r:'🅁',s:'🅂',t:'🅃',u:'🅄',v:'🅅',w:'🅆',x:'🅇',y:'🅈',z:'🅉',A:'🄰',B:'🄱',C:'🄲',D:'🄳',E:'🄴',F:'🄵',G:'🄶',H:'🄷',I:'🄸',J:'🄹',K:'🄺',L:'🄻',M:'🄼',N:'🄽',O:'🄾',P:'🄿',Q:'🅀',R:'🅁',S:'🅂',T:'🅃',U:'🅄',V:'🅅',W:'🅆',X:'🅇',Y:'🅈',Z:'🅉'}; return m[c] || c; },
+    vaporwave:  c => { const code = c.charCodeAt(0); if (code >= 33 && code <= 126) return String.fromCodePoint(code + 0xFEE0); return c; },
+};
+
+// Map style names to unicode transforms
+const STYLE_UNICODE = {
+    neon: 'bold', flag: 'bold', blackpink: 'script', blackpink2: 'italic',
+    cartoon: 'bubble', delete: 'bold', clouds: 'italic', galaxy: 'bolditalic',
+    galaxy2: 'italic', glitch: 'vaporwave', glossy: 'mono', glow: 'bold',
+    gradient: 'script', light: 'bolditalic', retro: 'mono', gold: 'bold',
+    neon2: 'italic', neonglitch: 'vaporwave', flag2: 'bubble', paper: 'script',
+    pixel: 'mono', sand: 'italic', beach: 'bubble', effect: 'bold',
+    typography: 'bolditalic', underwater: 'italic', handwriting: 'script', logo: 'bold',
+    default: 'bold',
+};
+
+function transform(text, mapName) {
+    const fn = UNICODE_MAPS[mapName] || UNICODE_MAPS.bold;
+    return text.split('').map(fn).join('');
+}
 
 module.exports = {
     commands: [
@@ -66,59 +92,35 @@ module.exports = {
 
         if (cmd === 'logolist') {
             const styles = Object.keys(LOGO_STYLES).filter(k => k !== 'logolist').sort();
-            const chunk1 = styles.slice(0, Math.ceil(styles.length / 2));
-            const chunk2 = styles.slice(Math.ceil(styles.length / 2));
+            const half   = Math.ceil(styles.length / 2);
             return send(
                 `🎨 *Logo Styles (${styles.length})*\n\n` +
-                chunk1.map(s => `• .${s}`).join('\n') + '\n\n' +
-                chunk2.map(s => `• .${s}`).join('\n') +
+                styles.slice(0, half).map(s => `• .${s}`).join('\n') + '\n\n' +
+                styles.slice(half).map(s => `• .${s}`).join('\n') +
                 `\n\n_Usage: .${styles[0]} <your text>_`
             );
         }
 
         if (!text) {
             return send(
-                `🎨 *${cmd.toUpperCase()} Logo Maker*\n\n` +
+                `🎨 *${cmd.toUpperCase()} Style*\n\n` +
                 `❌ *Usage:* \`.${cmd} <your text>\`\n\n` +
                 `Example: \`.${cmd} Silva MD\`\n\n` +
                 `_Use \`.logolist\` to see all styles_`
             );
         }
 
-        const styleInfo = LOGO_STYLES[cmd] || { style: 'logo', color: '#FF6600', bg: '#FFFFFF' };
-        await sock.sendPresenceUpdate('composing', jid);
+        const styleInfo  = LOGO_STYLES[cmd] || { style: 'logo', color: '#FF6600', bg: '#FFFFFF' };
+        const mapName    = STYLE_UNICODE[styleInfo.style] || 'bold';
+        const styled     = transform(text, mapName);
+        const DECORATORS = { neon:'⚡', blackpink:'🌸', galaxy:'🌌', glitch:'⚠️', gold:'✨', glow:'💡', gradient:'🌈', logo:'🎯', default:'🎨' };
+        const icon       = DECORATORS[styleInfo.style] || '🎨';
 
-        let sent = false;
-        for (const buildUrl of LOGO_APIS) {
-            try {
-                const url = buildUrl(text, styleInfo.color, styleInfo.bg);
-                const res = await axios.get(url, { responseType: 'arraybuffer', timeout: 20000 });
-                if (res.data?.length > 500) {
-                    await sock.sendMessage(jid, {
-                        image: Buffer.from(res.data),
-                        caption: fmt(`🎨 *${cmd.toUpperCase()}*\n\nText: ${text}`),
-                        contextInfo
-                    }, { quoted: message });
-                    sent = true;
-                    break;
-                }
-            } catch {}
-        }
-
-        if (!sent) {
-            const fancy = text.split('').map(c => {
-                const code = c.charCodeAt(0);
-                if (code >= 65 && code <= 90) return String.fromCodePoint(code + 0x1D3BF);
-                if (code >= 97 && code <= 122) return String.fromCodePoint(code + 0x1D3B9);
-                return c;
-            }).join('');
-            await send(
-                `🎨 *${cmd.toUpperCase()} Style*\n\n` +
-                `${fancy}\n\n` +
-                `_Text:_ ${text}\n` +
-                `_Style:_ ${cmd}\n\n` +
-                `_Image generation unavailable — showing styled text_`
-            );
-        }
+        await send(
+            `${icon} *${cmd.toUpperCase()} Style*\n\n` +
+            `${styled}\n\n` +
+            `_Text:_ ${text}\n` +
+            `_Color:_ ${styleInfo.color}  _BG:_ ${styleInfo.bg}`
+        );
     }
 };

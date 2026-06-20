@@ -447,66 +447,14 @@ async function tryParallelApis(url) {
     const shortcode = extractShortcode(url);
 
     const attempts = [
-        // saveig.app
-        axios.post('https://saveig.app/api/ajaxSearch',
-            qs.stringify({ q: url, t: 'media', lang: 'en' }),
-            {
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Origin': 'https://saveig.app',
-                    'Referer': 'https://saveig.app/',
-                    'User-Agent': UA_BROWSER,
-                },
-                timeout: 10000,
-            }
-        ).then(r => {
-            const d = r.data;
-            if (typeof d === 'object' && d?.data) {
-                const items = parseDownloadHtml(d.data);
-                if (items.length) return { source: 'saveig', items };
-            }
-            throw new Error('saveig: no data');
-        }),
+        // saveig.app removed (dead 2026-06)
+        Promise.reject(new Error('saveig: removed')),
 
-        // snapinsta.app
-        axios.post('https://snapinsta.app/api/ajaxSearch',
-            qs.stringify({ q: url, t: 'media', lang: 'en' }),
-            {
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Origin': 'https://snapinsta.app',
-                    'Referer': 'https://snapinsta.app/',
-                    'User-Agent': UA_BROWSER,
-                },
-                timeout: 10000,
-            }
-        ).then(r => {
-            const d = r.data;
-            if (typeof d === 'object' && d?.data) {
-                const items = parseDownloadHtml(d.data);
-                if (items.length) return { source: 'snapinsta', items };
-            }
-            throw new Error('snapinsta: no data');
-        }),
+        // snapinsta.app removed (dead 2026-06)
+        Promise.reject(new Error('snapinsta: removed')),
 
-        // nexoracle
-        axios.get(`https://api.nexoracle.com/social/ig?url=${encodeURIComponent(url)}`, {
-            headers: { 'User-Agent': UA_BROWSER },
-            timeout: 10000,
-        }).then(r => {
-            const d = r.data;
-            const arr = d?.result || d?.media || (Array.isArray(d) ? d : []);
-            if (!arr.length) throw new Error('nexoracle: empty');
-            return {
-                source: 'nexoracle',
-                items: arr.map(i => ({
-                    url:  i.url || i.video_url || i.image_url,
-                    type: (i.url || '').includes('.mp4') ? 'video' : 'image',
-                })).filter(i => i.url),
-            };
-        }),
+        // nexoracle removed (dead 2026-06 — returns bot-protection HTML)
+        Promise.reject(new Error('nexoracle: removed')),
 
         // instadownload.net via wp-json
         shortcode ? axios.get(
@@ -600,7 +548,7 @@ module.exports = [
                 { name: 'Embed Page',      fn: () => tryEmbedPage(url)       },
                 { name: 'Parallel APIs',   fn: () => tryParallelApis(url)    },
                 { name: 'SnipSave',        fn: () => trySnapsave(url)        },
-                { name: 'FastDL',          fn: () => tryFastDl(url)          },
+                // FastDL removed — fastdl.app dead 2026-06
                 { name: 'iGram',           fn: () => tryIgram(url)           },
                 { name: 'NPM Package',     fn: () => tryNpmPackage(url)      },
                 { name: 'oEmbed',          fn: () => tryOEmbed(url)          },
