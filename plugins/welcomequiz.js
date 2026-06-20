@@ -115,7 +115,7 @@ module.exports = {
             saveQuizSettings(quizSettings);
 
             return sock.sendMessage(jid, {
-                text: `✅ *Welcome quiz set and enabled!*\n\n❓ *Question:* ${question}\n✅ *Answer:* ${answer}\n⏱️ *Timeout:* ${timeout}s\n\nNew members will be asked this question when they join.`,
+                text: `✅ *Welcome quiz set and enabled🫠!*\n\n❓ *Question:* ${question}\n✅ *Answer:* ${answer}\n⏱️ *Timeout:* ${timeout}s\n\nNew members will be asked this question when they join.`,
                 contextInfo
             }, { quoted: message });
         }
