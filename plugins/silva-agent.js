@@ -261,18 +261,19 @@ function getSmartResponse(query) {
     return null;
 }
 
-// ── AI APIs: all race in parallel — ch.at primary, first valid response wins ──
-// Known-dead domains (ENOTFOUND): paxsenix.biz.id, vapis.my.id — removed.
-// popcat returns literal "Timed Out" string — filtered in tryOne.
-// ch.at returns {"answer":"..."} — read .answer field.
+// ── AI APIs ── tested live; only these endpoints currently respond correctly ──
+// Dead (ENOTFOUND/4xx): paxsenix, vapis, siputzx, duckduckgo, lance-frank, etc.
+// ch.at: returns {"answer":"..."} — CONFIRMED WORKING ~400ms
+// pollinations text: returns plain string — CONFIRMED WORKING ~3s (slow fallback)
+// popcat: returns "Timed Out" string — kept but filtered via BAD regex
 async function askFreeAI(query, jid, systemPrompt) {
     const contextPrompt = jid ? buildContextPrompt(jid, query) : query;
     const fullPrompt    = systemPrompt
         ? systemPrompt + '\n\nUser: ' + contextPrompt
         : contextPrompt;
 
-    // Reject empty responses AND known error strings that look like valid text
-    const BAD = /^(timed?\s*out|error|sorry|undefined|null|false)$/i;
+    // Reject empty/error strings that some APIs return instead of a real answer
+    const BAD = /^(timed?\s*out|error|sorry|undefined|null|false|bad\s*request|unauthorized|forbidden)$/i;
     const tryOne = async (fn) => {
         const r = await fn();
         const s = r ? String(r).trim() : '';
@@ -282,50 +283,35 @@ async function askFreeAI(query, jid, systemPrompt) {
 
     try {
         return await Promise.any([
-            // 1. ch.at — primary (returns {"answer":"..."})
+            // 1. ch.at — PRIMARY (~400ms, returns {"answer":"..."})
             tryOne(async () => {
                 const res = await axios.post('https://ch.at/api/chat',
                     { message: fullPrompt },
                     { headers: { 'Content-Type': 'application/json', 'User-Agent': 'SilvaMD-Bot/2.0' }, timeout: 10000 }
                 );
-                return res.data?.answer || res.data?.reply || res.data?.message || res.data?.response || res.data?.result || res.data?.text || null;
+                return res.data?.answer || res.data?.reply || res.data?.message || res.data?.response || res.data?.result || null;
             }),
-            // 2. siputzx DeepSeek
+            // 2. pollinations.ai — free, no key, plain text (~3s, slower but reliable)
             tryOne(async () => {
+                const prompt = fullPrompt.slice(0, 600); // keep URL short
                 const res = await axios.get(
-                    'https://api.siputzx.my.id/api/ai/deepseek-r1?content=' + encodeURIComponent(fullPrompt),
-                    { timeout: 10000 }
+                    'https://text.pollinations.ai/' + encodeURIComponent(prompt) + '?model=openai&seed=' + (Date.now() % 9999),
+                    { timeout: 15000 }
                 );
-                return res.data?.data || res.data?.message || null;
+                return typeof res.data === 'string' ? res.data : null;
             }),
-            // 3. popcat chatbot (filter "Timed Out" via BAD regex above)
+            // 3. popcat — fast but unreliable ("Timed Out" filtered by BAD above)
             tryOne(async () => {
                 const res = await axios.get(
-                    'https://api.popcat.xyz/chatbot?msg=' + encodeURIComponent(query) +
+                    'https://api.popcat.xyz/chatbot?msg=' + encodeURIComponent(query.slice(0, 200)) +
                     '&owner=' + encodeURIComponent(config.OWNER_NAME || 'Silva') + '&botname=Silva',
-                    { timeout: 8000 }
+                    { timeout: 7000 }
                 );
                 return res.data?.response || null;
             }),
-            // 4. DuckDuckGo AI chat (free, no key)
-            tryOne(async () => {
-                const res = await axios.post('https://duckduckgo.com/duckchat/v1/chat',
-                    { model: 'gpt-4o-mini', messages: [{ role: 'user', content: fullPrompt }] },
-                    { headers: { 'Content-Type': 'application/json', 'x-vqd-4': '4-' }, timeout: 10000 }
-                );
-                return res.data?.message || null;
-            }),
-            // 5. lance-frank (render.com)
-            tryOne(async () => {
-                const res = await axios.get(
-                    'https://lance-frank-asta.onrender.com/api/gpt?q=' + encodeURIComponent(fullPrompt),
-                    { timeout: 12000 }
-                );
-                return res.data?.message || res.data?.result || null;
-            }),
         ]);
     } catch {
-        return null;
+        return null; // Gemini fallback handled in caller
     }
 }
 

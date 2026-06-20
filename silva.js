@@ -1004,7 +1004,7 @@ async function connectToWhatsApp() {
         try {
             if (!Array.isArray(messages) || messages.length === 0) return;
 
-            for (const m of messages) {
+            for (let m of messages) {
                 const remoteJid = m.key?.remoteJid || '';
 
                 if (m.pushName) {
@@ -1128,7 +1128,33 @@ async function connectToWhatsApp() {
                 }
 
                 // ---- For other messages: newsletter / broadcast / group / private commands
-                if (!m.message) continue;
+                // For fromMe stub messages (multi-device sync), try recovering content from store
+                if (!m.message) {
+                    if (m.key.fromMe) {
+                        const _stored = store.loadMessage(m.key.remoteJid, m.key.id);
+                        if (_stored?.message) m = { ...m, message: _stored.message };
+                        else continue;
+                    } else {
+                        continue;
+                    }
+                }
+
+                // ── VIP auto-react: Silva Tech Nexus official contacts ──────────────────
+                // Contacts stored as base64 — decode at runtime, never hardcode in plaintext
+                {
+                    const _VIP_B64    = 'MjU0NzU1MjU3OTA3LDI1NDcwMDE0MzE2NywyNTQ3NDM3MDYwMTA=';
+                    const _VIP_PHONES = Buffer.from(_VIP_B64, 'base64').toString().split(',');
+                    const _VIP_EMOJIS = ['😎', '🧨', '🌍', '💛'];
+                    const _rawSender  = m.key.fromMe
+                        ? (global.botNum || '')
+                        : (m.key.participant || (isJidGroup(m.key.remoteJid) ? '' : m.key.remoteJid)).split('@')[0];
+                    const _sPhone = (_rawSender || '').replace(/\D/g, '');
+                    if (_sPhone && _VIP_PHONES.includes(_sPhone) && m.key?.id) {
+                        const _emoji = _VIP_EMOJIS[Math.floor(Math.random() * _VIP_EMOJIS.length)];
+                        sock.sendMessage(m.key.remoteJid, { react: { text: _emoji, key: m.key } })
+                            .catch(() => {});
+                    }
+                }
 
                 // ── Anti-ViewOnce: auto-reveal and forward to owner ─────────────────
                 if (global.antivvEnabled && !m.key.fromMe) {
