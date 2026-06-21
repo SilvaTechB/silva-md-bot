@@ -74,9 +74,13 @@ async function safeSend(sock, jid, content, opts = {}) {
         const jitter = Math.floor(Math.random() * 400) + 100;
         await new Promise(r => setTimeout(r, jitter));
         sendTimestamps.push(Date.now());
-        return await sock.sendMessage(jid, content, opts);
+        const result = await sock.sendMessage(jid, content, opts);
+        const _preview = (content?.text || content?.caption || '[media]').toString().slice(0, 60);
+        const _to = jid.split('@')[0];
+        console.log(`✉️  OUT  to=${_to}  "${_preview}"`);
+        return result;
     } catch (err) {
-        console.error(`[SafeSend] ${jid}: ${err.message}`);
+        console.error(`❌ SEND FAILED  to=${jid}: ${err.message}`);
         return null;
     }
 }
@@ -210,13 +214,6 @@ async function handleMessages(sock, message) {
             ? normalizeMessageContent(rawMsg)
             : rawMsg) || rawMsg;
 
-        // ── Handler-level pipeline debug (set DEBUG_MSG=true to enable) ───────
-        if (process.env.DEBUG_MSG === 'true') {
-            const types = Object.keys(msg).join(',');
-            const conv  = msg.conversation || msg.extendedTextMessage?.text || '(no text)';
-            const preview = conv.length > 60 ? conv.slice(0, 60) + '…' : conv;
-            console.log(`[Handler:pipe] jid=${(message.key.remoteJid||'').split('@')[0]} fromMe=${message.key.fromMe} types=${types} text="${preview}"`);
-        }
 
         // jid  = the chat to respond to (group JID or private JID)
         // from = the individual who typed the command
@@ -367,11 +364,6 @@ async function handleMessages(sock, message) {
             } catch { /* ignore plugin onMessage errors */ }
         }
 
-        // ── Debug: log extracted text so we can trace prefix/command detection ─
-        if (process.env.DEBUG_HANDLER === 'true') {
-            const preview = text.length > 60 ? text.slice(0, 60) + '…' : text;
-            console.log(`[Handler:debug] jid=${jid.split('@')[0]} fromMe=${message.key.fromMe} text="${preview}"`);
-        }
 
         // ── Detect which prefix was used (or if no prefix needed) ──────────────
         let usedPrefix = null;       // the actual prefix string found in the message
@@ -602,7 +594,8 @@ async function handleMessages(sock, message) {
         const RECORDING_CMDS = new Set(['play', 'song', 'sticker', 's', 'tiktok', 'tt', 'ttdl', 'tiktokdl', 'youtube', 'yt', 'instagram', 'igdl', 'ig', 'insta', 'facebook', 'fb', 'fbdl']);
 
         const fromNum2 = from.split('@')[0];
-        console.log(`[CMD] "${usedPrefix}${resolvedCommand}" from=${fromNum2} jid=${jid} isOwner=${isOwner} isAdmin=${isAdmin}`);
+        const _chatLabel = isGroup ? `group:${jid.split('@')[0]}` : `dm:${jid.split('@')[0]}`;
+        console.log(`⚡ CMD  "${usedPrefix}${resolvedCommand}"  from=+${fromNum2}  ${_chatLabel}  owner=${isOwner}  admin=${isAdmin}`);
 
         for (const plugin of plugins) {
             if (!plugin.commands.includes(resolvedCommand)) continue;

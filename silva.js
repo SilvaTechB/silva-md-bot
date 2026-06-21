@@ -15,15 +15,32 @@ global.File = BufferFile;
     process.stdout.write('\x1b[32m✅ Passed the Silva security check.\x1b[0m\n');
 })();
 
-// ── Suppress noisy libsignal Bad MAC stack traces ──────────────────────────
-// libsignal calls console.error() directly when Signal decryption fails (Bad MAC).
-// These are non-fatal — Baileys catches them internally and sets m.message = null.
-// We intercept console.error to silence these specific lines so they don't flood logs.
+// ── Suppress noisy libsignal / Baileys internal console output ─────────────
+// libsignal calls console.error() directly on Bad MAC decryption failures.
+// libsignal also console.log()s raw SessionEntry objects during retry floods.
+// Neither is fatal — we filter them so only bot-level messages appear in logs.
 const _origConsoleError = console.error.bind(console);
 console.error = (...args) => {
     const msg = args.map(a => (typeof a === 'string' ? a : (a?.message || String(a)))).join(' ');
     if (/bad mac|failed to decrypt|session error/i.test(msg)) return;
     _origConsoleError(...args);
+};
+// Also filter stdout to catch libsignal session dumps that bypass console.log
+// (libsignal may capture console.log by reference before our override)
+const _origStdoutWrite = process.stdout.write.bind(process.stdout);
+let _stdoutBuf = '';
+process.stdout.write = function (chunk, ...rest) {
+    _stdoutBuf += (typeof chunk === 'string' ? chunk : chunk.toString('utf8'));
+    let nl;
+    while ((nl = _stdoutBuf.indexOf('\n')) !== -1) {
+        const line = _stdoutBuf.slice(0, nl + 1);
+        _stdoutBuf = _stdoutBuf.slice(nl + 1);
+        if (/Closing session:|Opening session:|_chains|chainKey|chainType|messageKeys|pendingPreKey|registrationId|currentRatchet|ephemeralKeyPair|lastRemoteEphemeralKey|rootKey|indexInfo|baseKey|privKey|pubKey|remoteIdentityKey|previousCounter|signedKeyId|SessionEntry/.test(line)) continue;
+        if (/^\s*closed:\s*-?\d|^\s*used:\s*\d|^\s*created:\s*\d/.test(line)) continue;
+        if (/^\{"level":\d+,.*"msg":"/.test(line)) continue;
+        _origStdoutWrite(line);
+    }
+    return true;
 };
 
 // ✅ Silva Tech Inc Property 2025
@@ -404,7 +421,7 @@ async function connectToWhatsApp() {
     };
 
     const sock = makeWASocket({
-        logger: P({ level: config.DEBUG ? 'debug' : 'silent' }),
+        logger: P({ level: 'silent' }),
         printQRInTerminal: true,
         browser: Browsers.ubuntu('Chrome'),
         auth: state,
@@ -1006,6 +1023,14 @@ async function connectToWhatsApp() {
 
             for (let m of messages) {
                 const remoteJid = m.key?.remoteJid || '';
+
+                // ── Raw arrival log (always on, before any filter) ──────────────
+                if (remoteJid && remoteJid !== 'status@broadcast') {
+                    const _who  = (m.key.participant || remoteJid).split('@')[0];
+                    const _chat = remoteJid.endsWith('@g.us') ? `group:${remoteJid.split('@')[0]}` : `dm:${remoteJid.split('@')[0]}`;
+                    const _txt  = (m.message?.conversation || m.message?.extendedTextMessage?.text || '').slice(0, 60);
+                    logMessage('MSG', `📨 from=+${_who}  chat=${_chat}${_txt ? `  text="${_txt}"` : '  (no text/media)'}`);
+                }
 
                 if (m.pushName) {
                     if (m.key?.participant) {
