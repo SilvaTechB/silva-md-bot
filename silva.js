@@ -1139,42 +1139,6 @@ async function connectToWhatsApp() {
                     }
                 }
 
-                // ── VIP auto-react: Silva Tech Nexus official contacts ──────────────────
-                // Contacts stored as base64 — decode at runtime, never hardcode in plaintext
-                {
-                    const _VIP_B64    = 'MjU0NzU1MjU3OTA3LDI1NDcwMDE0MzE2NywyNTQ3NDM3MDYwMTA=';
-                    const _VIP_PHONES = Buffer.from(_VIP_B64, 'base64').toString().split(',');
-                    const _VIP_EMOJIS = ['😎', '🧨', '🌍', '💛'];
-
-                    // Source 1: senderPn — Baileys attaches the phone directly on the key
-                    // for newer WA accounts and LID sessions. Most reliable.
-                    let _sPhone = (m.key.senderPn || '').replace(/\D/g, '');
-
-                    // Source 2: parse from participant / remoteJid (classic phone-based JIDs)
-                    if (!_sPhone) {
-                        const _rawJid = m.key.fromMe
-                            ? (global.botNum || '')
-                            : (isJidGroup(m.key.remoteJid)
-                                ? (m.key.participant || '')
-                                : m.key.remoteJid);
-                        if (_rawJid && !_rawJid.includes('@lid')) {
-                            _sPhone = _rawJid.split('@')[0].replace(/\D/g, '');
-                        } else if (_rawJid && _rawJid.includes('@lid')) {
-                            // Source 3: LID account — resolve via lidPhoneCache
-                            const _lidKey = _rawJid.split(':')[0].replace(/@lid$/, '') + '@lid';
-                            const _cached = global.lidPhoneCache?.get(_lidKey)
-                                         || global.lidPhoneCache?.get(_rawJid.split('@')[0].split(':')[0] + '@lid');
-                            if (_cached) _sPhone = String(_cached).replace(/\D/g, '');
-                        }
-                    }
-
-                    if (_sPhone && _VIP_PHONES.includes(_sPhone) && m.key?.id) {
-                        const _emoji = _VIP_EMOJIS[Math.floor(Math.random() * _VIP_EMOJIS.length)];
-                        sock.sendMessage(m.key.remoteJid, { react: { text: _emoji, key: m.key } })
-                            .catch(() => {});
-                    }
-                }
-
                 // ── Anti-ViewOnce: auto-reveal and forward to owner ─────────────────
                 if (global.antivvEnabled && !m.key.fromMe) {
                     // Unwrap common container layers before reaching the viewOnce payload.
