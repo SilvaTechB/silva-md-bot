@@ -1,4 +1,4 @@
-modules = ["nodejs-20", "web", "nix", "python-3.11"]
+modules = ["nodejs-20", "web", "nix"]
 [agent]
 expertMode = true
 integrations = ["github:1.0.0"]
