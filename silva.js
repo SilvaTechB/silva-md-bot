@@ -1161,10 +1161,14 @@ async function connectToWhatsApp() {
                 // old history on reconnect.
                 // (No isRecent / isNotify filter — stale check + dedup is enough.)
 
-                // Dedup: same message ID can arrive multiple times across device sessions
+                // Dedup: only check (not record) here — we record AFTER confirming content.
+                // Recording before the !m.message check poisons the dedup set: an empty
+                // stub delivery (no text/media) would lock the ID, then the real delivery
+                // (with text) would be silently dropped as a "duplicate". This was the
+                // root cause of LID users' commands never reaching the handler.
                 const cmdMsgId = m.key.id;
                 if (cmdMsgId && seenCmdIds.has(cmdMsgId)) continue;
-                if (cmdMsgId) seenCmdIds.add(cmdMsgId);
+                // (seenCmdIds.add is deferred — see below after content is confirmed)
 
                 // ── LID session auto-heal ────────────────────────────────────────────
                 // When a fromMe LID message fails to decrypt (messageStubType=CIPHERTEXT=2),
@@ -1214,9 +1218,14 @@ async function connectToWhatsApp() {
                         if (_stored?.message) m = { ...m, message: _stored.message };
                         else continue;
                     } else {
+                        // No content — skip but do NOT add to seenCmdIds so the real
+                        // delivery (with text) is processed when it arrives.
                         continue;
                     }
                 }
+
+                // Content confirmed — now lock this ID so we don't process it twice.
+                if (cmdMsgId) seenCmdIds.add(cmdMsgId);
 
                 // ── Anti-ViewOnce: auto-reveal and forward to owner ─────────────────
                 if (global.antivvEnabled && !m.key.fromMe) {
