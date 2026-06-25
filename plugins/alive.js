@@ -15,7 +15,8 @@ module.exports = {
     group:       true,
     private:     true,
 
-    run: async (sock, message, args, { sender, contextInfo }) => {
+    run: async (sock, message, args, ctx) => {
+        const { safeSend, contextInfo } = ctx;
         const t = getActiveTheme()?.global || {};
 
         const start = performance.now();
@@ -28,8 +29,7 @@ module.exports = {
         const uptime = `${h}h ${m}m ${s}s`;
 
         const totalRam = (os.totalmem() / 1073741824).toFixed(2);
-        const freeRam  = (os.freemem()  / 1073741824).toFixed(2);
-        const usedRam  = (os.totalmem() - os.freemem()) / 1073741824;
+        const usedRam  = ((os.totalmem() - os.freemem()) / 1073741824).toFixed(2);
 
         const mode   = (config.MODE || 'PUBLIC').toUpperCase();
         const owner  = config.OWNER_NUMBER || global.botNum || 'Unknown';
@@ -44,9 +44,8 @@ module.exports = {
         const footer   = t.footer   || 'Silva MD';
         const alive    = t.alive    || 'System online. All functions nominal.';
         const emoji    = t.aliveEmoji || '⚡';
-        const imageUrl = config.ALIVE_IMG || t.pic1 || 'https://files.catbox.moe/5uli5p.jpeg';
-
         const modeEmoji = mode === 'PUBLIC' ? '🟢' : mode === 'PRIVATE' ? '🔒' : '🔵';
+        const imageUrl = config.ALIVE_IMG || t.pic1 || 'https://files.catbox.moe/5uli5p.jpeg';
 
         const caption =
 `${emoji}  *${botName}* — is Alive!
@@ -56,7 +55,7 @@ module.exports = {
 │ 👑  *Owner:*    +${owner}
 │ ⏱️  *Uptime:*   ${uptime}
 │ ⚡  *Speed:*    ${ping} ms
-│ 💾  *RAM:*      ${usedRam.toFixed(2)} / ${totalRam} GB
+│ 💾  *RAM:*      ${usedRam} / ${totalRam} GB
 │ ${modeEmoji}  *Mode:*     ${mode}
 │ 🎨  *Theme:*    ${theme}
 │ 🔑  *Prefix:*   ${prefix}
@@ -69,13 +68,9 @@ module.exports = {
 ✦ ${footer}`;
 
         try {
-            await sock.sendMessage(sender, {
-                image:   { url: imageUrl },
-                caption,
-                contextInfo
-            }, { quoted: message });
+            await safeSend({ image: { url: imageUrl }, caption, contextInfo }, { quoted: message });
         } catch {
-            await sock.sendMessage(sender, { text: caption, contextInfo }, { quoted: message });
+            await safeSend({ text: caption, contextInfo }, { quoted: message });
         }
     }
 };

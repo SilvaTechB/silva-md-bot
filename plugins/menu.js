@@ -5,8 +5,6 @@ const path    = require('path');
 const config  = require('../config');
 const { getStr } = require('../lib/theme');
 const moment  = require('moment-timezone');
-const baileys = require('@whiskeysockets/baileys');
-const { proto, generateMessageIDV2 } = baileys;
 
 const WEBSITE = 'https://silvatech.co.ke';
 const TZ      = 'Africa/Nairobi';
@@ -178,39 +176,6 @@ function buildCommandHelp(cmdName, plugins, pfx) {
     ].join('\n');
 }
 
-// ── Send as call-log bubble → menu reply ──────────────────────────────────────
-async function sendCallLogMenu(sock, jid, menuText, imgUrl) {
-    const CallOutcome = proto.Message.CallLogMessage.CallOutcome;
-    const callMsgId   = generateMessageIDV2(sock.user?.id);
-    const botJid      = sock.user?.id || '';
-
-    const callContent = proto.Message.fromObject({
-        callLogMesssage: { isVideo: false, callOutcome: CallOutcome.MISSED, durationSecs: 0, callType: 0 }
-    });
-    await sock.relayMessage(jid, callContent, { messageId: callMsgId });
-    await new Promise(r => setTimeout(r, 400));
-
-    const quotedCtx = {
-        stanzaId:      callMsgId,
-        participant:   botJid,
-        quotedMessage: { callLogMesssage: { isVideo: false, callOutcome: CallOutcome.MISSED, durationSecs: 0, callType: 0 } },
-        externalAdReply: {
-            title:                 `${getStr('botName') || 'Silva MD'} — Command Menu`,
-            body:                  `Tap to view all commands`,
-            thumbnailUrl:          imgUrl,
-            sourceUrl:             WEBSITE,
-            mediaType:             1,
-            renderLargerThumbnail: false
-        }
-    };
-
-    try {
-        await sock.sendMessage(jid, { image: { url: imgUrl }, caption: menuText, contextInfo: quotedCtx });
-    } catch {
-        await sock.sendMessage(jid, { text: menuText, contextInfo: quotedCtx });
-    }
-}
-
 // ── Plugin ────────────────────────────────────────────────────────────────────
 module.exports = {
     commands:    ['menu', 'help', 'list', 'cmds', 'commands'],
@@ -221,8 +186,7 @@ module.exports = {
     private:     true,
 
     run: async (sock, message, args, ctx) => {
-        const { prefix, contextInfo } = ctx;
-        const jid     = message.key.remoteJid;
+        const { prefix, contextInfo, safeSend } = ctx;
         const plugins = loadPlugins();
         const botName = getStr('botName') || config.BOT_NAME || 'Silva MD';
         const mode    = (config.MODE || 'public').toUpperCase();
@@ -237,47 +201,29 @@ module.exports = {
         // ── .help <command> ─────────────────────────────────────────────────
         if (rawCmd === 'help' && args.length) {
             const cmdName = args[0].replace(/^\./, '').toLowerCase();
-            return sock.sendMessage(jid, {
-                text:        buildCommandHelp(cmdName, plugins, pfx),
-                contextInfo
-            }, { quoted: message });
+            return safeSend({ text: buildCommandHelp(cmdName, plugins, pfx), contextInfo }, { quoted: message });
         }
 
         // ── .menu <id|name> — read-more for a specific category ─────────────
         if (args.length) {
             const query = args.join(' ').toLowerCase().trim();
 
-            // Try numeric ID
-            const byNum = /^\d+$/.test(query)
-                ? CATEGORIES.find(c => c.id === parseInt(query, 10))
-                : null;
+            const byNum  = /^\d+$/.test(query) ? CATEGORIES.find(c => c.id === parseInt(query, 10)) : null;
+            const byName = !byNum ? CATEGORIES.find(c => c.name.toLowerCase().includes(query)) : null;
+            const cat    = byNum || byName;
 
-            // Try name partial match
-            const byName = !byNum
-                ? CATEGORIES.find(c => c.name.toLowerCase().includes(query))
-                : null;
-
-            const cat = byNum || byName;
             if (cat) {
-                return sock.sendMessage(jid, {
-                    text:        buildCategoryMenu(cat, plugins, pfx),
-                    contextInfo
-                }, { quoted: message });
+                return safeSend({ text: buildCategoryMenu(cat, plugins, pfx), contextInfo }, { quoted: message });
             }
 
-            // Fallback: treat query as a command lookup
             const cmdName = query.replace(/^\./, '');
             const plugin  = plugins.find(p => (p.commands || []).includes(cmdName));
             if (plugin) {
-                return sock.sendMessage(jid, {
-                    text:        buildCommandHelp(cmdName, plugins, pfx),
-                    contextInfo
-                }, { quoted: message });
+                return safeSend({ text: buildCommandHelp(cmdName, plugins, pfx), contextInfo }, { quoted: message });
             }
 
-            // Nothing matched — show a quick guide
             const examples = CATEGORIES.slice(0, 6).map(c => `  \`${pfx}menu ${c.id}\` — ${c.icon} ${c.name}`).join('\n');
-            return sock.sendMessage(jid, {
+            return safeSend({
                 text: `❌ *"${query}"* didn't match any category or command.\n\n📋 *Try:*\n${examples}\n\nOr use \`${pfx}menu\` for the full overview.`,
                 contextInfo
             }, { quoted: message });
@@ -286,31 +232,11 @@ module.exports = {
         // ── .menu — compact overview ─────────────────────────────────────────
         const menuText = buildCompactMenu(plugins, pfx, botName, mode);
 
-        // Primary: call-log bubble
+        // Try image + caption first, fall back to plain text
         try {
-            await sendCallLogMenu(sock, jid, menuText, imgUrl);
-            return;
-        } catch (err) {
-            console.error('[Menu] callLog send failed:', err.message);
-        }
-
-        // Fallback: image + caption
-        const fallbackCtx = {
-            ...contextInfo,
-            externalAdReply: {
-                title:                 `${botName} — Command Menu`,
-                body:                  `${plugins.length} plugins • Prefix: ${pfx} • ${mode} mode`,
-                thumbnailUrl:          imgUrl,
-                sourceUrl:             WEBSITE,
-                mediaType:             1,
-                renderLargerThumbnail: true
-            }
-        };
-
-        try {
-            await sock.sendMessage(jid, { image: { url: imgUrl }, caption: menuText, contextInfo: fallbackCtx }, { quoted: message });
+            await safeSend({ image: { url: imgUrl }, caption: menuText, contextInfo }, { quoted: message });
         } catch {
-            await sock.sendMessage(jid, { text: menuText, contextInfo }, { quoted: message });
+            await safeSend({ text: menuText, contextInfo }, { quoted: message });
         }
     }
 };
