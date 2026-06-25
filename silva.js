@@ -100,6 +100,32 @@ const config = require('./config.js');
 if (typeof global.antivvEnabled === 'undefined') global.antivvEnabled = config.ANTIVV !== false;
 const store = makeInMemoryStore({ logger: P({ level: 'silent' }) });
 
+// ── Reconnect state — module-level so it persists across connectToWhatsApp() calls ──
+let _reconnectCount   = 0;   // how many consecutive failed reconnect attempts
+let _isReconnecting   = false; // guard: only one reconnect in flight at a time
+let _keepAliveTimer   = null;  // handle for the keep-alive presence interval
+
+function _scheduleReconnect(fn) {
+    if (_isReconnecting) {
+        logMessage('DEBUG', '[Reconnect] Skipped — reconnect already in progress');
+        return;
+    }
+    _isReconnecting = true;
+    _reconnectCount++;
+    // Exponential backoff: 3s → 6s → 12s → 24s → ... capped at 5 minutes
+    const delay = Math.min(3000 * Math.pow(2, _reconnectCount - 1), 5 * 60 * 1000);
+    logMessage('INFO', `[Reconnect] Attempt #${_reconnectCount} in ${Math.round(delay / 1000)}s`);
+    setTimeout(() => {
+        _isReconnecting = false;
+        fn();
+    }, delay);
+}
+
+function _resetReconnect() {
+    _reconnectCount = 0;
+    _isReconnecting = false;
+}
+
 const prefix = config.PREFIX || '.';
 const tempDir = path.join(os.tmpdir(), 'silva-cache');
 const port = process.env.PORT || 25680;
@@ -548,12 +574,25 @@ async function connectToWhatsApp() {
 
     // connection update
     sock.ev.on('connection.update', async update => {
-        const { connection, lastDisconnect } = update;
+        const { connection, lastDisconnect, qr } = update;
+
+        // QR code received — log it so the user knows to scan
+        if (qr) {
+            logMessage('INFO', '📱 QR code ready — scan it in WhatsApp > Linked Devices');
+        }
+
         if (connection === 'close') {
+            // Stop the keep-alive ping for this socket — a new one starts on reconnect
+            if (_keepAliveTimer) { clearInterval(_keepAliveTimer); _keepAliveTimer = null; }
+
             const statusCode = lastDisconnect?.error?.output?.statusCode;
-            logMessage('WARN', `Connection closed: ${statusCode || 'Unknown'}`);
+            const reason     = lastDisconnect?.error?.message || '';
+            logMessage('WARN', `Connection closed: ${statusCode || 'Unknown'}${reason ? ` (${reason})` : ''}`);
+
             if (statusCode === DisconnectReason.loggedOut) {
+                // 401 — session explicitly invalidated by WhatsApp; must re-pair
                 logMessage('WARN', '⚠️ Session logged out by WhatsApp. Clearing session and reconnecting with QR...');
+                _resetReconnect();
                 try {
                     const files = fs.readdirSync(sessionDir);
                     for (const f of files) {
@@ -563,20 +602,35 @@ async function connectToWhatsApp() {
                 } catch (e) {
                     logMessage('WARN', `Could not clear session: ${e.message}`);
                 }
-                setTimeout(() => connectToWhatsApp(), 3000);
+                _scheduleReconnect(() => connectToWhatsApp());
             } else if (statusCode === 440) {
-                // 440 = "replaced" — another instance connected with the same session.
-                // This means the bot is running simultaneously from two places (e.g. Replit + Heroku).
-                // Only ONE instance can hold a WhatsApp session at a time.
-                // Back off for 60 seconds before retrying — this stops the thrashing loop.
-                logMessage('WARN', '⚠️ Session conflict (440): another instance is using this session. Only one bot can be active at a time. Waiting 60s before retrying...');
-                setTimeout(() => connectToWhatsApp(), 60000);
+                // 440 = replaced — another instance connected with the same session.
+                // Hard wait 90s to avoid a thrash loop between two running instances.
+                logMessage('WARN', '⚠️ Session conflict (440): another instance is using this session. Waiting 90s...');
+                _resetReconnect();
+                setTimeout(() => connectToWhatsApp(), 90000);
+            } else if (statusCode === 408 || statusCode === 503 || statusCode === 500) {
+                // 408 = connection timeout, 503/500 = WhatsApp server errors
+                // Use exponential backoff — these happen when WA rate-limits reconnects
+                logMessage('INFO', `[Reconnect] Server-side disconnect (${statusCode}) — backing off`);
+                _scheduleReconnect(() => connectToWhatsApp());
             } else {
-                logMessage('INFO', 'Reconnecting...');
-                setTimeout(() => connectToWhatsApp(), 3000);
+                // All other codes: standard backoff reconnect
+                logMessage('INFO', 'Reconnecting with backoff...');
+                _scheduleReconnect(() => connectToWhatsApp());
             }
         } else if (connection === 'open') {
+            // Reset backoff counters — we have a stable connection
+            _resetReconnect();
             logMessage('SUCCESS', '✅ Connected to WhatsApp');
+
+            // ── Keep-alive: send a presence update every 45s to prevent 408 timeouts ──
+            if (_keepAliveTimer) clearInterval(_keepAliveTimer);
+            _keepAliveTimer = setInterval(async () => {
+                try {
+                    await sock.sendPresenceUpdate('available');
+                } catch { /* ignore — reconnect handles real disconnects */ }
+            }, 45 * 1000);
 
             // Store bot JID, phone number, and LID globally.
             // In full-LID groups WhatsApp hides phone numbers entirely — the only

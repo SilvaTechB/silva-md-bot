@@ -682,15 +682,23 @@ async function handleMessages(sock, message) {
             }
 
             try {
-                await plugin.run(sock, message, args, ctx);
+                const PLUGIN_TIMEOUT_MS = 60_000;
+                const _timeoutP = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error(`Plugin timed out after ${PLUGIN_TIMEOUT_MS / 1000}s`)), PLUGIN_TIMEOUT_MS)
+                );
+                await Promise.race([plugin.run(sock, message, args, ctx), _timeoutP]);
             } catch (err) {
-                console.error(`[Plugin:${command}] ${err.stack || err.message}`);
+                const isTimeout = /timed out/i.test(err.message);
+                console.error(`[Plugin:${command}] ${isTimeout ? '⏱ TIMEOUT' : ''} ${err.stack || err.message}`);
                 const errTheme = getActiveTheme();
+                const errMsg = isTimeout
+                    ? `⏱ That command took too long and was cancelled. Try again.`
+                    : (errTheme?.error?.text || `⚠️ Command error: ${err.message || 'unknown error'}`);
                 await safeSend(sock, jid, {
                     text: [
                         `*${th.botName || 'Silva MD'}*`,
                         ``,
-                        errTheme?.error?.text || `⚠️ Command error: ${err.message || 'unknown error'}`,
+                        errMsg,
                         ``,
                         th.footer ? `_${th.footer}_` : ''
                     ].filter(Boolean).join('\n')
