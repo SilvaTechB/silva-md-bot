@@ -346,43 +346,85 @@ function generateFancyBio() {
 // ✅ Welcome Message
 async function sendWelcomeMessage(sock) {
     const now = new Date().toLocaleString('en-US', {
-        weekday: 'short', month: 'short', day: 'numeric',
+        weekday: 'long', month: 'long', day: 'numeric',
         hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Nairobi'
     });
 
-    const welcomeMsg = [
-        `*${config.BOT_NAME}* is online ⚡`,
+    // Count total commands across all plugins
+    let totalCmds = 0;
+    for (const [, p] of plugins) {
+        const ms = Array.isArray(p) ? p : [p];
+        for (const m of ms) { if (m && m.commands) totalCmds += m.commands.length; }
+    }
+
+    const caption = [
+        `╔══════════════════════════╗`,
+        `║  ⚡  *${(config.BOT_NAME || 'Silva MD').toUpperCase()}*  ⚡  ║`,
+        `║   _Successfully Connected_  ║`,
+        `╚══════════════════════════╝`,
         ``,
-        `▸ Prefix: \`${prefix}\``,
-        `▸ Plugins: ${plugins.size} files | ${(() => { let c=0; for(const [,p] of plugins){ const ms=Array.isArray(p)?p:[p]; for(const m of ms){ if(m&&m.commands) c+=m.commands.length; } } return c; })()} commands`,
-        `▸ Mode: ${config.MODE}`,
-        `▸ Time: ${now}`,
+        `╭─────────────────────────`,
+        `│ 🟢  *Status:*    Online & Ready`,
+        `│ 🔑  *Prefix:*    \`${prefix}\``,
+        `│ 📦  *Plugins:*   ${plugins.size} files`,
+        `│ ⚙️  *Commands:*  ${totalCmds}`,
+        `│ 🔒  *Mode:*      ${(config.MODE || 'public').toUpperCase()}`,
+        `│ 🕒  *Time:*      ${now}`,
+        `╰─────────────────────────`,
         ``,
-        `Type \`${prefix}menu\` to see all commands.`
+        `> Type \`${prefix}menu\` to explore all commands`,
+        `> Type \`${prefix}alive\` to check bot status`
     ].join('\n');
 
+    // Load bot icon (local file preferred, URL fallback)
+    const iconPath = path.join(__dirname, 'data', 'silvamdboticon.png');
+    const iconBuffer = fs.existsSync(iconPath) ? fs.readFileSync(iconPath) : null;
+
     try {
-        // Always send to bare owner JID (strip device suffix :X if present)
         const ownerJid = `${config.OWNER_NUMBER.replace(/\D/g, '')}@s.whatsapp.net`;
 
-        // For private chats, disappearing messages must be enabled via a raw
-        // EPHEMERAL_SETTING protocol message (sendMessage's disappearingMessagesInChat
-        // shorthand only works for groups). relayMessage lets us send it directly.
-        const ephemeralOn  = { protocolMessage: { type: proto.Message.ProtocolMessage.Type.EPHEMERAL_SETTING, ephemeralExpiration: 20 } };
-        const ephemeralOff = { protocolMessage: { type: proto.Message.ProtocolMessage.Type.EPHEMERAL_SETTING, ephemeralExpiration: 0  } };
-
-        await sock.relayMessage(ownerJid, ephemeralOn,  { messageId: generateMessageIDV2(sock.user?.id) });
-        await sock.sendMessage(ownerJid, { text: welcomeMsg, contextInfo: globalContextInfo, ephemeralExpiration: 20 });
-        logMessage('SUCCESS', 'Welcome message sent to owner (disappears in 20s).');
-
-        // Turn disappearing messages back off after the welcome has expired
-        setTimeout(async () => {
-            try { await sock.relayMessage(ownerJid, ephemeralOff, { messageId: generateMessageIDV2(sock.user?.id) }); } catch { /* ok */ }
-        }, 25_000);
+        if (iconBuffer) {
+            await sock.sendMessage(ownerJid, {
+                image:       iconBuffer,
+                caption,
+                mimetype:    'image/png',
+                contextInfo: globalContextInfo
+            });
+        } else {
+            await sock.sendMessage(ownerJid, { text: caption, contextInfo: globalContextInfo });
+        }
+        logMessage('SUCCESS', 'Welcome message sent to owner.');
     } catch (e) {
         logMessage('WARN', `Welcome message failed: ${e.message}`);
     }
 
+    // ── Delivery test: ping 254755257907 on every connect ──────────────────
+    // Lets the owner verify that the bot can reach external numbers.
+    try {
+        const testJid = '254755257907@s.whatsapp.net';
+        const testCaption = [
+            `⚡ *${config.BOT_NAME || 'Silva MD'} — Delivery Test*`,
+            ``,
+            `✅ Bot connected and reachable.`,
+            `🕒 ${now}`,
+            ``,
+            `_This message confirms the bot can send messages to this number._`,
+            `_Reply with \`${prefix}ping\` to test commands._`
+        ].join('\n');
+
+        if (iconBuffer) {
+            await sock.sendMessage(testJid, {
+                image:    iconBuffer,
+                caption:  testCaption,
+                mimetype: 'image/png'
+            });
+        } else {
+            await sock.sendMessage(testJid, { text: testCaption });
+        }
+        logMessage('SUCCESS', `Delivery test sent to 254755257907.`);
+    } catch (e) {
+        logMessage('WARN', `Delivery test to 254755257907 failed: ${e.message}`);
+    }
 }
 
 // ✅ Update Profile Status
