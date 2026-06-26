@@ -9,8 +9,7 @@ let isJidGroup, areJidsSameUser, jidNormalizedUser, normalizeMessageContent;
 try {
     ({ isJidGroup, areJidsSameUser, jidNormalizedUser, normalizeMessageContent } = require('@whiskeysockets/baileys'));
 } catch {
-    // @lid = WhatsApp Business / privacy DM — NOT a group
-    isJidGroup            = (jid) => typeof jid === 'string' && jid.endsWith('@g.us') && !jid.endsWith('@lid');
+    isJidGroup            = (jid) => typeof jid === 'string' && jid.endsWith('@g.us');
     jidNormalizedUser     = (jid) => (jid || '').replace(/:[^@]+@/, '@');
     areJidsSameUser       = (a, b) => jidNormalizedUser(a) === jidNormalizedUser(b);
     normalizeMessageContent = (c) => c;
@@ -136,30 +135,6 @@ async function safeSend(sock, jid, content, opts = {}) {
             return result;
         } catch (err3) {
             console.error(`❌ SEND FAILED (attempt 3 plain)  to=${jid}: ${err3.message}`);
-        }
-    }
-
-    // Attempt 4 (@lid only) — resolve LID → phone@s.whatsapp.net from the LID cache.
-    // WhatsApp Business accounts always accept messages to their phone JID even when
-    // the @lid outbound session cannot be established by the bot.
-    if (isLidDm) {
-        const normLid    = jid.split(':')[0].split('@')[0];
-        const cachedPhone = global.lidPhoneCache?.get(normLid)
-            || global.lidPhoneCache?.get(normLid + '@lid')
-            || global.lidPhoneCache?.get(jid);
-        if (cachedPhone) {
-            const phoneDigits = String(cachedPhone).replace(/\D/g, '');
-            const phoneJid    = `${phoneDigits}@s.whatsapp.net`;
-            const plainText   = content?.text || content?.caption;
-            if (plainText && phoneJid !== jid) {
-                try {
-                    const result = await sock.sendMessage(phoneJid, { text: plainText });
-                    console.log(`✉️  OUT (@lid→phone fallback)  to=${phoneDigits}  "${_preview}"`);
-                    return result;
-                } catch (err4) {
-                    console.error(`❌ SEND FAILED (attempt 4 @lid→phone)  to=${phoneJid}: ${err4.message}`);
-                }
-            }
         }
     }
 

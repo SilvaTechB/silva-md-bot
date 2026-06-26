@@ -2,7 +2,6 @@
 
 const axios = require('axios');
 const { jidNormalizedUser, downloadMediaMessage } = require('@whiskeysockets/baileys');
-const { globalLidMapping } = require('@whiskeysockets/baileys/lib/Utils/lid-mapping');
 
 const truecallerCache = new Map();
 
@@ -68,14 +67,6 @@ function lidToPhone(lid) {
         if (global.lidPhoneCache) {
             const cached = global.lidPhoneCache.get(lid) || global.lidPhoneCache.get(norm) || global.lidPhoneCache.get(bareNorm);
             if (cached && cached.length >= 7) return cached;
-        }
-
-        const pnJid = globalLidMapping.getPnFromLid(lid);
-        if (pnJid) return pnJid.split('@')[0].replace(/\D/g, '');
-
-        if (norm !== lid) {
-            const pnJid2 = globalLidMapping.getPnFromLid(norm);
-            if (pnJid2) return pnJid2.split('@')[0].replace(/\D/g, '');
         }
 
         if (global.lidJidMap) {
@@ -306,7 +297,7 @@ module.exports = {
                 return sock.sendMessage(jid, { text: '❌ Could not fetch group members.', contextInfo }, { quoted: message });
             }
 
-            const lidMapSize = globalLidMapping.size();
+            const lidMapSize = global.lidPhoneCache?.size || 0;
             const pushCacheSize = global.pushNameCache?.size || 0;
             const lidJidSize = global.lidJidMap?.size || 0;
             await sock.sendMessage(jid, {

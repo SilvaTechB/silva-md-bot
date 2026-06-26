@@ -779,6 +779,24 @@ async function connectToWhatsApp() {
 
     sock.ev.on('creds.update', saveCreds);
 
+    // Capture LID ↔ phone mapping delivered by WhatsApp on connect.
+    // Baileys 6.17.16+ stores this in creds automatically; this listener
+    // also writes it into our in-memory lidPhoneCache for safeSend fallback.
+    sock.ev.on('messaging-history.set', ({ contacts }) => {
+        if (!Array.isArray(contacts)) return;
+        for (const c of contacts) {
+            const lid   = c.id?.endsWith('@lid') ? c.id : null;
+            const phone = c.phoneNumber || c.notify || null;
+            if (lid && phone) {
+                const phoneDigits = String(phone).replace(/\D/g, '');
+                if (phoneDigits.length >= 7) {
+                    global.lidPhoneCache = global.lidPhoneCache || new Map();
+                    global.lidPhoneCache.set(lid.split('@')[0], `${phoneDigits}@s.whatsapp.net`);
+                }
+            }
+        }
+    });
+
     // ✅ Cache messages for anti-delete
     // Store pushName + resolved sender phone so delete events can show real names
     // even when WhatsApp replaces the participant JID with a @lid privacy ID.
