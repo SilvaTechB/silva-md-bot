@@ -64,25 +64,65 @@ const MAX_SENDS_PER_MIN = 30;
 
 async function safeSend(sock, jid, content, opts = {}) {
     if (!jid || !sock?.sendMessage) return null;
+
+    const _preview = (content?.text || content?.caption || '[media]').toString().slice(0, 60);
+    const _to = jid.split('@')[0];
+
+    // Rate limit + jitter
+    const now = Date.now();
+    while (sendTimestamps.length && now - sendTimestamps[0] > 60000) sendTimestamps.shift();
+    if (sendTimestamps.length >= MAX_SENDS_PER_MIN) {
+        const wait = 60000 - (now - sendTimestamps[0]);
+        await new Promise(r => setTimeout(r, Math.min(wait, 3000)));
+    }
+    const jitter = Math.floor(Math.random() * 400) + 100;
+    await new Promise(r => setTimeout(r, jitter));
+    sendTimestamps.push(Date.now());
+
+    // Primary attempt — with quoted reply / all opts
     try {
-        const now = Date.now();
-        while (sendTimestamps.length && now - sendTimestamps[0] > 60000) sendTimestamps.shift();
-        if (sendTimestamps.length >= MAX_SENDS_PER_MIN) {
-            const wait = 60000 - (now - sendTimestamps[0]);
-            await new Promise(r => setTimeout(r, Math.min(wait, 3000)));
-        }
-        const jitter = Math.floor(Math.random() * 400) + 100;
-        await new Promise(r => setTimeout(r, jitter));
-        sendTimestamps.push(Date.now());
         const result = await sock.sendMessage(jid, content, opts);
-        const _preview = (content?.text || content?.caption || '[media]').toString().slice(0, 60);
-        const _to = jid.split('@')[0];
         console.log(`✉️  OUT  to=${_to}  "${_preview}"`);
         return result;
     } catch (err) {
-        console.error(`❌ SEND FAILED  to=${jid}: ${err.message}`);
-        return null;
+        console.error(`❌ SEND FAILED (attempt 1)  to=${jid}: ${err.message}`);
     }
+
+    // WhatsApp Business accounts often carry a messageContextInfo wrapper that
+    // Baileys includes when building the quoted reply, causing WA servers to
+    // reject the message silently.  Retry without the quoted option so the
+    // plain reply still reaches the Business account.
+    if (opts.quoted) {
+        const { quoted: _q, ...optsNoQuote } = opts;
+        // Also strip newsletter contextInfo from content — some WA Business
+        // accounts reject the forwardedNewsletterMessageInfo field.
+        const safeContent = { ...content };
+        if (safeContent.contextInfo?.forwardedNewsletterMessageInfo) {
+            const { forwardedNewsletterMessageInfo: _n, ...ci } = safeContent.contextInfo;
+            safeContent.contextInfo = Object.keys(ci).length ? ci : undefined;
+        }
+        try {
+            const result = await sock.sendMessage(jid, safeContent, optsNoQuote);
+            console.log(`✉️  OUT (no-quote retry)  to=${_to}  "${_preview}"`);
+            return result;
+        } catch (err2) {
+            console.error(`❌ SEND FAILED (attempt 2 no-quote)  to=${jid}: ${err2.message}`);
+        }
+    }
+
+    // Last resort: plain text only, no opts
+    if (content?.text || content?.caption) {
+        try {
+            const plainText = content.text || content.caption;
+            const result = await sock.sendMessage(jid, { text: plainText });
+            console.log(`✉️  OUT (plain fallback)  to=${_to}  "${_preview}"`);
+            return result;
+        } catch (err3) {
+            console.error(`❌ SEND FAILED (attempt 3 plain)  to=${jid}: ${err3.message}`);
+        }
+    }
+
+    return null;
 }
 
 // Newsletter watermark — only safe in private chats; groups get an empty object
