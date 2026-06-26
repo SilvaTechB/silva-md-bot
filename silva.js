@@ -1326,9 +1326,13 @@ async function connectToWhatsApp() {
                     }
                 }
 
+                // Use m.key.remoteJid as-is — never remap @lid to @s.whatsapp.net.
+                // @s.whatsapp.net = regular WA DM, @lid = Business/privacy DM, @g.us = group.
+                // handleMessages and safeSend both accept all three suffix types.
                 const sender = m.key.remoteJid;
-                const isGroupMsg = isJidGroup(sender);
-                const isNewsletter = sender && sender.endsWith && sender.endsWith('@newsletter');
+                const isGroupMsg = sender.endsWith('@g.us');
+                const isLidDm = sender.endsWith('@lid');
+                const isNewsletter = sender.endsWith('@newsletter');
                 const isBroadcast = isJidBroadcast(sender) || isJidStatusBroadcast(sender);
 
                 // --- Newsletter messages — autofollow + react then skip
@@ -1381,7 +1385,7 @@ async function connectToWhatsApp() {
                     continue;
                 }
 
-                logMessage('MESSAGE', `New ${isGroupMsg ? 'group' : isBroadcast ? 'broadcast' : 'private'} message from ${sender}`);
+                logMessage('MESSAGE', `New ${isGroupMsg ? 'group' : isLidDm ? 'lid-dm' : isBroadcast ? 'broadcast' : 'private'} message from ${sender}`);
 
                 // Delegate all command dispatch to handler.js
                 // (handles prefix check, permissions, group admin, run() API)

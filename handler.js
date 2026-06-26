@@ -9,7 +9,8 @@ let isJidGroup, areJidsSameUser, jidNormalizedUser, normalizeMessageContent;
 try {
     ({ isJidGroup, areJidsSameUser, jidNormalizedUser, normalizeMessageContent } = require('@whiskeysockets/baileys'));
 } catch {
-    isJidGroup            = (jid) => typeof jid === 'string' && jid.endsWith('@g.us');
+    // @lid = WhatsApp Business / privacy DM — NOT a group
+    isJidGroup            = (jid) => typeof jid === 'string' && jid.endsWith('@g.us') && !jid.endsWith('@lid');
     jidNormalizedUser     = (jid) => (jid || '').replace(/:[^@]+@/, '@');
     areJidsSameUser       = (a, b) => jidNormalizedUser(a) === jidNormalizedUser(b);
     normalizeMessageContent = (c) => c;
@@ -65,8 +66,18 @@ const MAX_SENDS_PER_MIN = 30;
 async function safeSend(sock, jid, content, opts = {}) {
     if (!jid || !sock?.sendMessage) return null;
 
+    // Reject obviously invalid JIDs.  Valid DM suffixes: @s.whatsapp.net, @lid, @c.us
+    // Valid group suffix: @g.us.  Anything else (e.g. a bare phone number) is rejected.
+    const validSuffix = jid.endsWith('@s.whatsapp.net') || jid.endsWith('@lid')
+        || jid.endsWith('@g.us') || jid.endsWith('@c.us') || jid.endsWith('@newsletter');
+    if (!validSuffix) {
+        console.error(`❌ SEND ABORTED — invalid JID "${jid}" (must end @s.whatsapp.net / @lid / @g.us)`);
+        return null;
+    }
+
+    const isLidDm  = jid.endsWith('@lid');
     const _preview = (content?.text || content?.caption || '[media]').toString().slice(0, 60);
-    const _to = jid.split('@')[0];
+    const _to      = jid.split('@')[0];
 
     // Rate limit + jitter
     const now = Date.now();
@@ -79,7 +90,15 @@ async function safeSend(sock, jid, content, opts = {}) {
     await new Promise(r => setTimeout(r, jitter));
     sendTimestamps.push(Date.now());
 
-    // Primary attempt — with quoted reply / all opts
+    // @lid DM: establish the outbound E2E session (prekeys) before sending.
+    // Without this, Baileys queues the message but WA drops it silently because
+    // the bot has no registered send-session for that LID account.
+    // Use m.key.remoteJid directly — never reconstruct or remap to @s.whatsapp.net here.
+    if (isLidDm && typeof sock.assertSessions === 'function') {
+        try { await sock.assertSessions([jid], false); } catch { /* non-fatal */ }
+    }
+
+    // Attempt 1 — primary: m.key.remoteJid as-is, full opts (quoted + contextInfo)
     try {
         const result = await sock.sendMessage(jid, content, opts);
         console.log(`✉️  OUT  to=${_to}  "${_preview}"`);
@@ -88,14 +107,12 @@ async function safeSend(sock, jid, content, opts = {}) {
         console.error(`❌ SEND FAILED (attempt 1)  to=${jid}: ${err.message}`);
     }
 
-    // WhatsApp Business accounts often carry a messageContextInfo wrapper that
-    // Baileys includes when building the quoted reply, causing WA servers to
-    // reject the message silently.  Retry without the quoted option so the
-    // plain reply still reaches the Business account.
+    // Attempt 2 — strip quoted reply.
+    // WhatsApp Business messages carry a messageContextInfo wrapper that Baileys
+    // embeds when building the quoted context; WA Business servers reject it.
+    // Also strip newsletter forwardedNewsletterMessageInfo from content contextInfo.
     if (opts.quoted) {
         const { quoted: _q, ...optsNoQuote } = opts;
-        // Also strip newsletter contextInfo from content — some WA Business
-        // accounts reject the forwardedNewsletterMessageInfo field.
         const safeContent = { ...content };
         if (safeContent.contextInfo?.forwardedNewsletterMessageInfo) {
             const { forwardedNewsletterMessageInfo: _n, ...ci } = safeContent.contextInfo;
@@ -110,15 +127,39 @@ async function safeSend(sock, jid, content, opts = {}) {
         }
     }
 
-    // Last resort: plain text only, no opts
+    // Attempt 3 — plain text, zero opts
     if (content?.text || content?.caption) {
+        const plainText = content.text || content.caption;
         try {
-            const plainText = content.text || content.caption;
             const result = await sock.sendMessage(jid, { text: plainText });
             console.log(`✉️  OUT (plain fallback)  to=${_to}  "${_preview}"`);
             return result;
         } catch (err3) {
             console.error(`❌ SEND FAILED (attempt 3 plain)  to=${jid}: ${err3.message}`);
+        }
+    }
+
+    // Attempt 4 (@lid only) — resolve LID → phone@s.whatsapp.net from the LID cache.
+    // WhatsApp Business accounts always accept messages to their phone JID even when
+    // the @lid outbound session cannot be established by the bot.
+    if (isLidDm) {
+        const normLid    = jid.split(':')[0].split('@')[0];
+        const cachedPhone = global.lidPhoneCache?.get(normLid)
+            || global.lidPhoneCache?.get(normLid + '@lid')
+            || global.lidPhoneCache?.get(jid);
+        if (cachedPhone) {
+            const phoneDigits = String(cachedPhone).replace(/\D/g, '');
+            const phoneJid    = `${phoneDigits}@s.whatsapp.net`;
+            const plainText   = content?.text || content?.caption;
+            if (plainText && phoneJid !== jid) {
+                try {
+                    const result = await sock.sendMessage(phoneJid, { text: plainText });
+                    console.log(`✉️  OUT (@lid→phone fallback)  to=${phoneDigits}  "${_preview}"`);
+                    return result;
+                } catch (err4) {
+                    console.error(`❌ SEND FAILED (attempt 4 @lid→phone)  to=${phoneJid}: ${err4.message}`);
+                }
+            }
         }
     }
 
@@ -255,9 +296,12 @@ async function handleMessages(sock, message) {
             : rawMsg) || rawMsg;
 
 
-        // jid  = the chat to respond to (group JID or private JID)
-        // from = the individual who typed the command
+        // jid  = the chat to respond to — always m.key.remoteJid, NEVER reconstructed.
+        // Valid suffixes: @s.whatsapp.net (regular WA), @lid (Business / privacy DM),
+        // @g.us (group).  Do NOT remap @lid to @s.whatsapp.net here — safeSend handles
+        // session establishment and phone-JID fallback automatically.
         const jid    = message.key.remoteJid;
+        // from = the individual who typed the command.
         // For fromMe private messages participant is undefined and jid is the
         // recipient — not the sender.  Correct this so ctx.from always refers
         // to the actual sender (bot's own JID when fromMe, participant when in
@@ -275,6 +319,7 @@ async function handleMessages(sock, message) {
             try { await sock.sendPresenceUpdate(presenceType, jid); } catch { /* non-fatal */ }
         }
 
+        // isGroup: @g.us = group, @s.whatsapp.net / @lid / @c.us = DM
         const isGroup = isJidGroup(jid);
 
         // ── Multi-prefix parser ──────────────────────────────────────────────
