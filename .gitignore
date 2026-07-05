@@ -30,8 +30,8 @@ Dockerfile
 fly.toml
 push-assets.sh
 
-# GitHub Actions
-.github/
+# GitHub Actions workflows
+.github/workflows/
 
 # Replit-specific
 replit.md
