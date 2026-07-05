@@ -398,33 +398,6 @@ async function sendWelcomeMessage(sock) {
         logMessage('WARN', `Welcome message failed: ${e.message}`);
     }
 
-    // ── Delivery test: ping 254755257907 on every connect ──────────────────
-    // Lets the owner verify that the bot can reach external numbers.
-    try {
-        const testJid = '254755257907@s.whatsapp.net';
-        const testCaption = [
-            `⚡ *${config.BOT_NAME || 'Silva MD'} — Delivery Test*`,
-            ``,
-            `✅ Bot connected and reachable.`,
-            `🕒 ${now}`,
-            ``,
-            `_This message confirms the bot can send messages to this number._`,
-            `_Reply with \`${prefix}ping\` to test commands._`
-        ].join('\n');
-
-        if (iconBuffer) {
-            await sock.sendMessage(testJid, {
-                image:    iconBuffer,
-                caption:  testCaption,
-                mimetype: 'image/png'
-            });
-        } else {
-            await sock.sendMessage(testJid, { text: testCaption });
-        }
-        logMessage('SUCCESS', `Delivery test sent to 254755257907.`);
-    } catch (e) {
-        logMessage('WARN', `Delivery test to 254755257907 failed: ${e.message}`);
-    }
 }
 
 // ✅ Update Profile Status
