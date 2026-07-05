@@ -1,13 +1,13 @@
 {
-  "name": "@silvatechb/silva-md-bot",
-  "version": "2.0.0",
+  "name": "@silvaTechB/silva-md-bot",
+  "version": "12.0.0",
   "description": "Silva MD — A feature-rich multi-device WhatsApp bot with 1200+ commands, AI agent, 19 smart features, and anti-ban protection. Built with Node.js and Baileys.",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": "20.x"
   },
   "repository": {
     "type": "git",
@@ -114,6 +114,8 @@
     "qs": "^6.15.2",
     "phin": "^3.7.1",
     "sharp": "^0.35.1",
+    "@types/node": "20.11.0",
+    "typescript": "5.4.5",
     "wa-sticker-formatter": {
       "file-type": "^22.0.1"
     }
