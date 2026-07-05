@@ -28,7 +28,7 @@ outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "node silva.js"
+args = "node index.js"
 waitForPort = 5000
 
 [[ports]]
