@@ -1,5 +1,4 @@
-// index.js — Asset bootstrapper for Silva MD Bot
-// Clones (or updates) the public silva-md-data repo, then starts the bot.
+
 
 const { spawnSync } = require('child_process');
 const fs   = require('fs');
@@ -68,7 +67,7 @@ async function bootstrap() {
         }
     }
 
-    console.log('\x1b[32m[Bootstrap] Assets ready — starting Silva MD...\x1b[0m\n');
+    console.log('\x1b[32m[Bootstrap] ALL DATA LOADED — starting Silva MD...\x1b[0m\n');
     require('./silva.js');
 }
 
