@@ -94,7 +94,6 @@
     "url-regex-safe": "^3.0.0",
     "wa-sticker-formatter": "^4.4.4",
     "ws": "^8.21.0",
-    "xmd-baileys": "^1.0.35",
     "yargs": "^17.7.3",
     "youtube-yts": "^2.0.0",
     "youtubedl-core": "^4.11.7",
