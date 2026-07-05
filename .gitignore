@@ -19,3 +19,23 @@ smm/
 handler.js
 _fix_agent.js
 _assets/
+
+# Runtime data
+data/
+anti-call-settings.json
+
+# Platform-specific / deployment configs
+Dockerfile
+.dockerignore
+fly.toml
+push-assets.sh
+
+# GitHub Actions
+.github/
+
+# Replit-specific
+replit.md
+replit.nix
+
+# Agent memory
+.agents/

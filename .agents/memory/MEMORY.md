@@ -1,1 +1,0 @@
-- [Dead API audit 2026-06](dead-api-audit-2026.md) — comprehensive audit of all Silva MD plugins; lists dead vs live endpoints and replacement strategy.
