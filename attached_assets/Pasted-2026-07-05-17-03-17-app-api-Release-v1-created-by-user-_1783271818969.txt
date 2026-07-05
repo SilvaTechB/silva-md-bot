@@ -1,0 +1,49 @@
+2026-07-05 17:03:17 app[api]: Release v1 created by user silvateam279@herokumanager.com
+2026-07-05 17:03:17 app[api]: Initial release by user silvateam279@herokumanager.com
+2026-07-05 17:03:18 app[api]: Release v2 created by user uncaring733@gmail.com
+2026-07-05 17:03:18 app[api]: Enable Logplex by user uncaring733@gmail.com
+2026-07-05 17:03:18 app[api]: Set SESSION_ID, OWNER_NUMBER, PREFIX, MODE, BOT_NAME, OWNER_NAME, THEME, ALIVE_IMG, GEMINI_API_KEY, ANTIDELETE_GROUP, ANTIDELETE_PRIVATE, AUTO_STATUS_SEEN, AUTO_STATUS_REACT, ALWAYS_ONLINE, ANTIVV, ANTILINK, ANTICALL, TIMEZONE, AUTO_JOIN_GROUPS, PORT config vars by user uncaring733@gmail.com
+2026-07-05 17:03:18 app[api]: Release v3 created by user uncaring733@gmail.com
+2026-07-05 17:03:19 app[api]: Build started by user uncaring733@gmail.com
+2026-07-05 17:04:06 app[api]: Release v4 created by user uncaring733@gmail.com
+2026-07-05 17:04:06 app[api]: Deploy 1783270998847 by user uncaring733@gmail.com
+2026-07-05 17:04:06 app[api]: Scaled to web@1:Basic by user uncaring733@gmail.com
+2026-07-05 17:04:13 heroku[web.1]: Starting process with command `node index.js`
+2026-07-05 17:04:14 app[web.1]: [36m[Bootstrap] Checking assets repo...[0m
+2026-07-05 17:04:14 app[web.1]: [Bootstrap] Cloning silva-md-data (first run)...
+2026-07-05 17:04:14 app[web.1]: /bin/sh: 1: git: not found
+2026-07-05 17:04:14 app[web.1]: [Bootstrap] Clone failed — will try to run with local files if present.
+2026-07-05 17:04:14 app[web.1]: [32m[Bootstrap] ALL DATA LOADED — starting Silva MD...[0m
+2026-07-05 17:04:14 app[web.1]: 
+2026-07-05 17:04:14 app[web.1]: [32m✅ Passed the Silva security check.[0m
+2026-07-05 17:04:14 app[web.1]: [Bootstrap] Fatal error: Cannot find module './handler'
+2026-07-05 17:04:14 app[web.1]: Require stack:
+2026-07-05 17:04:14 app[web.1]: - /app/silva.js
+2026-07-05 17:04:14 app[web.1]: - /app/index.js
+2026-07-05 17:04:14 app[web.1]: [32m✅ Passed the Silva security check.[0m
+2026-07-05 17:04:14 heroku[web.1]: Process exited with status 1
+2026-07-05 17:04:14 heroku[web.1]: State changed from starting to crashed
+2026-07-05 17:04:14 heroku[web.1]: State changed from crashed to starting
+2026-07-05 17:04:21 heroku[web.1]: Starting process with command `node index.js`
+2026-07-05 17:04:21 app[web.1]: [36m[Bootstrap] Checking assets repo...[0m
+2026-07-05 17:04:21 app[web.1]: [Bootstrap] Cloning silva-md-data (first run)...
+2026-07-05 17:04:22 app[web.1]: /bin/sh: 1: git: not found
+2026-07-05 17:04:22 app[web.1]: [Bootstrap] Clone failed — will try to run with local files if present.
+2026-07-05 17:04:22 app[web.1]: [32m[Bootstrap] ALL DATA LOADED — starting Silva MD...[0m
+2026-07-05 17:04:22 app[web.1]: 
+2026-07-05 17:04:22 app[web.1]: [32m✅ Passed the Silva security check.[0m
+2026-07-05 17:04:22 app[web.1]: [Bootstrap] Fatal error: Cannot find module './handler'
+2026-07-05 17:04:22 app[web.1]: Require stack:
+2026-07-05 17:04:22 app[web.1]: - /app/silva.js
+2026-07-05 17:04:22 app[web.1]: - /app/index.js
+2026-07-05 17:04:22 app[web.1]: [32m✅ Passed the Silva security check.[0m
+2026-07-05 17:04:22 heroku[web.1]: Process exited with status 1
+2026-07-05 17:04:22 heroku[web.1]: State changed from starting to crashed
+2026-07-05 17:04:28 app[api]: Build succeeded
+2026-07-05 17:04:52 app[api]: Log session created by user uncaring733@gmail.com
+2026-07-05 17:05:26 app[api]: Log session created by user uncaring733@gmail.com
+2026-07-05 17:05:57 app[api]: Log session created by user uncaring733@gmail.com
+2026-07-05 17:06:29 app[api]: Log session created by user uncaring733@gmail.com
+2026-07-05 17:07:04 app[api]: Log session created by user uncaring733@gmail.com
+2026-07-05 17:09:12 heroku[router]: at=error code=H10 desc="App crashed" method=GET path="/" host=silva-vega-bolt-912-c0a9b5cc9b31.herokuapp.com request_id=fadcdf66-b238-1e8e-47a5-440701423a2c fwd="" dyno= connect=0ms service=0ms status=503 bytes=567 protocol=http1.1 tls=false
+2026-07-05 17:09:55 app[api]: Log session created by user uncaring733@gmail.com
