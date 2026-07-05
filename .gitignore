@@ -10,3 +10,12 @@ replit.nix
 data/lid-phone-cache.json
 data/push-names.json
 .local/
+
+# Asset folders — loaded at runtime from silva-md-data repo
+plugins/
+lib/
+themes/
+smm/
+handler.js
+_fix_agent.js
+_assets/
