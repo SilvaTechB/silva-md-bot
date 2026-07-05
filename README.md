@@ -4,7 +4,7 @@
 
 <br>
 
-<img src="data/silvamdboticon.png" width="300"/>
+<img src="https://github.com/silvatechnexusinc/silva-md-data/blob/main/data/silvamdboticon.png" width="300"/>
 
 <br><br>
 
