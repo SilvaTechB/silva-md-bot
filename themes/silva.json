@@ -1,0 +1,42 @@
+{
+  "theme": "Silva MD",
+  "AUTHOR": "SilvaTech",
+  "LANGUAGE": "English",
+  "LANGCODE": "en",
+  "STRINGS": {
+    "global": {
+      "botName": "Silva MD",
+      "body": "WhatsApp Bot",
+      "greet": "Boss",
+      "greet2": "Hey Boss",
+      "pic1": "https://files.catbox.moe/5uli5p.jpeg",
+      "pic2": "https://files.catbox.moe/5uli5p.jpeg",
+      "pic3": "https://files.catbox.moe/5uli5p.jpeg",
+      "pic4": "https://files.catbox.moe/5uli5p.jpeg",
+      "pic5": "https://files.catbox.moe/5uli5p.jpeg",
+      "pic6": "https://files.catbox.moe/5uli5p.jpeg",
+      "pic7": "https://files.catbox.moe/5uli5p.jpeg",
+      "dotbody": "Silva MD is online.",
+      "promote": "Admin role granted.",
+      "demote": "Admin role removed.",
+      "antlink": "Link detected. *Goodbye.*",
+      "mention": "Please mention a user.",
+      "title": "Silva-MD",
+      "footer": "Silva MD Bot",
+      "by": "Made by: SilvaTech",
+      "success": "Done ✓",
+      "wait": "*Processing your request* ✅",
+      "admin": "⛔ This command is for group admins only.",
+      "botAdmin": "❗ Please give me admin role first.",
+      "owner": "⛔ This command is reserved for the bot owner.",
+      "group": "❗ This feature is for groups only.",
+      "private": "⚠️ This feature is for private chats only.",
+      "bot": "⚠️ This feature is for the bot number only.",
+      "alive": "System online. All functions nominal.",
+      "aliveEmoji": "⚡"
+    },
+    "error": {
+      "text": "⚠️ An error occurred. Please try again."
+    }
+  }
+}

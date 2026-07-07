@@ -1,0 +1,42 @@
+{
+  "theme": "Nezuko",
+  "AUTHOR": "SamPandey001",
+  "LANGUAGE": "English",
+  "LANGCODE": "en",
+  "STRINGS": {
+    "global": {
+      "botName": "𝐍𝐞𝐳𝐮𝐤𝐨",
+      "body": "𝑊ℎ𝑎𝑡𝑠𝑎𝑝𝑝 𝐁𝐨𝐭",
+      "greet": "Onii-Chan",
+      "greet2": "Hey Onii-Chan",
+      "pic1": "https://raw.githubusercontent.com/SecktorBot/Brandimages/main/Nezuko/nezuko-1st.jpg",
+      "pic2": "https://raw.githubusercontent.com/SecktorBot/Brandimages/main/Nezuko/2nd.jpg",
+      "pic3": "https://raw.githubusercontent.com/SecktorBot/Brandimages/main/Nezuko/3rd.jpg",
+      "pic4": "https://raw.githubusercontent.com/SecktorBot/Brandimages/main/Nezuko/4th.jpg",
+      "pic5": "https://raw.githubusercontent.com/SecktorBot/Brandimages/main/Nezuko/5th.jpg",
+      "pic6": "https://raw.githubusercontent.com/SecktorBot/Brandimages/main/Nezuko/6th.jpg",
+      "pic7": "https://raw.githubusercontent.com/SecktorBot/Brandimages/main/Nezuko/7th.jpg",
+      "dotbody": "Yup. I am here.",
+      "promote": "A new worthy DEMON arrived",
+      "demote": "You are not Worthy",
+      "antlink": "Link Detected.\n*Good Bye Worthless Demon*",
+      "mention": "Please mention any user Onii-Chan",
+      "title": "𝐍𝐞𝐳𝐮𝐤𝐨-𝐂𝐡𝐚𝐧-𝐦𝐝",
+      "footer": "𝐊𝐚𝐦𝐚𝐝𝐨-𝐍𝐞𝐳𝐮𝐤𝐨",
+      "by": "Made by: CitelVoid",
+      "success": "Success ✓",
+      "wait": "𝑷𝒓𝒐𝒄𝒆𝒔𝒔𝒊𝒏𝒈 𝒚𝒐𝒖𝒓 𝒓𝒆𝒒𝒖𝒆𝒔𝒕✅",
+      "admin": "𝑇ℎ𝑖𝑠 𝑐𝑜𝑚𝑚𝑎𝑛𝑑 𝑖𝑠 𝑜𝑛𝑙𝑦 𝑓𝑜𝑟 𝑔𝑟𝑜𝑢𝑝 𝐴𝑑𝑚𝑖𝑛⚠️!",
+      "botAdmin": "𝑃𝑙𝑒𝑎𝑠𝑒 𝑃𝑟𝑜𝑣𝑖𝑑𝑒 𝑚𝑒 𝐴𝑑𝑚𝑖𝑛 𝑅𝑜𝑙𝑒 .❗",
+      "owner": "𝐓𝐡𝐢𝐬 𝐂𝐨𝐦𝐦𝐚𝐧𝐝 𝐢𝐬 𝐨𝐧𝐥𝐲 𝐟𝐨𝐫 𝐌𝐲 𝐎𝐰𝐧𝐞𝐫 ⚠️",
+      "group": "𝑻𝒉𝒊𝒔 𝑭𝒆𝒂𝒕𝒖𝒓𝒆 𝒊𝒔 𝑶𝒏𝒍𝒚 𝑭𝒐𝒓 𝑮𝒓𝒐𝒖𝒑𝒔❗",
+      "private": "𝑻𝒉𝒊𝒔 𝒇𝒆𝒂𝒕𝒖𝒓𝒆 𝒊𝒏 𝒐𝒏𝒍𝒚 𝒇𝒐𝒓 𝒕𝒉𝒆 𝐌𝐲 𝐎𝐰𝐧𝐞𝐫 ⚠️",
+      "bot": "𝑻𝒉𝒊𝒔 𝒇𝒆𝒂𝒕𝒖𝒓𝒆 𝒊𝒏 𝒐𝒏𝒍𝒚 𝒇𝒐𝒓 𝒕𝒉𝒆 𝒃𝒐𝒕 𝒏𝒖𝒎𝒃𝒆𝒓⚠️",
+      "alive": "*nods* ~ Still here, still protecting you.",
+      "aliveEmoji": "🎋"
+    },
+    "error": {
+      "text": "Task Failed"
+    }
+  }
+}
