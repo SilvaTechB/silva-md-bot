@@ -3,7 +3,7 @@
 const fs   = require('fs');
 const path = require('path');
 const { getStr } = require('../lib/theme');
-const SETTINGS_PATH = path.join(__dirname, '../anti-call-settings.json');
+const SETTINGS_PATH = path.join(__dirname, '../data/anti-call-settings.json');
 
 const DEFAULT_SETTINGS = {
     rejectCalls:    true,
