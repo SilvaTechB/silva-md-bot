@@ -1,5 +1,7 @@
 const fs = require('fs');
-if (fs.existsSync('config.env')) require('dotenv').config({ path: './config.env' });
+// Load .env first (standard dotenv), then config.env (overrides .env if both exist)
+if (fs.existsSync('.env')) require('dotenv').config({ path: './.env' });
+if (fs.existsSync('config.env')) require('dotenv').config({ path: './config.env', override: true });
 
 function toBool(val, defaultOn = true) {
     if (val === undefined || val === null || val === '') return defaultOn;
