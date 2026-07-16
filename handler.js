@@ -20,6 +20,56 @@ function jidToNum(jid) {
     if (!jid) return '';
     return jidNormalizedUser(jid).split('@')[0].replace(/\D/g, '');
 }
+function normalizePhoneJid(value) {
+  if (!value) return '';
+
+  const normalized = jidNormalizedUser(value);
+
+  if (normalized.endsWith('@s.whatsapp.net')) {
+    return normalized;
+  }
+
+  const number = normalized.split('@')[0].replace(/\D/g, '');
+  return number ? `${number}@s.whatsapp.net` : normalized;
+}
+
+function resolveLid(jid, groupMetadata = null) {
+  if (!jid || typeof jid !== 'string') return jid || '';
+  if (!jid.endsWith('@lid')) return jidNormalizedUser(jid);
+
+  const participants = groupMetadata?.participants || [];
+
+  for (const participant of participants) {
+    const participantLid = participant.lid || '';
+
+    if (
+      participantLid &&
+      (
+        participantLid === jid ||
+        jidNormalizedUser(participantLid) === jidNormalizedUser(jid)
+      )
+    ) {
+      return normalizePhoneJid(participant.id);
+    }
+  }
+
+  const normalizedLid = jidNormalizedUser(jid);
+  const bareLid = normalizedLid.split('@')[0];
+
+  const cachedPhone =
+    global.lidPhoneCache?.get(jid) ||
+    global.lidPhoneCache?.get(normalizedLid) ||
+    global.lidPhoneCache?.get(bareLid) ||
+    global.lidPhoneCache?.get(`${bareLid}@lid`);
+
+  if (cachedPhone) {
+    return normalizePhoneJid(cachedPhone);
+  }
+
+  // Resolution is best-effort. Preserve the original valid JID if no
+  // phone mapping exists.
+  return normalizedLid;
+}
 
 // True when two phone numbers refer to the same subscriber.
 // Handles missing country codes by comparing the last 9 significant digits.
@@ -271,16 +321,7 @@ async function handleMessages(sock, message) {
             : rawMsg) || rawMsg;
 
 
-        // jid  = the chat to respond to — always m.key.remoteJid, NEVER reconstructed.
-        // Valid suffixes: @s.whatsapp.net (regular WA), @lid (Business / privacy DM),
-        // @g.us (group).  Do NOT remap @lid to @s.whatsapp.net here — safeSend handles
-        // session establishment and phone-JID fallback automatically.
         const jid    = message.key.remoteJid;
-        // from = the individual who typed the command.
-        // For fromMe private messages participant is undefined and jid is the
-        // recipient — not the sender.  Correct this so ctx.from always refers
-        // to the actual sender (bot's own JID when fromMe, participant when in
-        // a group, or the remote JID for incoming private messages).
         const _botOwnJid = global.botJid || '';
         const from = message.key.participant
             || (message.key.fromMe && !isJidGroup(jid) ? (_botOwnJid || jid) : jid);
@@ -374,11 +415,14 @@ async function handleMessages(sock, message) {
                 if (URL_REGEX.test(text)) {
                     try {
                         await sock.sendMessage(jid, { delete: message.key });
-                        const antlinkMsg = getStr('antlink') || `⚠️ @${from.split('@')[0]} links are not allowed in this group.`;
-                        await safeSend(sock, jid, {
-                            text: antlinkMsg,
-                            mentions: [from]
-                        });
+                        const antlinkMsg =
+                                        getStr('antlink') ||
+                                                `⚠️ @${senderNum} links are not allowed in this group.`;
+
+                                    await safeSend(sock, jid, {
+                                        text: antlinkMsg,
+                                        mentions: [resolvedFrom],
+                                    });
                     } catch (e) {
                         console.error('[Antilink] delete failed:', e.message);
                     }
@@ -390,9 +434,9 @@ async function handleMessages(sock, message) {
         // ── onMessage hooks — fired for ALL messages (not just commands) ────────
         // Tracking and auto-reply only for other people's messages (not the bot's own).
         if (!message.key.fromMe) {
-            if (typeof global.trackMessage === 'function') try { global.trackMessage(jid, from); } catch {}
+            if (typeof global.trackMessage === 'function') try { global.trackMessage(jid, resolvedFrom); } catch {}
             if (typeof global.addXP === 'function') {
-                try { global.addXP(jid, from); } catch {}
+                try { global.addXP(jid, resolvedFrom); } catch {}
             }
             if (!isGroup && typeof global.checkAutoReply === 'function') {
                 try {
@@ -406,7 +450,10 @@ async function handleMessages(sock, message) {
                 try {
                     const result = global.checkWelcomeQuizAnswer(jid, from, text);
                     if (result?.passed) {
-                        await safeSend(sock, jid, { text: `✅ @${from.split('@')[0]} passed the welcome quiz! Welcome to the group! 🎉`, mentions: [from] });
+                        await safeSend(sock, jid, {
+                        text: `✅ @${senderNum} passed the welcome quiz! Welcome to the group! 🎉`,
+                        mentions: [resolvedFrom]
+                    });
                     }
                 } catch {}
             }
@@ -418,9 +465,16 @@ async function handleMessages(sock, message) {
             if (typeof p.onMessage !== 'function') continue;
             try {
                 await p.onMessage(sock, message, text, {
-                    jid, sender, from, isGroup,
-                    contextInfo: isGroup ? {} : GLOBAL_CONTEXT_INFO
-                });
+                jid,
+                sender,
+                from,
+                resolvedFrom,
+                senderNum,
+                resolveLid: (targetJid) => resolveLid(targetJid, groupMetadata),
+                isGroup,
+                groupMetadata,
+                contextInfo: isGroup ? {} : GLOBAL_CONTEXT_INFO
+            });
             } catch { /* ignore plugin onMessage errors */ }
         }
 
@@ -514,39 +568,9 @@ async function handleMessages(sock, message) {
         if (isGroup) {
             groupMetadata = await getCachedGroupMetadata(sock, jid);
         }
-
-        // ── Resolve sender phone (handle @lid format) ─────────────────────────
-        const isLid = typeof from === 'string' && from.endsWith('@lid');
-        let resolvedFrom = from; // will be the real phone JID if LID is resolved
-
-        if (isLid) {
-            // 1. Try group participants list (most accurate)
-            if (groupMetadata?.participants) {
-                for (const p of groupMetadata.participants) {
-                    const pLid = p.lid || '';
-                    if (pLid && (pLid === from || jidNormalizedUser(pLid) === jidNormalizedUser(from))) {
-                        resolvedFrom = p.id; // swap LID for real phone JID
-                        break;
-                    }
-                }
-            }
-
-            // 2. Fall back to the global LID→phone cache populated by silva.js
-            //    (every received message caches participant LID + phone via cacheLidPhone)
-            if (resolvedFrom === from && global.lidPhoneCache?.size) {
-                const normLid = from.split(':')[0].split('@')[0];
-                const cachedPhone = global.lidPhoneCache.get(normLid)
-                    || global.lidPhoneCache.get(normLid + '@lid')
-                    || global.lidPhoneCache.get(from);
-                if (cachedPhone) {
-                    resolvedFrom = cachedPhone.includes('@')
-                        ? cachedPhone
-                        : `${cachedPhone.replace(/\D/g, '')}@s.whatsapp.net`;
-                }
-            }
-        }
-
-        const fromNum = jidToNum(resolvedFrom);
+        const resolvedFrom = resolveLid(from, groupMetadata);
+        const senderNum = jidToNum(resolvedFrom);
+        const fromNum = senderNum;
 
         // ── Resolve owner / bot phone numbers ─────────────────────────────────
         // Pull directly from process.env first so stale config objects can't
@@ -615,6 +639,9 @@ async function handleMessages(sock, message) {
             jid,
             chat:          jid,
             isGroup,
+            resolvedFrom,
+            senderNum,
+            resolveLid: (targetJid) => resolveLid(targetJid, groupMetadata),
             isAdmin,
             isBotAdmin,
             isOwner,
