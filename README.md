@@ -1,4 +1,8 @@
-<div align="center">
+1. Click the button above
+2. Choose QR Code or Pairing Code
+3. Link your WhatsApp
+4. Copy the SESSION_ID shown
+5. Paste it into your host's secrets panel<div align="center">
 
 <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=200&section=header&text=SILVA%20MD%20BOT&fontSize=70&fontColor=fff&animation=twinkling&fontAlignY=35&desc=Next-Gen%20WhatsApp%20Automation&descAlignY=60&descSize=20" width="100%"/>
 
