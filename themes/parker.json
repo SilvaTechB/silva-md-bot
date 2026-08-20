@@ -1,0 +1,42 @@
+{
+  "theme": "Parker",
+  "AUTHOR": "SamPandey001",
+  "LANGUAGE": "English",
+  "LANGCODE": "en",
+  "STRINGS": {
+    "global": {
+      "botName": "𝐏𝐚𝐫𝐤𝐞𝐫",
+      "body": "𝑊ℎ𝑎𝑡𝑠𝑎𝑝𝑝 𝐵𝑜𝑡",
+      "greet": "Bro",
+      "greet2": "Dude",
+      "pic1": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhf9367JxCqZ0Hf79cc3vQVF3A41g8egRXTQ&usqp=CAU",
+      "pic2": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSyDczHe4rFH6tsuZI5riu4dmRvycAJQ9eAYQ&usqp=CAU",
+      "pic3": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4tZVNuXQLmeurH0MArErp_Gnw_i5YVZ_H2A&usqp=CAU",
+      "pic4": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTPmCA5jLktdc-Djr6IovgCwn-iIcPMZBbbUw&usqp=CAU",
+      "pic5": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTeSfyoQaA--E-YKL62Jh08moUnkjGTtUuqiw&usqp=CAU",
+      "pic6": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSW6lzA6SIvgcEPDG3KX8DwuFrcYYQjJudYBw&usqp=CAU",
+      "pic7": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_rxSeh7S6OlDLO5G1ABXBYESaYvPqHe-1lg&usqp=CAU",
+      "dotbody": "Hii Bro, I'm right here.",
+      "promote": "Admin Role Privileged",
+      "demote": "Uhh, Admin Role Taken back",
+      "antlink": "Link Detected.\n*Good Bye Bro*",
+      "mention": "Please atleast mention any user bro.",
+      "title": "𝐏𝐞𝐭𝐞𝐫 𝐏𝐚𝐫𝐤𝐞𝐫-𝐦𝐝",
+      "footer": "𝐏𝐞𝐭𝐞𝐫 𝐏𝐚𝐫𝐤𝐞𝐫",
+      "by": "Made by: CitelVoid",
+      "success": "Done ✓",
+      "wait": "𝑷𝒓𝒐𝒄𝒆𝒔𝒔𝒊𝒏𝒈 𝒚𝒐𝒖𝒓 𝒓𝒆𝒒𝒖𝒆𝒔𝒕✅",
+      "admin": "𝑇ℎ𝑖𝑠 𝑐𝑜𝑚𝑚𝑎𝑛𝑑 𝑖𝑠 𝑜𝑛𝑙𝑦 𝑓𝑜𝑟 𝑔𝑟𝑜𝑢𝑝 𝐴𝑑𝑚𝑖𝑛⚠️!",
+      "botAdmin": "𝑃𝑙𝑒𝑎𝑠𝑒 𝑃𝑟𝑜𝑣𝑖𝑑𝑒 𝑚𝑒 𝐴𝑑𝑚𝑖𝑛 𝑅𝑜𝑙𝑒 𝑆𝑖𝑟.❗",
+      "owner": "𝐓𝐡𝐢𝐬 𝐂𝐨𝐦𝐦𝐚𝐧𝐝 𝐢𝐬 𝐨𝐧𝐥𝐲 𝐟𝐨𝐫 𝐌𝐲 𝐎𝐰𝐧𝐞𝐫 ⚠️",
+      "group": "𝑻𝒉𝒊𝒔 𝑭𝒆𝒂𝒕𝒖𝒓𝒆 𝒊𝒔 𝑶𝒏𝒍𝒚 𝑭𝒐𝒓 𝑮𝒓𝒐𝒖𝒑𝒔❗",
+      "private": "𝑻𝒉𝒊𝒔 𝒇𝒆𝒂𝒕𝒖𝒓𝒆 𝒊𝒏 𝒐𝒏𝒍𝒚 𝒇𝒐𝒓 𝒕𝒉𝒆 𝐌𝐲 𝐎𝐰𝐧𝐞𝐫 ⚠️",
+      "bot": "𝑻𝒉𝒊𝒔 𝒇𝒆𝒂𝒕𝒖𝒓𝒆 𝒊𝒏 𝒐𝒏𝒍𝒚 𝒇𝒐𝒓 𝒕𝒉𝒆 𝒃𝒐𝒕 𝒏𝒖𝒎𝒃𝒆𝒓⚠️",
+      "alive": "Your friendly neighborhood bot is online! Go web!",
+      "aliveEmoji": "🕷️"
+    },
+    "error": {
+      "text": "*Uhh, Got an Error*"
+    }
+  }
+}

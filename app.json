@@ -1,163 +1,123 @@
 {
-  "name": "Silva MD Bot",
-  "description": "Advanced WhatsApp Bot v3.0 - 58+ commands with AI, media downloads, group management, antidelete, TTS, and more. Built with Baileys library.",
+  "name": "silva-md",
+  "description": "Silva MD — A feature-rich multi-device WhatsApp bot with 1200+ commands, AI agent, auto-status, anti-delete, sudo system, and 19 smart features. Built with Node.js and Baileys.",
+  "keywords": ["silva-md", "whatsapp", "baileys", "bot", "multi-device", "ai", "chatbot", "whatsapp-bot", "nodejs"],
+  "logo": "https://files.catbox.moe/5uli5p.jpeg",
   "repository": "https://github.com/SilvaTechB/silva-md-bot",
-  "logo": "https://raw.githubusercontent.com/SilvaTechB/silva-md-bot/main/assets/logo.png",
-  "keywords": [
-    "whatsapp",
-    "bot",
-    "baileys",
-    "silva",
-    "whatsapp-bot",
-    "automation",
-    "ai",
-    "media-downloader",
-    "group-management"
-  ],
+  "website": "https://silvatech.co.ke",
   "success_url": "/",
   "stack": "heroku-24",
+  "env": {
+    "SESSION_ID": {
+      "description": "Your WhatsApp session ID. Get it from the pairing page.",
+      "required": true,
+      "value": ""
+    },
+    "OWNER_NUMBER": {
+      "description": "Owner WhatsApp number with country code (e.g. 254712345678).",
+      "required": true,
+      "value": ""
+    },
+    "PREFIX": {
+      "description": "Command prefix. Single: '.' | Multiple: '.,!,/,?' | Any symbol: 'any' | No prefix: 'none'.",
+      "required": false,
+      "value": "."
+    },
+    "MODE": {
+      "description": "Bot mode: public (everyone), private (owner only), group (groups only), inbox (DM only), both (public).",
+      "required": false,
+      "value": "public"
+    },
+    "BOT_NAME": {
+      "description": "Bot display name shown in menus and greetings.",
+      "required": false,
+      "value": "✦ Silva ✦ MD ✦"
+    },
+    "OWNER_NAME": {
+      "description": "Bot owner's display name.",
+      "required": false,
+      "value": "Silva MD"
+    },
+    "THEME": {
+      "description": "Bot theme/voice. Options: silva, adam, ayanokoji, edith, friday, genos, gideon, gojo, goku, luffy, naruto, nezuko, parker, secktor, suhail, zerotwo, itachi, batman, thanos.",
+      "required": false,
+      "value": "silva"
+    },
+    "ALIVE_IMG": {
+      "description": "Image URL shown with the alive/menu command.",
+      "required": false,
+      "value": "https://files.catbox.moe/5uli5p.jpeg"
+    },
+    "GEMINI_API_KEY": {
+      "description": "Google Gemini API key for advanced AI responses. Get it from ai.google.dev.",
+      "required": false,
+      "value": ""
+    },
+    "ANTIDELETE_GROUP": {
+      "description": "Recover deleted messages in groups (true/false).",
+      "required": false,
+      "value": "true"
+    },
+    "ANTIDELETE_PRIVATE": {
+      "description": "Recover deleted messages in private chats (true/false).",
+      "required": false,
+      "value": "true"
+    },
+    "AUTO_STATUS_SEEN": {
+      "description": "Auto-view all WhatsApp status updates (true/false).",
+      "required": false,
+      "value": "true"
+    },
+    "AUTO_STATUS_REACT": {
+      "description": "Auto-react to status updates with emoji (true/false).",
+      "required": false,
+      "value": "true"
+    },
+    "ALWAYS_ONLINE": {
+      "description": "Keep bot always shown as online (true/false).",
+      "required": false,
+      "value": "true"
+    },
+    "ANTIVV": {
+      "description": "Auto-recover view-once messages (true/false).",
+      "required": false,
+      "value": "true"
+    },
+    "ANTILINK": {
+      "description": "Auto-remove links in groups (true/false).",
+      "required": false,
+      "value": "false"
+    },
+    "ANTICALL": {
+      "description": "Auto-reject incoming calls (true/false).",
+      "required": false,
+      "value": "false"
+    },
+    "TIMEZONE": {
+      "description": "Timezone for date/time features (e.g. Africa/Nairobi, America/New_York).",
+      "required": false,
+      "value": "Africa/Nairobi"
+    },
+    "AUTO_JOIN_GROUPS": {
+      "description": "Comma-separated group invite codes to auto-join on startup. Leave blank to disable.",
+      "required": false,
+      "value": ""
+    },
+    "PORT": {
+      "description": "HTTP server port for the web dashboard.",
+      "required": false,
+      "value": "25680"
+    }
+  },
   "formation": {
     "web": {
       "quantity": 1,
       "size": "basic"
     }
   },
-  "env": {
-    "SESSION_ID": {
-      "description": "Your WhatsApp session ID (format: Silva~base64_compressed_session). Get it from the session generator.",
-      "required": true
-    },
-    "OWNER_NUMBER": {
-      "description": "Bot owner's WhatsApp number with country code (e.g. 254700000000). Required for owner-only commands like eval, broadcast, ban.",
-      "required": true
-    },
-    "BOT_NAME": {
-      "description": "Display name for the bot shown in menus and responses.",
-      "value": "Silva MD",
-      "required": false
-    },
-    "PREFIX": {
-      "description": "Command prefix character (e.g. . or ! or #).",
-      "value": ".",
-      "required": false
-    },
-    "BOT_MODE": {
-      "description": "Bot access mode: 'public' (everyone can use) or 'private' (owner and allowed users only).",
-      "value": "public",
-      "required": false
-    },
-    "ALLOWED_USERS": {
-      "description": "Comma-separated WhatsApp numbers allowed to use bot in private mode (e.g. 254700000000,254711111111).",
-      "required": false
-    },
-    "AUTO_STATUS_SEEN": {
-      "description": "Automatically view/mark all WhatsApp statuses as seen. Set to 'false' to disable.",
-      "value": "true",
-      "required": false
-    },
-    "AUTO_STATUS_REACT": {
-      "description": "Automatically react to WhatsApp statuses with random emojis. Set to 'false' to disable.",
-      "value": "true",
-      "required": false
-    },
-    "AUTO_STATUS_REPLY": {
-      "description": "Automatically send a reply message to statuses. Set to 'true' to enable.",
-      "value": "false",
-      "required": false
-    },
-    "AUTO_STATUS_MSG": {
-      "description": "Message sent when auto-replying to statuses (only works if AUTO_STATUS_REPLY is true).",
-      "value": "✅ Status viewed by Silva MD",
-      "required": false
-    },
-    "CUSTOM_REACT_EMOJIS": {
-      "description": "Comma-separated emojis used for random status reactions.",
-      "value": "❤️,🔥,💯,😍,👏",
-      "required": false
-    },
-    "STATUS_SAVER": {
-      "description": "Save status updates (media/text) for recovery. Set to 'true' to enable.",
-      "value": "false",
-      "required": false
-    },
-    "STATUS_REPLY": {
-      "description": "Send a reply after saving a status. Set to 'true' to enable.",
-      "value": "false",
-      "required": false
-    },
-    "STATUS_MSG": {
-      "description": "Message sent after saving a status (only works if STATUS_REPLY is true).",
-      "value": "SILVA MD 💖 SUCCESSFULLY VIEWED YOUR STATUS",
-      "required": false
-    },
-    "STATUS_SAVE_TO_OWNER": {
-      "description": "Forward saved statuses to the bot owner. Set to 'true' to enable.",
-      "value": "false",
-      "required": false
-    },
-    "ANTI_DELETE": {
-      "description": "Enable anti-delete to recover deleted messages and forward them to owner. Set to 'false' to disable.",
-      "value": "true",
-      "required": false
-    },
-    "ANTI_DELETE_GROUP": {
-      "description": "Enable anti-delete in group chats. Set to 'false' to disable.",
-      "value": "true",
-      "required": false
-    },
-    "ANTI_DELETE_PRIVATE": {
-      "description": "Enable anti-delete in private/DM chats. Set to 'false' to disable.",
-      "value": "true",
-      "required": false
-    },
-    "AUTO_READ": {
-      "description": "Automatically mark incoming messages as read (blue ticks). Set to 'false' to disable.",
-      "value": "true",
-      "required": false
-    },
-    "AUTO_TYPING": {
-      "description": "Show typing indicator when processing commands. Set to 'true' to enable.",
-      "value": "false",
-      "required": false
-    },
-    "AUTO_REPLY": {
-      "description": "Send a reply for unrecognized commands. Set to 'true' to enable.",
-      "value": "false",
-      "required": false
-    },
-    "AUTO_REACT_NEWSLETTER": {
-      "description": "Automatically react to newsletter/channel messages. Set to 'true' to enable.",
-      "value": "false",
-      "required": false
-    },
-    "NEWSLETTER_IDS": {
-      "description": "Comma-separated newsletter/channel JIDs to auto-follow on connection (e.g. 120363xxx@newsletter).",
-      "required": false
-    },
-    "OPENAI_API_KEY": {
-      "description": "OpenAI API key for GPT/AI chat features. Get one at platform.openai.com.",
-      "required": false
-    },
-    "ANTI_CALL": {
-      "description": "Automatically reject incoming WhatsApp calls (except from owner). Set to 'false' to disable.",
-      "value": "true",
-      "required": false
-    },
-    "DEBUG_MODE": {
-      "description": "Enable verbose debug logging for troubleshooting. Set to 'true' to enable.",
-      "value": "false",
-      "required": false
-    }
-  },
   "buildpacks": [
     {
-      "url": "heroku/nodejs"
-    },
-    {
-      "url": "https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest"
-    },
-    {
-      "url": "https://github.com/clhuang/heroku-buildpack-webp-binaries.git"
+      "url": "https://github.com/heroku/heroku-buildpack-nodejs.git"
     }
   ]
 }

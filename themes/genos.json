@@ -1,0 +1,42 @@
+{
+  "theme": "Genos",
+  "AUTHOR": "SamPandey001",
+  "LANGUAGE": "English",
+  "LANGCODE": "en",
+  "STRINGS": {
+    "global": {
+      "botName": "𝐆𝐞𝐧𝐨𝐬",
+      "body": "𝑊ℎ𝑎𝑡𝑠𝑎𝑝𝑝 𝐵𝑜𝑡",
+      "greet": "Master",
+      "greet2": "Hey Master",
+      "pic1": "https://images5.alphacoders.com/656/656718.jpg",
+      "pic2": "https://i.pinimg.com/originals/4e/f4/9f/4ef49fa405a4973e1682c7fcdc68fe1c.jpg",
+      "pic3": "https://wallpapers.com/images/high/one-punch-man-genos-f4kqtbew9cs5f1n1.jpg",
+      "pic4": "https://flyclipart.com/thumbs/one-punch-man-genos-4k-1222032.png",
+      "pic5": "https://wallpapercave.com/uwp/uwp923267.jpeg",
+      "pic6": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQcM5VjI_3jG888bD_2zLs0-xVsxBsdxkHnCw&usqp=CAU",
+      "pic7": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQF2NPSrjipWFdmcEvF1moi2tQAMFI6hP-ZQw&usqp=CAU",
+      "dotbody": "Stop me if you can.",
+      "promote": "Promoted as an Admin, Enjoy",
+      "demote": "Admin role retrieved",
+      "antlink": "Link Detected.\n*Good Bye Master*",
+      "mention": "Please mention any user Master",
+      "title": "𝐆𝐄𝐍𝐎𝐒-𝐦𝐝",
+      "footer": "𝐆𝐄𝐍𝐎𝐒-𝐂𝐘𝐁𝐎𝐑𝐆",
+      "by": "Made by: CitelVoid",
+      "success": "Success ✓",
+      "wait": "𝑷𝒓𝒐𝒄𝒆𝒔𝒔𝒊𝒏𝒈 𝒚𝒐𝒖𝒓 𝒓𝒆𝒒𝒖𝒆𝒔𝒕✅",
+      "admin": "𝑇ℎ𝑖𝑠 𝑐𝑜𝑚𝑚𝑎𝑛𝑑 𝑖𝑠 𝑜𝑛𝑙𝑦 𝑓𝑜𝑟 𝑔𝑟𝑜𝑢𝑝 𝐴𝑑𝑚𝑖𝑛⚠️!",
+      "botAdmin": "𝑃𝑙𝑒𝑎𝑠𝑒 𝑃𝑟𝑜𝑣𝑖𝑑𝑒 𝑚𝑒 𝐴𝑑𝑚𝑖𝑛 𝑅𝑜𝑙𝑒 .❗",
+      "owner": "𝐓𝐡𝐢𝐬 𝐂𝐨𝐦𝐦𝐚𝐧𝐝 𝐢𝐬 𝐨𝐧𝐥𝐲 𝐟𝐨𝐫 𝐌𝐲 𝐎𝐰𝐧𝐞𝐫 ⚠️",
+      "group": "𝑻𝒉𝒊𝒔 𝑭𝒆𝒂𝒕𝒖𝒓𝒆 𝒊𝒔 𝑶𝒏𝒍𝒚 𝑭𝒐𝒓 𝑮𝒓𝒐𝒖𝒑𝒔❗",
+      "private": "𝑻𝒉𝒊𝒔 𝒇𝒆𝒂𝒕𝒖𝒓𝒆 𝒊𝒏 𝒐𝒏𝒍𝒚 𝒇𝒐𝒓 𝒕𝒉𝒆 𝐌𝐲 𝐎𝐰𝐧𝐞𝐫 ⚠️",
+      "bot": "𝑻𝒉𝒊𝒔 𝒇𝒆𝒂𝒕𝒖𝒓𝒆 𝒊𝒏 𝒐𝒏𝒍𝒚 𝒇𝒐𝒓 𝒕𝒉𝒆 𝒃𝒐𝒕 𝒏𝒖𝒎𝒃𝒆𝒓⚠️",
+      "alive": "Cyborg systems fully operational. Awaiting your command.",
+      "aliveEmoji": "🔥"
+    },
+    "error": {
+      "text": "*Task Failed*"
+    }
+  }
+}
