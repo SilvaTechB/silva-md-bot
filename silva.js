@@ -95,6 +95,8 @@ const express = require('express');
 const P = require('pino');
 const { handleMessages } = require('./handler');
 const { handleStatusBroadcast } = require('./lib/statusManager');
+const { isDuplicateMessage, rememberMessageIfContent } = require('./lib/message-gate');
+const { trackUndecryptableMessage } = require('./lib/session-recovery');
 const { initCallHandler } = require('./plugins/anticall');
 const config = require('./config.js');
 if (typeof global.antivvEnabled === 'undefined') global.antivvEnabled = config.ANTIVV !== false;
@@ -1202,7 +1204,7 @@ async function connectToWhatsApp() {
                 // (with text) would be silently dropped as a "duplicate". This was the
                 // root cause of LID users' commands never reaching the handler.
                 const cmdMsgId = m.key.id;
-                if (cmdMsgId && seenCmdIds.has(cmdMsgId)) continue;
+                if (isDuplicateMessage(m, seenCmdIds)) continue;
                 // (seenCmdIds.add is deferred — see below after content is confirmed)
 
                 // ── LID session auto-heal ────────────────────────────────────────────
@@ -1224,11 +1226,11 @@ async function connectToWhatsApp() {
                     // reset-after-10 behavior caused "No sessions" errors and made
                     // every other contact stop decrypting until the account was
                     // paired again.
-                    global._nullMsgCount = (global._nullMsgCount || 0) + 1;
-                    if (global._nullMsgCount >= 10) {
-                        logMessage('WARN', `[Session] ${global._nullMsgCount} undecryptable messages — keeping existing keys and continuing; the affected sender session will be retried.`);
-                        global._nullMsgCount = 0;
-                    }
+                    const recoveryState = trackUndecryptableMessage(
+                        { count: global._nullMsgCount || 0 },
+                        count => logMessage('WARN', `[Session] ${count} undecryptable messages — keeping existing keys and continuing; the affected sender session will be retried.`)
+                    );
+                    global._nullMsgCount = recoveryState.count;
                 } else if (m.message) {
                     // Reset counter as soon as a message decrypts successfully
                     global._nullMsgCount = 0;
@@ -1249,7 +1251,7 @@ async function connectToWhatsApp() {
                 }
 
                 // Content confirmed — now lock this ID so we don't process it twice.
-                if (cmdMsgId) seenCmdIds.add(cmdMsgId);
+                rememberMessageIfContent(m, seenCmdIds);
 
                 // ── Anti-ViewOnce: auto-reveal and forward to owner ─────────────────
                 if (global.antivvEnabled && !m.key.fromMe) {
