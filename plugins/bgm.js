@@ -34,6 +34,13 @@ function parseFlags(args) {
     return { vol: vol / 100, replace };
 }
 
+// ─── Force vol into a safe, bounded decimal before ffmpeg filter interpolation ───
+function safeVol(vol) {
+    const n = Number(vol);
+    if (!Number.isFinite(n) || n < 0 || n > 1) return 0.3;
+    return n.toFixed(2);
+}
+
 // ─── Run ffmpeg and return the output path ───────────────────────────────────
 function mergeMedia(videoPath, audioPath, outputPath, { vol, replace }) {
     return new Promise((resolve, reject) => {
