@@ -1,3 +1,7 @@
+<p align="center">
+  <img alt="Provider Logos" src="smm/logos.svg" width="100%" />
+</p>
+
 <div align="center">
 
 <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=200&section=header&text=SILVA%20MD%20BOT&fontSize=70&fontColor=fff&animation=twinkling&fontAlignY=35&desc=Next-Gen%20WhatsApp%20Automation&descAlignY=60&descSize=20" width="100%"/>
