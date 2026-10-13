@@ -1,17 +1,5 @@
 'use strict';
 
-const { execSync } = require('child_process');
-const { exec }     = require('child_process');
-
-// ── Promise wrapper for shell exec ────────────────────────────────────────────
-function shell(cmd, opts = {}) {
-    return new Promise((resolve) => {
-        exec(cmd, { timeout: 15000, maxBuffer: 1024 * 1024 * 4, ...opts }, (err, stdout, stderr) => {
-            resolve({ stdout: stdout || '', stderr: stderr || '', err });
-        });
-    });
-}
-
 // ── Capture console.log output during eval ────────────────────────────────────
 function makeCapture() {
     const logs = [];
