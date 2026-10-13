@@ -81,29 +81,59 @@ module.exports = {
     private: false,
 
     run: async (sock, message, args, ctx) => {
-        const { jid, sender, contextInfo } = ctx;
+        const {
+                    jid,
+                    sender,
+                    resolvedFrom,
+                    senderNum,
+                    resolveLid,
+                    contextInfo
+                } = ctx;
         const rawCmd = (message.message?.extendedTextMessage?.text
             || message.message?.conversation || '').trim().split(/\s+/)[0].replace(/^\./, '').toLowerCase();
 
         if (['leaderboard', 'lb', 'levels'].includes(rawCmd)) {
-            const groupUsers = Object.entries(levelData)
-                .filter(([key]) => key.startsWith(jid + ':'))
-                .map(([key, data]) => ({ sender: key.split(':')[1], ...data }))
-                .sort((a, b) => b.level - a.level || b.xp - a.xp)
-                .slice(0, 15);
+    const groupUsers = Object.entries(levelData)
+        .filter(([key]) => key.startsWith(`${jid}:`))
+        .map(([key, data]) => {
+            const storedJid = key.slice(jid.length + 1);
 
-            if (!groupUsers.length) {
-                return sock.sendMessage(jid, { text: '📊 No leveling data yet. Keep chatting!', contextInfo }, { quoted: message });
-            }
+            const mentionJid = typeof resolveLid === 'function'
+                ? resolveLid(storedJid)
+                : storedJid;
 
-            const list = groupUsers.map((u, i) => {
-                const num = u.sender.split('@')[0];
+            return {
+                sender: storedJid,
+                mentionJid,
+                ...data
+            };
+        })
+        .sort((a, b) => b.level - a.level || b.xp - a.xp)
+        .slice(0, 15);
+
+    if (!groupUsers.length) {
+        return sock.sendMessage(
+            jid,
+            {
+                text: '📊 No leveling data yet. Keep chatting!',
+                contextInfo
+            },
+            { quoted: message }
+        );
+    }
+
+    const list = groupUsers.map((u, i) => {
+        const num =
+            u.mentionJid
+                .split('@')[0]
+                .replace(/\D/g, '') ||
+            u.mentionJid.split('@')[0];
                 const title = getTitle(u.level);
                 const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`;
                 return `${medal} @${num}\n   Level ${u.level} ${title} • ${u.xp} XP • ${u.messages} msgs`;
             }).join('\n\n');
 
-            const mentions = groupUsers.map(u => u.sender);
+          const mentions = groupUsers.map(u => u.mentionJid);
 
             return sock.sendMessage(jid, {
                 text: `🏆 *Leaderboard*\n\n${list}`,
@@ -112,13 +142,23 @@ module.exports = {
             }, { quoted: message });
         }
 
-        const key = `${jid}:${sender}`;
-        const user = levelData[key] || { xp: 0, level: 0, messages: 0 };
+       const userJid = resolvedFrom || sender;
+
+        const key = `${jid}:${userJid}`;
+
+        const user = levelData[key] || {
+            xp: 0,
+            level: 0,
+            messages: 0
+        };
         const needed = xpForLevel(user.level);
         const progress = makeProgressBar(user.xp, needed);
         const title = getTitle(user.level);
         const nextTitle = titles.find(t => t.level > user.level);
-        const num = sender.split('@')[0];
+        const num =
+            senderNum ||
+            userJid.split('@')[0].replace(/\D/g, '') ||
+            userJid.split('@')[0]
 
         let text = `📊 *Your Level*\n\n`;
         text += `👤 @${num}\n`;
@@ -131,7 +171,7 @@ module.exports = {
 
         return sock.sendMessage(jid, {
             text,
-            mentions: [sender],
+           mentions: [userJid],
             contextInfo
         }, { quoted: message });
     }
