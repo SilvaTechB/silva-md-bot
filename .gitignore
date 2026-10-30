@@ -11,6 +11,7 @@ _assets/
 replit.nix
 data/lid-phone-cache.json
 data/push-names.json
+data/agent-v2-memory.json
 .local/
 .agents/
 attached_assets/

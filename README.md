@@ -224,6 +224,28 @@ pm2 save && pm2 startup
 | `MODE` | `public` | `public` · `private` · `group` · `inbox` |
 | `THEME` | `silva` | Bot personality — see [Themes](#-themes) |
 
+### 🧠 Agent v2
+
+Agent v2 is an opt-in tool-calling assistant. It can use approved tools for calculations, command discovery, bot status, persistent chat memory, web lookup, weather, and the universal public-media downloader. It runs through `.autopilot`, `.agent2`, or `.copilot` and does not replace the existing `.silva` agent.
+
+| Variable | Default | Description |
+|----------|:-------:|-------------|
+| `AGENT_API_KEY` | empty | API key for an OpenAI-compatible provider |
+| `AGENT_API_URL` | OpenAI API | Provider base URL, including `/v1` when required |
+| `AGENT_MODEL` | `gpt-4o-mini` | Provider model identifier |
+| `AGENT_MAX_STEPS` | `5` | Maximum tool-calling steps per request, capped at 8 |
+
+Example:
+
+```env
+AGENT_API_KEY=your_provider_key
+AGENT_API_URL=https://api.openai.com/v1
+AGENT_MODEL=gpt-4o-mini
+AGENT_MAX_STEPS=5
+```
+
+Try it with `.autopilot calculate 25 * 4`, `.autopilot weather in Nairobi`, or `.autopilot remember that I prefer short answers`. Use `.autopilot forget` to clear the chat's persistent Agent v2 memory. Runtime memory is stored in `data/agent-v2-memory.json`, which is ignored by Git.
+
 ### 📸 Auto-Status
 
 | Variable | Default | Description |
