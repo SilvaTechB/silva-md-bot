@@ -4,15 +4,36 @@ const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 
-// ── Conversation memory (per JID, keeps last 8 exchanges) ────────────────────
+// ── Conversation memory (per JID, persists across restarts) ───────────────────
+const MEMORY_FILE = path.join(__dirname, '../data/silva-agent-memory.json');
 const conversationMemory = new Map();
 const MEMORY_MAX = 8;
+
+try {
+    const saved = JSON.parse(fs.readFileSync(MEMORY_FILE, 'utf8'));
+    for (const [jid, messages] of Object.entries(saved || {})) {
+        if (Array.isArray(messages)) conversationMemory.set(jid, messages.slice(-MEMORY_MAX));
+    }
+} catch { /* First run or no memory file yet. */ }
+
+function persistMemory() {
+    try {
+        fs.mkdirSync(path.dirname(MEMORY_FILE), { recursive: true });
+        const data = Object.fromEntries(conversationMemory.entries());
+        const temp = `${MEMORY_FILE}.tmp`;
+        fs.writeFileSync(temp, JSON.stringify(data, null, 2));
+        fs.renameSync(temp, MEMORY_FILE);
+    } catch (error) {
+        console.warn(`[Silva] memory persistence failed: ${error.message}`);
+    }
+}
 
 function rememberMessage(jid, role, text) {
     if (!conversationMemory.has(jid)) conversationMemory.set(jid, []);
     const mem = conversationMemory.get(jid);
     mem.push({ role, text, ts: Date.now() });
     if (mem.length > MEMORY_MAX) mem.shift();
+    persistMemory();
 }
 
 function getMemory(jid) {
@@ -22,7 +43,7 @@ function getMemory(jid) {
 function buildContextPrompt(jid, currentQuery) {
     const mem = getMemory(jid).slice(-6); // last 6 turns
     if (!mem.length) return currentQuery;
-    const history = mem.map(m => `${m.role === 'user' ? 'User' : 'Silva'}: ${m.text}`).join('\n');
+    const history = mem.map(m => `${m.role === 'memory' ? 'Remembered fact' : m.role === 'user' ? 'User' : 'Silva'}: ${m.text}`).join('\n');
     return `You are Silva, a smart, friendly WhatsApp AI assistant. Stay in character. Be concise and helpful.\n\nConversation so far:\n${history}\n\nUser: ${currentQuery}\nSilva:`;
 }
 const os = require('os');
@@ -497,6 +518,7 @@ const agentActions = {
     toggle_antibad_off:/\b(turn\s+off|disable|deactivate)\s+(anti\s*bad|bad\s*words?|swear\s*filter|profanity)\b/i,
     toggle_bluetick:   /\b(turn\s+on|enable)\s+(blue\s*ticks?|read\s*receipts?)\b/i,
     toggle_bluetick_off:/\b(turn\s+off|disable|hide)\s+(blue\s*ticks?|read\s*receipts?)\b/i,
+    remember_fact:     /^remember\s+(?:that\s+)?(.+)/i,
     clear_memory:      /\b(forget|clear|reset)\s+(our\s+)?(chat|conversation|memory|history|context)\b/i,
 };
 
@@ -1472,8 +1494,17 @@ module.exports = {
             reply(`🫥 *Blue Ticks: OFF*\n\nRead receipts hidden — your views are private.`);
             return;
 
+        } else if (agentActions.remember_fact.test(query)) {
+            const match = query.match(agentActions.remember_fact);
+            const fact = match?.[1]?.trim().replace(/[.!?]+$/, '');
+            if (!fact) return reply('❓ Tell me what you want me to remember.');
+            rememberMessage(jid, 'memory', fact);
+            reply(`🧠 *Remembered*\n\nI’ll remember: _${fact}_\n\nSay *Silva, forget our conversation* whenever you want to clear it.`);
+            return;
+
         } else if (agentActions.clear_memory.test(query)) {
             conversationMemory.delete(jid);
+            persistMemory();
             reply(`🧹 *Memory cleared!*\n\nI've forgotten our conversation history. Fresh start! 🤖`);
             return;
 

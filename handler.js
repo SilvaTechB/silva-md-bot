@@ -428,10 +428,11 @@ async function handleMessages(sock, message) {
         }
 
         if (usedPrefix === null) {
-            // Allow "silva" or "agent" to trigger the AI assistant without any prefix
-            if (/^(silva|agent)\b/i.test(text.trim())) {
+            // Allow natural "Silva, ...", "Hey Silva ...", or "agent ..." activation without a prefix.
+            const directAgent = text.trim().match(/^(?:hey\s+)?(silva|agent)(?:\s*[,!:.\-]\s*|\s+|$)(.*)$/i);
+            if (directAgent) {
                 usedPrefix  = '';
-                commandText = text.trim();
+                commandText = `${directAgent[1]} ${directAgent[2] || ''}`.trim();
             } else {
                 // No prefix matched — fire typing indicator then stop
                 if (!message.key.fromMe && (config.AUTO_TYPING || config.AUTO_RECORDING)) {
