@@ -371,6 +371,9 @@ Any command can show its usage with either `.help <command>` or `<prefix><comman
 | `.kick` / `.remove` | Remove a member |
 | `.promote` / `.demote` | Change admin status |
 | `.warn` | Issue warning (auto-kick at 3) |
+| `.warnlist` | List warnings for the current group |
+| `.unwarn` / `.warnreset` / `.resetwarn` | Reset a member's warnings |
+| `.warnmenu` / `.warnings` / `.menu 26` | Open the Warning Management menu |
 | `.tagall` | Mention all members |
 | `.hidetag` | Silent mention |
 | `.lock` / `.unlock` | Toggle who can send messages |

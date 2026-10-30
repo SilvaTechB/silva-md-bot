@@ -37,6 +37,7 @@ const CATEGORIES = [
     { id: 23, icon: '🌐',  name: 'Universal Downloader', cmds: ['download','dl','socialdl','universal','autodl'] },
     { id: 24, icon: '🧠',  name: 'Silva Agent',            cmds: ['silva','agent','assistant','ask','autopilot','agent2','copilot'] },
     { id: 25, icon: '👨‍💻', name: 'Developers',             cmds: ['developers','devs','devcontact'] },
+    { id: 26, icon: '⚠️', name: 'Warning Management',      cmds: ['warn','unwarn','warnreset','resetwarn','warnlist','warnmenu','warnings','reset'] },
 ];
 
 // ── Box drawing ───────────────────────────────────────────────────────────────
@@ -105,6 +106,7 @@ function buildCompactMenu(plugins, pfx, botName, mode) {
         `│  \`${pfx}menu 3\`  → AI & Intelligence │\n` +
         `│  \`${pfx}menu 6\`  → Group Management  │\n` +
         `│  \`${pfx}menu 18\` → Lend & Sub-bot    │\n` +
+        `│  \`${pfx}menu 26\` → Warning Management │\n` +
         `│  \`${pfx}help <cmd>\` → Command help   │\n` +
         `│  \`${pfx}find <word>\` → Search commands │\n` +
         `╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄╯\n` +
@@ -193,7 +195,7 @@ function quickActionButtons() {
 module.exports = {
     commands:    ['menu', 'help', 'list', 'cmds', 'commands'],
     description: 'Show all commands in a categorized menu — use .menu <number> for a category deep-dive',
-    usage:       '.menu | .menu <1-24> | .menu <category name> | .help <command>',
+    usage:       '.menu | .menu <1-26> | .menu <category name> | .help <command>',
     permission:  'public',
     group:       true,
     private:     true,

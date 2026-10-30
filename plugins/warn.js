@@ -3,9 +3,10 @@
 const fs   = require('fs');
 const path = require('path');
 const { fmt, getStr } = require('../lib/theme');
+const config = require('../config');
 
 const DATA_PATH  = path.join(__dirname, '../data/warns.json');
-const WARN_LIMIT = 3;
+const WARN_LIMIT = Math.max(1, Number(config.WARN || process.env.WARN_LIMIT || 3));
 
 function loadData() {
     try {
@@ -52,8 +53,9 @@ function getAllWarns(jid) {
 }
 
 module.exports = {
-    commands:    ['warn', 'unwarn', 'warnreset', 'warnlist'],
-    description: 'Warn group members. Auto-kick after 3 warnings.',
+    commands:    ['warn', 'unwarn', 'warnreset', 'resetwarn', 'warnlist', 'warnmenu', 'warnings', 'reset'],
+    description: 'Warn group members, review warnings, and reset warning counts.',
+    usage:       '.warn @user [reason] | .warnlist | .unwarn @user | .warnmenu',
     permission:  'admin',
     group:       true,
     private:     false,
@@ -61,7 +63,6 @@ module.exports = {
 
     async run(sock, message, args, ctx) {
         const { jid, isAdmin, isBotAdmin, mentionedJid, reply, command, theme } = ctx;
-        const cmd = command || (args[-1]);
 
         if (!isAdmin) return reply(fmt(theme.admin || '⛔ Only admins can use this command.'));
 
@@ -72,6 +73,18 @@ module.exports = {
         const quotedParticipant = message.message?.extendedTextMessage?.contextInfo?.participant;
         const target = quotedParticipant || mentionedJid?.[0];
         const sub = (args[0] || '').toLowerCase();
+
+        if (rawCmd === 'warnmenu' || rawCmd === 'warnings') {
+            return reply(fmt(
+                `⚠️ *Warning Management*\n\n` +
+                `• [1m${ctx.prefix || '.'}warn @user [reason][0m — issue a warning\n` +
+                `• [1m${ctx.prefix || '.'}warnlist[0m — list warnings\n` +
+                `• [1m${ctx.prefix || '.'}unwarn @user[0m — reset a user\n` +
+                `• [1m${ctx.prefix || '.'}warnreset @user[0m — reset a user\n` +
+                `• [1m${ctx.prefix || '.'}reset warn @user[0m — reset a user\n\n` +
+                `_${WARN_LIMIT} warnings trigger automatic removal when I am an admin._`
+            ).replace(/\u001b\[1m|\u001b\[0m/g, '*'));
+        }
 
         if (rawCmd === 'warnlist') {
             const warns = getAllWarns(jid);
@@ -86,7 +99,7 @@ module.exports = {
             }, { quoted: message });
         }
 
-        if (rawCmd === 'unwarn' || rawCmd === 'warnreset') {
+        if (rawCmd === 'unwarn' || rawCmd === 'warnreset' || rawCmd === 'resetwarn' || (rawCmd === 'reset' && sub === 'warn')) {
             if (!target) return reply(fmt('❌ Reply to a message or mention a user to reset their warnings.'));
             resetWarns(jid, target);
             const num = target.split('@')[0];
@@ -99,13 +112,18 @@ module.exports = {
         if (!target) {
             return reply(fmt(
                 `*Warn System*\n\n` +
-                `• \`.warn @user\` — warn a user (auto-kick after ${WARN_LIMIT})\n` +
-                `• \`.unwarn @user\` — remove all warnings\n` +
-                `• \`.warnlist\` — list all warned users`
+                `• ${ctx.prefix || '.'}warn @user [reason] — warn a user (auto-kick after ${WARN_LIMIT})\n` +
+                `• ${ctx.prefix || '.'}unwarn @user — remove all warnings\n` +
+                `• ${ctx.prefix || '.'}warnlist — list all warned users\n` +
+                `• ${ctx.prefix || '.'}warnmenu — show warning help`
             ));
         }
 
-        const reason = args.filter(a => !a.includes('@')).join(' ') || 'No reason given';
+        const quotedText = message.message?.extendedTextMessage?.contextInfo?.quotedMessage?.conversation
+            || message.message?.extendedTextMessage?.contextInfo?.quotedMessage?.extendedTextMessage?.text || '';
+        const reason = args.filter(a => a !== 'warn' && !a.includes('@')).join(' ')
+            || (quotedText && quotedText.length <= 120 ? quotedText : '')
+            || 'No reason given';
         const count  = addWarn(jid, target);
         const remaining = WARN_LIMIT - count;
         const num = target.split('@')[0];
