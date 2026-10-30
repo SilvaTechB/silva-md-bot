@@ -251,7 +251,7 @@ Try it with `.autopilot calculate 25 * 4`, `.autopilot weather in Nairobi`, or `
 
 When `DATABASE_URL` or `DATABASE_URL_POOLED` is configured, Silva creates encrypted tables for users, selected Agent v2 conversations, and developer contacts. Agent chat content is encrypted with AES-256-GCM before it is stored. Set `DB_ENCRYPTION_KEY` to a long random secret; if it is omitted, the bot derives a key from the session configuration. The three default developer contacts are `254700143167`, `254755257907`, and `254743706010`, and they are available through `.developers`.
 
-Never commit the real Neon connection strings or encryption key. Add them to your hosting provider’s secret/environment-variable panel. The database is optional, and the bot continues running if Postgres is unavailable.
+Never commit the real Neon connection strings or encryption key. Add them to your hosting provider’s secret/environment-variable panel. If your private secret store only accepts one encoded value, use `DATABASE_URL_B64` or `DATABASE_URL_POOLED_B64`; Silva decodes it only at runtime. Base64 is reversible obfuscation, not encryption, so it must still be treated as a secret. The database is optional, and the bot continues running if Postgres is unavailable.
 
 ### 📸 Auto-Status
 
