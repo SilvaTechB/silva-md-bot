@@ -40,7 +40,7 @@ const FANCY_MAP = {
 
 module.exports = {
     commands: [
-        'ebinary', 'debinary', 'ebase', 'dbase',
+        'ebinary', 'debinary', 'dbinary', 'ebase', 'dbase',
         'fancy', 'ttp', 'domaincheck', 'rename', 'tinyurl', 'rebrandly', 'vgd', 'vurl',
         'adfoc', 'cleanuri', 'createpdf', 'createqr', 'readqr',
         'shortener', 'sspc', 'ssphone', 'sstab', 'ssur', 'ssweb',
@@ -64,7 +64,7 @@ module.exports = {
             return send(`🔢 *Text → Binary*\n\n*Input:* ${text}\n*Output:* ${bin}`);
         }
 
-        if (cmd === 'debinary') {
+        if (cmd === 'debinary' || cmd === 'dbinary') {
             if (!text) return send('❌ *Usage:* `.debinary <binary>`');
             try {
                 const decoded = text.trim().split(/\s+/).map(b => String.fromCharCode(parseInt(b, 2))).join('');
