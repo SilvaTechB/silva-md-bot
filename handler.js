@@ -351,7 +351,13 @@ async function handleMessages(sock, message) {
         // ── Extract text ─────────────────────────────────────────────────────
         // Walk through all known message types — WhatsApp Business and newer
         // WA versions wrap content differently. Order: most specific → most generic.
-        const text = extractMessageText(rawMsg, normalizeMessageContent);
+        let text = extractMessageText(rawMsg, normalizeMessageContent);
+        // Interactive menu replies carry stable IDs instead of typed commands.
+        // Translate only Silva-owned menu IDs, then reuse the normal dispatcher.
+        const menuAction = text.match(/^silva:menu:(?:category:)?(\d+)$/i);
+        if (menuAction) text = `menu ${menuAction[1]}`;
+        else if (/^silva:menu:(?:home|main)$/i.test(text)) text = 'menu';
+        else if (/^silva:menu:help$/i.test(text)) text = 'help menu';
 
         // Database persistence is deliberately fire-and-forget. A database
         // outage must never delay or block normal WhatsApp message handling.

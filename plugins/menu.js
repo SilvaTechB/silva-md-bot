@@ -181,6 +181,14 @@ function buildCommandHelp(cmdName, plugins, pfx) {
     ].join('\n');
 }
 
+function quickActionButtons() {
+    return [
+        { buttonId: 'silva:menu:category:3', buttonText: { displayText: '🤖 AI & Agent' }, type: 1 },
+        { buttonId: 'silva:menu:category:1', buttonText: { displayText: '⬇️ Downloads' }, type: 1 },
+        { buttonId: 'silva:menu:category:6', buttonText: { displayText: '👥 Groups' }, type: 1 },
+    ];
+}
+
 // ── Plugin ────────────────────────────────────────────────────────────────────
 module.exports = {
     commands:    ['menu', 'help', 'list', 'cmds', 'commands'],
@@ -237,9 +245,17 @@ module.exports = {
         // ── .menu — compact overview ─────────────────────────────────────────
         const menuText = buildCompactMenu(plugins, pfx, botName, mode);
 
-        // Try image + caption first, fall back to plain text
+        // Keep the branded image, then add quick actions. Older WhatsApp
+        // clients ignore buttons and still receive the caption/text fallback.
         try {
             await safeSend({ image: { url: imgUrl }, caption: menuText, contextInfo }, { quoted: message });
+            await safeSend({
+                text: '⚡ *Quick actions* — or reply with `.menu <number>`',
+                footer: `${botName} Menu`,
+                buttons: quickActionButtons(),
+                headerType: 1,
+                contextInfo
+            }, { quoted: message });
         } catch {
             await safeSend({ text: menuText, contextInfo }, { quoted: message });
         }

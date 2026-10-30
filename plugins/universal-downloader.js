@@ -1,6 +1,7 @@
 'use strict';
 
 const axios = require('axios');
+const { extractMessageText } = require('../lib/message-utils');
 
 const API_ORIGIN = 'https://downloader.silvatechs.com';
 const API_PATH = '/api/public/download';
@@ -9,7 +10,17 @@ const MAX_URL_LENGTH = 2048;
 const MAX_QUERY_LENGTH = 200;
 
 function extractUrl(text) {
-    return text.match(/https?:\/\/[^\s<>]+/i)?.[0]?.replace(/[),.!?]+$/, '') || '';
+    const match = String(text || '').match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be|tiktok\.com|instagram\.com|facebook\.com|fb\.watch|twitter\.com|x\.com)\/[^\s<>]*/i);
+    if (!match) return '';
+    const value = match[0].replace(/[),.!?]+$/, '');
+    return /^https?:\/\//i.test(value) ? value : `https://${value}`;
+}
+
+function quotedInput(message) {
+    const quoted = message?.message?.extendedTextMessage?.contextInfo?.quotedMessage
+        || message?.message?.imageMessage?.contextInfo?.quotedMessage
+        || message?.message?.videoMessage?.contextInfo?.quotedMessage;
+    return extractMessageText(quoted) || message?.message?.extendedTextMessage?.contextInfo?.externalAdReply?.sourceUrl || '';
 }
 
 function absoluteStreamUrl(value) {
@@ -44,12 +55,14 @@ module.exports = {
 
     run: async (sock, message, args, ctx) => {
         const { sender, contextInfo, prefix = '.', reply } = ctx;
-        const input = args.join(' ').trim();
+        const argumentInput = args.join(' ').trim().replace(/^(?:download|dl|socialdl|universal)\s+/i, '');
+        const quoted = quotedInput(message);
+        const input = (argumentInput || quoted).trim();
         const searchMode = /^search\s+/i.test(input);
         const searchText = searchMode
             ? input.replace(/^search\s+/i, '').replace(/\s+(?:mp3|mp4)$/i, '').trim()
             : '';
-        const url = searchMode ? '' : extractUrl(input);
+        const url = searchMode ? '' : (extractUrl(input) || extractUrl(quoted));
         const formatArg = (args.at(-1) || '').toLowerCase();
         const format = formatArg === 'mp3' || formatArg === 'mp4' ? formatArg : 'mp4';
 
