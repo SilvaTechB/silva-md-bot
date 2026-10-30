@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="Provider Logos" src="smm/logos.svg" width="100%" />
+  <img alt="Provider Logos" src="./smm/logos.svg" width="100%" />
 </p>
 
 <div align="center">
@@ -8,7 +8,7 @@
 
 <br>
 
-<img src="https://github.com/silvatechnexusinc/silva-md-data/blob/main/data/silvamdboticon.png" width="300"/>
+<img src="./data/silvamdboticon.png" width="300"/>
 
 <br><br>
 
@@ -25,7 +25,7 @@
 
 <br>
 
-> **A powerful multi-device WhatsApp bot — 1500+ commands, AI agent, 19 smart features, anti-ban protection.**
+> **A powerful multi-device WhatsApp bot — 1,400+ commands, AI agent, 19 smart features, anti-ban protection.**
 
 </div>
 
@@ -35,22 +35,20 @@
 
 | | |
 |---|---|
-| [🔐 Get Session ID](#-step-1--get-session-id) | [✨ Features](#-features) |
-| [🚀 Deploy](#-step-2--deploy) | [🎨 Themes](#-themes) |
-| [⚙️ Environment Variables](#️-environment-variables) | [🤝 Connect](#-connect-with-silva) |
+| [🔐 Get Session ID](#step-1-get-session-id) | [✨ Features](#features) |
+| [🚀 Deploy](#step-2-deploy) | [🎨 Themes](#themes) |
+| [⚙️ Environment Variables](#environment-variables) | [🤝 Connect](#connect-with-silva) |
 
 ---
 
+<a id="step-1-get-session-id"></a>
 ## 🔐 Step 1 — Get Session ID
 
 > ⚡ You need a Session ID **before** deploying. It links the bot to your WhatsApp account.
 
 <div align="center">
 
-<a href="https://silva-session-selector.vercel.app/">
-<img src="https://img.shields.io/badge/──────────────────────────────────────────-000?style=for-the-badge" /><br>
-<img src="https://img.shields.io/badge/%F0%9F%94%90%20GET%20YOUR%20SESSION%20ID-Click%20Here%20to%20Generate-25D366?style=for-the-badge&labelColor=075E54&logoColor=white" height="45" />
-</a>
+<img src="https://img.shields.io/badge/%F0%9F%94%90%20SESSION%20ID-Use%20your%20trusted%20generator-25D366?style=for-the-badge&labelColor=075E54&logoColor=white" height="45" />
 
 </div>
 
@@ -68,6 +66,7 @@
 
 ---
 
+<a id="step-2-deploy"></a>
 ## 🚀 Step 2 — Deploy
 
 <div align="center">
@@ -209,6 +208,7 @@ pm2 save && pm2 startup
 
 ---
 
+<a id="environment-variables"></a>
 ## ⚙️ Environment Variables
 
 > Set these as secrets on your host, or in a local `config.env` file.
@@ -275,6 +275,7 @@ Try it with `.autopilot calculate 25 * 4`, `.autopilot weather in Nairobi`, or `
 
 ---
 
+<a id="features"></a>
 ## ✨ Features
 
 <div align="center">
@@ -320,6 +321,7 @@ Try it with `.autopilot calculate 25 * 4`, `.autopilot weather in Nairobi`, or `
 | `.tiktok` / `.tt` | TikTok video (no watermark) |
 | `.instagram` / `.ig` | Instagram reels & posts |
 | `.facebook` / `.fb` | Facebook videos |
+| `.download` / `.dl` | Universal public downloader for YouTube, TikTok, Instagram, Facebook, and X |
 | `.lyrics` | Song lyrics |
 | `.apk` | Download APK from Play Store |
 
@@ -332,7 +334,8 @@ Try it with `.autopilot calculate 25 * 4`, `.autopilot weather in Nairobi`, or `
 
 | Command | Description |
 |---------|-------------|
-| `.silva` / `.ask` / `.ai` | Chat with AI assistant |
+| `Silva, ...` / `.silva` / `.ask` / `.ai` | Prefix-free or command-based AI assistant with persistent memory |
+| `.autopilot` / `.agent2` | Agent v2 with tools, memory, web lookup, weather, and multi-step actions |
 | `.tts` | Text-to-speech (19+ languages) |
 | `.translate` | Translate to any language |
 | `.weather` | Real-time weather |
@@ -396,6 +399,7 @@ Try it with `.autopilot calculate 25 * 4`, `.autopilot weather in Nairobi`, or `
 
 ---
 
+<a id="themes"></a>
 ## 🎨 Themes
 
 > Change anytime with `.settheme <name>` or set `THEME=<name>` in your config.
@@ -424,6 +428,7 @@ Try it with `.autopilot calculate 25 * 4`, `.autopilot weather in Nairobi`, or `
 
 ---
 
+<a id="connect-with-silva"></a>
 ## 🤝 Connect With Silva
 
 <div align="center">
@@ -486,6 +491,6 @@ Try it with `.autopilot calculate 25 * 4`, `.autopilot weather in Nairobi`, or `
 
 **Built with purpose by [Silva Tech Inc](https://github.com/SilvaTechB)**
 
-`Silva MD Bot — 1500+ commands. One scan. Unlimited possibilities.`
+`Silva MD Bot — 1,400+ commands. One scan. Unlimited possibilities.`
 
 </div>
