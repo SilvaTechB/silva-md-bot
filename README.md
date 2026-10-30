@@ -331,6 +331,10 @@ Never commit the real Neon connection string. Add the single `DATABASE_URL` valu
 | `.download` / `.dl` | Universal public downloader for YouTube, TikTok, Instagram, Facebook, and X |
 | `.autodl on/off/status` | Auto-detect public social links and send MP4 plus MP3 |
 | `.imdb <title>` | Search IMDb titles, years, types, cast, and links |
+| `.mp4reverse` / `.slowmo` | Reverse or slow down a replied video |
+| `.spectrum` / `.mp3crusher` | Create an audio spectrum video or apply an audio effect |
+| `.x2mp4` / `.x4mp4` | Resize a replied video to 50% or 25% |
+| `.mp4image` | Convert a replied image into a short MP4 |
 | `.lyrics` | Song lyrics |
 | `.apk` | Download APK from Play Store |
 
