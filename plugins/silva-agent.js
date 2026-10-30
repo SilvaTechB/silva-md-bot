@@ -74,7 +74,7 @@ const BOT_IDENTITY = {
     features: [
         'Auto View Status', 'Anti-Delete Messages', 'Download Songs & Videos',
         'View-Once Recovery', 'Fake Recording/Typing', 'Always Online',
-        'Auto Like Status', 'AI/ChatGPT Integration', 'Status Downloader',
+        'Auto Like Status', 'ch.at AI Integration', 'Status Downloader',
         'Anti-Call', 'Smart Chatbot', 'Auto Bio Update', 'Auto React',
         'Auto Read Messages', 'Auto Save Contacts', 'Anti-Ban Protection',
         'WhatsApp Safe Mode', 'Sudo System', 'Multi-Prefix Support'
@@ -282,33 +282,24 @@ function getSmartResponse(query) {
     return null;
 }
 
-// ── ch.at with automatic retry ───────────────────────────────────────────────
-// ch.at is the PRIMARY backbone. On transient network hiccups we retry up to
-// MAX_RETRIES times with exponential backoff before declaring defeat.
-const CHAT_ENDPOINT = 'https://ch.at/api/chat';
+// ── ch.at no-key integration with automatic retry ─────────────────────────────
+// ch.at documents a public GET interface: https://ch.at/?q=hello
+// It returns plain text in the form "Q: ...\nA: ..." and needs no API key.
+const CHAT_ENDPOINT = 'https://ch.at/';
 const MAX_RETRIES   = 3;
-
 async function callChAt(prompt) {
-    let lastErr;
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
         try {
-            const res = await axios.post(
-                CHAT_ENDPOINT,
-                { message: prompt },
-                {
-                    headers: { 'Content-Type': 'application/json', 'User-Agent': 'SilvaMD-Bot/2.0' },
-                    timeout: 12000,
-                }
-            );
-            const text = res.data?.answer
-                || res.data?.reply
-                || res.data?.message
-                || res.data?.response
-                || res.data?.result
-                || null;
-            if (text && String(text).trim().length > 4) return String(text).trim();
-        } catch (e) {
-            lastErr = e;
+            const res = await axios.get(CHAT_ENDPOINT, {
+                params: { q: String(prompt).slice(0, 5000) },
+                headers: { Accept: 'text/plain', 'User-Agent': 'SilvaMD-Bot/2.0' },
+                timeout: 15000,
+            });
+            const raw = typeof res.data === 'string' ? res.data : '';
+            const answer = raw.match(/(?:^|\n)A:\s*([\s\S]*)$/i)?.[1]?.trim() || raw.trim();
+            const cleaned = answer.replace(/[\u200B-\u200D\uFEFF]/g, '').trim();
+            if (cleaned.length > 4) return cleaned;
+        } catch {
             if (attempt < MAX_RETRIES) {
                 await new Promise(r => setTimeout(r, 500 * attempt)); // 500ms, 1s backoff
             }
@@ -368,9 +359,8 @@ function offlineSmartReply(query, pluginKeys) {
 }
 
 // ── Main AI dispatcher ────────────────────────────────────────────────────────
-// ch.at is the backbone. pollinations.ai races in parallel as a warm fallback.
-// If both lose, Gemini (if keyed) is tried. If everything fails the offline
-// smart responder guarantees a useful reply — this function NEVER returns null.
+// ch.at is the no-key backbone. If it is unavailable, the caller uses the
+// existing offline smart responder so the bot still replies usefully.
 async function askFreeAI(query, jid, systemPrompt, _pluginKeys) {
     const contextPrompt = jid ? buildContextPrompt(jid, query) : query;
     const fullPrompt    = systemPrompt
@@ -386,35 +376,8 @@ async function askFreeAI(query, jid, systemPrompt, _pluginKeys) {
         return null;
     };
 
-    // Race ch.at (with internal retry) against pollinations.ai in parallel.
-    // ch.at retries up to 3× so it wins the race even on the first-attempt miss.
-    const chatAtPromise      = callChAt(fullPrompt);
-    const pollinationsPromise = axios.get(
-        'https://text.pollinations.ai/' + encodeURIComponent(fullPrompt.slice(0, 500)) +
-        '?model=openai&seed=' + (Date.now() % 9999),
-        { timeout: 18000 }
-    ).then(r => (typeof r.data === 'string' ? r.data : null)).catch(() => null);
-
-    // popcat is fast — fire as an extra parallel contestant
-    const popcatPromise = axios.get(
-        'https://api.popcat.xyz/chatbot?msg=' + encodeURIComponent(query.slice(0, 200)) +
-        '&owner=' + encodeURIComponent(config.OWNER_NAME || 'Silva') + '&botname=Silva',
-        { timeout: 7000 }
-    ).then(r => r.data?.response || null).catch(() => null);
-
-    // First valid reply from any source wins
-    const result = await Promise.race([
-        chatAtPromise,
-        pollinationsPromise,
-        popcatPromise,
-        // Hard ceiling so the caller is never stuck forever
-        new Promise(resolve => setTimeout(() => resolve(null), 20000)),
-    ].map(p => Promise.resolve(p).then(v => validate(v) ? validate(v) : new Promise(() => {}))));
-
-    if (result) return result;
-
-    // All parallel attempts exhausted — let the caller try Gemini, then offline fallback
-    return null;
+    const result = await callChAt(fullPrompt);
+    return validate(result);
 }
 
 const agentActions = {
@@ -1730,8 +1693,8 @@ module.exports = {
                 rememberMessage(jid, 'user', query);
                 rememberMessage(jid, 'bot', smart);
             } else {
-                // Step 4: AI — ch.at (with retry) races pollinations + popcat in parallel.
-                //          Gemini is tried if all free APIs fail.
+                // Step 4: AI — ch.at no-key endpoint with retry.
+                //          The offline responder remains the final fallback.
                 //          offlineSmartReply() is the guaranteed final backstop — NEVER silent.
                 rememberMessage(jid, 'user', query);
                 await sock.sendPresenceUpdate('composing', jid);
@@ -1820,7 +1783,7 @@ module.exports = {
                     // TOOL: command not found — fall through to conversational reply
                 }
 
-                // Conversational response (may come from ch.at, Gemini, or offline fallback)
+                // Conversational response (from ch.at or the offline fallback)
                 response = aiReply.startsWith('🤖 *Silva*') ? aiReply : `🤖 *Silva*\n\n${aiReply}`;
                 rememberMessage(jid, 'bot', aiReply.slice(0, 300));
             }

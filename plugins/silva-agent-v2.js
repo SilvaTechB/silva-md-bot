@@ -26,7 +26,7 @@ module.exports = {
             '• `.autopilot remember that I prefer short answers`',
             '',
             'Controls: `.autopilot forget` and `.autopilot status`',
-            'Requires an OpenAI-compatible provider configured in `config.env`.'
+            'Uses ch.at without an API key. An optional OpenAI-compatible provider enables structured tool-calling.'
         ].join('\n'));
 
         if (/^(forget|clear|reset)\b/i.test(query)) {
@@ -36,7 +36,7 @@ module.exports = {
 
         if (/^status$/i.test(query)) {
             const count = getHistory(jid).length;
-            return reply(`🧠 *Agent v2 Status*\n\nPersistent memory items: ${count}\nTool loop: enabled\nSafe tools: calculator, command search, bot status, memory, web search, weather, media download`);
+            return reply(`🧠 *Agent v2 Status*\n\nPersistent memory items: ${count}\nChat backend: ch.at (no API key)\nStructured tool loop: optional provider\nSafe tools: calculator, command search, bot status, memory, web search, weather, media download`);
         }
 
         await reply('🧠 Planning your request...');

@@ -226,25 +226,26 @@ pm2 save && pm2 startup
 
 ### 🧠 Agent v2
 
-Agent v2 is an opt-in tool-calling assistant. It can use approved tools for calculations, command discovery, bot status, persistent chat memory, web lookup, weather, and the universal public-media downloader. It runs through `.autopilot`, `.agent2`, or `.copilot` and does not replace the existing `.silva` agent.
+Agent v2 is an opt-in assistant backed by [ch.at](https://ch.at/) and does not require an API key. It can use approved tools for calculations, command discovery, bot status, persistent chat memory, web lookup, weather, and the universal public-media downloader when an optional structured provider is configured. It runs through `.autopilot`, `.agent2`, or `.copilot` and does not replace the existing `.silva` agent.
 
 | Variable | Default | Description |
 |----------|:-------:|-------------|
-| `AGENT_API_KEY` | empty | API key for an OpenAI-compatible provider |
-| `AGENT_API_URL` | OpenAI API | Provider base URL, including `/v1` when required |
-| `AGENT_MODEL` | `gpt-4o-mini` | Provider model identifier |
+| `AGENT_API_KEY` | empty | Optional key for structured tool-calling; ch.at is used when empty |
+| `AGENT_API_URL` | OpenAI API | Optional provider base URL, including `/v1` when required |
+| `AGENT_MODEL` | `gpt-4o-mini` | Optional structured-provider model identifier |
 | `AGENT_MAX_STEPS` | `5` | Maximum tool-calling steps per request, capped at 8 |
 
 Example:
 
 ```env
+# Optional: leave these unset to use ch.at only.
 AGENT_API_KEY=your_provider_key
 AGENT_API_URL=https://api.openai.com/v1
 AGENT_MODEL=gpt-4o-mini
 AGENT_MAX_STEPS=5
 ```
 
-Try it with `.autopilot calculate 25 * 4`, `.autopilot weather in Nairobi`, or `.autopilot remember that I prefer short answers`. Use `.autopilot forget` to clear the chat's persistent Agent v2 memory. Runtime memory is stored in `data/agent-v2-memory.json`, which is ignored by Git.
+Try it with `.autopilot calculate 25 * 4`, `.autopilot weather in Nairobi`, or `.autopilot remember that I prefer short answers`. Use `.autopilot forget` to clear the chat's persistent Agent v2 memory. Runtime memory is stored in `data/agent-v2-memory.json`, which is ignored by Git. The existing prefix-free `Silva, ...` assistant also uses ch.at as its no-key backend.
 
 ### 📸 Auto-Status
 
