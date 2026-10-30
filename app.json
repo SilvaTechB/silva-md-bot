@@ -58,31 +58,6 @@
       "required": false,
       "value": ""
     },
-    "DATABASE_URL_POOLED": {
-      "description": "Optional pooled Postgres connection URL for Neon or another hosted Postgres provider.",
-      "required": false,
-      "value": ""
-    },
-    "DATABASE_URL_B64": {
-      "description": "Optional Base64-encoded Postgres URL from a private secret store. Base64 is reversible, not encryption.",
-      "required": false,
-      "value": ""
-    },
-    "DATABASE_URL_POOLED_B64": {
-      "description": "Optional Base64-encoded pooled Postgres URL from a private secret store.",
-      "required": false,
-      "value": ""
-    },
-    "DB_ENCRYPTION_KEY": {
-      "description": "Private AES-256-GCM key for encrypting stored agent chats and developer profiles.",
-      "required": false,
-      "value": ""
-    },
-    "DEVELOPER_NUMBERS": {
-      "description": "Comma-separated Silva developer numbers with country codes.",
-      "required": false,
-      "value": "254700143167,254755257907,254743706010"
-    },
     "ANTIDELETE_GROUP": {
       "description": "Recover deleted messages in groups (true/false).",
       "required": false,
