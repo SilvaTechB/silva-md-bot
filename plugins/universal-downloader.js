@@ -1,5 +1,7 @@
 'use strict';
 
+const fs = require('fs');
+const path = require('path');
 const axios = require('axios');
 const { extractMessageText } = require('../lib/message-utils');
 
@@ -8,6 +10,20 @@ const API_PATH = '/api/public/download';
 const SUPPORTED_HOSTS = /(?:youtube\.com|youtu\.be|tiktok\.com|instagram\.com|facebook\.com|fb\.watch|twitter\.com|x\.com)/i;
 const MAX_URL_LENGTH = 2048;
 const MAX_QUERY_LENGTH = 200;
+const AUTO_DOWNLOAD_FILE = path.join(__dirname, '..', 'data', 'auto-download.json');
+const autoDownloadChats = new Set();
+
+try {
+    const saved = JSON.parse(fs.readFileSync(AUTO_DOWNLOAD_FILE, 'utf8'));
+    for (const [jid, enabled] of Object.entries(saved || {})) if (enabled) autoDownloadChats.add(jid);
+} catch { /* first run */ }
+
+function saveAutoDownloadSettings() {
+    try {
+        fs.mkdirSync(path.dirname(AUTO_DOWNLOAD_FILE), { recursive: true });
+        fs.writeFileSync(AUTO_DOWNLOAD_FILE, JSON.stringify(Object.fromEntries([...autoDownloadChats].map(jid => [jid, true])), null, 2));
+    } catch (error) { console.warn(`[AutoDownload] settings save failed: ${error.message}`); }
+}
 
 function extractUrl(text) {
     const match = String(text || '').match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be|tiktok\.com|instagram\.com|facebook\.com|fb\.watch|twitter\.com|x\.com)\/[^\s<>]*/i);
@@ -46,15 +62,31 @@ function apiErrorMessage(error) {
 }
 
 module.exports = {
-    commands: ['download', 'dl', 'socialdl', 'universal'],
-    description: 'Download public media from YouTube, TikTok, Instagram, Facebook, and X',
-    usage: '.download <url> [mp3|mp4] | .download search <YouTube name> [mp3|mp4]',
+    commands: ['download', 'dl', 'socialdl', 'universal', 'autodl'],
+    description: 'Download social media and optionally auto-send MP4 video plus MP3 audio',
+    usage: '.download <url> [mp3|mp4] | .autodl on|off|status',
     permission: 'public',
     group: true,
     private: true,
 
     run: async (sock, message, args, ctx) => {
-        const { sender, contextInfo, prefix = '.', reply } = ctx;
+        const { sender, contextInfo, prefix = '.', reply, jid, isGroup, isAdmin, isOwner, silent } = ctx;
+        const command = String(ctx.command || '').toLowerCase();
+        if (command === 'autodl') {
+            if (isGroup ? (!isAdmin && !isOwner) : !isOwner) {
+                return reply('⛔ Only group admins or the owner can change auto-download settings.');
+            }
+            const action = String(args[0] || 'status').toLowerCase();
+            if (action === 'on' || action === 'enable') {
+                autoDownloadChats.add(jid); saveAutoDownloadSettings();
+                return reply('✅ Auto-download enabled. Public social links will receive both MP4 video and MP3 audio.');
+            }
+            if (action === 'off' || action === 'disable') {
+                autoDownloadChats.delete(jid); saveAutoDownloadSettings();
+                return reply('⏸️ Auto-download disabled for this chat.');
+            }
+            return reply(`📥 Auto-download is *${autoDownloadChats.has(jid) ? 'ON' : 'OFF'}* for this chat.\n\nUse ".autodl on" or ".autodl off".`);
+        }
         const argumentInput = args.join(' ').trim().replace(/^(?:download|dl|socialdl|universal)\s+/i, '');
         const quoted = quotedInput(message);
         const input = (argumentInput || quoted).trim();
@@ -82,7 +114,7 @@ module.exports = {
             return reply('❌ Unsupported link. This API currently supports YouTube, TikTok, Instagram, Facebook, and X links.');
         }
 
-        await reply(`⏳ Resolving ${searchMode ? 'YouTube search' : 'media'} as ${format.toUpperCase()}...`);
+        if (!silent) await reply(`⏳ Resolving ${searchMode ? 'YouTube search' : 'media'} as ${format.toUpperCase()}...`);
 
         const params = { format };
         if (url) params.url = url;
@@ -137,5 +169,20 @@ module.exports = {
             console.warn(`[UniversalDownloader] media send failed: ${error.message}`);
             return reply('❌ The temporary media link expired or WhatsApp could not fetch it. Please retry the command.');
         }
-    }
+    },
+
+    onMessage: async (sock, message, text, ctx) => {
+        if (!ctx?.jid || !autoDownloadChats.has(ctx.jid) || message?.key?.fromMe) return;
+        const input = String(text || '').trim();
+        // Explicit commands are handled by the normal downloader path and must
+        // not trigger a second automatic video/audio pair.
+        if (!input || /^[^a-zA-Z0-9]/.test(input) || /^(?:hey\s+)?(?:silva|agent|download|dl|autodl)\b/i.test(input)) return;
+        const url = extractUrl(input);
+        if (!url) return;
+        if (typeof ctx.reply === 'function') await ctx.reply('⏳ Auto-download detected. Fetching MP4 video and MP3 audio...');
+        await module.exports.run(sock, message, [url, 'mp4'], { ...ctx, silent: true, command: 'download' });
+        await module.exports.run(sock, message, [url, 'mp3'], { ...ctx, silent: true, command: 'download' });
+    },
+
+    isAutoDownloadEnabled: jid => autoDownloadChats.has(jid)
 };

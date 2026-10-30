@@ -14,6 +14,7 @@ data/push-names.json
 data/agent-v2-memory.json
 data/silva-agent-memory.json
 data/approve-all.json
+data/auto-download.json
 .local/
 .agents/
 attached_assets/

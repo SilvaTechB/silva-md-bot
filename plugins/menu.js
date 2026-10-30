@@ -34,7 +34,7 @@ const CATEGORIES = [
     { id: 20, icon: 'ℹ️', name: 'Bot Info',            cmds: ['alive','ping','uptime','owner','getjid','repo','menu','help','support','call','botinfo'] },
     { id: 21, icon: '👑',  name: 'Owner & Sudo',        cmds: ['sudo','setsudo','delsudo','getsudo','resetsudo','block','unblock','setmode','setprefix','setbotname','join','cmd','restart','shutdown','backupgroup','restoregroup','broadcast','eval','dmall','autojoin','cleanup','lendlimit'] },
     { id: 22, icon: '✨',  name: 'Advanced Utilities',  cmds: ['find','searchcmd','health','uptime2','sysinfo','uuid','timestamp','calcx','jsonformat','textstats','choose'] },
-    { id: 23, icon: '🌐',  name: 'Universal Downloader', cmds: ['download','dl','socialdl','universal'] },
+    { id: 23, icon: '🌐',  name: 'Universal Downloader', cmds: ['download','dl','socialdl','universal','autodl'] },
     { id: 24, icon: '🧠',  name: 'Silva Agent',            cmds: ['silva','agent','assistant','ask','autopilot','agent2','copilot'] },
     { id: 25, icon: '👨‍💻', name: 'Developers',             cmds: ['developers','devs','devcontact'] },
 ];

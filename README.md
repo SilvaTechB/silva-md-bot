@@ -329,6 +329,7 @@ Never commit the real Neon connection string. Add the single `DATABASE_URL` valu
 | `.instagram` / `.ig` | Instagram reels & posts |
 | `.facebook` / `.fb` | Facebook videos |
 | `.download` / `.dl` | Universal public downloader for YouTube, TikTok, Instagram, Facebook, and X |
+| `.autodl on/off/status` | Auto-detect public social links and send MP4 plus MP3 |
 | `.lyrics` | Song lyrics |
 | `.apk` | Download APK from Play Store |
 
