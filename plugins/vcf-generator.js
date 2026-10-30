@@ -90,7 +90,10 @@ function lidToPhone(lid) {
         }
     }
 
-    return cleanPhone(lid);
+    // Never treat the numeric part of an opaque @lid as a phone number.
+    // Only an explicit phone JID, participant phone field, or verified mapping
+    // is safe to export into a contact file.
+    return null;
 }
 
 function escapeVcf(str) {
@@ -352,7 +355,7 @@ module.exports = {
                 if (username) usernames++;
 
                 if (!name) {
-                    name = `+${phone}`;
+                    name = 'Unnamed WhatsApp contact';
                     phoneOnly++;
                 } else {
                     named++;
