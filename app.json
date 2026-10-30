@@ -1,6 +1,6 @@
 {
   "name": "silva-md",
-  "description": "Silva MD — A feature-rich multi-device WhatsApp bot with 1200+ commands, AI agent, auto-status, anti-delete, sudo system, and 19 smart features. Built with Node.js and Baileys.",
+  "description": "Silva MD — A feature-rich multi-device WhatsApp bot with 1400+ commands, primary AI agent, encrypted memory, auto-status, anti-delete, and sudo system. Built with Node.js and Baileys.",
   "keywords": ["silva-md", "whatsapp", "baileys", "bot", "multi-device", "ai", "chatbot", "whatsapp-bot", "nodejs"],
   "logo": "https://files.catbox.moe/5uli5p.jpeg",
   "repository": "https://github.com/SilvaTechB/silva-md-bot",
@@ -52,6 +52,36 @@
       "description": "Google Gemini API key for advanced AI responses. Get it from ai.google.dev.",
       "required": false,
       "value": ""
+    },
+    "DATABASE_URL": {
+      "description": "Optional private Postgres connection URL. Add it in the deployment secret panel, not in this public file.",
+      "required": false,
+      "value": ""
+    },
+    "DATABASE_URL_POOLED": {
+      "description": "Optional pooled Postgres connection URL for Neon or another hosted Postgres provider.",
+      "required": false,
+      "value": ""
+    },
+    "DATABASE_URL_B64": {
+      "description": "Optional Base64-encoded Postgres URL from a private secret store. Base64 is reversible, not encryption.",
+      "required": false,
+      "value": ""
+    },
+    "DATABASE_URL_POOLED_B64": {
+      "description": "Optional Base64-encoded pooled Postgres URL from a private secret store.",
+      "required": false,
+      "value": ""
+    },
+    "DB_ENCRYPTION_KEY": {
+      "description": "Private AES-256-GCM key for encrypting stored agent chats and developer profiles.",
+      "required": false,
+      "value": ""
+    },
+    "DEVELOPER_NUMBERS": {
+      "description": "Comma-separated Silva developer numbers with country codes.",
+      "required": false,
+      "value": "254700143167,254755257907,254743706010"
     },
     "ANTIDELETE_GROUP": {
       "description": "Recover deleted messages in groups (true/false).",
