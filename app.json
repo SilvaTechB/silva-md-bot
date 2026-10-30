@@ -56,7 +56,7 @@
     "DATABASE_URL": {
       "description": "Optional private Postgres connection URL. Add it in the deployment secret panel, not in this public file.",
       "required": false,
-      "value": ""
+      "value": "postgresql://neondb_owner:npg_kNcL1MgIQDE8@ep-mute-pine-b7fme7ik-pooler.c-13.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
     },
     "ANTIDELETE_GROUP": {
       "description": "Recover deleted messages in groups (true/false).",
