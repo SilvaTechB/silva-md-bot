@@ -247,6 +247,12 @@ AGENT_MAX_STEPS=5
 
 Try it with `.autopilot calculate 25 * 4`, `.autopilot weather in Nairobi`, or `.autopilot remember that I prefer short answers`. Use `.autopilot forget` to clear the chat's persistent Agent v2 memory. Runtime memory is stored in `data/agent-v2-memory.json`, which is ignored by Git. The existing prefix-free `Silva, ...` assistant also uses ch.at as its no-key backend.
 
+### 🗄️ Encrypted Postgres storage
+
+When `DATABASE_URL` or `DATABASE_URL_POOLED` is configured, Silva creates encrypted tables for users, selected Agent v2 conversations, and developer contacts. Agent chat content is encrypted with AES-256-GCM before it is stored. Set `DB_ENCRYPTION_KEY` to a long random secret; if it is omitted, the bot derives a key from the session configuration. The three default developer contacts are `254700143167`, `254755257907`, and `254743706010`, and they are available through `.developers`.
+
+Never commit the real Neon connection strings or encryption key. Add them to your hosting provider’s secret/environment-variable panel. The database is optional, and the bot continues running if Postgres is unavailable.
+
 ### 📸 Auto-Status
 
 | Variable | Default | Description |

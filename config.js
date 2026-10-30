@@ -49,4 +49,8 @@ module.exports = {
     AGENT_API_URL:         process.env.AGENT_API_URL || process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1',
     AGENT_MODEL:           process.env.AGENT_MODEL || process.env.OPENAI_MODEL || 'gpt-4o-mini',
     AGENT_MAX_STEPS:       parseInt(process.env.AGENT_MAX_STEPS || '5', 10),
+    DATABASE_URL:          process.env.DATABASE_URL || '',
+    DATABASE_URL_POOLED:   process.env.DATABASE_URL_POOLED || '',
+    DB_ENCRYPTION_KEY:     process.env.DB_ENCRYPTION_KEY || '',
+    DEVELOPER_NUMBERS:     process.env.DEVELOPER_NUMBERS || '254700143167,254755257907,254743706010',
 };

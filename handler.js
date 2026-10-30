@@ -5,6 +5,7 @@ const path = require('path');
 const config = require('./config');
 const { getStr, getActiveTheme } = require('./lib/theme');
 const { extractMessageText, unwrapMessageContent } = require('./lib/message-utils');
+const { recordUser } = require('./lib/database');
 
 let isJidGroup, areJidsSameUser, jidNormalizedUser, normalizeMessageContent;
 try {
@@ -319,6 +320,15 @@ async function handleMessages(sock, message) {
         // Walk through all known message types — WhatsApp Business and newer
         // WA versions wrap content differently. Order: most specific → most generic.
         const text = extractMessageText(rawMsg, normalizeMessageContent);
+
+        // Database persistence is deliberately fire-and-forget. A database
+        // outage must never delay or block normal WhatsApp message handling.
+        recordUser({
+            jid: from,
+            displayName: message.pushName || '',
+            isGroup,
+            metadata: { chatJid: jid, hasText: Boolean(text), fromMe: Boolean(message.key.fromMe) }
+        }).catch(() => {});
 
         // ── AFK auto-reply (fires before prefix check, not for owner's own messages) ──
         if (!message.key.fromMe) {

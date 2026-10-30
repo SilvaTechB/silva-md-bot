@@ -35,7 +35,8 @@ const CATEGORIES = [
     { id: 21, icon: '👑',  name: 'Owner & Sudo',        cmds: ['sudo','setsudo','delsudo','getsudo','resetsudo','block','unblock','setmode','setprefix','setbotname','join','cmd','restart','shutdown','backupgroup','restoregroup','broadcast','eval','dmall','autojoin','cleanup','lendlimit'] },
     { id: 22, icon: '✨',  name: 'Advanced Utilities',  cmds: ['find','searchcmd','health','uptime2','sysinfo','uuid','timestamp','calcx','jsonformat','textstats','choose'] },
     { id: 23, icon: '🌐',  name: 'Universal Downloader', cmds: ['download','dl','socialdl','universal'] },
-    { id: 24, icon: '🧠',  name: 'Agent v2',              cmds: ['autopilot','agent2','copilot'] },
+    { id: 24, icon: '🧠',  name: 'Silva Agent',            cmds: ['silva','agent','assistant','ask','autopilot','agent2','copilot'] },
+    { id: 25, icon: '👨‍💻', name: 'Developers',             cmds: ['developers','devs','devcontact'] },
 ];
 
 // ── Box drawing ───────────────────────────────────────────────────────────────
