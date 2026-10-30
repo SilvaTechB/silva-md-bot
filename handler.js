@@ -143,7 +143,9 @@ async function safeSend(sock, jid, content, opts = {}) {
     return null;
 }
 
-// Newsletter watermark — only safe in private chats; groups get an empty object
+// Newsletter attribution added to every user-facing outgoing message. This is
+// installed once on the live socket, so legacy plugins that call sock.sendMessage
+// directly receive the same behavior as plugins using safeSend/ctx.reply.
 const GLOBAL_CONTEXT_INFO = {
     forwardingScore: 999,
     isForwarded: true,
@@ -153,6 +155,35 @@ const GLOBAL_CONTEXT_INFO = {
         serverMessageId: 144
     }
 };
+
+const NEWSLETTER_MESSAGE_KEYS = new Set([
+    'text', 'image', 'video', 'audio', 'document', 'sticker', 'contact',
+    'location', 'poll', 'buttons', 'list', 'interactive', 'template', 'product'
+]);
+
+function withNewsletterContext(jid, content) {
+    if (!content || typeof content !== 'object' || jid?.endsWith('@newsletter')) return content;
+    if (!Object.keys(content).some(key => NEWSLETTER_MESSAGE_KEYS.has(key))) return content;
+    return {
+        ...content,
+        contextInfo: {
+            ...GLOBAL_CONTEXT_INFO,
+            ...(content.contextInfo || {}),
+            forwardedNewsletterMessageInfo: {
+                ...GLOBAL_CONTEXT_INFO.forwardedNewsletterMessageInfo,
+                ...(content.contextInfo?.forwardedNewsletterMessageInfo || {})
+            }
+        }
+    };
+}
+
+function installNewsletterForwarding(sock) {
+    if (!sock?.sendMessage || sock.__silvaNewsletterForwardingInstalled) return sock;
+    const originalSendMessage = sock.sendMessage.bind(sock);
+    sock.sendMessage = (jid, content, options) => originalSendMessage(jid, withNewsletterContext(jid, content), options);
+    Object.defineProperty(sock, '__silvaNewsletterForwardingInstalled', { value: true, enumerable: false });
+    return sock;
+}
 
 // ─── Plugin loader ───────────────────────────────────────────────────────────
 const plugins = [];
@@ -193,6 +224,7 @@ loadPlugins();
 
 // ─── Connection handlers ─────────────────────────────────────────────────────
 function setupConnectionHandlers(sock) {
+    installNewsletterForwarding(sock);
     bindGroupCacheInvalidation(sock);
     sock.ev.on('connection.update', ({ connection }) => {
         if (connection === 'open') console.log('[Handler] WhatsApp connection open.');
@@ -764,4 +796,4 @@ async function handleMessages(sock, message) {
     }
 }
 
-module.exports = { handleMessages, safeSend, setupConnectionHandlers, PERM, plugins, extractMessageText };
+module.exports = { handleMessages, safeSend, setupConnectionHandlers, installNewsletterForwarding, withNewsletterContext, PERM, plugins, extractMessageText };

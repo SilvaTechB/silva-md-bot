@@ -7,6 +7,7 @@ const {
     extractMessageText,
     safeSend,
     handleMessages,
+    installNewsletterForwarding,
 } = require('../handler');
 const {
     isDuplicateMessage,
@@ -43,6 +44,21 @@ test('extracts interactive response text without a live WhatsApp connection', ()
     };
 
     assert.equal(extractMessageText(message), '{"id":"alive"}');
+});
+
+test('adds newsletter attribution to plugin sends in groups and inboxes', async () => {
+    const sent = [];
+    const sock = {
+        sendMessage: async (jid, content) => { sent.push({ jid, content }); return { key: { id: 'sent' } }; },
+    };
+    installNewsletterForwarding(sock);
+    await sock.sendMessage('123@g.us', { text: 'group reply' });
+    await sock.sendMessage('254700000000@s.whatsapp.net', { image: Buffer.from('image'), caption: 'inbox reply' });
+    await sock.sendMessage('123@g.us', { delete: { remoteJid: '123@g.us', id: 'old' } });
+
+    assert.equal(sent[0].content.contextInfo.forwardedNewsletterMessageInfo.newsletterJid, '120363200367779016@newsletter');
+    assert.equal(sent[1].content.contextInfo.forwardedNewsletterMessageInfo.newsletterJid, '120363200367779016@newsletter');
+    assert.equal(sent[2].content.contextInfo, undefined);
 });
 
 test('does not mark an empty delivery as seen before the real message arrives', () => {
