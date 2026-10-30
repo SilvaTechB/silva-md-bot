@@ -2,6 +2,8 @@
 
 const axios = require('axios');
 const { jidNormalizedUser, downloadMediaMessage } = require('@whiskeysockets/baileys');
+let globalLidMapping;
+try { ({ globalLidMapping } = require('@whiskeysockets/baileys/lib/Utils/lid-mapping')); } catch {}
 
 const truecallerCache = new Map();
 
@@ -53,11 +55,16 @@ function getContactName(jid) {
     return null;
 }
 
+function cleanPhone(value) {
+    const digits = String(value || '').replace(/\D/g, '');
+    return digits.length >= 7 ? digits : null;
+}
+
 function lidToPhone(lid) {
     if (!lid) return null;
 
     if (lid.endsWith('@s.whatsapp.net')) {
-        return lid.split('@')[0].replace(/:/g, '').replace(/\D/g, '');
+        return cleanPhone(lid);
     }
 
     if (lid.endsWith('@lid')) {
@@ -66,16 +73,24 @@ function lidToPhone(lid) {
 
         if (global.lidPhoneCache) {
             const cached = global.lidPhoneCache.get(lid) || global.lidPhoneCache.get(norm) || global.lidPhoneCache.get(bareNorm);
-            if (cached && cached.length >= 7) return cached;
+            const phone = cleanPhone(cached);
+            if (phone) return phone;
         }
 
         if (global.lidJidMap) {
             const mapped = global.lidJidMap.get(lid) || global.lidJidMap.get(norm);
-            if (mapped) return mapped.split('@')[0].replace(/:/g, '').replace(/\D/g, '');
+            const phone = cleanPhone(mapped);
+            if (phone) return phone;
+        }
+
+        if (globalLidMapping?.getPnFromLid) {
+            const mapped = globalLidMapping.getPnFromLid(lid) || globalLidMapping.getPnFromLid(norm);
+            const phone = cleanPhone(mapped);
+            if (phone) return phone;
         }
     }
 
-    return null;
+    return cleanPhone(lid);
 }
 
 function escapeVcf(str) {
@@ -99,8 +114,9 @@ function buildVcard(name, phone, metadata = {}) {
     ].filter(Boolean).join('\n');
 }
 
-function resolveAndName(participantId, resolveLid) {
-    let phone = lidToPhone(participantId);
+function resolveAndName(participant, resolveLid) {
+    const participantId = typeof participant === 'string' ? participant : (participant?.id || participant?.lid || '');
+    let phone = cleanPhone(participant?.phoneNumber || participant?.phone || participant?.pn) || lidToPhone(participantId);
     if (!phone && resolveLid) {
         const resolved = resolveLid(participantId);
         if (resolved && resolved !== participantId) {
@@ -315,7 +331,7 @@ module.exports = {
             const seen = new Set();
 
             for (const p of participants) {
-                const { phone, name: cachedName } = resolveAndName(p.id, resolveLid);
+                const { phone, name: cachedName } = resolveAndName(p, resolveLid);
 
                 if (!phone) {
                     skipped++;
@@ -344,12 +360,15 @@ module.exports = {
             if (!vcards.length) {
                 return sock.sendMessage(jid, {
                     text: [
-                        '❌ Could not resolve any phone numbers from group members.',
+                        '❌ WhatsApp did not provide any exportable phone numbers for this group.',
                         '',
-                        'This happens in LID-only groups. The name/number cache builds up as the bot sees messages in the group.',
+                        'This group is currently LID-only and Baileys has no LID→phone mapping for its members.',
+                        'The bot cannot infer private phone numbers from an opaque LID.',
+                        '',
                         `Current cache: LID=${lidMapSize} | Names=${pushCacheSize} | Contacts=${lidJidSize}`,
                         '',
-                        'Let more members chat in the group, then try again.',
+                        'Try again after the bot receives messages from members or after its contact history syncs.',
+                        'Any members still hidden by WhatsApp will remain unresolved.',
                     ].join('\n'),
                     contextInfo
                 }, { quoted: message });
