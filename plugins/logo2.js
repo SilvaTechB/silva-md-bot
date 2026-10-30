@@ -75,7 +75,7 @@ module.exports = {
         'glitchtext', 'glossysilver', 'glowingtext', 'gradienttext', 'lighteffect',
         'logo1917', 'logolist', 'logomaker', 'luxurygold', 'makingneon', 'neonglitch',
         'nigerianflag', 'papercut', 'pixelglitch', 'sandsummer', 'summerbeach',
-        'texteffect', 'typographytext', 'underwater', 'writetext'
+        'texteffect', 'typographytext', 'underwater', 'writetext', 'textmaker'
     ],
     description: 'Logo maker and text effect generator',
     usage:       '.logomaker <text> | .galaxy <text> | .glitchtext <text>',

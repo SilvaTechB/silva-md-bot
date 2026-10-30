@@ -505,11 +505,18 @@ async function handleMessages(sock, message) {
         const args    = parts;
         if (!command) return;
 
+        // Support both `.help <command>` and `.command help` forms. The latter
+        // is especially useful for commands discovered from older bot menus.
+        const commandHelpTarget = /^(?:help|\?)$/i.test(args[0] || '') ? command : '';
+        if (commandHelpTarget) {
+            args.splice(0, 1, commandHelpTarget);
+        }
+
         // ── Command predictor: resolve typos / short-forms ───────────────────
-        let resolvedCommand = command;
+        let resolvedCommand = commandHelpTarget ? 'help' : command;
         let predictionNote  = null;
         const exactExists   = plugins.some(p => p.commands?.includes(command));
-        if (!exactExists) {
+        if (!commandHelpTarget && !exactExists) {
             const prediction = predictCommand(command, plugins);
             if (prediction?.confidence === 'ambiguous') {
                 const th = getActiveTheme()?.global || {};

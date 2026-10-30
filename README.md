@@ -330,6 +330,7 @@ Never commit the real Neon connection string. Add the single `DATABASE_URL` valu
 | `.facebook` / `.fb` | Facebook videos |
 | `.download` / `.dl` | Universal public downloader for YouTube, TikTok, Instagram, Facebook, and X |
 | `.autodl on/off/status` | Auto-detect public social links and send MP4 plus MP3 |
+| `.imdb <title>` | Search IMDb titles, years, types, cast, and links |
 | `.lyrics` | Song lyrics |
 | `.apk` | Download APK from Play Store |
 
@@ -346,12 +347,15 @@ Never commit the real Neon connection string. Add the single `DATABASE_URL` valu
 | `.autopilot` / `.agent2` | Agent v2 with tools, memory, web lookup, weather, and multi-step actions |
 | `.tts` | Text-to-speech (19+ languages) |
 | `.translate` | Translate to any language |
+| `.textmaker <text>` | Create styled Unicode text; aliases include `.writetext` and `.logomaker` |
 | `.weather` | Real-time weather |
 | `.wiki` | Wikipedia search |
 | `.qr` | Generate QR code |
 | `.calc` | Calculator |
 
 </details>
+
+Any command can show its usage with either `.help <command>` or `<prefix><command> help`, for example `.translate help` or `.imdb help`.
 
 <details>
 <summary><b>👥 Group Management</b></summary>
