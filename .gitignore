@@ -13,6 +13,7 @@ data/lid-phone-cache.json
 data/push-names.json
 data/agent-v2-memory.json
 data/silva-agent-memory.json
+data/approve-all.json
 .local/
 .agents/
 attached_assets/

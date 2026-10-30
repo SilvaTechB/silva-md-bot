@@ -226,7 +226,7 @@ pm2 save && pm2 startup
 
 ### 🧠 Agent v2
 
-Agent v2 is an opt-in assistant backed by [ch.at](https://ch.at/) and does not require an API key. It can use approved tools for calculations, command discovery, bot status, persistent chat memory, web lookup, weather, and the universal public-media downloader when an optional structured provider is configured. It runs through `.autopilot`, `.agent2`, or `.copilot` and does not replace the existing `.silva` agent.
+Agent v2 is the primary Silva assistant backed by [ch.at](https://ch.at/) and does not require an API key. It can use approved tools for calculations, command discovery, bot status, persistent chat memory, web lookup, weather, and the universal public-media downloader. It runs through prefix-free `Silva ...` messages or `.silva`, `.autopilot`, `.agent2`, and `.copilot`. The previous implementation remains available only as `.legacy-agent`.
 
 | Variable | Default | Description |
 |----------|:-------:|-------------|
@@ -367,6 +367,9 @@ Never commit the real Neon connection string. Add the single `DATABASE_URL` valu
 | `.lock` / `.unlock` | Toggle who can send messages |
 | `.welcome` / `.goodbye` | Auto-messages for join/leave |
 | `.poll` / `.vote` | Create a WhatsApp poll |
+| `.approveall on/off` | Automatically approve or pause group join requests |
+| `.approveall status` / `.joinrequests` | Show approval mode and pending requests |
+| `.approvejoin all` / `.rejectjoin all` | Approve or reject pending requests in bulk |
 
 </details>
 

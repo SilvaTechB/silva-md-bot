@@ -235,6 +235,12 @@ function setupConnectionHandlers(sock) {
             try { await p.onGroupParticipantsUpdate(sock, update); } catch { /* ignore */ }
         }
     });
+    sock.ev.on('group.join-request', async (update) => {
+        for (const p of plugins) {
+            if (typeof p.onJoinRequest !== 'function') continue;
+            try { await p.onJoinRequest(sock, update); } catch { /* ignore */ }
+        }
+    });
 }
 
 // ─── Command predictor ───────────────────────────────────────────────────────
