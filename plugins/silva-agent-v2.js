@@ -1,11 +1,74 @@
 'use strict';
 
 const { runAgent, clearHistory, getHistory } = require('../lib/agent-v2');
+const universalDownloader = require('./universal-downloader');
+
+const SOCIAL_URL = /https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be|tiktok\.com|instagram\.com|facebook\.com|fb\.watch|twitter\.com|x\.com)\//i;
+const ACTION_INTENT = /\b(weather|forecast|temperature|search|google|look up|wiki|wikipedia|translate|definition|define|lyrics?|play|music|song|spotify|tiktok|instagram|insta|facebook|youtube|ytmp[34]|twitter|tweet|pinterest|sticker|qr code|qrcode|remind|reminder|note|poll|schedule|group|kick|remove|promote|demote|mute|unmute|lock|unlock|tag all|download|save this|send this)\b/i;
+
+function pluginMap() {
+    const map = new Map();
+    try {
+        const { plugins } = require('../handler');
+        for (const plugin of plugins || []) {
+            const modules = Array.isArray(plugin) ? plugin : [plugin];
+            for (const mod of modules) for (const command of mod?.commands || []) if (!map.has(command)) map.set(command, mod);
+        }
+    } catch {}
+    return map;
+}
+
+function permissionAllowed(plugin, ctx) {
+    if (plugin.permission === 'owner') return Boolean(ctx.isOwner);
+    if (plugin.permission === 'admin') return Boolean(ctx.isAdmin || ctx.isOwner);
+    return true;
+}
+
+async function runExplicitCommand(sock, message, query, ctx) {
+    const match = query.match(/^(?:run|execute|do|use|try|open)\s+\.?([a-z0-9_-]+)(?:\s+(.*))?$/i)
+        || query.match(/^\.?([a-z0-9_-]+)(?:\s+(.*))?$/i);
+    if (!match) return false;
+    const command = (match[1] || '').toLowerCase();
+    const plugin = pluginMap().get(command);
+    if (!plugin || ['silva', 'agent', 'assistant', 'ask', 'autopilot', 'agent2', 'copilot'].includes(command)) return false;
+    if (!permissionAllowed(plugin, ctx)) {
+        await ctx.reply(`⛔ The ${command} command requires ${plugin.permission} permission.`);
+        return true;
+    }
+    await plugin.run(sock, message, (match[2] || '').split(/\s+/).filter(Boolean), ctx);
+    return true;
+}
+
+async function runLocalAction(sock, message, query, ctx) {
+    const url = query.match(/https?:\/\/[^\s<>]+/i)?.[0]?.replace(/[),.!?]+$/, '');
+    const asksForMedia = /\b(download|save|send|get|fetch|video|audio|mp3|mp4)\b/i.test(query);
+    if ((url && SOCIAL_URL.test(url) && asksForMedia) || /^download\s+(?:search\s+)?/i.test(query)) {
+        const format = /\bmp3\b|\baudio\b/i.test(query) ? 'mp3' : 'mp4';
+        const args = query.match(/^download\s+search\s+(.+?)(?:\s+(mp3|mp4))?$/i);
+        if (args) {
+            await universalDownloader.run(sock, message, ['search', args[1], args[2] || format], ctx);
+            return true;
+        }
+        await universalDownloader.run(sock, message, [url || query.replace(/^download\s+/i, ''), format], ctx);
+        return true;
+    }
+
+    if (await runExplicitCommand(sock, message, query, ctx)) return true;
+
+    // Reuse the mature legacy action router for deterministic commands only.
+    // Conversational requests continue through Agent v2 and ch.at.
+    if (ACTION_INTENT.test(query)) {
+        const legacy = require('./silva-agent');
+        await legacy.run(sock, message, query.split(/\s+/).filter(Boolean), ctx);
+        return true;
+    }
+    return false;
+}
 
 module.exports = {
-    commands: ['autopilot', 'agent2', 'copilot'],
-    description: 'Agent v2 with memory, safe tools, web lookup, weather, and multi-step actions',
-    usage: '.autopilot <request> | .autopilot forget | .autopilot status',
+    commands: ['silva', 'agent', 'assistant', 'ask', 'autopilot', 'agent2', 'copilot'],
+    description: 'Primary Silva Agent with ch.at, memory, local command execution, and media delivery',
+    usage: 'Silva <request> | .silva <request> | .autopilot <request>',
     permission: 'public',
     group: true,
     private: true,
@@ -14,39 +77,36 @@ module.exports = {
         const { jid, reply } = ctx;
         const query = args.join(' ').trim();
         if (!query) return reply([
-            '🧠 *Silva Agent v2*',
+            '🧠 *Silva Agent*',
             '',
-            'I can plan a request, use approved tools, remember useful context, and complete multi-step tasks.',
+            'Talk naturally without a prefix, or use `.silva`.',
             '',
             'Examples:',
-            '• `.autopilot calculate 25 * 4`',
-            '• `.autopilot what is the weather in Nairobi?`',
-            '• `.autopilot find the command for downloading videos`',
-            '• `.autopilot download this public link as mp3: <url>`',
-            '• `.autopilot remember that I prefer short answers`',
+            '• `Silva, what is the weather in Nairobi?`',
+            '• `Silva, download this link as mp4: <url>`',
+            '• `Silva, download this link as mp3: <url>`',
+            '• `Silva, run menu`',
+            '• `Silva, remember that I prefer short answers`',
             '',
-            'Controls: `.autopilot forget` and `.autopilot status`',
-            'Uses ch.at without an API key. An optional OpenAI-compatible provider enables structured tool-calling.'
+            'Use `Silva, forget our conversation` to clear memory.'
         ].join('\n'));
 
         if (/^(forget|clear|reset)\b/i.test(query)) {
             clearHistory(jid);
-            return reply('✅ Agent v2 memory cleared for this chat.');
+            return reply('✅ Silva memory cleared for this chat.');
         }
-
         if (/^status$/i.test(query)) {
-            const count = getHistory(jid).length;
-            return reply(`🧠 *Agent v2 Status*\n\nPersistent memory items: ${count}\nChat backend: ch.at (no API key)\nStructured tool loop: optional provider\nSafe tools: calculator, command search, bot status, memory, web search, weather, media download`);
+            return reply(`🧠 *Silva Agent Status*\n\nPersistent memory items: ${getHistory(jid).length}\nChat backend: ch.at (no API key)\nLocal command execution: enabled\nMedia delivery: MP4 + MP3 enabled`);
         }
 
-        await reply('🧠 Planning your request...');
         try {
+            if (await runLocalAction(sock, message, query, ctx)) return;
+            await reply('🧠 Thinking...');
             const result = await runAgent(query, { ...ctx, sock, message });
-            if (result.setup) return reply(`⚙️ ${result.text}`);
-            return reply(`🤖 *Silva Agent v2*\n\n${result.text}`);
+            return reply(`🤖 *Silva*\n\n${result.text}`);
         } catch (error) {
-            console.error(`[AgentV2] ${error.message}`);
-            return reply('❌ Agent v2 could not complete that request. Check the provider settings or try again.');
+            console.error(`[SilvaAgent] ${error.message}`);
+            return reply('❌ Silva could not complete that request. Please try again.');
         }
     }
 };

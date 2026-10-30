@@ -486,7 +486,7 @@ const agentActions = {
 };
 
 module.exports = {
-    commands: ['silva', 'agent', 'do', 'assistant', 'ask'],
+    commands: ['legacy-agent'],
     description: 'Silva - AI assistant that runs commands, creates content, searches the web, and knows everything about the bot',
     permission: 'public',
     run: async (sock, message, args, ctx) => {

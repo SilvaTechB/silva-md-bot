@@ -97,6 +97,7 @@ const { handleMessages } = require('./handler');
 const { handleStatusBroadcast } = require('./lib/statusManager');
 const { isDuplicateMessage, rememberMessageIfContent } = require('./lib/message-gate');
 const { trackUndecryptableMessage } = require('./lib/session-recovery');
+const { initDatabase } = require('./lib/database');
 const { initCallHandler } = require('./plugins/anticall');
 const config = require('./config.js');
 if (typeof global.antivvEnabled === 'undefined') global.antivvEnabled = config.ANTIVV !== false;
@@ -360,22 +361,13 @@ async function sendWelcomeMessage(sock) {
     }
 
     const caption = [
-        `╔══════════════════════════╗`,
-        `║  ⚡  *${(config.BOT_NAME || 'Silva MD').toUpperCase()}*  ⚡  ║`,
-        `║   _Successfully Connected_  ║`,
-        `╚══════════════════════════╝`,
+        `⚡ *${(config.BOT_NAME || 'Silva MD').toUpperCase()} — ONLINE*`,
+        `✅ Connected and ready`,
+        `🧠 Agent: ch.at • Persistent memory`,
+        `📦 ${plugins.size} plugins • ${totalCmds} commands`,
+        `🔒 Mode: ${(config.MODE || 'public').toUpperCase()} • ${now}`,
         ``,
-        `╭─────────────────────────`,
-        `│ 🟢  *Status:*    Online & Ready`,
-        `│ 🔑  *Prefix:*    \`${prefix}\``,
-        `│ 📦  *Plugins:*   ${plugins.size} files`,
-        `│ ⚙️  *Commands:*  ${totalCmds}`,
-        `│ 🔒  *Mode:*      ${(config.MODE || 'public').toUpperCase()}`,
-        `│ 🕒  *Time:*      ${now}`,
-        `╰─────────────────────────`,
-        ``,
-        `> Type \`${prefix}menu\` to explore all commands`,
-        `> Type \`${prefix}alive\` to check bot status`
+        `Use \`${prefix}menu\` for commands or say *Silva, ...* naturally.`
     ].join('\n');
 
     // Load bot icon (local file preferred, URL fallback)
@@ -1559,6 +1551,11 @@ process.on('unhandledRejection', (reason, promise) => {
         console.log('╚══════════════════════════════════════════╝');
         console.log('\x1b[0m');
         logMessage('INFO', 'Booting Silva MD Bot...');
+
+        // Database is optional: users can run the bot without Postgres.
+        // When configured, it initializes encrypted user/chat/developer storage
+        // in the background and never prevents WhatsApp from connecting.
+        initDatabase().catch(error => logMessage('WARN', `Database unavailable: ${error.message}`));
 
         // ── Load sudo users from disk ───────────────────────────────────────
         try {
