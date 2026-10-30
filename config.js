@@ -45,4 +45,8 @@ module.exports = {
     GREETING:              process.env.GREETING || '',
     APP_URL:               process.env.APP_URL || '',
     INSTAGRAM_SESSION:     process.env.INSTAGRAM_SESSION || '',
+    AGENT_API_KEY:         process.env.AGENT_API_KEY || process.env.OPENAI_API_KEY || '',
+    AGENT_API_URL:         process.env.AGENT_API_URL || process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1',
+    AGENT_MODEL:           process.env.AGENT_MODEL || process.env.OPENAI_MODEL || 'gpt-4o-mini',
+    AGENT_MAX_STEPS:       parseInt(process.env.AGENT_MAX_STEPS || '5', 10),
 };

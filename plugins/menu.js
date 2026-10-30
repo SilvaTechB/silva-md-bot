@@ -35,6 +35,7 @@ const CATEGORIES = [
     { id: 21, icon: '👑',  name: 'Owner & Sudo',        cmds: ['sudo','setsudo','delsudo','getsudo','resetsudo','block','unblock','setmode','setprefix','setbotname','join','cmd','restart','shutdown','backupgroup','restoregroup','broadcast','eval','dmall','autojoin','cleanup','lendlimit'] },
     { id: 22, icon: '✨',  name: 'Advanced Utilities',  cmds: ['find','searchcmd','health','uptime2','sysinfo','uuid','timestamp','calcx','jsonformat','textstats','choose'] },
     { id: 23, icon: '🌐',  name: 'Universal Downloader', cmds: ['download','dl','socialdl','universal'] },
+    { id: 24, icon: '🧠',  name: 'Agent v2',              cmds: ['autopilot','agent2','copilot'] },
 ];
 
 // ── Box drawing ───────────────────────────────────────────────────────────────
@@ -183,7 +184,7 @@ function buildCommandHelp(cmdName, plugins, pfx) {
 module.exports = {
     commands:    ['menu', 'help', 'list', 'cmds', 'commands'],
     description: 'Show all commands in a categorized menu — use .menu <number> for a category deep-dive',
-    usage:       '.menu | .menu <1-23> | .menu <category name> | .help <command>',
+    usage:       '.menu | .menu <1-24> | .menu <category name> | .help <command>',
     permission:  'public',
     group:       true,
     private:     true,
