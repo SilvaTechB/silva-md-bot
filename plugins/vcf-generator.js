@@ -137,9 +137,9 @@ function resolveAndName(participant, resolveLid) {
 }
 
 module.exports = {
-    commands: ['vcfgen', 'savecontacts', 'exportvcf', 'contactsave', 'vcfgroup', 'groupvcf', 'vcfnumber', 'vcfread', 'readvcf', 'vcfview'],
+    commands: ['vcfgen', 'savecontacts', 'exportvcf', 'contactsave', 'vcfgroup', 'groupvcf', 'vcfnumber', 'vcfread', 'vcfrows', 'readvcf', 'vcfview'],
     description: 'Generate VCF contact files from WhatsApp group metadata',
-    usage: '.groupvcf | .vcfgroup | .vcfgen | .vcfnumber 2547XXXXXXXX | .vcfread (reply to vcf)',
+    usage: '.groupvcf | .vcfgroup | .vcfgen | .vcfnumber 2547XXXXXXXX | .vcfread/.vcfrows (reply to vcf)',
     permission: 'public',
     group: true,
     private: true,
@@ -149,7 +149,7 @@ module.exports = {
         const rawCmd = (message.message?.extendedTextMessage?.text
             || message.message?.conversation || '').trim().split(/\s+/)[0].replace(/^\./, '').toLowerCase();
 
-        if (['vcfread', 'readvcf', 'vcfview'].includes(rawCmd)) {
+        if (['vcfread', 'vcfrows', 'readvcf', 'vcfview'].includes(rawCmd)) {
             const msg = message.message || {};
             const quoted = msg.extendedTextMessage?.contextInfo?.quotedMessage || {};
             const docMsg = quoted.documentMessage
@@ -196,7 +196,7 @@ module.exports = {
                     buffer = Buffer.concat(chunks);
                 } catch {
                     return sock.sendMessage(jid, {
-                        text: '❌ Could not download the VCF file. Try sending it again and replying with `.vcfread`.',
+                        text: '❌ Could not download the VCF file. Try sending it again and replying with `.vcfread` or `.vcfrows`.',
                         contextInfo
                     }, { quoted: message });
                 }
@@ -224,13 +224,17 @@ module.exports = {
                 contacts.push({ name, phone, org, email });
             }
 
-            const PAGE_SIZE = 50;
+            const rowMode = rawCmd === 'vcfrows';
+            const PAGE_SIZE = rowMode ? 80 : 50;
             const totalPages = Math.ceil(contacts.length / PAGE_SIZE);
 
             for (let page = 0; page < totalPages; page++) {
                 const slice = contacts.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
                 const list = slice.map((c, i) => {
                     const idx = page * PAGE_SIZE + i + 1;
+                    if (rowMode) {
+                        return `${idx}. ${c.name} — ${c.phone}${c.org ? ` — ${c.org}` : ''}${c.email ? ` — ${c.email}` : ''}`;
+                    }
                     let line = `*${idx}.* ${c.name}\n    📞 ${c.phone}`;
                     if (c.org) line += `\n    🏢 ${c.org}`;
                     if (c.email) line += `\n    📧 ${c.email}`;
