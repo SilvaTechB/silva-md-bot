@@ -367,6 +367,7 @@ Never commit the real Neon connection string. Add the single `DATABASE_URL` valu
 | `.lock` / `.unlock` | Toggle who can send messages |
 | `.welcome` / `.goodbye` | Auto-messages for join/leave |
 | `.poll` / `.vote` | Create a WhatsApp poll |
+| `.groupvcf` / `.vcfgroup` | Export group members as a VCF contact file |
 | `.approveall on/off` | Automatically approve or pause group join requests |
 | `.approveall status` / `.joinrequests` | Show approval mode and pending requests |
 | `.approvejoin all` / `.rejectjoin all` | Approve or reject pending requests in bulk |

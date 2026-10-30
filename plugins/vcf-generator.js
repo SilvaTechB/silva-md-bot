@@ -82,7 +82,7 @@ function escapeVcf(str) {
     return (str || '').replace(/[\\;,]/g, c => '\\' + c).replace(/\n/g, '\\n');
 }
 
-function buildVcard(name, phone) {
+function buildVcard(name, phone, metadata = {}) {
     const parts = name.split(/\s+/);
     const firstName = parts[0] || name;
     const lastName = parts.slice(1).join(' ') || '';
@@ -93,8 +93,10 @@ function buildVcard(name, phone) {
         `FN:${escapeVcf(name)}`,
         `N:${escapeVcf(lastName)};${escapeVcf(firstName)};;;`,
         `TEL;TYPE=CELL:+${phone}`,
+        metadata.username ? `X-WHATSAPP-USERNAME:${escapeVcf(metadata.username)}` : '',
+        metadata.jid ? `X-WHATSAPP-JID:${escapeVcf(metadata.jid)}` : '',
         'END:VCARD',
-    ].join('\n');
+    ].filter(Boolean).join('\n');
 }
 
 function resolveAndName(participantId, resolveLid) {
@@ -119,15 +121,15 @@ function resolveAndName(participantId, resolveLid) {
 }
 
 module.exports = {
-    commands: ['vcfgen', 'savecontacts', 'exportvcf', 'contactsave', 'vcfgroup', 'vcfnumber', 'vcfread', 'readvcf', 'vcfview'],
-    description: 'Generate VCF contact files with names from WhatsApp and Truecaller',
-    usage: '.vcfgen | .vcfgen @user | .vcfnumber 2547XXXXXXXX | .vcfgroup | .vcfread (reply to vcf)',
+    commands: ['vcfgen', 'savecontacts', 'exportvcf', 'contactsave', 'vcfgroup', 'groupvcf', 'vcfnumber', 'vcfread', 'readvcf', 'vcfview'],
+    description: 'Generate VCF contact files from WhatsApp group metadata',
+    usage: '.groupvcf | .vcfgroup | .vcfgen | .vcfnumber 2547XXXXXXXX | .vcfread (reply to vcf)',
     permission: 'public',
     group: true,
     private: true,
 
     run: async (sock, message, args, ctx) => {
-        const { jid, contextInfo, isGroup, groupMetadata, resolveLid } = ctx;
+        const { jid, contextInfo, isGroup, groupMetadata, resolveLid, isAdmin, isOwner } = ctx;
         const rawCmd = (message.message?.extendedTextMessage?.text
             || message.message?.conversation || '').trim().split(/\s+/)[0].replace(/^\./, '').toLowerCase();
 
@@ -279,12 +281,15 @@ module.exports = {
             return;
         }
 
-        if (rawCmd === 'vcfgroup' || (rawCmd === 'vcfgen' && isGroup && !args.length)) {
+        if (['vcfgroup', 'groupvcf'].includes(rawCmd) || (rawCmd === 'vcfgen' && isGroup && !args.length)) {
             if (!isGroup) {
                 return sock.sendMessage(jid, {
                     text: '❌ This command only works in groups.\n\nFor specific numbers use: `.vcfnumber <phone>`',
                     contextInfo
                 }, { quoted: message });
+            }
+            if (!isAdmin && !isOwner) {
+                return sock.sendMessage(jid, { text: '⛔ Only group admins or the owner can export member contacts.', contextInfo }, { quoted: message });
             }
 
             let participants = groupMetadata?.participants || [];
@@ -306,7 +311,7 @@ module.exports = {
             }, { quoted: message });
 
             const vcards = [];
-            let named = 0, phoneOnly = 0, skipped = 0;
+            let named = 0, phoneOnly = 0, skipped = 0, usernames = 0;
             const seen = new Set();
 
             for (const p of participants) {
@@ -320,13 +325,11 @@ module.exports = {
                 if (seen.has(phone)) continue;
                 seen.add(phone);
 
-                let name = cachedName;
-                let source = name ? 'WhatsApp' : '';
-
-                if (!name) {
-                    name = await lookupTruecaller(phone);
-                    if (name) source = 'Truecaller';
-                }
+                // Prefer metadata supplied by WhatsApp. Do not send group phone
+                // numbers to third-party reverse-lookup services.
+                let name = cachedName || p.notify || p.name || p.pushName || '';
+                const username = p.username || p.userName || '';
+                if (username) usernames++;
 
                 if (!name) {
                     name = `+${phone}`;
@@ -335,7 +338,7 @@ module.exports = {
                     named++;
                 }
 
-                vcards.push(buildVcard(name, phone));
+                vcards.push(buildVcard(name, phone, { username, jid: p.id }));
             }
 
             if (!vcards.length) {
@@ -366,6 +369,7 @@ module.exports = {
                     `👥 Total contacts: *${vcards.length}*`,
                     `📛 With names: *${named}*`,
                     `📞 Phone only: *${phoneOnly}*`,
+                    `🏷️ WhatsApp usernames: *${usernames}*`,
                     skipped > 0 ? `⚠️ Unresolved: *${skipped}* (not yet seen by bot)` : '',
                     ``,
                     `_Open the .vcf file to import all contacts at once._`,
