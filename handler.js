@@ -33,6 +33,21 @@ function sameNumber(a, b) {
     return tail >= 6 && a.slice(-tail) === b.slice(-tail);
 }
 
+function isBotIdentity(candidate, identities) {
+    if (!candidate) return false;
+    return identities.some(identity => {
+        if (!identity) return false;
+        if (areJidsSameUser(candidate, identity)) return true;
+
+        const candidateNumber = jidToNum(candidate);
+        const identityNumber  = jidToNum(identity);
+        const candidateIsPhone = /@(s\.whatsapp\.net|c\.us)$/.test(candidate);
+        const identityIsPhone  = /@(s\.whatsapp\.net|c\.us)$/.test(identity);
+        return candidateIsPhone && identityIsPhone
+            && sameNumber(candidateNumber, identityNumber);
+    });
+}
+
 // ─── Permission constants ────────────────────────────────────────────────────
 const PERM = {
     PUBLIC: 'public',
@@ -326,6 +341,16 @@ async function handleMessages(sock, message) {
         const _botOwnJid = global.botJid || '';
         const from = message.key.participant
             || (message.key.fromMe && !isJidGroup(jid) ? (_botOwnJid || jid) : jid);
+        const botIdentities = [
+            _botOwnJid,
+            global.botLid,
+            sock.user?.id,
+            sock.user?.lid,
+            global.botNum ? `${global.botNum}@s.whatsapp.net` : '',
+        ].filter(Boolean);
+        const isSelfMessage = Boolean(message.key.fromMe)
+            || isBotIdentity(from, botIdentities)
+            || isBotIdentity(message.key.participant, botIdentities);
         // sender = chat JID for responses (matches legacy plugin expectation of m.key.remoteJid)
         const sender = jid;
         if (!jid || !from) return;
@@ -357,7 +382,7 @@ async function handleMessages(sock, message) {
         // In prefix-free mode every outgoing bot message is otherwise
         // indistinguishable from a user command. Never feed our own replies,
         // menus, forwarded text, or error messages back through the dispatcher.
-        if (message.key.fromMe && noPrefixMode) return;
+        if (isSelfMessage && noPrefixMode) return;
 
         // ── Extract text ─────────────────────────────────────────────────────
         // Walk through all known message types — WhatsApp Business and newer

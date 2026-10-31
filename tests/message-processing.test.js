@@ -140,6 +140,17 @@ test('prefix-free mode ignores self messages and ordinary text but accepts bare 
         assert.equal(sent.length, 0);
 
         await handleMessages(sock, {
+            key: {
+                id: 'echoed-self-menu',
+                remoteJid: '120363000000000000@g.us',
+                participant: '254700000000@s.whatsapp.net',
+                fromMe: false,
+            },
+            message: { conversation: 'Menu' },
+        });
+        assert.equal(sent.length, 0);
+
+        await handleMessages(sock, {
             key: { id: 'ordinary-text', remoteJid: '254700000001@s.whatsapp.net', fromMe: false },
             message: { conversation: 'this is ordinary conversation' },
         });
