@@ -264,7 +264,11 @@ Use `null`, `none`, `off`, or `no prefix` to enable prefix-free commands. Use a 
 
 When `DATABASE_URL` is configured, Silva creates encrypted tables for users, selected Agent v2 conversations, and developer contacts. Agent chat content is encrypted with AES-256-GCM before it is stored, using the bot's existing session secret as the encryption source. The three built-in developer contacts are `254700143167`, `254755257907`, and `254743706010`, and they are available through `.developers`.
 
-Never commit the real Neon connection string. Add the single `DATABASE_URL` value to your hosting provider's private secret/environment-variable panel. The database is optional, and the bot continues running if Postgres is unavailable.
+Never commit the real Neon connection string. Add the single `DATABASE_URL` value to your hosting provider's private secret/environment-variable panel. The database is optional, and the bot continues running if Postgres is unavailable. Owner feature toggles set with commands such as `.setautobio on`, `.setautoreact on`, `.setautoread on`, and `.setsetting KEY value` are also written to the encrypted `silva_user_settings` table when Postgres is available.
+
+### 📚 Command menu
+
+`.menu` builds its category counts from the live plugin registry on every request. Curated commands keep their intended category, new commands are classified from their command name and description, and any unmatched command is placed in **Advanced Utilities** rather than being hidden. Each command is assigned to one category only. Use `.menu <number>` for a category listing, `.allmenu <page>` for the complete alphabetical directory, and `.help <command>` for usage details.
 
 ### 📸 Auto-Status
 
@@ -290,6 +294,8 @@ Never commit the real Neon connection string. Add the single `DATABASE_URL` valu
 |----------|:-------:|-------------|
 | `ALWAYS_ONLINE` | `true` | Keep bot shown as always online |
 | `AUTO_TYPING` | `true` | Show typing indicator while processing |
+| `AUTO_BIO` | `true` | Update the bot About text when connecting |
+| `AUTO_REACT_MESSAGES` | `false` | React to ordinary incoming messages with a 15-second per-chat cooldown |
 | `READ_MESSAGE` | `false` | Auto blue-tick all messages |
 | `DEBUG` | `false` | Verbose logging |
 

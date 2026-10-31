@@ -8,6 +8,7 @@ const {
     safeSend,
     handleMessages,
     installNewsletterForwarding,
+    plugins,
 } = require('../handler');
 const {
     isDuplicateMessage,
@@ -18,6 +19,9 @@ const {
     trackUndecryptableMessage,
 } = require('../lib/session-recovery');
 const config = require('../config');
+const menuPlugin = require('../plugins/menu');
+const autoReactPlugin = require('../plugins/auto-react-messages');
+const database = require('../lib/database');
 
 test('extracts commands from nested WhatsApp wrappers', () => {
     const wrapped = {
@@ -180,4 +184,45 @@ test('undecryptable-message tracking only logs and resets its counter', () => {
     state = trackUndecryptableMessage(state, count => logs.push(count));
     assert.deepEqual(logs, [UNDECRYPTABLE_LOG_THRESHOLD]);
     assert.deepEqual(state, { count: 0, thresholdReached: true });
+});
+
+test('menu categorizes every live command exactly once without button payloads', async () => {
+    const categoryMap = menuPlugin._buildCategoryMap(plugins);
+    const registry = new Set(plugins.flatMap(plugin => plugin.commands || []).map(String));
+    const assigned = [...categoryMap.values()].flatMap(commands => [...commands]);
+    assert.equal(new Set(assigned).size, registry.size);
+    assert.deepEqual([...new Set(assigned)].sort(), [...registry].sort());
+
+    const sent = [];
+    await menuPlugin.run({}, { message: { conversation: '.menu' }, key: { id: 'menu-test' } }, [], {
+        prefix: '.',
+        contextInfo: {},
+        safeSend: async content => sent.push(content),
+    });
+    assert.ok(sent.some(content => content.image && /COMMAND CATEGORIES/.test(content.caption)));
+    assert.ok(sent.every(content => content.buttons === undefined));
+});
+
+test('database values are encrypted and generic auto-reactions are text-toggle controlled', async () => {
+    const encrypted = database.encrypt('AUTO_REACT_MESSAGES=true');
+    assert.notEqual(encrypted, 'AUTO_REACT_MESSAGES=true');
+    assert.equal(database.decrypt(encrypted), 'AUTO_REACT_MESSAGES=true');
+
+    const oldValue = config.AUTO_REACT_MESSAGES;
+    const sent = [];
+    const sock = { sendMessage: async (jid, content) => sent.push({ jid, content }) };
+    try {
+        config.AUTO_REACT_MESSAGES = true;
+        const message = {
+            key: { id: 'auto-react-1', remoteJid: '254700000099@s.whatsapp.net', fromMe: false },
+            message: { conversation: 'hello Silva' },
+        };
+        await autoReactPlugin.onMessage(sock, message, 'hello Silva', { jid: message.key.remoteJid });
+        await autoReactPlugin.onMessage(sock, { ...message, key: { ...message.key, id: 'auto-react-2' } }, 'hello again', { jid: message.key.remoteJid });
+        assert.equal(sent.length, 1);
+        assert.ok(sent[0].content.react);
+        assert.equal(sent[0].content.buttons, undefined);
+    } finally {
+        config.AUTO_REACT_MESSAGES = oldValue;
+    }
 });

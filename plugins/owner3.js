@@ -5,7 +5,7 @@ const path   = require('path');
 const config = require('../config');
 const { fmt } = require('../lib/theme');
 const { jidNormalizedUser } = require('@whiskeysockets/baileys');
-const { setUserSetting, deleteUserSetting } = require('../lib/database');
+const { setUserSetting, getUserSetting, deleteUserSetting } = require('../lib/database');
 
 const SUDO_FILE = path.join(__dirname, '../data/sudo.json');
 function loadSudo()       { try { return JSON.parse(fs.readFileSync(SUDO_FILE, 'utf8')); } catch { return []; } }
@@ -48,7 +48,7 @@ module.exports = {
     private:     true,
 
     run: async (sock, message, args, ctx) => {
-        const { jid, sender, contextInfo, isOwner, mentionedJid, groupMetadata } = ctx;
+        const { jid, sender, from, contextInfo, isOwner, mentionedJid, groupMetadata } = ctx;
         const cmd  = (message.message?.extendedTextMessage?.text
             || message.message?.conversation || '').trim().split(/\s+/)[0].replace(/^\./, '').toLowerCase();
         const text = args.join(' ').trim();
@@ -380,15 +380,25 @@ module.exports = {
              'setautoreadstatus', 'setautoreplystatus'].includes(cmd)) {
             const sub = (args[0] || 'on').toLowerCase();
             const val = sub === 'on' || sub === 'enable' || sub === 'true';
-            const key = cmd.replace('set', '').toUpperCase();
+            const settingKeys = {
+                setautobio: 'AUTO_BIO',
+                setautoreact: 'AUTO_REACT_MESSAGES',
+                setautoread: 'READ_MESSAGE',
+                setautoreadstatus: 'AUTO_STATUS_SEEN',
+                setautolikestatus: 'AUTO_STATUS_REACT',
+                setautoreplystatus: 'AUTO_STATUS_REPLY',
+            };
+            const key = settingKeys[cmd] || cmd.replace('set', '').toUpperCase();
             config[key] = val;
+            void setUserSetting({ jid: from || sender || jid, key, value: val });
             return send(`✅ *${cmd}* → *${val ? 'ON' : 'OFF'}*`);
         }
 
         if (cmd === 'getsetting') {
             const key = args[0]?.toUpperCase();
             if (!key) return send('❌ *Usage:* `.getsetting <key>`');
-            const val = config[key] ?? process.env[key] ?? 'not set';
+            const stored = await getUserSetting({ jid: from || sender || jid, key, fallback: undefined });
+            const val = stored !== undefined ? stored : (config[key] ?? process.env[key] ?? 'not set');
             return send(`⚙️ *Setting: ${key}*\n\nValue: \`${val}\``);
         }
 
@@ -398,7 +408,7 @@ module.exports = {
             if (!key || !val) return send('❌ *Usage:* `.setsetting <KEY> <value>`');
             config[key] = val;
             process.env[key] = val;
-            void setUserSetting({ jid: sender || jid, key, value: val });
+            void setUserSetting({ jid: from || sender || jid, key, value: val });
             return send(`✅ Set \`${key}\` = \`${val}\``);
         }
 
@@ -407,7 +417,7 @@ module.exports = {
             if (!key) return send('❌ *Usage:* `.resetsetting <KEY>`');
             delete config[key];
             delete process.env[key];
-            void deleteUserSetting({ jid: sender || jid, key });
+            void deleteUserSetting({ jid: from || sender || jid, key });
             return send(`✅ Setting \`${key}\` reset to default.`);
         }
 

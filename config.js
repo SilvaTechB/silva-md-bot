@@ -34,6 +34,8 @@ module.exports = {
     ALWAYS_ONLINE:         toBool(process.env.ALWAYS_ONLINE,         true),
     AUTO_TYPING:           toBool(process.env.AUTO_TYPING,           true),
     AUTO_RECORDING:        toBool(process.env.AUTO_RECORDING,        false),
+    AUTO_BIO:              toBool(process.env.AUTO_BIO,              true),
+    AUTO_REACT_MESSAGES:   toBool(process.env.AUTO_REACT_MESSAGES,   false),
     DELETE_LINKS:          toBool(process.env.DELETE_LINKS,          false),
     ANTIDELETE_GROUP:      toBool(process.env.ANTIDELETE_GROUP,      true),
     ANTIDELETE_PRIVATE:    toBool(process.env.ANTIDELETE_PRIVATE,    true),

@@ -396,6 +396,10 @@ async function sendWelcomeMessage(sock) {
 
 // ✅ Update Profile Status
 async function updateProfileStatus(sock) {
+    if (config.AUTO_BIO === false) {
+        logMessage('INFO', 'Automatic bio updates are disabled.');
+        return;
+    }
     try {
         const bio = generateFancyBio();
         await sock.updateProfileStatus(bio);

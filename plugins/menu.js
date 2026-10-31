@@ -60,12 +60,66 @@ function loadPlugins() {
     return out;
 }
 
+// Build the menu from the actual loaded registry rather than relying only on
+// the hand-curated list above. Curated matches win first; unlisted commands are
+// classified from their command name and plugin description, then placed in
+// Advanced Utilities as a visible safe fallback. Each command is assigned once.
+function buildCategoryMap(plugins) {
+    const map = new Map(CATEGORIES.map(category => [category.id, new Set()]));
+    const curated = new Map();
+    for (const category of CATEGORIES) {
+        for (const command of category.cmds) curated.set(command.toLowerCase(), category.id);
+    }
+
+    const rules = [
+        [1, /download|ytmp|tiktok|instagram|facebook|twitter|xvideo|spotify|soundcloud|pinterest|reddit|gdrive|capcut|apk|catbox|tourl/],
+        [2, /music|song|play|audio|lyrics|shazam|tts|transcrib|bgm|voice/],
+        [3, /ai|gpt|gemini|bard|openai|ask|agent|silva|assistant|imagine|translate|define|caption|describe|vision|ocr/],
+        [4, /search|wiki|imdb|weather|country|currency|time|whois|dns|ip|lookup|speed|screenshot|fetch|news|fact/],
+        [5, /sticker|stik|gif|jpeg|image|photo|video|emoji|qr|ascii|color|meme|quote|react|reverse|slow|compress|media/],
+        [6, /group|kick|promote|demote|admin|tag|poll|lock|unlock|link|revoke|broadcast|purge|warn|mute|pin|vcf|approve|join|reject/],
+        [7, /welcome|goodbye|event|quiz|greet/],
+        [8, /anti|block|ban|spam|scam|flood|audit|afk|badword|fake|delete|call|viewonce/],
+        [9, /joke|riddle|compliment|pickup|roast|truth|dare|ship|marry|divorce|slot|8ball|fun/],
+        [10, /text|json|regex|binary|rot|hash|encode|decode|word|url|morse|base64|timestamp|password|cron|chmod|mock/],
+        [11, /level|rank|xp|leaderboard|analytic|topuser|peak|presence|stat/],
+        [12, /channel|newsletter/],
+        [13, /game|quiz|hangman|tictactoe|ttt|rps|scramble|trivia|wordchain|guess|typerace|challenge/],
+        [14, /crypto|loan|saving|tax|salary|budget|expense|balance|networth|inflation|invest|bitcoin|discount/],
+        [15, /education|element|planet|zodiac|vocab|acronym|flag|nato|phrase|bible|learn/],
+        [16, /remind|bookmark|save|note|todo|reply|away|schedule|timer|calendar/],
+        [17, /workout|stretch|calorie|water|sleep|meditat|step|yoga|bmi|health/],
+        [18, /lend|subbot|pair|session|connectbot/],
+        [19, /stalk|device|checkscam|virus|tempmail/],
+        [20, /alive|ping|uptime|owner|repo|support|botinfo|menu|help|jid/],
+        [21, /sudo|setmode|setprefix|setbot|restart|shutdown|backup|restore|eval|autojoin|cleanup|config|setting/],
+        [23, /social|universal|autodl|^dl$/],
+        [24, /agent|copilot|autopilot|^silva$/],
+        [25, /developer|^dev/],
+        [26, /warn|warning/],
+    ];
+
+    for (const plugin of plugins) {
+        const description = String(plugin.description || '').toLowerCase();
+        for (const rawCommand of plugin.commands || []) {
+            const command = String(rawCommand).toLowerCase();
+            let categoryId = curated.get(command);
+            if (!categoryId) {
+                const haystack = `${command} ${description}`;
+                categoryId = rules.find(([, pattern]) => pattern.test(haystack))?.[0] || 22;
+            }
+            map.get(categoryId).add(command);
+        }
+    }
+    return map;
+}
+
 // ── Compact overview (`.menu`) ────────────────────────────────────────────────
-function buildCompactMenu(plugins, pfx, botName, mode) {
+function buildCompactMenu(plugins, pfx, botName, mode, categoryMap = buildCategoryMap(plugins)) {
     const allCmds   = new Set(plugins.flatMap(p => p.commands || []));
     const modeEmoji = mode === 'PUBLIC' ? '🟢' : mode === 'PRIVATE' ? '🔒' : '🔵';
     const now       = moment().tz(TZ);
-    let totalAssigned = 0;
+    const categorizedCount = [...categoryMap.values()].reduce((sum, commands) => sum + commands.size, 0);
 
     const header =
         `\n╔══════════════════════════════════╗\n` +
@@ -85,9 +139,8 @@ function buildCompactMenu(plugins, pfx, botName, mode) {
     // Numbered category list with command counts
     const catLines = [];
     for (const cat of CATEGORIES) {
-        const found = [...new Set(cat.cmds.filter(c => allCmds.has(c)))];
+        const found = [...(categoryMap.get(cat.id) || [])];
         if (!found.length) continue;
-        totalAssigned += found.length;
         const num = String(cat.id).padStart(2, ' ');
         catLines.push(`│  *${num}.* ${cat.icon}  ${cat.name.padEnd(22)} *(${found.length})*`);
     }
@@ -98,6 +151,7 @@ function buildCompactMenu(plugins, pfx, botName, mode) {
         `│  _(type \`.menu <number>\` for full list)_\n` +
         `├${hline()}\n` +
         catLines.join('\n') +
+        `\n│  ✅ Categorized: ${categorizedCount}/${allCmds.size} commands` +
         `\n╰${hline()}`;
 
     const footer =
@@ -118,12 +172,12 @@ function buildCompactMenu(plugins, pfx, botName, mode) {
 }
 
 // ── Category detail page (`.menu <id>`) ───────────────────────────────────────
-function buildCategoryMenu(cat, plugins, pfx) {
+function buildCategoryMenu(cat, plugins, pfx, categoryMap = buildCategoryMap(plugins)) {
     const allCmds = new Set(plugins.flatMap(p => p.commands || []));
     const descMap = new Map(
         plugins.flatMap(p => (p.commands || []).map(c => [c, { desc: p.description || '', usage: p.usage || '', perm: p.permission || 'public' }]))
     );
-    const found = [...new Set(cat.cmds.filter(c => allCmds.has(c)))];
+    const found = [...(categoryMap.get(cat.id) || [])].sort((a, b) => a.localeCompare(b));
     if (!found.length) return `❌ No commands found in *${cat.name}*.`;
 
     const PERM_ICON = { owner: '👑', admin: '⚙️', public: '🌍' };
@@ -227,10 +281,12 @@ module.exports = {
     permission:  'public',
     group:       true,
     private:     true,
+    _buildCategoryMap: buildCategoryMap,
 
     run: async (sock, message, args, ctx) => {
         const { prefix, contextInfo, safeSend } = ctx;
         const plugins = loadPlugins();
+        const categoryMap = buildCategoryMap(plugins);
         const botName = getStr('botName') || config.BOT_NAME || 'Silva MD';
         const mode    = (config.MODE || 'public').toUpperCase();
         const pfx     = prefix || '.';
@@ -264,7 +320,7 @@ module.exports = {
             const cat    = byNum || byName;
 
             if (cat) {
-                return safeSend({ text: buildCategoryMenu(cat, plugins, pfx), contextInfo }, { quoted: message });
+                return safeSend({ text: buildCategoryMenu(cat, plugins, pfx, categoryMap), contextInfo }, { quoted: message });
             }
 
             const cmdName = query.replace(/^\./, '');
@@ -281,7 +337,7 @@ module.exports = {
         }
 
         // ── .menu — compact overview ─────────────────────────────────────────
-        const menuText = buildCompactMenu(plugins, pfx, botName, mode);
+        const menuText = buildCompactMenu(plugins, pfx, botName, mode, categoryMap);
 
         // Keep the branded image and use text-only navigation for compatibility
         // with Baileys versions that do not support button payloads reliably.
