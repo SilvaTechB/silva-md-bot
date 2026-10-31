@@ -354,6 +354,11 @@ async function handleMessages(sock, message) {
         // primary prefix used in help text / plugin output
         const prefix = prefixList[0] || (anyPrefixMode ? '.' : '');
 
+        // In prefix-free mode every outgoing bot message is otherwise
+        // indistinguishable from a user command. Never feed our own replies,
+        // menus, forwarded text, or error messages back through the dispatcher.
+        if (message.key.fromMe && noPrefixMode) return;
+
         // ── Extract text ─────────────────────────────────────────────────────
         // Walk through all known message types — WhatsApp Business and newer
         // WA versions wrap content differently. Order: most specific → most generic.
@@ -504,6 +509,13 @@ async function handleMessages(sock, message) {
         const command = (parts.shift() || '').toLowerCase();
         const args    = parts;
         if (!command) return;
+
+        // Prefix-free mode is intentionally command-based, not "reply to every
+        // sentence" mode. Keep the natural Silva/agent entry points, but do not
+        // fuzzy-match ordinary conversation such as "hello" to a command.
+        const exactCommand = plugins.some(p => p.commands?.includes(command));
+        const isAgentCommand = ['silva', 'agent', 'assistant', 'ask', 'autopilot', 'agent2', 'copilot'].includes(command);
+        if (noPrefixMode && !exactCommand && !isAgentCommand) return;
 
         // Support both `.help <command>` and `.command help` forms. The latter
         // is especially useful for commands discovered from older bot menus.

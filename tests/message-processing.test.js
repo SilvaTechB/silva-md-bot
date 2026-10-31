@@ -17,6 +17,7 @@ const {
     UNDECRYPTABLE_LOG_THRESHOLD,
     trackUndecryptableMessage,
 } = require('../lib/session-recovery');
+const config = require('../config');
 
 test('extracts commands from nested WhatsApp wrappers', () => {
     const wrapped = {
@@ -115,6 +116,43 @@ test('routes a prefixed command to a plugin without a live WhatsApp connection',
     assert.equal(sent[0].jid, '254700000000@s.whatsapp.net');
     assert.match(sent[0].content.text, /Pinging/);
     assert.match(sent[1].content.text, /Bot is Online/);
+});
+
+test('prefix-free mode ignores self messages and ordinary text but accepts bare commands', async () => {
+    const oldPrefix = config.PREFIX;
+    const sent = [];
+    const sock = {
+        sendMessage: async (jid, content) => {
+            sent.push({ jid, content });
+            return { key: { id: `reply-${sent.length}` } };
+        },
+        sendPresenceUpdate: async () => {},
+        user: { id: '254700000000:1@s.whatsapp.net' },
+    };
+
+    try {
+        config.PREFIX = 'none';
+
+        await handleMessages(sock, {
+            key: { id: 'self-menu', remoteJid: '254700000000@s.whatsapp.net', fromMe: true },
+            message: { conversation: 'Menu' },
+        });
+        assert.equal(sent.length, 0);
+
+        await handleMessages(sock, {
+            key: { id: 'ordinary-text', remoteJid: '254700000001@s.whatsapp.net', fromMe: false },
+            message: { conversation: 'this is ordinary conversation' },
+        });
+        assert.equal(sent.length, 0);
+
+        await handleMessages(sock, {
+            key: { id: 'bare-ping', remoteJid: '254700000001@s.whatsapp.net', fromMe: false },
+            message: { conversation: 'ping' },
+        });
+        assert.ok(sent.some(item => /Pinging/.test(item.content.text)));
+    } finally {
+        config.PREFIX = oldPrefix;
+    }
 });
 
 test('undecryptable-message tracking only logs and resets its counter', () => {
