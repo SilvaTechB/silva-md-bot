@@ -36,19 +36,10 @@ module.exports = {
             `📦 *Commands:* ${global.plugins?.flatMap?.(p => p.commands || []).length || '535+'}`,
             '',
             `_${config.MODE || 'public'} mode • Silva Tech Nexus_`,
+            '',
+            `📦 ${config.PREFIX || '.'}menu  •  📊 ${config.PREFIX || '.'}uptime  •  🧠 ${config.PREFIX || '.'}silva help`,
         ].join('\n');
 
         await safeSend({ image: { url: imageUrl }, caption, contextInfo }, { quoted: message });
-        await safeSend({
-            text: 'Tap a quick action',
-            footer: `${botName} • Online`,
-            buttons: [
-                { buttonId: 'silva:ping:menu', buttonText: { displayText: '📦 Menu' }, type: 1 },
-                { buttonId: 'silva:ping:stats', buttonText: { displayText: '📊 Stats' }, type: 1 },
-                { buttonId: 'silva:ping:ai', buttonText: { displayText: '🧠 AI' }, type: 1 },
-            ],
-            headerType: 1,
-            contextInfo
-        }, { quoted: message });
     }
 };

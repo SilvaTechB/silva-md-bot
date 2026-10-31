@@ -184,14 +184,6 @@ function buildCommandHelp(cmdName, plugins, pfx) {
     ].join('\n');
 }
 
-function quickActionButtons() {
-    return [
-        { buttonId: 'silva:menu:category:3', buttonText: { displayText: '🤖 AI & Agent' }, type: 1 },
-        { buttonId: 'silva:menu:category:1', buttonText: { displayText: '⬇️ Downloads' }, type: 1 },
-        { buttonId: 'silva:menu:category:6', buttonText: { displayText: '👥 Groups' }, type: 1 },
-    ];
-}
-
 function allCommandNames(plugins) {
     return [...new Set(plugins.flatMap(p => p.commands || []))]
         .map(command => String(command).toLowerCase())
@@ -227,14 +219,6 @@ function buildAllCommandsMenu(plugins, pfx, requestedPage = 1) {
     ].join('\n');
 }
 
-function allMenuButtons(page, pageCount) {
-    const buttons = [];
-    if (page > 1) buttons.push({ buttonId: `silva:allmenu:${page - 1}`, buttonText: { displayText: '◀️ Previous' }, type: 1 });
-    if (page < pageCount) buttons.push({ buttonId: `silva:allmenu:${page + 1}`, buttonText: { displayText: 'Next ▶️' }, type: 1 });
-    buttons.push({ buttonId: 'silva:menu:home', buttonText: { displayText: '📦 Main Menu' }, type: 1 });
-    return buttons;
-}
-
 // ── Plugin ────────────────────────────────────────────────────────────────────
 module.exports = {
     commands:    ['menu', 'help', 'list', 'cmds', 'commands', 'allmenu', 'allcommands', 'commandlist', 'fullmenu'],
@@ -262,13 +246,7 @@ module.exports = {
             const pageCount = Math.max(1, Math.ceil(commands.length / 80));
             const page = Math.min(Math.max(Number.parseInt(args[0], 10) || 1, 1), pageCount);
             const text = buildAllCommandsMenu(plugins, pfx, page);
-            return safeSend({
-                text,
-                footer: `${botName} • Complete command directory`,
-                buttons: allMenuButtons(page, pageCount),
-                headerType: 1,
-                contextInfo
-            }, { quoted: message });
+            return safeSend({ text, contextInfo }, { quoted: message });
         }
 
         // ── .help <command> ─────────────────────────────────────────────────
@@ -305,17 +283,11 @@ module.exports = {
         // ── .menu — compact overview ─────────────────────────────────────────
         const menuText = buildCompactMenu(plugins, pfx, botName, mode);
 
-        // Keep the branded image, then add quick actions. Older WhatsApp
-        // clients ignore buttons and still receive the caption/text fallback.
+        // Keep the branded image and use text-only navigation for compatibility
+        // with Baileys versions that do not support button payloads reliably.
         try {
             await safeSend({ image: { url: imgUrl }, caption: menuText, contextInfo }, { quoted: message });
-            await safeSend({
-                text: '⚡ *Quick actions* — or reply with `.menu <number>`',
-                footer: `${botName} Menu`,
-                buttons: quickActionButtons(),
-                headerType: 1,
-                contextInfo
-            }, { quoted: message });
+            await safeSend({ text: `⚡ *Quick actions:* ${pfx}allmenu 1 • ${pfx}menu 3 • ${pfx}menu 6`, contextInfo }, { quoted: message });
         } catch {
             await safeSend({ text: menuText, contextInfo }, { quoted: message });
         }

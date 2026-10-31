@@ -394,13 +394,6 @@ async function handleMessages(sock, message) {
         if (menuAction) text = `menu ${menuAction[1]}`;
         else if (/^silva:menu:(?:home|main)$/i.test(text)) text = 'menu';
         else if (/^silva:menu:help$/i.test(text)) text = 'help menu';
-        else if (/^silva:allmenu(?::(\d+))?$/i.test(text)) {
-            const allMenuAction = text.match(/^silva:allmenu(?::(\d+))?$/i);
-            text = `allmenu ${allMenuAction?.[1] || '1'}`;
-        } else if (/^silva:ping:(menu|stats|ai)$/i.test(text)) {
-            const pingAction = text.match(/^silva:ping:(menu|stats|ai)$/i)[1].toLowerCase();
-            text = pingAction === 'menu' ? 'menu' : pingAction === 'stats' ? 'uptime' : 'silva help';
-        }
 
         // Database persistence is deliberately fire-and-forget. A database
         // outage must never delay or block normal WhatsApp message handling.
