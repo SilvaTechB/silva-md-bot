@@ -5,6 +5,7 @@ const path   = require('path');
 const config = require('../config');
 const { fmt } = require('../lib/theme');
 const { jidNormalizedUser } = require('@whiskeysockets/baileys');
+const { setUserSetting, deleteUserSetting } = require('../lib/database');
 
 const SUDO_FILE = path.join(__dirname, '../data/sudo.json');
 function loadSudo()       { try { return JSON.parse(fs.readFileSync(SUDO_FILE, 'utf8')); } catch { return []; } }
@@ -47,7 +48,7 @@ module.exports = {
     private:     true,
 
     run: async (sock, message, args, ctx) => {
-        const { jid, contextInfo, isOwner, mentionedJid, groupMetadata } = ctx;
+        const { jid, sender, contextInfo, isOwner, mentionedJid, groupMetadata } = ctx;
         const cmd  = (message.message?.extendedTextMessage?.text
             || message.message?.conversation || '').trim().split(/\s+/)[0].replace(/^\./, '').toLowerCase();
         const text = args.join(' ').trim();
@@ -397,6 +398,7 @@ module.exports = {
             if (!key || !val) return send('❌ *Usage:* `.setsetting <KEY> <value>`');
             config[key] = val;
             process.env[key] = val;
+            void setUserSetting({ jid: sender || jid, key, value: val });
             return send(`✅ Set \`${key}\` = \`${val}\``);
         }
 
@@ -405,6 +407,7 @@ module.exports = {
             if (!key) return send('❌ *Usage:* `.resetsetting <KEY>`');
             delete config[key];
             delete process.env[key];
+            void deleteUserSetting({ jid: sender || jid, key });
             return send(`✅ Setting \`${key}\` reset to default.`);
         }
 

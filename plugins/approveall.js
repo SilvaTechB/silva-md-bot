@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { resolvePhoneJid } = require('../lib/phone-utils');
 
 const SETTINGS_PATH = path.join(__dirname, '..', 'data', 'approve-all.json');
 const settings = new Map();
@@ -38,6 +39,40 @@ async function updateRequests(sock, jid, participants, action) {
 }
 
 function requestJid(request) { return request?.jid || request?.id || request?.participant || request; }
+
+function phoneFromRequest(request) {
+    const candidates = [
+        request?.participantPn, request?.phoneNumber, request?.phone,
+        request?.pn, request?.userJid, request?.jid,
+    ];
+    for (const candidate of candidates) {
+        if (typeof candidate !== 'string') continue;
+        if (candidate.endsWith('@s.whatsapp.net') || candidate.endsWith('@c.us')) return candidate.replace('@c.us', '@s.whatsapp.net');
+        if (/^\d{7,}$/.test(candidate)) return `${candidate}@s.whatsapp.net`;
+    }
+    return null;
+}
+
+async function resolveMentionJid(sock, request, participant) {
+    const direct = phoneFromRequest(request);
+    if (direct) return direct;
+    const cached = resolvePhoneJid(participant);
+    if (cached) return cached;
+    if (participant?.endsWith('@lid') && typeof sock.onWhatsApp === 'function') {
+        try {
+            const results = await sock.onWhatsApp(participant);
+            const jid = results?.find?.(entry => entry?.jid?.endsWith('@s.whatsapp.net'))?.jid;
+            if (jid) return jid;
+        } catch { /* fall through without a false LID mention */ }
+    }
+    return null;
+}
+
+function requesterLabel(request, participant, mentionJid) {
+    if (mentionJid) return `@${mentionJid.split('@')[0]}`;
+    const name = request?.name || request?.pushName || global.pushNameCache?.get?.(participant);
+    return name ? String(name).slice(0, 80) : 'the requester';
+}
 
 module.exports = {
     commands: ['approveall', 'approvejoin', 'rejectjoin', 'joinrequests'],
@@ -92,7 +127,9 @@ module.exports = {
         if (!jid || !participant || !enabled(jid) || ['approve', 'approved', 'reject', 'rejected'].includes(action)) return;
         try {
             await updateRequests(sock, jid, [participant], 'approve');
-            await sock.sendMessage(jid, { text: `✅ Approved join request for @${participant.split('@')[0]}.`, mentions: [participant] });
+            const mentionJid = await resolveMentionJid(sock, update, participant);
+            const text = `✅ Approved join request for ${requesterLabel(update, participant, mentionJid)}.`;
+            await sock.sendMessage(jid, mentionJid ? { text, mentions: [mentionJid] } : { text });
         } catch (error) {
             console.warn(`[ApproveAll] ${jid} could not approve ${participant}: ${error.message}`);
         }
