@@ -112,10 +112,12 @@ test('routes a prefixed command to a plugin without a live WhatsApp connection',
         message: { conversation: '.ping' },
     });
 
-    assert.equal(sent.length, 2);
+    assert.equal(sent.length, 3);
     assert.equal(sent[0].jid, '254700000000@s.whatsapp.net');
     assert.match(sent[0].content.text, /Pinging/);
-    assert.match(sent[1].content.text, /Bot is Online/);
+    assert.match(sent[1].content.caption, /\*Ping:\*/);
+    assert.equal(sent[2].content.text, 'Tap a quick action');
+    assert.equal(sent[2].content.buttons.length, 3);
 });
 
 test('prefix-free mode ignores self messages and ordinary text but accepts bare commands', async () => {

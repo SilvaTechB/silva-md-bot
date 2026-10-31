@@ -107,6 +107,7 @@ function buildCompactMenu(plugins, pfx, botName, mode) {
         `│  \`${pfx}menu 6\`  → Group Management  │\n` +
         `│  \`${pfx}menu 18\` → Lend & Sub-bot    │\n` +
         `│  \`${pfx}menu 26\` → Warning Management │\n` +
+        `│  \`${pfx}allmenu\` → Every command       │\n` +
         `│  \`${pfx}help <cmd>\` → Command help   │\n` +
         `│  \`${pfx}find <word>\` → Search commands │\n` +
         `╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄╯\n` +
@@ -191,11 +192,54 @@ function quickActionButtons() {
     ];
 }
 
+function allCommandNames(plugins) {
+    return [...new Set(plugins.flatMap(p => p.commands || []))]
+        .map(command => String(command).toLowerCase())
+        .sort((a, b) => a.localeCompare(b));
+}
+
+function buildAllCommandsMenu(plugins, pfx, requestedPage = 1) {
+    const commands = allCommandNames(plugins);
+    const pageSize = 80;
+    const pageCount = Math.max(1, Math.ceil(commands.length / pageSize));
+    const page = Math.min(Math.max(Number.parseInt(requestedPage, 10) || 1, 1), pageCount);
+    const start = (page - 1) * pageSize;
+    const rows = commands.slice(start, start + pageSize);
+    const columns = 3;
+    const lines = [];
+    for (let i = 0; i < rows.length; i += columns) {
+        lines.push(rows.slice(i, i + columns)
+            .map(command => `\`${pfx}${command}\``.padEnd(24))
+            .join(''));
+    }
+    const previous = page > 1 ? `\`${pfx}allmenu ${page - 1}\`` : '—';
+    const next = page < pageCount ? `\`${pfx}allmenu ${page + 1}\`` : '—';
+    return [
+        `📚 *${config.BOT_NAME || 'Silva MD'} — COMPLETE COMMAND DIRECTORY*`,
+        `_${commands.length} commands • page ${page}/${pageCount}_`,
+        '',
+        lines.join('\n'),
+        '',
+        `◀️ Previous: ${previous}`,
+        `▶️ Next: ${next}`,
+        '',
+        `_Use ${pfx}help <command> for detailed usage._`,
+    ].join('\n');
+}
+
+function allMenuButtons(page, pageCount) {
+    const buttons = [];
+    if (page > 1) buttons.push({ buttonId: `silva:allmenu:${page - 1}`, buttonText: { displayText: '◀️ Previous' }, type: 1 });
+    if (page < pageCount) buttons.push({ buttonId: `silva:allmenu:${page + 1}`, buttonText: { displayText: 'Next ▶️' }, type: 1 });
+    buttons.push({ buttonId: 'silva:menu:home', buttonText: { displayText: '📦 Main Menu' }, type: 1 });
+    return buttons;
+}
+
 // ── Plugin ────────────────────────────────────────────────────────────────────
 module.exports = {
-    commands:    ['menu', 'help', 'list', 'cmds', 'commands'],
-    description: 'Show all commands in a categorized menu — use .menu <number> for a category deep-dive',
-    usage:       '.menu | .menu <1-26> | .menu <category name> | .help <command>',
+    commands:    ['menu', 'help', 'list', 'cmds', 'commands', 'allmenu', 'allcommands', 'commandlist', 'fullmenu'],
+    description: 'Show categorized commands or the complete command directory',
+    usage:       '.menu | .menu <1-26> | .allmenu [page] | .help <command>',
     permission:  'public',
     group:       true,
     private:     true,
@@ -212,6 +256,20 @@ module.exports = {
             message.message?.extendedTextMessage?.text ||
             message.message?.conversation || ''
         ).trim().split(/\s+/)[0].replace(/^[^\w]/, '').toLowerCase();
+
+        if (['allmenu', 'allcommands', 'commandlist', 'fullmenu'].includes(rawCmd)) {
+            const commands = allCommandNames(plugins);
+            const pageCount = Math.max(1, Math.ceil(commands.length / 80));
+            const page = Math.min(Math.max(Number.parseInt(args[0], 10) || 1, 1), pageCount);
+            const text = buildAllCommandsMenu(plugins, pfx, page);
+            return safeSend({
+                text,
+                footer: `${botName} • Complete command directory`,
+                buttons: allMenuButtons(page, pageCount),
+                headerType: 1,
+                contextInfo
+            }, { quoted: message });
+        }
 
         // ── .help <command> ─────────────────────────────────────────────────
         if (rawCmd === 'help' && args.length) {
