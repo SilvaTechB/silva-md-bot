@@ -2,6 +2,7 @@
 
 const { runAgent, clearHistory, getHistory } = require('../lib/agent-v2');
 const universalDownloader = require('./universal-downloader');
+const setPrefixPlugin = require('./setprefix');
 
 const SOCIAL_URL = /https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be|tiktok\.com|instagram\.com|facebook\.com|fb\.watch|twitter\.com|x\.com)\//i;
 const ACTION_INTENT = /\b(weather|forecast|temperature|search|google|look up|wiki|wikipedia|translate|definition|define|lyrics?|play|music|song|spotify|tiktok|instagram|insta|facebook|youtube|ytmp[34]|twitter|tweet|pinterest|sticker|qr code|qrcode|remind|reminder|note|poll|schedule|group|kick|remove|promote|demote|mute|unmute|lock|unlock|tag all|download|save this|send this)\b/i;
@@ -24,6 +25,32 @@ function permissionAllowed(plugin, ctx) {
     return true;
 }
 
+function parseNaturalPrefixCommand(query) {
+    const match = String(query || '').trim().match(
+        /^(?:set|change|switch|update)\s+(?:the\s+)?prefix\s*(?:(?:to|as)\s*|=\s*)?(.+)$/i
+    );
+    if (!match) return null;
+
+    const value = match[1].trim().replace(/^([`"'])(.*)\1$/, '$2').trim();
+    if (!value) return null;
+
+    const noPrefix = /^(?:null|none|off|disable|disabled|no\s+prefix)$/i.test(value);
+    return noPrefix ? 'none' : value;
+}
+
+async function runNaturalPrefixCommand(sock, message, query, ctx) {
+    const newPrefix = parseNaturalPrefixCommand(query);
+    if (newPrefix === null) return false;
+
+    if (!ctx.isOwner) {
+        await ctx.reply('⛔ Only the bot owner can change the command prefix.');
+        return true;
+    }
+
+    await setPrefixPlugin.run(sock, message, [newPrefix], ctx);
+    return true;
+}
+
 async function runExplicitCommand(sock, message, query, ctx) {
     const match = query.match(/^(?:run|execute|do|use|try|open)\s+\.?([a-z0-9_-]+)(?:\s+(.*))?$/i)
         || query.match(/^\.?([a-z0-9_-]+)(?:\s+(.*))?$/i);
@@ -40,6 +67,8 @@ async function runExplicitCommand(sock, message, query, ctx) {
 }
 
 async function runLocalAction(sock, message, query, ctx) {
+    if (await runNaturalPrefixCommand(sock, message, query, ctx)) return true;
+
     const url = query.match(/https?:\/\/[^\s<>]+/i)?.[0]?.replace(/[),.!?]+$/, '');
     const asksForMedia = /\b(download|save|send|get|fetch|video|audio|mp3|mp4)\b/i.test(query);
     if ((url && SOCIAL_URL.test(url) && asksForMedia) || /^download\s+(?:search\s+)?/i.test(query)) {
@@ -72,6 +101,7 @@ module.exports = {
     permission: 'public',
     group: true,
     private: true,
+    parseNaturalPrefixCommand,
 
     run: async (sock, message, args, ctx) => {
         const { jid, reply } = ctx;

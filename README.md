@@ -247,6 +247,19 @@ AGENT_MAX_STEPS=5
 
 Try it with `.autopilot calculate 25 * 4`, `.autopilot weather in Nairobi`, or `.autopilot remember that I prefer short answers`. Use `.autopilot forget` to clear the chat's persistent Agent v2 memory. Runtime memory is stored in `data/agent-v2-memory.json`, which is ignored by Git. The existing prefix-free `Silva, ...` assistant also uses ch.at as its no-key backend.
 
+### 🎛️ Prefix control
+
+The owner can change the command mode from a normal command or by speaking naturally to Silva. These changes apply immediately and are persisted in the local `config.env` file for the next restart:
+
+```text
+.setprefix .
+.setprefix none
+Silva, set prefix to .
+Silva, set prefix to null
+```
+
+Use `null`, `none`, `off`, or `no prefix` to enable prefix-free commands. Use a symbol such as `.`, `!`, or `.,!,/` to require one or more prefixes. Prefix changes are owner-only.
+
 ### 🗄️ Encrypted Postgres storage
 
 When `DATABASE_URL` is configured, Silva creates encrypted tables for users, selected Agent v2 conversations, and developer contacts. Agent chat content is encrypted with AES-256-GCM before it is stored, using the bot's existing session secret as the encryption source. The three built-in developer contacts are `254700143167`, `254755257907`, and `254743706010`, and they are available through `.developers`.
