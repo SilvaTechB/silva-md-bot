@@ -1109,6 +1109,7 @@ async function connectToWhatsApp() {
             if (!Array.isArray(messages) || messages.length === 0) return;
 
             for (let m of messages) {
+                try {
                 const remoteJid = m.key?.remoteJid || '';
 
                 // ── Raw arrival log (always on, before any filter) ──────────────
@@ -1373,6 +1374,9 @@ async function connectToWhatsApp() {
                     try { await sock.readMessages([m.key]); } catch (e) { /* ignore */ }
                 }
                 await handleMessages(sock, m);
+                } catch (messageError) {
+                    logMessage('ERROR', `Message processing failed (id=${m?.key?.id || 'unknown'}): ${messageError.stack || messageError.message}`);
+                }
             }
         } catch (err) {
             logMessage('ERROR', `messages.upsert consolidated handler error: ${err.stack || err.message}`);
