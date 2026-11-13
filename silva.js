@@ -94,6 +94,7 @@ const zlib = require('zlib'); // Added for session decompression
 const express = require('express');
 const P = require('pino');
 const { handleMessages } = require('./handler');
+const viewOncePlugin = require('./plugins/viewonce');
 const { handleStatusBroadcast } = require('./lib/statusManager');
 const { isDuplicateMessage, rememberMessageIfContent } = require('./lib/message-gate');
 const { trackUndecryptableMessage } = require('./lib/session-recovery');
@@ -1249,6 +1250,11 @@ async function connectToWhatsApp() {
 
                 // Content confirmed — now lock this ID so we don't process it twice.
                 rememberMessageIfContent(m, seenCmdIds);
+
+                // Cache view-once bytes before any downstream handler can consume or
+                // mutate the message. Quoted view-once payloads often omit mediaKey,
+                // so the arrival-time cache is the only reliable path for .vv.
+                await viewOncePlugin.cacheViewOnce(m);
 
                 // ── Anti-ViewOnce: auto-reveal and forward to owner ─────────────────
                 if (global.antivvEnabled && !m.key.fromMe) {

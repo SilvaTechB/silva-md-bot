@@ -30,7 +30,12 @@ function unwrap(msg) {
 }
 
 function isWrappedViewOnce(raw) {
-    return !!(raw?.viewOnceMessageV2 || raw?.viewOnceMessageV2Extension || raw?.viewOnceMessage);
+    let m = raw;
+    for (let i = 0; i < 5 && m; i++) {
+        if (m.viewOnceMessageV2 || m.viewOnceMessageV2Extension || m.viewOnceMessage) return true;
+        m = m.ephemeralMessage?.message || m.documentWithCaptionMessage?.message;
+    }
+    return false;
 }
 
 async function downloadBuffer(content, type) {
@@ -46,7 +51,7 @@ async function downloadBuffer(content, type) {
  * It downloads view-once media the moment it arrives (while the media key
  * is still valid) and stores the bytes so .vv works later.
  */
-async function cacheViewOnce(m) {
+async function cacheViewOnce(m, downloader = downloadBuffer) {
     try {
         const raw = m?.message;
         if (!raw || !m.key?.id) return;
@@ -58,7 +63,7 @@ async function cacheViewOnce(m) {
             if (!(isWrappedViewOnce(raw) || content.viewOnce)) return; // not view-once
             if (!content.mediaKey || content.mediaKey.length === 0) return;
 
-            const buffer = await downloadBuffer(content, type);
+            const buffer = await downloader(content, type);
             global.viewOnceCache.set(m.key.id, {
                 type,
                 buffer,
